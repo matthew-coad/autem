@@ -11,20 +11,14 @@ if __name__ == '__main__':
 
 import genetic
 import genetic.scorers as scorers
+import genetic.learners as learners
 
 from pathlib import Path
 from pandas import read_csv
 
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Lasso
-from sklearn.linear_model import ElasticNet
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.svm import SVR
-
 simulation_name = "boston_quick_spot"
 simulation_path = Path("tests", "simulations", simulation_name)
-simulation_rounds = 30
+simulation_rounds = 50
 
 # Load dataset
 def load_boston():
@@ -42,19 +36,23 @@ def run_boston_quick_spot():
     y = array[:,13]
     validation_size = 0.20
     seed = 7
-    models = []
-    models.append(('LR', LinearRegression()))
-    models.append(('LASSO', Lasso()))
-    models.append(('EN', ElasticNet()))
-    models.append(('KNN', KNeighborsRegressor()))
-    models.append(('CART', DecisionTreeRegressor()))
-    models.append(('SVR', SVR(gamma='auto')))
 
     components = [
         genetic.Data(x, y, .3),
         genetic.FixedPopulationSize(100),
-        genetic.ModelChoice(models), 
+
+        # Learners
+        learners.LinearRegression(),
+        learners.Lasso(),
+        learners.ElasticNet(),
+        learners.KNeighborsRegressor(),
+        learners.DecisionTreeRegressor(),
+        learners.SVR(),
+        learners.LearnerChoice(),
+
+        # Transforms
         genetic.StandardiseTransform(),
+
         genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),
         genetic.ModelScoreSignificantFitness(0.1),
         genetic.BattleCompetition(5, 5, .5),

@@ -12,7 +12,7 @@ from pandas import read_csv
 
 simulation_name = "knn_tune"
 simulation_path = Path("tests", "simulations", simulation_name)
-simulation_rounds = 30
+simulation_rounds = 50
 
 # Load dataset
 def load_boston():
@@ -36,6 +36,13 @@ def run_knn_tune():
         genetic.FixedPopulationSize(100),
         learners.KNeighborsRegressor(),
         learners.LinearRegression(),
+        learners.
+        models.append(('LASSO', Lasso()))
+        models.append(('EN', ElasticNet()))
+        models.append(('KNN', KNeighborsRegressor()))
+        models.append(('CART', DecisionTreeRegressor()))
+        models.append(('SVR', SVR(gamma='auto')))
+
         learners.LearnerChoice(),
         genetic.StandardiseTransform(),
         genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),

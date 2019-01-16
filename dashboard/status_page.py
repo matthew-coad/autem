@@ -218,7 +218,7 @@ def update_member_kpi_summary(simulation, kpi, dimension):
                 x=df[df[dimension] == cond]['generation_prop'],
                 y=df[df[dimension] == cond][kpi],
                 mode='markers',
-                name=cond
+                name=str(cond)
             )
             for cond in conditions
         ]

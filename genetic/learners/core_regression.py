@@ -16,6 +16,22 @@ class LinearRegression(Learner):
     def makeModel(self):
         return LinearRegressionModel()
 
+class Lasso(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "LASSO", "Lasso", [])
+
+    def makeModel(self):
+        return LassoModel()
+
+class ElasticNet(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "EN", "Elastic Net", [])
+
+    def makeModel(self):
+        return ElasticNetModel()
+
 class KNeighborsRegressor(Learner):
 
     def __init__(self):
@@ -26,3 +42,19 @@ class KNeighborsRegressor(Learner):
 
     def makeModel(self):
         return KNeighborsRegressorModel()
+
+class DecisionTreeRegressor(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "CART", "Decision Tree", [])
+
+    def makeModel(self):
+        return DecisionTreeRegressorModel()
+
+class SVR(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "SVR", "Support Vector Machine", [])
+
+    def makeModel(self):
+        return SVRModel(gamma='auto')
