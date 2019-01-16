@@ -13,7 +13,15 @@ Automatic Machine Learner. Uses genetic algorithms to search for a high performi
 
 ## Check into GITHUB
 
+**Complete**
+
+https://github.com/matthew-coad/autem
+
 ## Better project name
+
+**Complete**
+
+Name changed to autem
 
 ## Report meta information based on column postfix - 
 
