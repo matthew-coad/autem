@@ -2,6 +2,16 @@
 
 ## Show population generation duration
 
+## Add a history property to forms
+
+## Test member form equality
+
+## Default member form
+
+## Mutate member form
+
+## Mutate identical forms
+
 ## Fix kpi selection
 
 **Complete**
