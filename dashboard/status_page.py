@@ -11,17 +11,16 @@ import plotly.plotly as py
 from plotly import graph_objs as go
 
 import genetic
-import config
 from pathlib import Path
 
-from app import app
+from app import app, simulations_path
 from dashboard.components import indicator
 
 def layout():
-    meta_manager = genetic.MetaManager(config.REPOSITORY_PATH)
+    meta_manager = genetic.MetaManager(simulations_path)
     simulations = meta_manager.get_simulations()
     meta_info = meta_manager.get_meta_info()
-    measure_attributes = [a for a in meta_info.member_attributes if a.role == genetic.AttributeRole.KPI]
+    measure_attributes = [a for a in meta_info.member_attributes if a.role == genetic.AttributeRole.KPI or a.role == genetic.AttributeRole.Measure]
     dimension_attributes = [a for a in meta_info.member_attributes if a.role == genetic.AttributeRole.Dimension]
 
     return [
@@ -133,7 +132,7 @@ def update_generation_indicator(simulation):
         layout = dict(annotations=[dict(text="No simulation available", showarrow=False)])
         return ""
 
-    simulation_path = config.REPOSITORY_PATH.joinpath(simulation)
+    simulation_path = simulations_path.joinpath(simulation)
     report_manager = genetic.ReportManager(simulation_path)
     population_report = report_manager.read_population_report()
     generation = population_report["generation_prop"].max()
@@ -149,7 +148,7 @@ def update_population_over_time_summary(simulation):
         layout = dict(annotations=[dict(text="No simulation available", showarrow=False)])
         return {"data": [], "layout": layout}
 
-    simulation_path = config.REPOSITORY_PATH.joinpath(simulation)
+    simulation_path = simulations_path.joinpath(simulation)
     report_manager = genetic.ReportManager(simulation_path)
     population_report = report_manager.read_population_report()
     df = population_report
@@ -197,7 +196,7 @@ def update_member_kpi_summary(simulation, kpi, dimension):
         layout = dict(annotations=[dict(text="No results available", showarrow=False)])
         return {"data": [], "layout": layout}
 
-    simulation_path = config.REPOSITORY_PATH.joinpath(simulation)
+    simulation_path = simulations_path.joinpath(simulation)
     report_manager = genetic.ReportManager(simulation_path)
     df = report_manager.read_member_report()
 

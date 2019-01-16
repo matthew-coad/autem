@@ -2,7 +2,12 @@
 import dash
 from dash.dependencies import Input, Output
 import flask
+from pathlib import Path
+
+simulations_path = Path("experiments", "tune_energy", "simulations")
 
 server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.config.suppress_callback_exceptions = True
+
+
