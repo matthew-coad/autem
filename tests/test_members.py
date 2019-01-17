@@ -7,6 +7,8 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 
+from tests.boson_quick_spot import make_boston_quick_spot_simulation
+
 import unittest
 
 class TestMemberInitializer(genetic.Component):
@@ -87,6 +89,17 @@ class members_fixture(unittest.TestCase):
         check_report = frame[['generation_prop', 'population_id', 'member_id', 'test']]
         test_frame = pd.DataFrame(data  = {'generation_prop': [1,1,1,1,1], 'population_id': [1,1,1,1,1], 'member_id': [2,3,4,5,6], 'test': [2,3,4,5,6]})
         self.assertTrue(check_report.equals(test_frame))
+
+    def test_member_clone_has_identical_configuation(self):
+
+        simulation = make_boston_quick_spot_simulation("member_clone_has_identical_configuation")
+        simulation.run()
+        population1 = simulation.population
+        parent0 = population1.members[0]
+        member1 = genetic.Member(population1, parent0)
+        print(repr(member1.configuration))
+        print(repr(parent0.configuration))
+        self.assertEqual(repr(member1.configuration), repr(parent0.configuration), "Clone configuration is identical to parent")
 
 if __name__ == '__main__':
     unittest.main()

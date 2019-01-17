@@ -40,7 +40,6 @@ class Population:
         """
         Evaluate the population
         """
-        self.evaluation = SimpleNamespace()
         for component in self.simulation.components:
             component.evaluatePopulation(self)
         for member in self.members:

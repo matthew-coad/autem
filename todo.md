@@ -1,8 +1,8 @@
-# TODO
+TODO
 
-## Show population generation duration
+# Problem diversity exploration
 
-## Add a history property to forms
+## Add a history property to members
 
 ## Test member form equality
 
@@ -13,6 +13,18 @@
 ## Mutate identical forms
 
 ## Fix kpi selection
+
+# Refactoring
+
+## Collect transformers together
+
+## 
+
+
+
+# Initial Cut
+
+## Show population generation duration
 
 **Complete**
 

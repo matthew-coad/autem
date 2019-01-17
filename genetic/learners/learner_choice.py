@@ -3,7 +3,7 @@ from genetic.components import Component
 class LearnerChoice(Component):
 
     def initializeMember(self, member):
-        learners = member.configuration.learners
+        learners = list(member.configuration.learners.__dict__)
         random_state = member.simulation.random_state
         learner_index = random_state.randint(0, len(learners))
         member.configuration.learner_name = learners[learner_index]

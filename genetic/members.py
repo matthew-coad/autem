@@ -10,6 +10,7 @@ class Member:
         self.id = population.simulation.generate_id()
         self.simulation = population.simulation
         self.population = population
+        self.history = SimpleNamespace()
         self.configuration = SimpleNamespace()
         self.evaluation = SimpleNamespace()
 

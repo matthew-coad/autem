@@ -94,13 +94,13 @@ class ModelScorer(Component):
         self.scorer = scorer
 
     def initializeMember(self, member):
-        member.configuration.parent_model_scores = []
+        member.history.model_scores = []
 
     def copyMember(self, member, parent0):
-        member.configuration.parent_model_scores = parent0.evaluation.model_scores[:]
+        member.history.model_scores = parent0.evaluation.model_scores[:]
 
     def crossoverMember(self, member, parent0, parent1):
-        member.configuration.parent_model_scores = []
+        member.history.model_scores = []
 
     def evaluateMember(self, member):
 
@@ -123,7 +123,7 @@ class ModelScorer(Component):
         pipeline.fit(x_train, y_train)
         y_pred = pipeline.predict(x_test)
         model_score = scorer(y_test, y_pred)
-        model_scores = member.configuration.parent_model_scores
+        model_scores = member.history.model_scores
         model_scores.append(model_score)
 
         member.evaluation.model_score = model_score

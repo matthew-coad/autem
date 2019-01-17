@@ -13,12 +13,12 @@ class Parameter:
         raise NotImplementedError
 
     def getMemberValue(self, learner, member):
-        configuration = getattr(member.configuration, learner.name)
+        configuration = getattr(member.configuration.learners, learner.name)
         value = getattr(configuration, self.name)
         return value
 
     def setMemberValue(self, learner, member, value):
-        configuration = getattr(member.configuration, learner.name)
+        configuration = getattr(member.configuration.learners, learner.name)
         setattr(configuration, self.name, value)
 
     def initializeParameter(self, learner, member):

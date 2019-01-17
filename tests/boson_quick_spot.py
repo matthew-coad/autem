@@ -16,8 +16,6 @@ import genetic.learners as learners
 from pathlib import Path
 from pandas import read_csv
 
-simulation_name = "boston_quick_spot"
-simulation_path = Path("tests", "simulations", simulation_name)
 simulation_rounds = 50
 
 # Load dataset
@@ -27,7 +25,7 @@ def load_boston():
     dataset = read_csv(filename, delim_whitespace=True, names=names)
     return dataset
 
-def run_boston_quick_spot():
+def make_boston_quick_spot_simulation(simulation_name, simulation_path = None):
 
     df = load_boston()
 
@@ -53,14 +51,22 @@ def run_boston_quick_spot():
         # Transforms
         genetic.StandardiseTransform(),
 
+        # Compete
         genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),
         genetic.ModelScoreSignificantFitness(0.1),
         genetic.BattleCompetition(5, 5, .5),
-        genetic.SavePath(simulation_path)
     ]
+    if not simulation_path is None:
+        components.append(genetic.SavePath(simulation_path))
     simulation = genetic.Simulation(simulation_name, components, seed = 1)
+    return simulation
+
+def run_boston_quick_spot(simulation):
+    simulation_rounds = 50
     for round in range(simulation_rounds):
         simulation.run()
 
 if __name__ == '__main__':
-    run_boston_quick_spot()
+    simulation_name = "boston_quick_spot"
+    simulation = make_boston_quick_spot_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+    run_boston_quick_spot(simulation)

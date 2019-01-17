@@ -15,22 +15,25 @@ class Learner(Component):
 
     def initializeMember(self, member):
         configuration = member.configuration
-        setattr(configuration, self.name, SimpleNamespace())
+        if not hasattr(configuration, "learners"):
+            configuration.learners = SimpleNamespace()
+        setattr(configuration.learners, self.name, SimpleNamespace())
         for parameter in self.parameters:
             parameter.initializeParameter(self, member)
-        if not hasattr(configuration, "learners"):
-            configuration.learners = []
-        configuration.learners.append(self.name)
 
     def copyMember(self, member, parent0):
         configuration = member.configuration
-        setattr(configuration, self.name, SimpleNamespace())
+        if not hasattr(configuration, "learners"):
+            configuration.learners = SimpleNamespace()
+        setattr(configuration.learners, self.name, SimpleNamespace())
         for parameter in self.parameters:
             parameter.copyParameter(self, member, parent0)
 
     def crossoverMember(self, member, parent0, parent1):
         configuration = member.configuration
-        setattr(configuration, self.name, SimpleNamespace())        
+        if not hasattr(configuration, "learners"):
+            configuration.learners = SimpleNamespace()
+        setattr(configuration.learners, self.name, SimpleNamespace())
         for parameter in self.parameters:
             parameter.crossoverParameter(self, member, parent0, parent1)
 
