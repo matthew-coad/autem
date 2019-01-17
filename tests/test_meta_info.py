@@ -2,7 +2,7 @@ if __name__ == '__main__':
     import context
 
 import genetic
-import tests.boson_quick_spot as boson_quick_spot
+import tests.quick_spot_simulation as quick_spot_simulation
 from genetic.meta_manager import MetaManager, AttributeRole
 from tests.config import test_repository_path
 
@@ -15,7 +15,7 @@ class meta_info_fixture(unittest.TestCase):
         self.meta_manager = MetaManager(test_repository_path)
 
     def test_get_meta_information(self):
-        meta_info = self.meta_manager.get_simulation_info("first_model")
+        meta_info = self.meta_manager.get_simulation_info("quick_spot")
         self.assertIsNotNone(meta_info)
 
     def test_attribute_roles(self):
@@ -42,12 +42,12 @@ class meta_info_fixture(unittest.TestCase):
         self.assertEqual(unknown_composite_attribute.label, "test_unknown")
 
     def test_first_model_has_attributes(self):
-        meta_info = self.meta_manager.get_simulation_info("first_model")
+        meta_info = self.meta_manager.get_simulation_info("quick_spot")
         self.assertTrue(len(meta_info.member_attributes) > 0)
         self.assertTrue(len(meta_info.population_attributes) > 0)
 
     def test_first_model_all_columns_known(self):
-        meta_info = self.meta_manager.get_simulation_info("first_model")
+        meta_info = self.meta_manager.get_simulation_info("quick_spot")
         member_attributes = meta_info.member_attributes
         population_attributes = meta_info.population_attributes
         self.assertTrue(all(m.role != AttributeRole.Unknown for m in member_attributes))

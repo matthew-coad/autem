@@ -5,7 +5,6 @@ from . import battles
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import get_scorer
 from sklearn.pipeline import Pipeline
 
@@ -62,28 +61,6 @@ class ModelChoice(Component):
 
     def reportMember(self, member, row):
         row.model_dim = member.evaluation.model_name
-
-class StandardiseTransform(Component):
-
-    def initializeMember(self, member):
-        standardise = member.simulation.random_state.randint(0, 2)
-        member.configuration.standardise = standardise
-
-    def copyMember(self, member, parent0):
-        member.configuration.standardise = parent0.configuration.standardise
-
-    def crossoverMember(self, member, parent0, parent1):
-        member.configuration.standardise = parent0.configuration.standardise
-
-    def evaluateMember(self, member):
-        standardise = member.configuration.standardise
-        if not hasattr(member.evaluation, "steps"):
-            member.evaluation.steps = []
-        if standardise:
-            member.evaluation.steps.append(('standardise', StandardScaler()))
-
-    def reportMember(self, member, row):
-        row.standardise_dim = member.configuration.standardise
 
 class ModelScorer(Component):
     """

@@ -30,6 +30,20 @@ class Member:
             for component in self.simulation.components:
                 component.initializeMember(self)
 
+    def mutate(self):
+        random_state = self.simulation.random_state
+        components = self.simulation.components
+        n_components = len(components)
+
+        # Randomly select components to attempt to mutate
+        component_indexes = random_state.choice(n_components, n_components, replace=False)
+
+        for index in component_indexes:
+            component = components[index]
+            mutated = component.mutateMember(self)
+            if mutated:
+                break
+
     def evaluate(self):
         for component in self.simulation.components:
             component.evaluateMember(self)

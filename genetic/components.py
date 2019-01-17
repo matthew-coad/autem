@@ -24,6 +24,13 @@ class Component:
         """
         pass
 
+    def mutateMember(self, member):
+        """
+        Perform a member mutation which set an aspect to a random value.
+        Returns True if a mutation was successfully performed, otherwise returns False
+        """
+        return False
+
     def evaluateMember(self, member):
         """
         Update the evaluation state for a member of a population

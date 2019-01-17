@@ -37,6 +37,20 @@ class Learner(Component):
         for parameter in self.parameters:
             parameter.crossoverParameter(self, member, parent0, parent1)
 
+    def mutateMember(self, member):
+        if not self.isActive(member):
+            return False
+
+        random_state = member.simulation.random_state
+        parameters = self.parameters
+        n_parameter = len(parameters)
+        if n_parameter == 0:
+            return False
+
+        parameter_indexes = random_state.choice(n_parameter, size = n_parameter, replace = False)
+        parameter = parameters[parameter_indexes[0]]
+        parameter.mutateParameter(self, member)
+
     def isActive(self, member):
         configuration = member.configuration
         if hasattr(configuration, "learner_name"):

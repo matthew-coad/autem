@@ -5,10 +5,9 @@ import genetic
 import unittest
 from pathlib import Path
 
-from .run_highest_id import runHighestIDSimulation
-from .run_first_model import runFirstModelSimulation
-from .run_significant_model import runSignificantModelSimulation
-from .boson_quick_spot import run_boston_quick_spot
+from tests.highest_id_simulation import runHighestIDSimulation
+from tests.quick_spot_simulation import run_quick_spot_simulation, make_quick_spot_simulation
+from tests.quick_knn_tune_simulation import run_knn_tune_simulation, make_knn_tune_simulation
 
 class simulations_fixture(unittest.TestCase):
 
@@ -21,11 +20,15 @@ class simulations_fixture(unittest.TestCase):
     def test_run_highest_id(self):
         runHighestIDSimulation()
 
-    def test_run_first_model(self):
-        runFirstModelSimulation()
+    def test_quick_spot_simulation(self):
+        simulation_name = "quick_spot"
+        simulation = make_quick_spot_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+        run_quick_spot_simulation(simulation, 3)
 
-    def test_run_significant_model(self):
-        runSignificantModelSimulation()
+    def test_knn_tune_simulation(self):
+        simulation_name = "quick_knn_tune"
+        simulation = make_knn_tune_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+        run_knn_tune_simulation(simulation, 3)
 
 if __name__ == '__main__':
     unittest.main()

@@ -30,6 +30,14 @@ Renamed ChoiceParameter to ChoiceTuneParameter to make clear its status as a cho
 
 ## Mutate member form
 
+Add mutate member support to components.
+
+Add a mutate method to members.
+
+Added mutate to Learners, StandardTransform and LearnerSelect
+
+**done**
+
 ## Mutate identical forms
 
 ## Fix kpi selection
@@ -38,9 +46,9 @@ Renamed ChoiceParameter to ChoiceTuneParameter to make clear its status as a cho
 
 ## Collect transformers together
 
-## 
+**done**
 
-
+## Remove obsolete model code
 
 # Initial Cut
 

@@ -45,6 +45,10 @@ class Parameter:
         value = self.getMemberValue(learner, parent)
         self.setMemberValue(learner, member, value)
 
+    def mutateParameter(self, learner, member):
+        value = self.generateValue(member)
+        self.setMemberValue(learner, member, value)
+
     def reportParameter(self, learner, member, row):
         if not self.report_name is None:
             value = self.getMemberValue(learner, member)
