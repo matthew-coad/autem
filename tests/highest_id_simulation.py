@@ -8,12 +8,19 @@ class IDRating(genetic.Component):
 
     def initializeMember(self, member):
         member.configuration.rating = member.id
+        member.configuration.incarnation = 0
 
     def copyMember(self, member, parent0):
         member.configuration.rating = parent0.configuration.rating
+        member.configuration.incarnation = parent0.configuration.incarnation
 
     def crossoverMember(self, member, parent0, parent1):
         member.configuration.rating = parent0.configuration.rating
+        member.configuration.incarnation = 0
+
+    def mutateMember(self, member):
+        member.configuration.incarnation += 1
+        return True
 
     def reportMember(self, member, row):
         row.rating = member.configuration.rating

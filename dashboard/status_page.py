@@ -169,6 +169,11 @@ def update_population_over_time_summary(simulation):
             x=df['generation_prop'],
             y=df['dead_measure'],
             name='dead'
+        ),
+        go.Scatter(
+            x=df['generation_prop'],
+            y=df['passive_measure'],
+            name='passive'
         )
     ]
         

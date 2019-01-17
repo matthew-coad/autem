@@ -28,7 +28,7 @@ Renamed ChoiceParameter to ChoiceTuneParameter to make clear its status as a cho
 
 **Done**
 
-## Mutate member form
+## Mutate members
 
 Add mutate member support to components.
 
@@ -38,7 +38,13 @@ Added mutate to Learners, StandardTransform and LearnerSelect
 
 **done**
 
-## Mutate identical forms
+## Detect and mutate passive members
+
+During a match, if both members have exactly the same configuration tag one for mutation.
+
+When constructing the next generation mutate tagged members
+
+**done**
 
 ## Fix kpi selection
 

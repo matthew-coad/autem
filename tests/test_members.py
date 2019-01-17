@@ -92,7 +92,7 @@ class members_fixture(unittest.TestCase):
         self.assertTrue(check_report.equals(test_frame))
 
     def test_member_clone_has_identical_configuation(self):
-        simulation = make_quick_spot_simulation("member_clone_has_identical_configuation")
+        simulation = make_quick_spot_simulation("member_clone_has_identical_configuation", 3)
         simulation.run()
         population1 = simulation.population
         parent0 = population1.members[0]
@@ -100,7 +100,7 @@ class members_fixture(unittest.TestCase):
         self.assertEqual(repr(member1.configuration), repr(parent0.configuration))
 
     def test_mutation_changes_member(self):
-        simulation = make_quick_spot_simulation("member_clone_has_identical_configuation")
+        simulation = make_quick_spot_simulation("member_clone_has_identical_configuation", 3)
         simulation.run()
         population = simulation.population
         members = population.members
@@ -112,17 +112,17 @@ class members_fixture(unittest.TestCase):
             self.assertNotEqual(repr(original.configuration), repr(mutated.configuration))
 
     def test_mutation_changes_member_parameters(self):
-        simulation = make_knn_tune_simulation("test_mutation_changes_member_parameters")
+        simulation = make_knn_tune_simulation("test_mutation_changes_member_parameters", 3)
         simulation.run()
         population = simulation.population
         members = population.members
 
         for index in range(len(members)):
-            original = population.members[0]
+            original = members[index]
             mutated = genetic.Member(population, original)
             mutated.mutate()
             self.assertNotEqual(repr(original.configuration), repr(mutated.configuration))
 
-
+    
 if __name__ == '__main__':
     unittest.main()

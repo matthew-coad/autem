@@ -22,7 +22,7 @@ def load_boston():
     dataset = read_csv(filename, delim_whitespace=True, names=names)
     return dataset
 
-def make_knn_tune_simulation(simulation_name, simulation_path = None):
+def make_knn_tune_simulation(simulation_name, population_size, simulation_path = None):
 
     df = load_boston()
 
@@ -34,7 +34,7 @@ def make_knn_tune_simulation(simulation_name, simulation_path = None):
 
     components = [
         genetic.Data(x, y, .3),
-        genetic.FixedPopulationSize(10),
+        genetic.FixedPopulationSize(population_size),
 
         # Learners
         learners.KNeighborsRegressor(),
@@ -58,6 +58,6 @@ def run_knn_tune_simulation(simulation, simulation_rounds):
 
 if __name__ == '__main__':
     simulation_name = "quick_knn_tune"
-    simulation = make_knn_tune_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+    simulation = make_knn_tune_simulation(simulation_name, 10, Path("tests", "simulations", simulation_name))
     run_knn_tune_simulation(simulation, 3)
 

@@ -56,6 +56,8 @@ class BattleCompetition(Component):
         alive = population.alive
         exhausted = population.exhausted
         dead = population.dead
+        passive = population.passive
+
         initial_hit_points = self.hit_points
         initial_energy_points = self.energy_points
         survivor_ratio = self.survivor_ratio
@@ -66,48 +68,76 @@ class BattleCompetition(Component):
             member.evaluation.battles = 0
             member.evaluation.hit_points = initial_hit_points
             member.evaluation.energy = initial_energy_points
+            member.evaluation.passive = False
 
         while (len(alive)+ len(exhausted) > minimum_members and len(alive) > 1):
             contestant_indexes = random_state.choice(len(alive), 2, replace=False)
-            
-            contest_result = self.runBattle(population, alive[contestant_indexes[0]], alive[contestant_indexes[1]])
-            alive[contestant_indexes[0]].evaluation.battles += 1
-            alive[contestant_indexes[1]].evaluation.battles += 1
 
-            member.evaluation.battles = 0
-            if contest_result == 1:
-                alive[contestant_indexes[1]].evaluation.hit_points -= 1
-                alive[contestant_indexes[0]].evaluation.energy += 1
-                alive[contestant_indexes[1]].evaluation.energy += 1
-                if alive[contestant_indexes[1]].evaluation.hit_points <= 0:
-                    dead.append(alive[contestant_indexes[1]])
-                    del alive[contestant_indexes[1]]
-            elif contest_result == 2:
-                alive[contestant_indexes[0]].evaluation.hit_points -= 1
-                alive[contestant_indexes[0]].evaluation.energy += 1
-                alive[contestant_indexes[1]].evaluation.energy += 1
-                if alive[contestant_indexes[0]].evaluation.hit_points <= 0:
-                    dead.append(alive[contestant_indexes[0]])
-                    del alive[contestant_indexes[0]]
+            if not repr(alive[contestant_indexes[0]].configuration) == repr(alive[contestant_indexes[1]].configuration):
+                contest_result = self.runBattle(population, alive[contestant_indexes[0]], alive[contestant_indexes[1]])
             else:
+                # Members are identical! Set the contest result to No contest
+                contest_result = -1
+
+            # Energy, battles evaluation
+            if contest_result == 1 or contest_result == 2:
+                # Someone won!
+                # Mark the battles and give both contestant a point of energy to keep them fighting.
+                # Cos something interesting is happening
+                alive[contestant_indexes[0]].evaluation.battles += 1
+                alive[contestant_indexes[1]].evaluation.battles += 1
+                alive[contestant_indexes[0]].evaluation.energy += 1
+                alive[contestant_indexes[1]].evaluation.energy += 1
+            elif contest_result == 0:
+                # Draw
+                # Mark the battles but remove a point of energy to exhaust the contestants
+                # if no outcome can be decided
+                alive[contestant_indexes[0]].evaluation.battles += 1
+                alive[contestant_indexes[1]].evaluation.battles += 1
                 alive[contestant_indexes[0]].evaluation.energy -= 1
                 alive[contestant_indexes[1]].evaluation.energy -= 1
-                # Remove contestant with highest id first to stop 1st index changing
-                sorted_indexes = sorted(contestant_indexes)
-                if alive[sorted_indexes[1]].evaluation.energy <= 0:
-                    exhausted.append(alive[sorted_indexes[0]])
-                    del alive[sorted_indexes[1]]
-                if alive[sorted_indexes[0]].evaluation.energy <= 0:
-                    exhausted.append(alive[sorted_indexes[0]])
-                    del alive[sorted_indexes[0]]
+            else:
+                # No contest
+                pass
+
+            # Hp/passive evauation
+            if contest_result == 1:
+                alive[contestant_indexes[1]].evaluation.hit_points -= 1
+            elif contest_result == 2:
+                alive[contestant_indexes[0]].evaluation.hit_points -= 1
+            elif contest_result == 0:
+                pass
+            else:
+                alive[contestant_indexes[0]].evaluation.passive = True
+
+            # Process contestant in index order to stop the index changing if we delete 
+            sorted_indexes = sorted(contestant_indexes)
+
+            def process_contestant(index):
+                contestant = alive[index]
+                if contestant.evaluation.hit_points <= 0:
+                    dead.append(contestant)
+                    del alive[index]
+                elif contestant.evaluation.energy <= 0:
+                    exhausted.append(contestant)
+                    del alive[index]
+                elif contestant.evaluation.passive:
+                    passive.append(contestant)
+                    del alive[index]
+                else:
+                    pass
+            process_contestant(sorted_indexes[1])
+            process_contestant(sorted_indexes[0])
 
         # Competition over
         population.alive = alive
         population.exhausted = exhausted
         population.dead = dead
+        population.passive = passive
 
     def reportMember(self, member, row):
         row.n_battle_measure = member.evaluation.battles
         row.hp_measure = member.evaluation.hit_points
         row.energy_measure = member.evaluation.energy
+        row.passive_measure = member.evaluation.passive
 

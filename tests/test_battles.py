@@ -18,6 +18,9 @@ class TestMemberCrossover(genetic.Component):
 
 class HighestIdWinsBattle(genetic.Component):
 
+    def initializeMember(self, member):
+        member.configuration.test = member.id
+
     def battleMembers(self, population, member1, member2):
         return 1 if member1.id > member2.id else 2
 
@@ -55,7 +58,7 @@ class battles_fixture(unittest.TestCase):
         p1.breed()
         self.assertEqual(len(p1.alive), 3)
         self.assertEqual(len(p1.children), 3)
-        self.assertEqual(len(p1.alive + p1.children), 6)
+        self.assertEqual(len(p1.alive + p1.children + p1.passive), 6)
 
     def test_next_generation_are_survivors(self):
         simulation = genetic.Simulation("Test_Battle", [

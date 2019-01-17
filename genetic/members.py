@@ -41,8 +41,11 @@ class Member:
         for index in component_indexes:
             component = components[index]
             mutated = component.mutateMember(self)
+            if mutated is None:
+                raise RuntimeError("mutateMember did not return a value")
             if mutated:
-                break
+                return None
+        raise RuntimeError("No component performed a mutation")
 
     def evaluate(self):
         for component in self.simulation.components:

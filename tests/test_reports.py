@@ -34,7 +34,7 @@ class reports_fixture(unittest.TestCase):
     def test_read_population_report(self):
         manager = genetic.ReportManager(self.quick_spot_path)
         population_report = manager.read_population_report()
-        self.assertEqual(population_report.shape, (3,8))
+        self.assertEqual(population_report.shape, (3,9))
 
     def test_read_member_report(self):
         manager = genetic.ReportManager(self.quick_spot_path)

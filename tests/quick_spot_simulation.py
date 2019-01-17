@@ -26,7 +26,7 @@ def load_boston():
     dataset = read_csv(filename, delim_whitespace=True, names=names)
     return dataset
 
-def make_quick_spot_simulation(simulation_name, simulation_path = None):
+def make_quick_spot_simulation(simulation_name, population_size, simulation_path = None):
 
     df = load_boston()
 
@@ -38,7 +38,7 @@ def make_quick_spot_simulation(simulation_name, simulation_path = None):
 
     components = [
         genetic.Data(x, y, .3),
-        genetic.FixedPopulationSize(100),
+        genetic.FixedPopulationSize(population_size),
 
         # Learners
         learners.LinearRegression(),
@@ -68,5 +68,5 @@ def run_quick_spot_simulation(simulation, simulation_rounds):
 
 if __name__ == '__main__':
     simulation_name = "quick_spot"
-    simulation = make_quick_spot_simulation(simulation_name, Path("tests", "simulations", simulation_name))
-    run_boston_quick_spot(simulation, 10)
+    simulation = make_quick_spot_simulation(simulation_name, 10, Path("tests", "simulations", simulation_name))
+    run_quick_spot_simulation(simulation, 5)

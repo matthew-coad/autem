@@ -19,8 +19,9 @@ class LearnerChoice(Component):
         learners = list(member.configuration.learners.__dict__)
         learners.remove(current_learner)
         if len(learners) == 0:
-            return false
+            return False
 
         random_state = member.simulation.random_state
         learner_index = random_state.randint(0, len(learners))
         member.configuration.learner_name = learners[learner_index]
+        return True

@@ -21,6 +21,7 @@ class Population:
         self.members = []
         self.alive = []
         self.exhausted = []
+        self.passive = []
         self.dead = []
         self.children = []
         self.started_at = None
@@ -33,8 +34,12 @@ class Population:
                 component.initializePopulation(self)
         else:
             self.configuration = parent0.configuration
-            survivors = parent0.alive + parent0.exhausted
-            self.members = [Member(self, m) for m in survivors] + parent0.children
+            survivors = [Member(self, p) for p in parent0.alive + parent0.exhausted]
+            mutants = [Member(self, p) for p in parent0.passive]
+            for mutant in mutants:
+                mutant.mutate()
+            children = parent0.children
+            self.members = survivors + mutants + children
 
     def evaluate(self):
         """
@@ -52,6 +57,7 @@ class Population:
         self.alive = self.members[:]
         self.exhausted = []
         self.dead = []
+        self.passive = []
         for component in self.simulation.components:
             component.competePopulation(self)
 
@@ -89,6 +95,7 @@ class Population:
         row.alive_measure = len(self.alive)
         row.exhausted_measure = len(self.exhausted)
         row.dead_measure = len(self.dead)
+        row.passive_measure = len(self.passive)
         row.children_measure = len(self.children)
         
         for component in self.simulation.components:
@@ -147,7 +154,8 @@ class FixedPopulationSize(Component):
         population_size = self.population_size
         random_state = population.simulation.random_state
         parents = population.alive + population.exhausted
-        children_size = population_size - len(parents)
+        passive = population.passive
+        children_size = population_size - len(parents) - len(passive)
         while (len(population.children) < children_size):
             parent_indexes = random_state.choice(len(parents), 2, replace=False)
             child = Member(population, parents[parent_indexes[0]], parents[parent_indexes[1]])

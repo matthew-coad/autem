@@ -50,6 +50,7 @@ class Learner(Component):
         parameter_indexes = random_state.choice(n_parameter, size = n_parameter, replace = False)
         parameter = parameters[parameter_indexes[0]]
         parameter.mutateParameter(self, member)
+        return True
 
     def isActive(self, member):
         configuration = member.configuration
@@ -67,7 +68,7 @@ class Learner(Component):
         model = self.makeModel()
         if len(self.parameters) > 0:
             pairs = [(p.name, p.getMemberValue(self, member)) for p in self.parameters]
-            params = dict(pairs for p in pairs if not p[1] is None)
+            params = dict(p for p in pairs if not p[1] is None)
             model.set_params(**params)
         member.evaluation.model = model
         member.evaluation.model_name = self.name

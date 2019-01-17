@@ -22,12 +22,12 @@ class simulations_fixture(unittest.TestCase):
 
     def test_quick_spot_simulation(self):
         simulation_name = "quick_spot"
-        simulation = make_quick_spot_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+        simulation = make_quick_spot_simulation(simulation_name, 10, Path("tests", "simulations", simulation_name))
         run_quick_spot_simulation(simulation, 3)
 
     def test_knn_tune_simulation(self):
         simulation_name = "quick_knn_tune"
-        simulation = make_knn_tune_simulation(simulation_name, Path("tests", "simulations", simulation_name))
+        simulation = make_knn_tune_simulation(simulation_name, 10, Path("tests", "simulations", simulation_name))
         run_knn_tune_simulation(simulation, 3)
 
 if __name__ == '__main__':

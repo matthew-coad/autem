@@ -5,8 +5,7 @@ from sklearn.preprocessing import StandardScaler
 class StandardiseTransform(Component):
 
     def initializeMember(self, member):
-        standardise = member.simulation.random_state.randint(0, 2)
-        member.configuration.standardise = standardise
+        member.configuration.standardise = 1
 
     def copyMember(self, member, parent0):
         member.configuration.standardise = parent0.configuration.standardise
@@ -17,6 +16,7 @@ class StandardiseTransform(Component):
     def mutateMember(self, member):
         value = 1 if member.configuration.standardise == 0 else 0
         member.configuration.standardise = value
+        return True
 
     def evaluateMember(self, member):
         standardise = member.configuration.standardise
