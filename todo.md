@@ -4,9 +4,29 @@ TODO
 
 ## Add a history property to members
 
+**Done**
+
+Moved parent_model_scores to history. Okay cos its only used for evaluation.
+
 ## Test member form equality
 
-## Default member form
+**Done**
+
+Added test_member_clone_has_identical_configuation
+
+Moved learner configurations into a "Learners" object so we can interate learners without a seperate list.
+
+## Default learner parameter values
+
+Allowed parameters to have a "None" value in which case the value will not be passed onto the model.
+
+Seperated parameter value initialization vs mutation
+
+Set ChoiceLearner to initialize value to None.
+
+Renamed ChoiceParameter to ChoiceTuneParameter to make clear its status as a choice for model tuning parameters.
+
+**Done**
 
 ## Mutate member form
 

@@ -52,7 +52,8 @@ class Learner(Component):
 
         model = self.makeModel()
         if len(self.parameters) > 0:
-            params = dict([(p.name, p.getMemberValue(self, member)) for p in self.parameters])
+            pairs = [(p.name, p.getMemberValue(self, member)) for p in self.parameters]
+            params = dict(pairs for p in pairs if not p[1] is None)
             model.set_params(**params)
         member.evaluation.model = model
         member.evaluation.model_name = self.name

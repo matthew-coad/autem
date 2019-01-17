@@ -1,5 +1,5 @@
 from .learner import Learner
-from .parameter import Parameter, ChoiceParameter
+from .parameter import Parameter, ChoiceTuneParameter
 
 from sklearn.linear_model import LinearRegression as LinearRegressionModel
 from sklearn.linear_model import Lasso as LassoModel
@@ -37,7 +37,7 @@ class KNeighborsRegressor(Learner):
     def __init__(self):
         choices = [3,5,7,9,11,13,15,21,25,31,41,51]
         Learner.__init__(self, "KNN-R", "K-Neighbors", [
-            ChoiceParameter("n_neighbors", "n_neighbors_dim", choices)
+            ChoiceTuneParameter("n_neighbors", "n_neighbors_dim", choices)
         ])
 
     def makeModel(self):

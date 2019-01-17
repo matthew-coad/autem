@@ -27,5 +27,5 @@ class ReportManager():
         """
         files = [self.path.joinpath(n) for n in os.listdir(self.path) if fnmatch.fnmatch(n, 'Member_*.csv')]
         frames = [pd.read_csv(n) for n in files]
-        df = pd.concat(frames)
+        df = pd.concat(frames, sort=True)
         return df

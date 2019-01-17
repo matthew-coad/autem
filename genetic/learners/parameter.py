@@ -6,9 +6,15 @@ class Parameter:
         self.name = name
         self.report_name = report_name
 
+    def initialValue(self, member):
+        """
+        Get the initial value of a member
+        """
+        raise NotImplementedError
+
     def generateValue(self, member):
         """
-        Generate an initial value of a parameter
+        Generate a new random value of a parameter
         """
         raise NotImplementedError
 
@@ -22,7 +28,7 @@ class Parameter:
         setattr(configuration, self.name, value)
 
     def initializeParameter(self, learner, member):
-        initial_value = self.generateValue(member)
+        initial_value = self.initialValue(member)
         self.setMemberValue(learner, member, initial_value)
 
     def copyParameter(self, learner, member, parent0):
@@ -44,11 +50,16 @@ class Parameter:
             value = self.getMemberValue(learner, member)
             setattr(row, self.report_name, value)
 
-class ChoiceParameter(Parameter):
+class ChoiceTuneParameter(Parameter):
 
     def __init__(self, name, report_name, choices):
         Parameter.__init__(self, name, report_name)
         self.choices = choices
+
+    def initialValue(self, member):
+        # Initial value is None.
+        # Models have "good" default values which will be used in this case
+        return None
 
     def generateValue(self, member):
         random_state = member.simulation.random_state

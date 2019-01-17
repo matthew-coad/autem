@@ -1,4 +1,4 @@
-from .parameter import Parameter, ChoiceParameter
+from .parameter import Parameter, ChoiceTuneParameter
 from .learner import Learner
 from .learner_choice import LearnerChoice
 
