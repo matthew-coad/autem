@@ -13,7 +13,7 @@ class Simulation:
     def __init__(self, name, components, seed = 1234):
         self.name = name
         self.started = False
-        self.stopped = False
+        self.complete = False
         self.components = components
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
@@ -24,18 +24,20 @@ class Simulation:
         self.next_id += 1
         return id
 
-    def run(self):
+    def run(self, finalising = False):
         """
         Run one iteration of the simulation
         """
         self.started = True
-        population = populations.Population(self, self.population)
+        population = populations.Population(self, finalising, self.population)
         population.started_at = datetime.datetime.now()
         start_time = time.time()
         population.evaluate()
-        population.compete()
+        population.battle()
         population.breed()
         population.duration = time.time() - start_time
         population.analyze()
         population.save()
         self.population = population
+        self.complete = population.complete
+

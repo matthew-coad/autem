@@ -27,13 +27,13 @@ class populations_fixture(unittest.TestCase):
 
     def test_populations_have_unique_id(self):
         simulation = genetic.Simulation("Test", [])
-        population1 = genetic.Population(simulation)
-        population2 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
+        population2 = genetic.Population(simulation, False)
         self.assertNotEqual(population1.id, population2.id)
 
     def test_has_fixed_size_members(self):
         simulation = genetic.Simulation("Test", [genetic.FixedPopulationSize(10)])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         self.assertEqual(len(population1.members), 10)
 
     def test_members_evaluated(self):
@@ -41,7 +41,7 @@ class populations_fixture(unittest.TestCase):
             genetic.FixedPopulationSize(10),
             TestFlagMemberEvaluated()
             ])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         population1.evaluate()
         self.assertEqual(len(population1.members), 10)
         self.assertTrue(population1.members[0].configuration.evaluated)
@@ -51,7 +51,7 @@ class populations_fixture(unittest.TestCase):
             genetic.FixedPopulationSize(10),
             TestSaveId()
             ])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         population1.evaluate()
         population1.analyze()
 

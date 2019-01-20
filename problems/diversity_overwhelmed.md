@@ -55,3 +55,9 @@ This should naturally start to explore the parameters with a deep search space.
 
 However the scores will no longer converge to a single value. Their will only be a buzz. We have no absolutaly "score" to determine the winner
 and will need some method of determining the fittest forms at the end.
+
+## Conclusion
+
+Populations now look diverse and the space is being continuously explored. However its now unclear who the victors are.
+
+

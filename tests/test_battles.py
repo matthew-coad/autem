@@ -33,9 +33,9 @@ class battles_fixture(unittest.TestCase):
             genetic.BattleCompetition(5,5,.5),
             HighestIdWinsBattle()])
 
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
-        p1.compete()
+        p1.battle()
         alive = p1.alive
         self.assertEqual(len(p1.members), 2)
         self.assertEqual(len(p1.alive), 1)
@@ -52,9 +52,9 @@ class battles_fixture(unittest.TestCase):
             genetic.BattleCompetition(5,5,.5),
             HighestIdWinsBattle()])
 
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
-        p1.compete()
+        p1.battle()
         p1.breed()
         self.assertEqual(len(p1.alive), 3)
         self.assertEqual(len(p1.children), 3)
@@ -67,12 +67,12 @@ class battles_fixture(unittest.TestCase):
             genetic.BattleCompetition(5,5,.5),
             HighestIdWinsBattle()])
 
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
-        p1.compete()
+        p1.battle()
         p1.breed()
 
-        p2 = genetic.Population(simulation, p1)
+        p2 = genetic.Population(simulation, False, p1)
         self.assertEqual(len(p1.members), 6)
         self.assertTrue(p2.members[0].parent0id > 0)
 

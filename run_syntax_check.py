@@ -1,6 +1,3 @@
-if __name__ == '__main__':
-    import context
-
 import tests.test_components
 import tests.test_members
 import tests.test_populations

@@ -26,7 +26,7 @@ class BattleCompetition(Component):
 
     def runBattle(self, population, member1, member2):
         """
-        Run a battle between two members.
+        Run a match between two members.
         Returns the member postfix of the victor, 0 if the contest is a draw
         """
         # Run battles in order until we get a result
@@ -36,16 +36,16 @@ class BattleCompetition(Component):
                 return result
         return 0
 
-    def competePopulation(self, population):
+    def battlePopulation(self, population):
         """
-        Have members of the population compete in a series of battles.
+        Have members of the population battle in a series of matches.
         Each contestant starts with a number of "hitpoints" and "energy". 
         Every they lose a battle they lose a hitpoint and are eliminated from
         the population if they run out of hitpoints.
         If the battle is a draw both contestants lose a point of energy. If a battle has
         a result both contestants gain a point of energy.
         If a contestant out of energy they become exhausted and can no longer compete 
-        in competitions.
+        in matches.
 
         The competition runs until a preset number of members are dead or all competitors
         are exhausted.
@@ -57,11 +57,16 @@ class BattleCompetition(Component):
         exhausted = population.exhausted
         dead = population.dead
         passive = population.passive
+        finalising = population.finalising
 
         initial_hit_points = self.hit_points
         initial_energy_points = self.energy_points
         survivor_ratio = self.survivor_ratio
-        minimum_members =  floor(len(alive) * survivor_ratio)
+        if not finalising:
+            minimum_members =  floor(len(alive) * survivor_ratio)
+        else:
+            minimum_members = 0
+
         random_state = population.simulation.random_state
 
         for member in alive:
@@ -70,7 +75,7 @@ class BattleCompetition(Component):
             member.evaluation.energy = initial_energy_points
             member.evaluation.passive = False
 
-        while (len(alive)+ len(exhausted) > minimum_members and len(alive) > 1):
+        while (len(alive) + len(exhausted) > minimum_members and len(alive) > 1):
             contestant_indexes = random_state.choice(len(alive), 2, replace=False)
 
             if not repr(alive[contestant_indexes[0]].configuration) == repr(alive[contestant_indexes[1]].configuration):
@@ -134,6 +139,9 @@ class BattleCompetition(Component):
         population.exhausted = exhausted
         population.dead = dead
         population.passive = passive
+
+        if finalising:
+            population.complete = len(alive) + len(exhausted) <= 1
 
     def reportMember(self, member, row):
         row.n_battle_measure = member.evaluation.battles

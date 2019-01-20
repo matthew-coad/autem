@@ -42,7 +42,7 @@ def make_knn_tune_simulation(simulation_name, population_size, simulation_path =
         # Transforms
         transforms.StandardiseTransform(),
 
-        # Compete
+        # Battle
         genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),
         genetic.ModelScoreSignificantFitness(0.1),
         genetic.BattleCompetition(5, 5, .5),
@@ -52,9 +52,12 @@ def make_knn_tune_simulation(simulation_name, population_size, simulation_path =
     simulation = genetic.Simulation(simulation_name, components, seed = 1)
     return simulation
 
-def run_knn_tune_simulation(simulation, simulation_rounds):
+def run_knn_tune_simulation(simulation, simulation_rounds, finalise):
     for round in range(simulation_rounds):
         simulation.run()
+    if finalise:
+        while not simulation.complete:
+            simulation.run(True)
 
 if __name__ == '__main__':
     simulation_name = "quick_knn_tune"

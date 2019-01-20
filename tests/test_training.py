@@ -36,7 +36,7 @@ class data_fixture(unittest.TestCase):
         y = self.y
 
         simulation = genetic.Simulation("Test", [genetic.Data(x, y, .2)])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         self.assertIs(population1.configuration.x, x)
         self.assertIs(population1.configuration.y, y)
 
@@ -46,7 +46,7 @@ class data_fixture(unittest.TestCase):
         y = self.y
 
         simulation = genetic.Simulation("Test", [genetic.Data(x, y, .2)])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         population1.evaluate()
         self.assertTrue(hasattr(population1.evaluation, "x_train"))
 
@@ -55,9 +55,9 @@ class data_fixture(unittest.TestCase):
         y = self.y
 
         simulation = genetic.Simulation("Test", [genetic.Data(x, y, .2)])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
-        p2 = genetic.Population(simulation)
+        p2 = genetic.Population(simulation, False)
         p2.evaluate()
 
         self.assertTrue(np.array_equal(p1.evaluation.y_train, p1.evaluation.y_train))
@@ -81,7 +81,7 @@ class model_fixture(unittest.TestCase):
         lr_model = LogisticRegression()
         models.append(('LR', lr_model))
         simulation = genetic.Simulation("Test", [genetic.ModelChoice(models)])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
 
         m1 = genetic.Member(p1)
@@ -106,7 +106,7 @@ class model_fixture(unittest.TestCase):
             genetic.ModelScoreFitness(),
             genetic.BattleCompetition(5,5,.2)
         ])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
 
         m1 = genetic.Member(p1)
@@ -134,9 +134,9 @@ class model_fixture(unittest.TestCase):
             genetic.ModelScoreFitness(),
             genetic.BattleCompetition(5,5,.2)
         ])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
-        p1.compete()
+        p1.battle()
         p1.breed()
         
 if __name__ == '__main__':

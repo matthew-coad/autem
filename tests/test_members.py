@@ -40,28 +40,28 @@ class members_fixture(unittest.TestCase):
 
     def test_members_have_unique_ids(self):
         simulation = genetic.Simulation("Test", [])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         member1 = genetic.Member(population1)
         member2 = genetic.Member(population1)
         self.assertNotEqual(member1.id, member2.id)
 
     def test_new_members_are_initialized(self):
         testSimulation = genetic.Simulation("Test", [TestMemberInitializer()])
-        testPopulation = genetic.Population(testSimulation)
+        testPopulation = genetic.Population(testSimulation, False)
         testMember = genetic.Member(testPopulation)
         self.assertTrue(isinstance(testMember, genetic.Member))
         self.assertEqual(testMember.configuration.test, 1)
 
     def test_copy(self):
         testSimulation = genetic.Simulation("Test", [TestMemberCrossover()])
-        testPopulation = genetic.Population(testSimulation)
+        testPopulation = genetic.Population(testSimulation, False)
         parent0 = genetic.Member(testPopulation)
         testMember = genetic.Member(testPopulation, parent0)
         self.assertEqual(testMember.configuration.test, parent0.configuration.test)
 
     def test_crossover(self):
         testSimulation = genetic.Simulation("Test", [TestMemberCrossover()])
-        testPopulation = genetic.Population(testSimulation)
+        testPopulation = genetic.Population(testSimulation, False)
         parent0 = genetic.Member(testPopulation)
         parent1 = genetic.Member(testPopulation)
         testMember = genetic.Member(testPopulation, parent0, parent1)
@@ -72,7 +72,7 @@ class members_fixture(unittest.TestCase):
             genetic.FixedPopulationSize(10),
             TestReportId()
             ])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         population1.evaluate()
         member0 = population1.members[0]
         row = member0.report()
@@ -83,7 +83,7 @@ class members_fixture(unittest.TestCase):
             genetic.FixedPopulationSize(5),
             TestReportId()
             ])
-        population1 = genetic.Population(simulation)
+        population1 = genetic.Population(simulation, False)
         population1.evaluate()
         population1.analyze()
         frame = population1.member_report

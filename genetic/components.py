@@ -57,7 +57,7 @@ class Component:
         """
         pass
 
-    def competePopulation(self, population):
+    def battlePopulation(self, population):
         """
         Perform population competition
         """

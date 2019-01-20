@@ -52,8 +52,10 @@ def make_quick_spot_simulation(simulation_name, population_size, simulation_path
         # Transforms
         transforms.StandardiseTransform(),
 
-        # Compete
+        # Evaluation
         genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),
+
+        # Battle
         genetic.ModelScoreSignificantFitness(0.1),
         genetic.BattleCompetition(5, 5, .5),
     ]
@@ -65,6 +67,8 @@ def make_quick_spot_simulation(simulation_name, population_size, simulation_path
 def run_quick_spot_simulation(simulation, simulation_rounds):
     for round in range(simulation_rounds):
         simulation.run()
+    while not simulation.complete:
+        simulation.run(True)
 
 if __name__ == '__main__':
     simulation_name = "quick_spot"

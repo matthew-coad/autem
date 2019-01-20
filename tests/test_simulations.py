@@ -28,7 +28,7 @@ class simulations_fixture(unittest.TestCase):
     def test_knn_tune_simulation(self):
         simulation_name = "quick_knn_tune"
         simulation = make_knn_tune_simulation(simulation_name, 10, Path("tests", "simulations", simulation_name))
-        run_knn_tune_simulation(simulation, 3)
+        run_knn_tune_simulation(simulation, 3, False)
 
 if __name__ == '__main__':
     unittest.main()

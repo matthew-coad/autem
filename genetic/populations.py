@@ -9,9 +9,11 @@ import datetime
 class Population:
     """Population that genetic algorithms act on"""
 
-    def __init__(self, simulation, parent0 = None):
+    def __init__(self, simulation, finalising, parent0 = None):
         self.id = simulation.generate_id()
         self.simulation = simulation
+        self.finalising = finalising
+
         if parent0 is None:
             self.generation = 1
         else:
@@ -28,6 +30,7 @@ class Population:
         self.duration = None
         self.population_report = None
         self.member_report = None
+        self.complete = False
 
         if parent0 is None:
             for component in simulation.components:
@@ -35,10 +38,14 @@ class Population:
         else:
             self.configuration = parent0.configuration
             survivors = [Member(self, p) for p in parent0.alive + parent0.exhausted]
-            mutants = [Member(self, p) for p in parent0.passive]
-            for mutant in mutants:
-                mutant.mutate()
-            children = parent0.children
+            if not self.finalising:
+                children = parent0.children
+                mutants = [Member(self, p) for p in parent0.passive]
+                for mutant in mutants:
+                    mutant.mutate()
+            else:
+                mutants = []
+                children = []
             self.members = survivors + mutants + children
 
     def evaluate(self):
@@ -50,24 +57,25 @@ class Population:
         for member in self.members:
             member.evaluate()
 
-    def compete(self):
+    def battle(self):
         """
-        Have members of the population compete to determine fitness
+        Have members of the population battle to determine dominance!
         """
         self.alive = self.members[:]
         self.exhausted = []
         self.dead = []
         self.passive = []
         for component in self.simulation.components:
-            component.competePopulation(self)
+            component.battlePopulation(self)
 
     def breed(self):
         """
         Have members of the population breed to create children for the next generation
         """
         self.children = []
-        for component in self.simulation.components:
-            component.breedPopulation(self)
+        if not self.finalising:
+            for component in self.simulation.components:
+                component.breedPopulation(self)
 
     def analyze(self):
         """

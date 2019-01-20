@@ -31,7 +31,7 @@ class learner_fixture(unittest.TestCase):
             genetic.Data(x, y, .2),
             learners.LogisticRegression()
         ])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
 
         m1 = genetic.Member(p1)
@@ -50,7 +50,7 @@ class learner_fixture(unittest.TestCase):
             learners.LinearRegression(),
             learners.LearnerChoice()
         ])
-        p1 = genetic.Population(simulation)
+        p1 = genetic.Population(simulation, False)
         p1.evaluate()
 
         m1 = genetic.Member(p1)

@@ -1,5 +1,17 @@
 TODO
 
+# Final Victory
+
+## Add a evaluation mode flag to the population
+
+## Change simulation rules
+
+## Track eliminated members
+
+## Move breeding to start of next generation
+
+## Move breeding into population
+
 # Problem diversity exploration
 
 ## Add a history property to members
