@@ -6,6 +6,11 @@ class Path(Reporter):
     def __init__(self, path):
         self.path = path
 
+    def start_simulation(self, simulation):
+        manager = ReportManager(self.path)
+        simulation_info = manager.get_simulation(simulation.name)
+        manager.prepare_simulation(simulation_info)
+
     def report_simulation(self, simulation):
         """
         Report on the progress of a simulation

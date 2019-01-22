@@ -19,7 +19,14 @@ def run_highest_id_wins():
     simulation = simulators.Simulation("highest_id_wins", [highest_id_wins(), reporters.Path(simulations_path())], population_size=2)
     simulation.start()
     simulation.step()
+    simulation.step()
+    simulation.step()
     simulation.report()
+    simulation.step()
+    simulation.step()
+    simulation.step()
+    simulation.report()
+
 
 if __name__ == '__main__':
     run_highest_id_wins()

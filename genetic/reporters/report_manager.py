@@ -42,8 +42,10 @@ class ReportManager():
         simulations = [self.get_simulation(n) for n in directories]
         return simulations
 
-    def update_battle_report(self, simulation, step, records):
+    def prepare_simulation(self, simulation):
         prepare_path(simulation.path)
+
+    def update_battle_report(self, simulation, step, records):
         filename = "%s_%05d.csv" % ("Battle", step)
         full_path = simulation.path.joinpath(filename)
         report = get_report_frame(records)

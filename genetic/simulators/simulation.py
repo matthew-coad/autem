@@ -134,4 +134,5 @@ class Simulation:
         """
         for component in self.components:
             component.report_simulation(self)
+        self.reports = []
     
