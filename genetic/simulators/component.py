@@ -7,6 +7,12 @@ class Component:
         """
         pass
 
+    def outline_simulation(self, simulation, outline):
+        """
+        Outline what information is going to be supplied by a simulation
+        """
+        pass
+
     def start_member(self, member):
         """
         Start a member
@@ -22,12 +28,6 @@ class Component:
     def battle_members(self, member1, member2, result):
         """
         Run a battle between two members
-        """
-        pass
-
-    def outline_member(self, member, outline):
-        """
-        Outline what information is going to be supplied on a member
         """
         pass
 

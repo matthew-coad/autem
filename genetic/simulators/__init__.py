@@ -4,4 +4,4 @@ from .population import Population
 from .simulation import Simulation
 from .battle_result import BattleOutcome, BattleResult
 from .evaluation import Evaluation
-from .outline import Role, Attribute, Outline
+from .outline import Dataset, Role, Attribute, Outline

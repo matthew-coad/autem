@@ -45,11 +45,15 @@ class ReportManager():
     def prepare_simulation(self, simulation):
         prepare_path(simulation.path)
 
-    def update_battle_report(self, simulation, step, records):
-        filename = "%s_%05d.csv" % ("Battle", step)
+    def update_battle_report(self, simulation, report_id, frame):
+        filename = "%s_%06d.csv" % ("Battle", report_id)
         full_path = simulation.path.joinpath(filename)
-        report = get_report_frame(records)
-        report.to_csv(full_path, index=False)
+        frame.to_csv(full_path, index=False)
+
+    def update_outline_report(self, simulation, frame):
+        filename = "Outline.csv"
+        full_path = simulation.path.joinpath(filename)
+        frame.to_csv(full_path, index=False)
 
     def read_battle_report(self, simulation):
         """

@@ -5,19 +5,23 @@ class Path(Reporter):
 
     def __init__(self, path):
         self.path = path
+        self.manager = ReportManager(self.path)
 
-    def start_simulation(self, simulation):
-        manager = ReportManager(self.path)
-        simulation_info = manager.get_simulation(simulation.name)
-        manager.prepare_simulation(simulation_info)
+    def get_simulation_info(self, simulation):
+        simulation_info = self.manager.get_simulation(simulation.name)
+        return simulation_info
 
     def report_simulation(self, simulation):
         """
         Report on the progress of a simulation
         """
-        steps = simulation.n_steps
-        records = simulation.reports
-        manager = ReportManager(self.path)
-        simulation_info = manager.get_simulation(simulation.name)
-        manager.update_battle_report(simulation_info, steps, records)
-        
+        report_id = simulation.n_steps
+        battle_frame = self.get_battle_frame(simulation)
+        simulation_info = self.get_simulation_info(simulation)
+        self.manager.update_battle_report(simulation_info, report_id, battle_frame)
+
+    def start_simulation(self, simulation):
+        simulation_info = self.get_simulation_info(simulation)
+        self.manager.prepare_simulation(simulation_info)
+        outline_frame = self.get_outline_frame(simulation)
+        self.manager.update_outline_report(simulation_info, outline_frame)

@@ -2,6 +2,7 @@ from .member import Member
 from .battle_result import BattleOutcome, BattleResult
 from .evaluation import Evaluation
 from .record import Record
+from .outline import Outline, Dataset, Role
 
 from types import SimpleNamespace
 
@@ -16,10 +17,11 @@ class Simulation:
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
         self.population_size = population_size
-        self.n_steps = 0
+        self.outline = None
         self.resources = SimpleNamespace()
         self.members = []
         self.reports = []
+        self.n_steps = 0
 
     def generate_id(self):
         id = self.next_id
@@ -33,10 +35,23 @@ class Simulation:
         for component in self.components:
             component.start_member(member)
 
+    def _outline_simulation(self):
+        """
+        Collect the simulation outline
+        """
+        outline = Outline()
+        outline.make_attribute("step", Dataset.Battle, [Role.Dimension])
+        outline.make_attribute("member_id", Dataset.Battle, [Role.ID])
+
+        for component in self.components:
+            component.outline_simulation(self, outline)
+        self.outline = outline
+
     def start(self):
         """
         Perform simulation startup
         """
+        self._outline_simulation()
         for component in self.components:
             component.start_simulation(self)
         for index in range(self.population_size):
