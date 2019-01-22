@@ -14,6 +14,10 @@ class BattleResult:
         self.outcome = BattleOutcome.NoContest
         self.victor = None
 
+    def inconclusive(self):
+        self.outcome = BattleOutcome.Inconclusive
+        self.victor = None
+
     def decisive(self, victor):
         self.outcome = BattleOutcome.Decisive
         self.victor = victor

@@ -1,5 +1,5 @@
 from genetic.components import Component
-from ..simulators import Component as Component2, Evaluation
+from ..simulators import Component as Component2, Evaluation, Dataset, Role
 from .parameter import Parameter
 
 from types import SimpleNamespace
@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
+import numpy as np
 from scipy import stats
 
 
@@ -16,6 +17,13 @@ class Learner(Component, Component2):
         self.name = name
         self.label = label
         self.parameters = parameters
+
+    def outline_simulation(self, simulation, outline):
+        """
+        Outline what information is going to be supplied by a simulation
+        """
+        if not outline.has_attribute("test_score", Dataset.Battle):
+            outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
 
     def start_member(self, member):
         configuration = member.configuration
@@ -65,7 +73,20 @@ class Learner(Component, Component2):
         y_pred = pipeline.predict(x_test)
         test_score = scorer.score(y_test, y_pred)
 
+        evaluation.model_name = model_name
         evaluation.test_score = test_score
+
+    def record_member(self, member, record):
+        if not self.is_active(member):
+            return None
+
+        test_score = None
+
+        test_scores = np.array([e.test_score for e in member.evaluations])
+        if len(member.evaluations) > 0:
+            test_score = test_scores.mean()
+        
+        record.test_score = test_score
 
     def makeModel(self):
         raise NotImplementedError()

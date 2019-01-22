@@ -40,8 +40,8 @@ class Simulation:
         Collect the simulation outline
         """
         outline = Outline()
-        outline.make_attribute("step", Dataset.Battle, [Role.Dimension])
-        outline.make_attribute("member_id", Dataset.Battle, [Role.ID])
+        outline.append_attribute("step", Dataset.Battle, [Role.Dimension])
+        outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
 
         for component in self.components:
             component.outline_simulation(self, outline)

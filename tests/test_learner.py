@@ -38,6 +38,7 @@ class learner_fixture(unittest.TestCase):
         simulation.start()
         member = simulation.members[0]
         evaluation = simulation.evaluate_member(member)
+        self.assertTrue(hasattr(evaluation, "model_name"))
         self.assertTrue(hasattr(evaluation, "test_score"))
 
 

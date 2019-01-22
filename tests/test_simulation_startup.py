@@ -8,7 +8,7 @@ import unittest
 class copy_id_on_start(simulators.Component):
 
     def outline_simulation(self, simulation, outline):
-        outline.make_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
+        outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
     def start_member(self, member):
         member.configuration.test = member.id
