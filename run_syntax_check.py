@@ -1,8 +1,8 @@
-import tests.test_components
-import tests.test_members
-import tests.test_populations
-import tests.test_reports
-import tests.test_simulations
-import tests.test_training
-import tests.test_learners
-import tests.test_meta_info
+import tests.test_battle_result
+import tests.test_generators
+import tests.test_learner
+import tests.test_loaders
+import tests.test_member
+import tests.test_report
+import tests.test_simulation_startup
+import tests.test_simulation_step

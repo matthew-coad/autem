@@ -15,3 +15,5 @@ class LogisticRegression(Learner):
 
     def makeModel(self):
         return LogisticRegressionModel(solver = 'liblinear', multi_class = 'ovr')
+
+
