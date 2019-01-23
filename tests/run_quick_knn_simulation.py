@@ -6,15 +6,11 @@ import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners as learners
 import genetic.loaders as loaders
-import genetic.reporters  as reporters
+import genetic.reporters as reporters
+import genetic.battlers as battlers
 
 from tests.datasets import load_boston
 from tests.config import simulations_path
-
-class who_knows(simulators.Component):
-
-    def battle_members(self, contestant1, contestant2, result):
-        result.inconclusive()
 
 def run_quick_knn_simulation():
 
@@ -25,7 +21,7 @@ def run_quick_knn_simulation():
             loaders.Data(x,y),
             scorers.NegativeRMSE(),
             learners.KNeighborsRegressor(),
-            who_knows(),
+            battlers.BestLearnerBattle(),
             reporters.Path(simulations_path())
         ], 
         population_size=5)

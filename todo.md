@@ -12,7 +12,7 @@
 
 + Add learner_name to battle report **done**
 
-+ Model score battle
++ Add best learner battle **done**
 
 # Live visulazation of spotcheck
 
