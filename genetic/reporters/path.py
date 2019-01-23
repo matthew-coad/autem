@@ -1,5 +1,5 @@
 from .reporter import Reporter
-from .report_manager import ReportManager
+
 
 class Path(Reporter):
 

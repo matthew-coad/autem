@@ -1,3 +1,4 @@
 from pathlib import Path
 
-REPOSITORY_PATH = Path("tests", "simulations")
+TEST_PATH = Path("Tests", "simulations")
+REPOSITORY_PATH = TEST_PATH

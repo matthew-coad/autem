@@ -1,4 +1,4 @@
-from genetic.components import Component
+from ..simulators import Component
 
 from sklearn.preprocessing import StandardScaler
 

@@ -5,6 +5,7 @@ import unittest
 
 import genetic.simulators as simulators
 import genetic.reporters as reporters
+import genetic.reporters.utility as utility
 
 class ReportMemory(reporters.Reporter):
 
@@ -18,7 +19,7 @@ class ReportMemory(reporters.Reporter):
         """
         steps = simulation.n_steps
         records = simulation.reports
-        frame = reporters.get_report_frame(records)
+        frame = utility.get_report_frame(records)
         self.step = steps
         self.report = frame
 

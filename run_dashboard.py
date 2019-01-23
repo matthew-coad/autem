@@ -1,59 +1,143 @@
-# -*- coding: utf-8 -*-
 import dash
-from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
-import flask
-import plotly.plotly as py
-from plotly import graph_objs as go
-import math
+from dash.dependencies import Input, Output, State
+import plotly.graph_objs as go
 
-from app import app, server
-from dashboard import status_page
+from genetic import ReportManager
 
-app.layout = html.Div(
-    [
-        # header
-        html.Div([
-                html.Span("MCG Dashboard", className='app-title')
+import config
+
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Link", href="#")),
+        dbc.DropdownMenu(
+            nav=True,
+            in_navbar=True,
+            label="Menu",
+            children=[
+                dbc.DropdownMenuItem("Entry 1"),
+                dbc.DropdownMenuItem("Entry 2"),
+                dbc.DropdownMenuItem(divider=True),
+                dbc.DropdownMenuItem("Entry 3"),
             ],
-            className="row header"
         ),
-
-        # tabs
-        html.Div([
-
-            dcc.Tabs(
-                id="tabs",
-                style={"height":"20","verticalAlign":"middle"},
-                children=[
-                    dcc.Tab(label="Status", value="status_tab"),
-                    dcc.Tab(label="Performance", value="performance_tab")
-                ],
-                value="status_tab",
-            )],
-            className="row tabs_div"
-        ),
-
-        # Tab content
-        html.Div(id="tab_content", className="row", style={"margin": "2% 3%"}),
-
-        html.Link(href="https://use.fontawesome.com/releases/v5.2.0/css/all.css",rel="stylesheet"),
-        html.Link(href="https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css",rel="stylesheet"),
-        html.Link(href="https://fonts.googleapis.com/css?family=Dosis", rel="stylesheet"),
-        html.Link(href="https://fonts.googleapis.com/css?family=Open+Sans", rel="stylesheet"),
-        html.Link(href="https://fonts.googleapis.com/css?family=Ubuntu", rel="stylesheet"),
-        html.Link(href="https://cdn.rawgit.com/amadoukane96/8a8cfdac5d2cecad866952c52a70a50e/raw/cd5a9bf0b30856f4fc7e3812162c74bfc0ebe011/dash_crm.css", rel="stylesheet")
-
     ],
-    className="row",
-    style={"margin": "0%"},
+    color="primary",
+    dark="True",    
+    brand="Autem",
+    brand_href="#",
+    sticky="top",
 )
 
-@app.callback(Output("tab_content", "children"), [Input("tabs", "value")])
-def render_content(tab):
-    return status_page.layout()
+# control_column = dbc.Col(dbc.Form([simulation_group]), width = 3)
+
+graph1 = html.Div(
+    [
+        html.P("Population over time"),
+
+        dcc.Graph(
+            config=dict(displayModeBar=False),
+            style={"height": "98%", "width": "98%"},
+        ),
+
+    ],
+    className="six columns chart_div",
+)
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
+
+def chi(args): return [a for a in args]
+
+def container(*args): return html.Div(children = chi(args), className="container-fluid")
+
+def row(*args): return html.Div(children = chi(args), className="row")
+
+def tool_col(*args): return html.Div(children = chi(args))
+
+def content_col(*args): return html.Div(children = chi(args), className="col-5")
+
+def div(*args): return html.Div(children = chi(args))
+
+def P(arg): return html.P(arg)
+
+def H(*args): return html.Div(children = chi(args), className="badge badge-primary text-wrap")
+
+def graph_place(id, label):
+    return div(
+        H(label),
+        dcc.Graph(
+            id=id,
+            config=dict(displayModeBar=False),
+            style={"height": "300px"},
+        )
+    )
+
+def graph_layout(x_title, y_title):
+    return go.Layout(
+        xaxis={'title': x_title},
+        yaxis={'title': y_title},
+        margin={'l': 40, 'b': 50, 't': 20, 'r': 20},
+        legend={'x': 0, 'y': 1},
+        hovermode='closest'
+    )
+
+def layout_app():
+    report_manager = ReportManager(config.REPOSITORY_PATH)
+    simulations = report_manager.get_simulations()
+    layout = container(
+        row(
+            content_col(
+                dcc.Dropdown(
+                    id="simulation",
+                    options=[{"label": sim.name, "value": sim.name} for sim in simulations],
+                    value=simulations[0].name,
+                    clearable=False,
+                ),
+            ),
+        ),
+
+        row(
+            content_col(
+                graph_place("kpi_progress", "Kpi progress")
+            ),
+            content_col(
+                graph_place("placeholder", "Placeholder")
+            ),
+        )
+    )
+    return layout
+
+app.layout = layout_app
+
+# Member measure plot
+@app.callback(
+    Output("kpi_progress", "figure"),
+    [
+        Input("simulation", "value"),
+    ],
+)
+def update_kpi_progress(simulation):
+    
+    if simulation is None:
+        layout = dict(annotations=[dict(text="No results available", showarrow=False)])
+        return {"data": [], "layout": layout}
+
+    report_manager = ReportManager(config.REPOSITORY_PATH)
+    simulation_info = report_manager.get_simulation(simulation)
+    df = report_manager.read_battle_report(simulation_info)
+
+    # Format results
+    data = [
+        go.Scatter(
+            x=df['step'],
+            y=df['test_score'],
+            mode='markers',
+            name='score'
+        ),
+    ]
+    return {"data": data, "layout": graph_layout("step", "score")}
 
 if __name__ == "__main__":
     app.run_server(debug=True)
