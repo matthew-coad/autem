@@ -6,7 +6,11 @@
 
 + Update dashboard to show frontend using Bootstrap. **done**
 
-+ Show simulations in side-by
++ Show simulations in side-panel **done**
+
++ Show step vs test_score **done**
+
++ Add learner_name to battle report **done**
 
 + Model score battle
 

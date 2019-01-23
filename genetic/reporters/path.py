@@ -1,9 +1,9 @@
 from .reporter import Reporter
 
-
 class Path(Reporter):
 
     def __init__(self, path):
+        from genetic import ReportManager
         self.path = path
         self.manager = ReportManager(self.path)
 
