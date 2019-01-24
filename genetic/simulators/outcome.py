@@ -9,7 +9,8 @@ class OutcomeType(Enum):
 
 class Outcome(SimpleNamespace):
 
-    def __init__(self, member1_id, member2_id):
+    def __init__(self, step, member1_id, member2_id):
+        self.step = step
         self.member1_id = member1_id
         self.member2_id = member2_id
         self.type = OutcomeType.NoContest
@@ -34,6 +35,12 @@ class Outcome(SimpleNamespace):
         self.type = OutcomeType.Decisive
         self.victor = victor
 
+    def fatal(self):
+        """
+        Contest was fatal for the loser
+        """
+        self.fatality = True
+
     def is_uncontested(self):
         return self.type == OutcomeType.NoContest
 
@@ -43,29 +50,18 @@ class Outcome(SimpleNamespace):
     def is_inconclusive(self):
         return self.type == OutcomeType.Inconclusive
 
-    def is_victorious(self, member_id):
-        """
-        Was the given member victorious?
-        """
+    def victor_id(self):
         if self.type != OutcomeType.Indecisive and self.type != OutcomeType.Decisive:
-            return False
-        if self.member1_id == member_id and self.victor == 1:
-            return True
-        if self.member2_id == member_id and self.victor == 2:
-            return True
-        return False
+            return None
+        victor_id = self.member1_id if self.victor == 1 else self.member2_id
+        return victor_id
 
-    def is_defeated(self, member_id):
-        """
-        Was the given member defeated?
-        """
+    def loser_id(self):
         if self.type != OutcomeType.Indecisive and self.type != OutcomeType.Decisive:
-            return False
-        if self.member1_id == member_id and self.victor == 2:
-            return True
-        if self.member2_id == member_id and self.victor == 1:
-            return True
-        return False
+            return None
+        loser_id = self.member2_id if self.victor == 1 else self.member1_id
+        return loser_id
 
-
+    def is_fatal(self):
+        return self.fatality
 

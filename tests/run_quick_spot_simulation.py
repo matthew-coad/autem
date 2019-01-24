@@ -29,6 +29,7 @@ def run_quick_spot_simulation():
             learners.SVR(),
 
             contests.BestLearner(),
+            contests.Survival(),
             reporters.Path(simulations_path())
         ], 
         population_size=5)

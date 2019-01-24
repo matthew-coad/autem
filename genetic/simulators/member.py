@@ -15,14 +15,17 @@ class Member:
         self.contests = []
         self.n_victory = 0
         self.n_defeat = 0
+        self.dead = False
 
     def contested(self, result):
         """
         Record a battle result
         """
-        if result.is_victorious(self.id):
+        if result.victor_id() == self.id:
             self.n_victory += 1
-        if result.is_defeated(self.id):
+        if result.loser_id() == self.id:
             self.n_defeat += 1
+        if result.loser_id() == self.id and result.is_fatal():
+            self.dead = True
         self.contests.append(result)
 

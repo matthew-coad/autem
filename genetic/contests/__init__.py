@@ -1,2 +1,3 @@
-from .battler import Battler
-from .BestLearner import BestLearner
+from .contester import Contester
+from .best_learner import BestLearner
+from .survival import Survival

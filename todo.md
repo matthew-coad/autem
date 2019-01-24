@@ -1,34 +1,40 @@
 # Move final obsolete code to XX
 
-+ Move core code. **Done**
+## Move core code. **Done**
 
-# Get boston experiments running for fixed number of rounds
+## Get boston experiments running for fixed number of rounds
 
-+ Update dashboard to show frontend using Bootstrap. **done**
+## Update dashboard to show frontend using Bootstrap. **done**
 
-+ Show simulations in side-panel **done**
+## Show simulations in side-panel **done**
 
-+ Show step vs test_score **done**
+## Show step vs test_score **done**
 
-+ Add learner_name to battle report **done**
+## Add learner_name to battle report **done**
 
-+ Add best learner battle **done**
+## Add best learner battle **done**
 
-+ Add battle results to members **done**
+## Add battle results to members **done**
 
-+ Report number of victories and defeats **done**
+## Report number of victories and defeats **done**
 
-+ Add Report number of victories and defeats **done**
+## Add Report number of victories and defeats **done**
 
-+ Report pvalue **done**
+## Report pvalue **done**
 
-+ Evaluate action, breed, mutate or death
+## Evaluate and report fatal
 
-+ Breed new members
+Add a contestor that compares a loosers defeat history versus the general populations. **done**
+If its significantly great then mark the contest as fatal. **done**
+Report member dead **done**
 
-+ Mutate member
+## Evaluate action, breed, mutate or death
 
-+ Kill member
+## Breed new members
+
+## Mutate member
+
+## Kill member
 
 # Live visulazation of spotcheck
 

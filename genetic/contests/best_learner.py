@@ -1,10 +1,10 @@
 from ..simulators import Dataset, Role
-from .battler import Battler
+from .contester import Contester
 
 import numpy as np
 from scipy import stats
 
-class BestLearner(Battler):
+class BestLearner(Contester):
     """
     Determines fitness by comparing mean model scores but only
     if the difference is considered significant

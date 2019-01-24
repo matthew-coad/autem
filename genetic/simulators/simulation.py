@@ -21,6 +21,7 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.members = []
         self.reports = []
+        self.contests = []
         self.n_steps = 0
 
     def generate_id(self):
@@ -46,6 +47,7 @@ class Simulation:
         outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_victory", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_defeat", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("dead", Dataset.Battle, [Role.Property])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -75,10 +77,13 @@ class Simulation:
         return evaluation
 
     def contest_members(self, contestant1, contestant2):
-        result = Outcome(contestant1.id, contestant2.id)
+        contest = Outcome(self.n_steps, contestant1.id, contestant2.id)
         for component in self.components:
-            component.contest_members(contestant1, contestant2, result)
-        return result
+            component.contest_members(contestant1, contestant2, contest)
+        contestant1.contested(contest)
+        contestant2.contested(contest)
+        self.contests.append(contest)
+        return contest
 
     def record_member(self, member):
         """
@@ -93,6 +98,7 @@ class Simulation:
         record.n_contest = len(member.contests)
         record.n_victory = member.n_victory
         record.n_defeat = member.n_defeat
+        record.dead = member.dead
 
         for component in self.components:
             component.record_member(member, record)
@@ -111,17 +117,15 @@ class Simulation:
         contestant1 = members[contestant_indexes[0]]
         contestant2 = members[contestant_indexes[1]]
 
-        # Have them battle.
-        outcome = self.contest_members(contestant1, contestant2)
-        contestant1.contested(outcome)
-        contestant2.contested(outcome)
+        # Have them contest.
+        contest = self.contest_members(contestant1, contestant2)
 
         # If there was no contest then something is wrong
-        if outcome.is_uncontested():
+        if contest.is_uncontested():
             raise RuntimeError("No contest component defined")
 
         # If we can't tell anything we need to do more evaluation
-        if outcome.is_inconclusive():
+        if contest.is_inconclusive():
             self.evaluate_member(contestant1)
             self.evaluate_member(contestant2)
 
