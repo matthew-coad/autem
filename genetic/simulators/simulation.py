@@ -23,6 +23,7 @@ class Simulation:
         self.reports = []
         self.contests = []
         self.n_steps = 0
+        self.running = False
 
     def generate_id(self):
         id = self.next_id
@@ -64,6 +65,9 @@ class Simulation:
             member = Member(self)
             self.members.append(member)
             self.start_member(member)
+        if len(self.members) < 2:
+            raise RuntimeError("Require at least 2 members to start")
+        self.running = True
 
     def evaluate_member(self, member):
         """
@@ -109,6 +113,9 @@ class Simulation:
         Run a step of the simulation
         """
 
+        if not self.running:
+            raise RuntimeError("Simulation is not running")
+
         random_state = self.random_state
         members = self.members
 
@@ -133,16 +140,23 @@ class Simulation:
         self.n_steps += 1
         self.reports.append(self.record_member(contestant1))
         self.reports.append(self.record_member(contestant2))
-        
-        # Member 1 Decisive Victory
-        # Member 1 Indecisive Victory
-        # Member 2 Decisive Victory
-        # Member 2 Indecisive Victory
 
-        # For each member compare their win loss ratio against the history of other members
-        # If its significant consider killing/breeding
+        # If contest was fatal remove the loser
+        if contest.is_fatal():
+            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
+            self.members.remove(loser)
 
-        # If victory is indecisive consider breeding members 
+        if len(self.members) < 2:
+            self.running = False
+
+    def run(self, steps):
+        """
+        Run the simulation for a number of steps
+        """
+        for step in range(steps):
+            if not self.running:
+                break
+            self.step()
 
     def report(self):
         """

@@ -32,11 +32,9 @@ def run_quick_spot_simulation():
             contests.Survival(),
             reporters.Path(simulations_path())
         ], 
-        population_size=5)
+        population_size=3)
     simulation.start()
-    steps = 50
-    for step in range(steps):
-        simulation.step()
+    simulation.run(500)
     simulation.report()
 
     return simulation

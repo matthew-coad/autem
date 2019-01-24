@@ -28,9 +28,17 @@ Add a contestor that compares a loosers defeat history versus the general popula
 If its significantly great then mark the contest as fatal. **done**
 Report member dead **done**
 
-## Evaluate action, breed, mutate or death
+## Remove dead members
 
-## Breed new members
+Remove dead members at the end of a simulation step **done**
+
+Stop simulation if there aren't at least two members **done**
+
+## Create members
+
+
+
+## Breed members
 
 ## Mutate member
 

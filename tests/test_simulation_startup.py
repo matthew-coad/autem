@@ -44,7 +44,9 @@ class simulation_startup_fixture(unittest.TestCase):
 
     def test_custom_outline(self):
         simulation = simulators.Simulation("Test", [copy_id_on_start()], population_size=10)
+        self.assertFalse(simulation.running)
         simulation.start()
+        self.assertTrue(simulation.running)
         outline = simulation.outline
         names = [ a.name for a in outline.attributes]
         self.assertTrue("test" in names)
