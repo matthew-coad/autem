@@ -3,6 +3,7 @@ from .outcome import OutcomeType, Outcome
 from .evaluation import Evaluation
 from .record import Record
 from .outline import Outline, Dataset, Role
+from .form import Form
 
 from types import SimpleNamespace
 
@@ -20,6 +21,7 @@ class Simulation:
         self.outline = None
         self.resources = SimpleNamespace()
         self.members = []
+        self.forms = {}
         self.reports = []
         self.contests = []
         self.n_steps = 0
@@ -30,12 +32,19 @@ class Simulation:
         self.next_id += 1
         return id
 
-    def start_member(self, member):
-        """
-        Start a simulation member
-        """
+    def start_member(self):
+        member = Member(self)
         for component in self.components:
             component.start_member(member)
+        form = Form(member)
+        form_key = form.get_key()
+        if form_key in self.forms:
+            form = self.forms[form_key]
+        else:
+            self.forms[form_key] = form
+        form.count += 1
+        self.members.append(member)
+        member.incarnated(form)
 
     def _outline_simulation(self):
         """
@@ -44,6 +53,7 @@ class Simulation:
         outline = Outline()
         outline.append_attribute("step", Dataset.Battle, [Role.Dimension])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
+        outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
         outline.append_attribute("n_evaluation", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_victory", Dataset.Battle, [Role.Measure])
@@ -62,9 +72,7 @@ class Simulation:
         for component in self.components:
             component.start_simulation(self)
         for index in range(self.population_size):
-            member = Member(self)
-            self.members.append(member)
-            self.start_member(member)
+            self.start_member()
         if len(self.members) < 2:
             raise RuntimeError("Require at least 2 members to start")
         self.running = True
@@ -98,6 +106,7 @@ class Simulation:
         record = Record()
         record.step = step
         record.member_id = member_id
+        record.incarnation = member.incarnation
         record.n_evaluation = len(member.evaluations)
         record.n_contest = len(member.contests)
         record.n_victory = member.n_victory

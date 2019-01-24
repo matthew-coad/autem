@@ -34,9 +34,11 @@ Remove dead members at the end of a simulation step **done**
 
 Stop simulation if there aren't at least two members **done**
 
-## Create members
+## Create member "forms"
 
+Track member "forms" where each member configuration has a unique "form" **done**
 
+Report on the number of incarnations a member has had. **done**
 
 ## Breed members
 

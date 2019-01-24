@@ -11,11 +11,20 @@ class Member:
         self.simulation = simulation
         self.id = simulation.generate_id()
         self.configuration = SimpleNamespace()
+        self.form = None
         self.evaluations = []
         self.contests = []
+        self.incarnation = None
         self.n_victory = 0
         self.n_defeat = 0
         self.dead = False
+
+    """
+    Notify this member that it has incarnated
+    """
+    def incarnated(self, form):
+        self.form = form
+        self.incarnation = form.count
 
     def contested(self, result):
         """
