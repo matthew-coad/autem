@@ -73,23 +73,19 @@ class Learner(Component):
         y_pred = pipeline.predict(x_test)
         test_score = scorer.score(y_test, y_pred)
 
-        evaluation.learner_name = learner_name
         evaluation.test_score = test_score
 
     def record_member(self, member, record):
+
         if not self.is_active(member):
             return None
 
-        test_score = None
-        learner_name = None
+        record.learner_name = member.configuration.learner_name
+        record.test_score = None
 
-        test_scores = np.array([e.test_score for e in member.evaluations])
-        if len(member.evaluations) > 0:
-            test_score = test_scores.mean()
-            learner_name = member.evaluations[-1].learner_name
-        
-        record.test_score = test_score
-        record.learner_name = learner_name
+        if member.evaluations:
+            test_scores = np.array([e.test_score for e in member.evaluations])
+            record.test_score = test_scores.mean()
 
     def makeModel(self):
         raise NotImplementedError()

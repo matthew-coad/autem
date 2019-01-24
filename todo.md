@@ -40,6 +40,14 @@ Track member "forms" where each member configuration has a unique "form" **done*
 
 Report on the number of incarnations a member has had. **done**
 
+## Diversity of forms!
+
+If two members compete and they are identical, mark the contest as "Duplicate" **done**
+
+If the contest is "Duplicate" put the latter incarnation in the "Reincarnations" queue. **done**
+
+Report a member as dead if marked for reincarnation. **done**
+
 ## Breed members
 
 ## Mutate member

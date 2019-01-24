@@ -22,6 +22,7 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.members = []
         self.forms = {}
+        self.reincarnations = []
         self.reports = []
         self.contests = []
         self.n_steps = 0
@@ -90,6 +91,12 @@ class Simulation:
 
     def contest_members(self, contestant1, contestant2):
         contest = Outcome(self.n_steps, contestant1.id, contestant2.id)
+
+        if contestant1.form is contestant2.form:
+            # If the contestants have the same form mark that they are duplicated
+            contest.duplicated()
+            return contest
+
         for component in self.components:
             component.contest_members(contestant1, contestant2, contest)
         contestant1.contested(contest)
@@ -133,8 +140,9 @@ class Simulation:
         contestant1 = members[contestant_indexes[0]]
         contestant2 = members[contestant_indexes[1]]
 
-        # Have them contest.
         contest = self.contest_members(contestant1, contestant2)
+
+        # Have them contest.
 
         # If there was no contest then something is wrong
         if contest.is_uncontested():
@@ -145,15 +153,23 @@ class Simulation:
             self.evaluate_member(contestant1)
             self.evaluate_member(contestant2)
 
+        # If contest was fatal remove the loser
+        if contest.is_fatal():
+            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
+            loser.killed()
+            self.members.remove(loser)
+
+        # If contest was duplication then move the later incarnation into the reincarnation queue
+        if contest.is_duplicated():
+            duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
+            duplicate.killed()
+            self.members.remove(duplicate)
+            self.reincarnations.append(duplicate)
+
         # Report on what happened
         self.n_steps += 1
         self.reports.append(self.record_member(contestant1))
         self.reports.append(self.record_member(contestant2))
-
-        # If contest was fatal remove the loser
-        if contest.is_fatal():
-            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
-            self.members.remove(loser)
 
         if len(self.members) < 2:
             self.running = False

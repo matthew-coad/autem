@@ -8,11 +8,28 @@ import unittest
 
 class highest_id_wins(simulators.Component):
 
+    def outline_simulation(self, simulation, outline):
+        outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
+
+    def start_member(self, member):
+        member.configuration.test = member.id
+
     def contest_members(self, contestant1, contestant2, result):
         if contestant1.id > contestant2.id:
             result.decisive(1)
         else:
             result.decisive(2)
+
+class copy_mod_id_on_start(simulators.Component):
+
+    def __init__(self, max):
+        self.max = max
+
+    def outline_simulation(self, simulation, outline):
+        outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
+
+    def start_member(self, member):
+        member.configuration.test = member.id % self.max
 
 class simulation_step_fixture(unittest.TestCase):
 
@@ -57,6 +74,15 @@ class simulation_step_fixture(unittest.TestCase):
         self.assertEqual(simulation.reports[0].step, 1)
         self.assertTrue(simulation.reports[0].member_id in member_ids)
         self.assertTrue(simulation.reports[1].member_id in member_ids)
+
+    def test_reincarnations(self):
+        # If we can only have one reincarnation after one round one member must have been on the reincarnation queue
+        simulation = simulators.Simulation("Test", [copy_mod_id_on_start(1)], population_size=2)
+        simulation.start()
+        simulation.step()
+        self.assertEqual(len(simulation.members), 1)
+        self.assertEqual(len(simulation.reincarnations), 1)
+        self.assertTrue(simulation.reincarnations[-1].dead)
 
 if __name__ == '__main__':
     unittest.main()

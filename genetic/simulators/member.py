@@ -34,7 +34,11 @@ class Member:
             self.n_victory += 1
         if result.loser_id() == self.id:
             self.n_defeat += 1
-        if result.loser_id() == self.id and result.is_fatal():
-            self.dead = True
         self.contests.append(result)
+
+    def killed(self):
+        """
+        Notify this member that is has been killed
+        """
+        self.dead = True
 
