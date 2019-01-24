@@ -19,6 +19,18 @@ class Component:
         """
         pass
 
+    def copy_member(self, member, prior):
+        """
+        Start a member
+        """
+        pass
+
+    def mutate_member(self, member, prior):
+        """
+        Mutate a member
+        """
+        return False
+
     def evaluate_member(self, member, evaluation):
         """
         Perform a round of member evaluation

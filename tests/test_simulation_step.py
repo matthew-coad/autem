@@ -31,6 +31,12 @@ class copy_mod_id_on_start(simulators.Component):
     def start_member(self, member):
         member.configuration.test = member.id % self.max
 
+    def copy_member(self, member, prior):
+        member.configuration.test = prior.configuration.test
+
+    def mutate_member(self, member, prior):
+        member.configuration.test = self.max + 1
+
 class simulation_step_fixture(unittest.TestCase):
 
     def test_one_id_battle(self):
@@ -70,19 +76,34 @@ class simulation_step_fixture(unittest.TestCase):
         simulation.start()
         simulation.step()
         member_ids = [simulation.members[0].id, simulation.members[1].id]
-        self.assertTrue(len(simulation.reports) == 2)
-        self.assertEqual(simulation.reports[0].step, 1)
-        self.assertTrue(simulation.reports[0].member_id in member_ids)
-        self.assertTrue(simulation.reports[1].member_id in member_ids)
+        self.assertTrue(len(simulation.reports) == 4)
+        self.assertEqual(simulation.reports[2].step, 1)
+        self.assertTrue(simulation.reports[2].member_id in member_ids)
+        self.assertTrue(simulation.reports[3].member_id in member_ids)
 
-    def test_reincarnations(self):
+    def test_duplicated(self):
         # If we can only have one reincarnation after one round one member must have been on the reincarnation queue
         simulation = simulators.Simulation("Test", [copy_mod_id_on_start(1)], population_size=2)
         simulation.start()
+        simulation.stop()
         simulation.step()
         self.assertEqual(len(simulation.members), 1)
         self.assertEqual(len(simulation.reincarnations), 1)
         self.assertTrue(simulation.reincarnations[-1].dead)
+
+    def test_reincarnate(self):
+        # If we can only have one reincarnation after one round one member must have been on the reincarnation queue
+        simulation = simulators.Simulation("Test", [copy_mod_id_on_start(1)], population_size=2)
+        simulation.start()
+        simulation.stop()
+        simulation.step()
+
+        reincarnating = simulation.reincarnations[-1]
+        simulation.reincarnate_member(reincarnating)
+
+        self.assertEqual(len(simulation.members), 2)
+        self.assertEqual(len(simulation.reincarnations), 0)
+        self.assertNotEqual(simulation.members[-1].configuration.test, reincarnating.configuration.test)
 
 if __name__ == '__main__':
     unittest.main()

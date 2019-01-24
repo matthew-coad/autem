@@ -48,9 +48,17 @@ If the contest is "Duplicate" put the latter incarnation in the "Reincarnations"
 
 Report a member as dead if marked for reincarnation. **done**
 
-## Breed members
+## Evolution
+
+Add standardize transform **done**
 
 ## Mutate member
+
+Add reincarnation support **done**
+
+Report dead as an integer **done**
+
+Report reincarnation attempts **done**
 
 ## Kill member
 

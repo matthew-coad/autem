@@ -35,6 +35,16 @@ class Learner(Component):
         learner_index = random_state.randint(0, len(all_learners))
         member.configuration.learner_name = all_learners[learner_index]
 
+    def copy_member(self, member, prior):
+        configuration = member.configuration
+        if not hasattr(configuration, "learners"):
+            configuration.learners = SimpleNamespace()
+        setattr(configuration.learners, self.name, SimpleNamespace())
+        member.configuration.learner_name = prior.configuration.learner_name
+
+    def mutate_member(self, member, prior):
+        return False # Don't mutate the learner as it invalidates tuning parameters
+
     def make_model(self):
         return self.makeModel()
 
@@ -65,7 +75,11 @@ class Learner(Component):
         #    params = dict(p for p in pairs if not p[1] is None)
         #    model.set_params(**params)
 
-        steps = []
+        if hasattr(evaluation, "steps"):
+            steps = evaluation.steps
+        else:
+            steps = []
+
         steps.append((learner_name, model))
         pipeline = Pipeline(steps=steps)
 

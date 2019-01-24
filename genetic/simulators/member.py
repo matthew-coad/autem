@@ -14,10 +14,17 @@ class Member:
         self.form = None
         self.evaluations = []
         self.contests = []
-        self.incarnation = None
+        self.birth = 0
+        self.incarnation = 0
         self.n_victory = 0
         self.n_defeat = 0
-        self.dead = False
+        self.dead = 0
+
+    """
+    Notify this member that an attempt is being made to incarnate
+    """
+    def incarnating(self):
+        self.birth += 1
 
     """
     Notify this member that it has incarnated
@@ -25,6 +32,12 @@ class Member:
     def incarnated(self, form):
         self.form = form
         self.incarnation = form.count
+
+    """
+    Notify this member that it is considered "grown" to adult hood
+    """
+    def grown(self):
+        self.birth = 0
 
     def contested(self, result):
         """
@@ -40,5 +53,5 @@ class Member:
         """
         Notify this member that is has been killed
         """
-        self.dead = True
+        self.dead = 1
 

@@ -5,6 +5,7 @@ import genetic
 import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners as learners
+import genetic.transforms as transforms
 import genetic.loaders as loaders
 import genetic.reporters as reporters
 import genetic.contests as contests
@@ -27,6 +28,8 @@ def run_quick_spot_simulation():
             learners.KNeighborsRegressor(),
             learners.DecisionTreeRegressor(),
             learners.SVR(),
+
+            transforms.Standardise(),
 
             contests.BestLearner(),
             contests.Survival(),
