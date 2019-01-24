@@ -29,7 +29,7 @@ class BattleCompetition(Component):
         Run a match between two members.
         Returns the member postfix of the victor, 0 if the contest is a draw
         """
-        # Run battles in order until we get a result
+        # Run contests in order until we get a result
         for component in population.simulation.components:
             result = component.battleMembers(population, member1, member2)
             if result > 0:
@@ -70,7 +70,7 @@ class BattleCompetition(Component):
         random_state = population.simulation.random_state
 
         for member in alive:
-            member.evaluation.battles = 0
+            member.evaluation.contests = 0
             member.evaluation.hit_points = initial_hit_points
             member.evaluation.energy = initial_energy_points
             member.evaluation.passive = False
@@ -84,21 +84,21 @@ class BattleCompetition(Component):
                 # Members are identical! Set the contest result to No contest
                 contest_result = -1
 
-            # Energy, battles evaluation
+            # Energy, contests evaluation
             if contest_result == 1 or contest_result == 2:
                 # Someone won!
-                # Mark the battles and give both contestant a point of energy to keep them fighting.
+                # Mark the contests and give both contestant a point of energy to keep them fighting.
                 # Cos something interesting is happening
-                alive[contestant_indexes[0]].evaluation.battles += 1
-                alive[contestant_indexes[1]].evaluation.battles += 1
+                alive[contestant_indexes[0]].evaluation.contests += 1
+                alive[contestant_indexes[1]].evaluation.contests += 1
                 alive[contestant_indexes[0]].evaluation.energy += 1
                 alive[contestant_indexes[1]].evaluation.energy += 1
             elif contest_result == 0:
                 # Draw
-                # Mark the battles but remove a point of energy to exhaust the contestants
+                # Mark the contests but remove a point of energy to exhaust the contestants
                 # if no outcome can be decided
-                alive[contestant_indexes[0]].evaluation.battles += 1
-                alive[contestant_indexes[1]].evaluation.battles += 1
+                alive[contestant_indexes[0]].evaluation.contests += 1
+                alive[contestant_indexes[1]].evaluation.contests += 1
                 alive[contestant_indexes[0]].evaluation.energy -= 1
                 alive[contestant_indexes[1]].evaluation.energy -= 1
             else:
@@ -144,7 +144,7 @@ class BattleCompetition(Component):
             population.complete = len(alive) + len(exhausted) <= 1
 
     def reportMember(self, member, row):
-        row.n_battle_measure = member.evaluation.battles
+        row.n_contest_measure = member.evaluation.contests
         row.hp_measure = member.evaluation.hit_points
         row.energy_measure = member.evaluation.energy
         row.passive_measure = member.evaluation.passive

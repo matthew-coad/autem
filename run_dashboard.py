@@ -103,7 +103,7 @@ def layout_app():
                 graph_place("kpi_progress", "Kpi progress")
             ),
             content_col(
-                graph_place("placeholder", "Placeholder")
+                graph_place("progress", "Simulation Progress")
             ),
         )
     )
@@ -111,7 +111,6 @@ def layout_app():
 
 app.layout = layout_app
 
-# Member measure plot
 @app.callback(
     Output("kpi_progress", "figure"),
     [
@@ -137,6 +136,64 @@ def update_kpi_progress(simulation):
             name='score'
         ),
     ]
+    return {"data": data, "layout": graph_layout("step", "score")}
+
+@app.callback(
+    Output("progress", "figure"),
+    [
+        Input("simulation", "value"),
+    ],
+)
+def update_progress(simulation):
+    
+    if simulation is None:
+        layout = dict(annotations=[dict(text="No results available", showarrow=False)])
+        return {"data": [], "layout": layout}
+
+    report_manager = ReportManager(config.REPOSITORY_PATH)
+    simulation_info = report_manager.get_simulation(simulation)
+    df = report_manager.read_battle_report(simulation_info)
+
+    # Format results
+    data = [
+        go.Scatter(
+            x=df['step'],
+            y=df['n_evaluation'],
+            mode='markers',
+            name='Evaluations',
+            marker = dict(
+                size = 2,
+            ),
+        ),
+        go.Scatter(
+            x=df['step'],
+            y=df['n_contest'],
+            mode='markers',
+            name='contests',
+            marker = dict(
+                size = 2,
+            ),
+        ),
+        go.Scatter(
+            x=df['step'],
+            y=df['n_victory'],
+            mode='markers',
+            name='Victories',
+            marker = dict(
+                size = 2,
+            ),
+        ),
+        go.Scatter(
+            x=df['step'],
+            y=df['n_defeat'],
+            mode='markers',
+            name='Defeats',
+            marker = dict(
+                size = 2,
+            ),
+        )
+    ]
+
     return {"data": data, "layout": graph_layout("step", "score")}
 
 if __name__ == "__main__":

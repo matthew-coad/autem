@@ -8,7 +8,7 @@ import unittest
 
 class highest_id_wins(simulators.Component):
 
-    def battle_members(self, contestant1, contestant2, result):
+    def contest_members(self, contestant1, contestant2, result):
         if contestant1.id > contestant2.id:
             result.decisive(1)
         else:
@@ -23,8 +23,10 @@ class simulation_step_fixture(unittest.TestCase):
         simulation.step()
         self.assertEqual(simulation.members[0].n_victory, 0)
         self.assertEqual(simulation.members[0].n_defeat, 1)
+        self.assertEqual(len(simulation.members[0].contests), 1)
         self.assertEqual(simulation.members[1].n_victory, 1)
         self.assertEqual(simulation.members[1].n_defeat, 0)
+        self.assertEqual(len(simulation.members[1].contests), 1)
 
     def test_step_count(self):
         simulation = simulators.Simulation("Test", [highest_id_wins()], population_size=2)

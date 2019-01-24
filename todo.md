@@ -14,6 +14,22 @@
 
 + Add best learner battle **done**
 
++ Add battle results to members **done**
+
++ Report number of victories and defeats **done**
+
++ Add Report number of victories and defeats **done**
+
++ Report pvalue **done**
+
++ Evaluate action, breed, mutate or death
+
++ Breed new members
+
++ Mutate member
+
++ Kill member
+
 # Live visulazation of spotcheck
 
 # Setup test deck for 10 open mlr problems

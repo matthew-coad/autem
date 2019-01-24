@@ -1,4 +1,4 @@
-import tests.test_battle_result
+import tests.test_outcome
 import tests.test_generators
 import tests.test_learner
 import tests.test_loaders

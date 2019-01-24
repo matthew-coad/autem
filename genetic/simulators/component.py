@@ -25,13 +25,13 @@ class Component:
         """
         pass
 
-    def battle_members(self, member1, member2, result):
+    def contest_members(self, member1, member2, outcome):
         """
         Run a battle between two members
         """
         pass
 
-    def record_member(self, member, report):
+    def record_member(self, member, record):
         """
         Record the state of a member
         """

@@ -12,15 +12,22 @@ import genetic.contests as contests
 from tests.datasets import load_boston
 from tests.config import simulations_path
 
-def run_quick_knn_simulation():
+def run_quick_spot_simulation():
 
     x,y = load_boston()
     simulation = simulators.Simulation(
-        "quick_knn", 
+        "quick_spot", 
         [
             loaders.Data(x,y),
             scorers.NegativeRMSE(),
+
+            learners.LinearRegression(),
+            learners.Lasso(),
+            learners.ElasticNet(),
             learners.KNeighborsRegressor(),
+            learners.DecisionTreeRegressor(),
+            learners.SVR(),
+
             contests.BestLearner(),
             reporters.Path(simulations_path())
         ], 
@@ -29,11 +36,9 @@ def run_quick_knn_simulation():
     steps = 50
     for step in range(steps):
         simulation.step()
-    simulation.step()
     simulation.report()
 
     return simulation
 
 if __name__ == '__main__':
-    run_quick_knn_simulation()
-
+    run_quick_spot_simulation()

@@ -1,5 +1,5 @@
 from .member import Member
-from .battle_result import BattleOutcome, BattleResult
+from .outcome import OutcomeType, Outcome
 from .evaluation import Evaluation
 from .record import Record
 from .outline import Outline, Dataset, Role
@@ -42,6 +42,10 @@ class Simulation:
         outline = Outline()
         outline.append_attribute("step", Dataset.Battle, [Role.Dimension])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
+        outline.append_attribute("n_evaluation", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_victory", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_defeat", Dataset.Battle, [Role.Measure])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -70,10 +74,10 @@ class Simulation:
         member.evaluations.append(evaluation)
         return evaluation
 
-    def battle_members(self, contestant1, contestant2):
-        result = BattleResult(contestant1.id, contestant2.id)
+    def contest_members(self, contestant1, contestant2):
+        result = Outcome(contestant1.id, contestant2.id)
         for component in self.components:
-            component.battle_members(contestant1, contestant2, result)
+            component.contest_members(contestant1, contestant2, result)
         return result
 
     def record_member(self, member):
@@ -85,6 +89,11 @@ class Simulation:
         record = Record()
         record.step = step
         record.member_id = member_id
+        record.n_evaluation = len(member.evaluations)
+        record.n_contest = len(member.contests)
+        record.n_victory = member.n_victory
+        record.n_defeat = member.n_defeat
+
         for component in self.components:
             component.record_member(member, record)
         return record
@@ -103,40 +112,28 @@ class Simulation:
         contestant2 = members[contestant_indexes[1]]
 
         # Have them battle.
-        result = self.battle_members(contestant1, contestant2)
+        outcome = self.contest_members(contestant1, contestant2)
+        contestant1.contested(outcome)
+        contestant2.contested(outcome)
 
-        # Inconclusive. Not enough information to evaluate
-        if result.outcome == BattleOutcome.NoContest:
-            raise RuntimeError("No battle component provided")
-        elif result.outcome == BattleOutcome.Inconclusive:
+        # If there was no contest then something is wrong
+        if outcome.is_uncontested():
+            raise RuntimeError("No contest component defined")
+
+        # If we can't tell anything we need to do more evaluation
+        if outcome.is_inconclusive():
             self.evaluate_member(contestant1)
             self.evaluate_member(contestant2)
-        elif result.outcome == BattleOutcome.Indecisive:
-            report = True
-            contestant1.matched(result)
-            contestant2.matched(result)
-        elif result.outcome == BattleOutcome.Decisive:
-            report = True
-            contestant1.matched(result)
-            contestant2.matched(result)
-        else:
-            raise RuntimeError("Unexpected outcome")
 
-        # Perform tracking
+        # Report on what happened
         self.n_steps += 1
-        report = result.outcome == BattleOutcome.Inconclusive or result.outcome == BattleOutcome.Decisive
-        if report:
-            self.reports.append(self.record_member(contestant1))
-            self.reports.append(self.record_member(contestant2))
+        self.reports.append(self.record_member(contestant1))
+        self.reports.append(self.record_member(contestant2))
         
         # Member 1 Decisive Victory
         # Member 1 Indecisive Victory
         # Member 2 Decisive Victory
         # Member 2 Indecisive Victory
-
-        # If inconclusive run evaluation for both members
-
-        # If a victor allocate hitpoints. Looser, loose. Victor gain.
 
         # For each member compare their win loss ratio against the history of other members
         # If its significant consider killing/breeding

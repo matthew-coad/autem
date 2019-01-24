@@ -24,7 +24,7 @@ class HighestIdWinsBattle(genetic.Component):
     def battleMembers(self, population, member1, member2):
         return 1 if member1.id > member2.id else 2
 
-class battles_fixture(unittest.TestCase):
+class contests_fixture(unittest.TestCase):
 
     def test_final_count_ends_battle(self):
 

@@ -1,7 +1,7 @@
 from .components import Component
 from . import members
 from . import populations
-from . import battles
+from . import contests
 
 import numpy as np
 from sklearn.model_selection import train_test_split
