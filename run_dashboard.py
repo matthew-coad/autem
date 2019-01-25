@@ -133,7 +133,11 @@ def update_kpi_progress(simulation):
             x=df['step'],
             y=df['test_score'],
             mode='markers',
-            name='score'
+            name='score',
+            marker = dict(
+                size = 2,
+            ),
+
         ),
     ]
     return {"data": data, "layout": graph_layout("step", "score")}

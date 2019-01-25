@@ -2,5 +2,7 @@ __pycache__
 tests/simulations
 experiments/simulations
 problems/simulations
+benchmark/**/simulations
 experiments/**/simulations
+
 xx/xx_tests/simulations

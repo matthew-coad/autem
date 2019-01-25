@@ -48,7 +48,7 @@ If the contest is "Duplicate" put the latter incarnation in the "Reincarnations"
 
 Report a member as dead if marked for reincarnation. **done**
 
-## Evolution
+# Evolution
 
 Add standardize transform **done**
 
@@ -60,9 +60,19 @@ Report dead as an integer **done**
 
 Report reincarnation attempts **done**
 
-## Kill member
+# Add benchmark suit
 
-# Live visulazation of spotcheck
+Downloaded openml **done**
 
-# Setup test deck for 10 open mlr problems
+Create openml query to select target datasets **done**
+
+Create benchmark test suite for classification problems **done**
+
+# Benchmarking problems
+
+Find why some benchmarks are failing. Investigate some error handling.
+
+Determine target scores.
+
+# Live visualization of spotchecking
 

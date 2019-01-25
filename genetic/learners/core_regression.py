@@ -35,10 +35,8 @@ class ElasticNet(Learner):
 class KNeighborsRegressor(Learner):
 
     def __init__(self):
-        choices = [3,5,7,9,11,13,15,21,25,31,41,51]
-        Learner.__init__(self, "KNN-R", "K-Neighbors", [
-            ChoiceTuneParameter("n_neighbors", "n_neighbors_dim", choices)
-        ])
+        # choices = [3,5,7,9,11,13,15,21,25,31,41,51]
+        Learner.__init__(self, "KNR", "K-Neighbors Regression", [])
 
     def makeModel(self):
         return KNeighborsRegressorModel()
