@@ -96,8 +96,8 @@ class Learner(Component):
 
         record.learner_name = member.configuration.learner_name
         record.test_score = None
-
-        if member.evaluations:
+        
+        if member.evaluations and record.n_errors == 0:
             test_scores = np.array([e.test_score for e in member.evaluations])
             record.test_score = test_scores.mean()
 

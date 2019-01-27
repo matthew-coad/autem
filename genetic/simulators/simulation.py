@@ -107,6 +107,7 @@ class Simulation:
         outline.append_attribute("death", Dataset.Battle, [Role.Property])
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
         outline.append_attribute("n_evaluation", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_errors", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_victory", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_defeat", Dataset.Battle, [Role.Measure])
@@ -138,7 +139,12 @@ class Simulation:
         member_id = member.id
         evaluation = Evaluation(member_id)
         for component in self.components:
-            component.evaluate_member(member, evaluation)
+            try:
+                component.evaluate_member(member, evaluation)
+            except Exception as ex:
+                evaluation.failed(ex)
+                break
+
         member.evaluations.append(evaluation)
         return evaluation
 
@@ -173,6 +179,7 @@ class Simulation:
 
         record.incarnation = member.incarnation
         record.n_evaluation = len(member.evaluations)
+        record.n_errors = sum(e.errors for e in member.evaluations)
         record.n_contest = len(member.contests)
         record.n_victory = member.n_victory
         record.n_defeat = member.n_defeat
@@ -214,8 +221,18 @@ class Simulation:
 
         # If we can't tell anything we need to do more evaluation
         if contest.is_inconclusive():
-            self.evaluate_member(contestant1)
-            self.evaluate_member(contestant2)
+            evaluation1 = self.evaluate_member(contestant1)
+            evaluation2 = self.evaluate_member(contestant2)
+
+            # Kill contestants immediately for an error was generated during evaluation
+            # They are no use to us
+            if evaluation1.errors > 0:
+                contestant1.killed()
+                self.members.remove(contestant1)
+
+            if evaluation2.errors > 0:
+                contestant2.killed()
+                self.members.remove(contestant2)
 
         # If contest was fatal remove the loser
         if contest.is_fatal():

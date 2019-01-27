@@ -70,9 +70,23 @@ Create benchmark test suite for classification problems **done**
 
 # Benchmarking problems
 
-Find why some benchmarks are failing. Investigate some error handling.
+Find why some benchmarks are failing.
 
 Determine target scores.
+
+# Command line
+
+Print progress reports
+
+# Error handling
+
+Have a fit terminate on any warning. **done**
+
+Errors have priority over model fitness
+
+Have fit report errors
+
+Have evaluation errors as a standard feature and add to meta.
 
 # Live visualization of spotchecking
 

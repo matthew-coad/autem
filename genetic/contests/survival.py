@@ -3,7 +3,7 @@ from .contester import Contester
 
 import numpy as np
 from scipy import stats
-
+ 
 class Survival(Contester):
     """
     After a contest check who lives and who dies.
@@ -40,29 +40,31 @@ class Survival(Contester):
         # Get all conclusive contests from current members where the member was contestant1.
         # We restrict it to contestant1 to stop contests being counted twice
         simulation = contestant1.simulation
-        all_contests = [ c for m in simulation.members for c in m.contests if m.id == c.member1_id and c.is_conclusive() ]
-        all_contests_victories = [ int(c.victor == 1) for c in all_contests]
-
         loser = contestant2 if outcome.victor == 1 else contestant1
         loser_contests = [ c for c in loser.contests if c.is_conclusive()]
-        loser_victories = [ int(c.victor_id() == loser.id) for c in loser_contests]
+        n_loser_contests = len(loser_contests)
 
-        # Must have at least 3 contests each to make a comparison
-        if len(all_contests) < 3 or len(loser_contests) < 3:
+        if n_loser_contests < 3:
             return None
 
-        # Run the t-test
-        test_result = stats.ttest_ind(loser_victories, all_contests_victories)
-        outcome.fitness = test_result[0] # positive if 1 > 2
-        outcome.fitness_p = test_result[1]
+        n_loser_victories = sum([ int(c.victor_id() == loser.id) for c in loser_contests])
+
+        all_contests = [ c for m in simulation.members for c in m.contests if m.id == c.member1_id and c.is_conclusive() and c.member1_id != loser.id and c.member2_id != loser.id ]
+        n_all_contests = len(all_contests)
+        if n_all_contests < 3:
+            return None
+
+        n_all_contests_victories = sum([ int(c.victor == 1) for c in all_contests])
+        all_p = n_all_contests_victories / n_all_contests
+
+        test_result = stats.binom_test(n_loser_victories, n=n_loser_contests, p=all_p, alternative='less')
+        outcome.fitness_p = test_result
         required_p_value = self.p_value
 
         # Need at least the required p-value to have an outcome
         if outcome.fitness_p > required_p_value:
             return None
-
-        if outcome.fitness < 0:
-            outcome.fatal()
+        outcome.fatal()
 
     def record_member(self, member, record):
         """

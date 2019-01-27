@@ -42,7 +42,12 @@ class BestLearner(Contester):
             return None
 
         # Run the t-test
-        test_result = stats.ttest_ind(member1_scores, member2_scores)
+        try:
+            test_result = stats.ttest_ind(member1_scores, member2_scores)
+        except:
+            outcome.inconclusive()
+            return None
+
         outcome.t_statistic = test_result[0] # positive if 1 > 2
         outcome.p_value = test_result[1]
 

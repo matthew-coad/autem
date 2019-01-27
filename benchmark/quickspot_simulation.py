@@ -14,6 +14,7 @@ import genetic.contests as contests
 import openml
 import os
 from pathlib import Path
+import warnings
 
 def data_path():
     return Path("benchmark/data")
@@ -55,9 +56,13 @@ def run_quick_spot_simulation(bid):
     for index in range(10):
         simulation.run(100)
         simulation.report()
+        if not simulation.running:
+            break
     return simulation
 
 if __name__ == '__main__':
+    warnings.filterwarnings('error')
+
     dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
     for did in dids:
         run_quick_spot_simulation(did)

@@ -54,5 +54,4 @@ class SVC(Learner):
         Learner.__init__(self, "SVC", "SVM Classifier", [])
 
     def make_model(self):
-        return SVCModel()
-
+        return SVCModel(gamma='auto')
