@@ -21,8 +21,8 @@ class BestLearner(Contester):
         """
         Outline what information is going to be supplied by a simulation
         """
-        outline.append_attribute("t_statistic", Dataset.Battle, [Role.Measure], "t-statistic")
-        outline.append_attribute("p_value", Dataset.Battle, [Role.Measure], "p value")
+        outline.append_attribute("contest_t", Dataset.Battle, [Role.Measure], "contest t-statistic")
+        outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -52,7 +52,7 @@ class BestLearner(Contester):
         outcome.t_statistic = test_result[0] # positive if 1 > 2
         outcome.p_value = test_result[1]
 
-        # Need at least the required p-value to have am outcome
+        # Need at least the required p-value to have an outcome
         if outcome.p_value > required_p_value:
             outcome.inconclusive()
             return None
@@ -68,5 +68,5 @@ class BestLearner(Contester):
         Record the state of a member
         """
         outcome = member.contests[-1] if member.contests else None
-        record.t_statistic = outcome.t_statistic if outcome else None
-        record.p_value = outcome.p_value if outcome else None
+        record.contest_t = outcome.t_statistic if outcome else None
+        record.contest_p = outcome.p_value if outcome else None

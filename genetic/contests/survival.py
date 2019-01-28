@@ -23,14 +23,12 @@ class Survival(Contester):
         """
         # Supply a "fitness" rating.
         # Members with a low fitness will get killed
-        outline.append_attribute("fitness", Dataset.Battle, [Role.Measure], "fitness")
-        outline.append_attribute("fitness_p", Dataset.Battle, [Role.Measure], "fitness_p")
+        outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
         # Make sure we define these extension values
-        outcome.fitness = None
-        outcome.fitness_p = None
+        outcome.survive_p = None
 
         if outcome.is_uncontested():
             return None
@@ -50,7 +48,7 @@ class Survival(Contester):
 
         n_loser_victories = sum([ int(c.victor_id() == loser.id) for c in loser_contests])
 
-        all_contests = [ c for m in simulation.members for c in m.contests if m.id == c.member1_id and c.is_conclusive() and c.member1_id != loser.id and c.member2_id != loser.id ]
+        all_contests = [ c for m in simulation.members for c in m.contests if m.id == c.member1_id and c.is_conclusive()]
         n_all_contests = len(all_contests)
         if n_all_contests < 3:
             return None
@@ -59,11 +57,11 @@ class Survival(Contester):
         all_p = n_all_contests_victories / n_all_contests
 
         test_result = stats.binom_test(n_loser_victories, n=n_loser_contests, p=all_p, alternative='less')
-        outcome.fitness_p = test_result
+        outcome.survive_p = test_result
         required_p_value = self.p_value
 
         # Need at least the required p-value to have an outcome
-        if outcome.fitness_p > required_p_value:
+        if outcome.survive_p > required_p_value:
             return None
         outcome.fatal()
 
@@ -72,5 +70,4 @@ class Survival(Contester):
         Record the state of a member
         """
         outcome = member.contests[-1] if member.contests else None
-        record.fitness = outcome.fitness if outcome and outcome.loser_id() == member.id else None
-        record.fitness_p = outcome.fitness_p if outcome and outcome.loser_id() == member.id else None
+        record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None

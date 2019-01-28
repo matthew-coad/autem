@@ -222,8 +222,9 @@ class Simulation:
         record.n_victory = member.n_victory
         record.n_defeat = member.n_defeat
 
-        for component in self.components:
-            component.record_member(member, record)
+        if record.n_errors == 0:
+            for component in self.components:
+                component.record_member(member, record)
         return record
 
     def should_repopulate(self):

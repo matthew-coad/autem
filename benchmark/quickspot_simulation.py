@@ -45,8 +45,6 @@ def run_quick_spot_simulation(bid):
             learners.GaussianNB(), 
             learners.SVC(),
 
-            transforms.Standardise(),
-
             contests.BestLearner(),
             contests.Survival(),
             reporters.Path(simulations_path())
@@ -61,8 +59,6 @@ def run_quick_spot_simulation(bid):
     return simulation
 
 if __name__ == '__main__':
-    warnings.filterwarnings('error')
-
     dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
     for did in dids:
         run_quick_spot_simulation(did)
