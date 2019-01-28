@@ -5,6 +5,7 @@ import config
 import genetic
 import genetic.simulators as simulators
 import genetic.scorers as scorers
+import genetic.selectors.classification as selectors
 import genetic.learners.classification as learners
 import genetic.transforms as transforms
 import genetic.loaders as loaders
@@ -30,7 +31,7 @@ def run_quick_spot_simulation(bid):
     prepare_OpenML()
     dataset = openml.datasets.get_dataset(bid)
     x, y, attribute_names = dataset.get_data(target=dataset.default_target_attribute, return_attribute_names=True,)
-    simulation_name = "%s_spot" % (dataset.name)
+    simulation_name = "%s_select" % (dataset.name)
 
     simulation = simulators.Simulation(
         simulation_name, 
@@ -44,6 +45,8 @@ def run_quick_spot_simulation(bid):
             learners.DecisionTreeClassifier(), 
             learners.GaussianNB(), 
             learners.SVC(),
+
+            selectors.SelectPercentile(),
 
             contests.BestLearner(),
             contests.Survival(),
@@ -60,5 +63,6 @@ def run_quick_spot_simulation(bid):
 
 if __name__ == '__main__':
     dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
+    dids = [11]
     for did in dids:
         run_quick_spot_simulation(did)
