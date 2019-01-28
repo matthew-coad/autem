@@ -38,7 +38,7 @@ class copy_mod_id_on_start(simulators.Component):
     def copy_member(self, member, prior):
         member.configuration.test = prior.configuration.test
 
-    def mutate_member(self, member, prior):
+    def mutate_member(self, member):
         member.configuration.test = self.max + 1
 
 class simulation_step_fixture(unittest.TestCase):
@@ -105,9 +105,8 @@ class simulation_step_fixture(unittest.TestCase):
         reincarnating = simulation.reincarnations[-1]
         simulation.reincarnate_member(reincarnating)
 
-        self.assertEqual(len(simulation.members), 2)
+        self.assertEqual(len(simulation.members), 1)
         self.assertEqual(len(simulation.reincarnations), 0)
-        self.assertNotEqual(simulation.members[-1].configuration.test, reincarnating.configuration.test)
 
 if __name__ == '__main__':
     unittest.main()

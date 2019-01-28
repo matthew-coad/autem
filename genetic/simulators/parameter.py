@@ -59,9 +59,11 @@ class Parameter:
         return False
 
     def crossover_member(self, component, member, parent0, parent1):
+        random_state = member.simulation.random_state
         parent_index = random_state.randint(0, 2)
         parent = parent0 if parent_index == 0 else parent1
-        self.set_value(component, member, self.get_value(component, parent))
+        value = self.get_value(component, parent)
+        self.set_value(component, member, value)
 
     def record_member(self, component, member, record):
         setattr(record, self.get_record_name(component), self.get_value(component, member))

@@ -95,7 +95,11 @@ Report evaluation errors
 
 # Feature selection
 
-Add selectPercentile component.
+Add selectPercentile component. **done**
+
+Implement cross over components **done**
+
+Implement cross over in simulation **done**
 
 Add breeding support
 

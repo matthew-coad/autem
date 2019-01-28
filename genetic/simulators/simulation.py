@@ -79,6 +79,15 @@ class Simulation:
             component.copy_member(member, prior)
         return member
 
+    def make_member_crossover(self, parent1, parent2):
+        """
+        Create a member that is a cross over of two parents
+        """
+        member = Member(self)
+        for component in self.components:
+            component.crossover_member(member, parent1, parent2)
+        return member
+
     def mutate_member(self, member):
         """
         Mutate a member, making a guaranteed modification to its configuration
@@ -97,6 +106,14 @@ class Simulation:
                     raise RuntimeError("Configuration was not mutated as requested")
                 return True
         return False
+
+    def crossover_member(self, parent1, parent2, max_incarnations = 5):
+        """
+        Cross over 2 members
+        """
+        member = self.make_member_crossover(parent1, parent2)
+        self.incarnate_member(member)
+        return member
 
     def reincarnate_member(self, prior):
         """

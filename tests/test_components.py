@@ -31,8 +31,8 @@ class ComponentD(simulators.Component):
     """
     def __init__(self, name):
         simulators.Component.__init__(self, name, "_groupD", [
-            simulators.ChoicesParameter("parameterA", [ "Test"], "parameter A", [1,2,3], None),
-            simulators.ChoicesParameter("parameterB", [ "Test"], "parameter B", [1,2,3], 3),
+            simulators.ChoicesParameter("parameterA", ["Test"], "parameter A", [1,2,3], None),
+            simulators.ChoicesParameter("parameterB", ["Test"], "parameter B", [1,2,3], 3),
          ])
 
 class components_fixture(unittest.TestCase):
@@ -214,6 +214,90 @@ class components_fixture(unittest.TestCase):
         copies = [ simulation.make_member_copy(m) for m in simulation.members ]
         for c in copies:
             simulation.mutate_member(c)
+
+    def test_component_crossover(self):
+        componentC = ComponentC("componentC")
+        componentC2 = ComponentC("componentC2")
+        simulation = simulators.Simulation("Test", [componentC, componentC2], population_size=100)
+        simulation.start()
+        random_state = simulation.random_state
+        members = simulation.members
+        member1_indexes = random_state.choice(100, size=50, replace=False)
+        member2_indexes = random_state.choice(100, size=50, replace=False)
+        parent_indexes = list(zip(member1_indexes, member2_indexes))
+
+        def pa_value(member):
+            return member.configuration.componentC.parameterA
+        def pb_value(member):
+            return member.configuration.componentC.parameterB
+
+        def p2a_value(member):
+            return member.configuration.componentC2.parameterA
+
+        def get_parent_match(index):
+            member1 = members[parent_indexes[index][0]]
+            member2 = members[parent_indexes[index][1]]
+            member1_b = p2a_value(member1)
+            member2_b = p2a_value(member2)
+            child = simulation.make_member_crossover(member1, member2)
+            child_b = p2a_value(child)
+            if member1_b == member2_b:
+                return 0
+            elif child_b == member1_b:
+                return 1
+            elif child_b == member2_b:
+                return 2
+            else:
+                return -1
+
+        parent_matches = [ get_parent_match(i) for i in range(50) ]
+        self.assertFalse(any([ i == -1 for i in parent_matches] ))
+        self.assertTrue(any([ i == 1 for i in parent_matches] ))
+        self.assertTrue(any([ i == 2 for i in parent_matches] ))
+
+    def test_component_group_crossover(self):
+        componentD1 = ComponentD("componentD1")
+        componentD2 = ComponentD("componentD2")
+        simulation = simulators.Simulation("Test", [componentD1, componentD2], population_size=100)
+        simulation.start()
+
+        random_state = simulation.random_state
+        members = simulation.members
+        member1_indexes = random_state.choice(100, size=50, replace=False)
+        member2_indexes = random_state.choice(100, size=50, replace=False)
+        parent_indexes = list(zip(member1_indexes, member2_indexes))
+
+        def pd1a_value(member):
+            return member.configuration.componentD1.parameterA
+        def pda2_value(member):
+            return member.configuration.componentD2.parameterA
+        def pda_value(member):
+            if member.configuration._groupD.active == "componentD1":
+                return pd1a_value(member)
+            else:
+                return pda2_value(member)
+
+        def get_parent_match(index):
+            member1 = members[parent_indexes[index][0]]
+            member2 = members[parent_indexes[index][1]]
+            member1_v = pda_value(member1)
+            member2_v = pda_value(member2)
+            child = simulation.make_member_crossover(member1, member2)
+            child_v = pda_value(child)
+            if member1_v == member2_v:
+                return 0
+            elif child_v == member1_v:
+                return 1
+            elif child_v == member2_v:
+                return 2
+            else:
+                return -1
+
+        parent_matches = [ get_parent_match(i) for i in range(50) ]
+        self.assertFalse(any([ i == -1 for i in parent_matches] ))
+        self.assertTrue(any([ i == 1 for i in parent_matches] ))
+        self.assertTrue(any([ i == 2 for i in parent_matches] ))
+
 
 if __name__ == '__main__':
     try:

@@ -84,7 +84,7 @@ class Component:
 
     def copy_group(self, member, prior):
         """
-        Copy group configurastion
+        Copy group configuration
         """
         if hasattr(member.configuration, self.group_name):
             return None
@@ -126,11 +126,42 @@ class Component:
         return False
 
     def crossover_member(self, member, parent0, parent1):
-        raise NotImplementedError()
-        #if not self.is_active(member):
-        #    return None
-        #for parameter in self.parameters:
-        #    parameter.crossover_member(self, member, parent0, parent1)
+        random_state = member.simulation.random_state
+
+        # If we are in group mode and this is the first group
+        # pick one of the parents to base my group and vcopy it
+        if not self.group_name is None and not hasattr(member.configuration, self.group_name):
+            parent0_group = self.get_group(parent0)
+            parent1_group = self.get_group(parent1)
+            parent_index = random_state.randint(0,2)
+            parent_group = parent0_group if parent_index == 0 else parent1_group
+            group = Group()
+            group.active = parent_group.active
+            group.components = parent_group.components[:]
+            setattr(member.configuration, self.group_name, group)
+        else:
+            group = self.get_group(member)
+
+        if not group is None and group.active == self.name:
+            # We are crossing over the selected component in group mode
+            setattr(member.configuration, self.name, SimpleNamespace())
+            parent0_group = self.get_group(parent0)
+            parent1_group = self.get_group(parent1)
+            if parent0_group.active == parent1_group.active:
+                # Parents have the same component
+                # Do a parameter wise copy
+                for parameter in self.parameters:
+                    parameter.crossover_member(self, member, parent0, parent1)
+            else:
+                # Parents don't match
+                # Do a copy of the selected parent
+                parent = parent0 if parent0_group.active == group.active else parent1
+                for parameter in self.parameters:
+                    parameter.copy_member(self, member, parent)
+        elif group is None:
+            setattr(member.configuration, self.name, SimpleNamespace())
+            for parameter in self.parameters:
+                parameter.crossover_member(self, member, parent0, parent1)
 
     def evaluate_member(self, member, evaluation):
         """
