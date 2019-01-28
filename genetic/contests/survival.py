@@ -14,6 +14,7 @@ class Survival(Contester):
         """
         P value used to determine if the survival history is significanly different from the general populations
         """
+        Contester.__init__(self, "BestLearner")
         self.p_value = p_value
 
     def outline_simulation(self, simulation, outline):

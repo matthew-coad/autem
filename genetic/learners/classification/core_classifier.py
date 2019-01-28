@@ -1,5 +1,4 @@
 from ..learner import Learner
-from ..parameter import Parameter
 
 from sklearn.linear_model import LogisticRegression as LogisticRegressionModel
 from sklearn.tree import DecisionTreeClassifier as DecisionTreeClassifierModel

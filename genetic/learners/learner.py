@@ -1,5 +1,4 @@
-from ..simulators import Component, Evaluation, Dataset, Role
-from .parameter import Parameter
+from ..simulators import Parameter, Component, Evaluation, Dataset, Role
 
 from types import SimpleNamespace
 
@@ -13,47 +12,22 @@ from scipy import stats
 class Learner(Component):
 
     def __init__(self, name, label, parameters):
-        self.name = name
+        Component.__init__(self, name, "learner", parameters)
         self.label = label
-        self.parameters = parameters
 
     def outline_simulation(self, simulation, outline):
         """
         Outline what information is going to be supplied by a simulation
         """
+        super().outline_simulation(simulation, outline)
         if not outline.has_attribute("test_score", Dataset.Battle):
-            outline.append_attribute("learner_name", Dataset.Battle, [ Role.Dimension ], "model")
             outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
 
-    def start_member(self, member):
-        configuration = member.configuration
-        if not hasattr(configuration, "learners"):
-            configuration.learners = SimpleNamespace()
-        setattr(configuration.learners, self.name, SimpleNamespace())
-        all_learners = list(member.configuration.learners.__dict__)
-        random_state = member.simulation.random_state
-        learner_index = random_state.randint(0, len(all_learners))
-        member.configuration.learner_name = all_learners[learner_index]
-
-    def copy_member(self, member, prior):
-        configuration = member.configuration
-        if not hasattr(configuration, "learners"):
-            configuration.learners = SimpleNamespace()
-        setattr(configuration.learners, self.name, SimpleNamespace())
-        member.configuration.learner_name = prior.configuration.learner_name
-
-    def mutate_member(self, member, prior):
-        return False # Don't mutate the learner as it invalidates tuning parameters
-
     def make_model(self):
-        return self.makeModel()
-
-    def is_active(self, member):
-        learner_name = member.configuration.learner_name
-        active = learner_name == self.name
-        return active
+        raise NotImplementedError()
 
     def evaluate_member(self, member, evaluation):
+        super().evaluate_member(member, evaluation)
         if not self.is_active(member):
             return None
 
@@ -90,16 +64,13 @@ class Learner(Component):
         evaluation.test_score = test_score
 
     def record_member(self, member, record):
+        super().record_member(member, record)
 
         if not self.is_active(member):
             return None
 
-        record.learner_name = member.configuration.learner_name
         record.test_score = None
-        
-        if member.evaluations and record.n_errors == 0:
+        if member.evaluations:
             test_scores = np.array([e.test_score for e in member.evaluations])
             record.test_score = test_scores.mean()
 
-    def makeModel(self):
-        raise NotImplementedError()

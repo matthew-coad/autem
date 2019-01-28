@@ -2,7 +2,9 @@ from .member import Member
 from .outcome import OutcomeType, Outcome
 from .evaluation import Evaluation
 from .record import Record
-from .outline import Outline, Dataset, Role
+from .dataset import Dataset
+from .role import Role
+from .outline import Outline
 from .form import Form
 
 from types import SimpleNamespace
@@ -34,10 +36,21 @@ class Simulation:
         self.next_id += 1
         return id
 
-    def start_member(self):
+    def make_member(self):
+        """
+        Create a brand new member
+        """
         member = Member(self)
         for component in self.components:
             component.start_member(member)
+        return member
+
+    def incarnate_member(self, member):
+        """
+        Given a member that is not currently incarnated, incarnate it
+        """
+        if not member.form is None:
+            raise RuntimeError("Member has already been incarnated")
         form = Form(member)
         form_key = form.get_key()
         if form_key in self.forms:
@@ -49,14 +62,48 @@ class Simulation:
         member.incarnated(form)
         self.members.append(member)
 
+    def start_member(self):
+        """
+        Start a new member
+        """
+        member = self.make_member()
+        self.incarnate_member(member)
+        return member
+
+    def make_member_copy(self, prior):
+        """
+        Create a member thats configured as a copy of another
+        """
+        member = Member(self)
+        for component in self.components:
+            component.copy_member(member, prior)
+        return member
+
+    def mutate_member(self, member):
+        """
+        Mutate a member, making a guaranteed modification to its configuration
+        """
+        random_state = self.random_state
+        components = self.components
+        n_components = len(components)
+        # Try each component in a random order until a component claims to have mutated the state
+        prior_repr = repr(member.configuration)
+        component_indexes = random_state.choice(n_components, size=n_components, replace=False)
+        for component_index in component_indexes:
+            component = components[component_index]
+            mutated = component.mutate_member(member)
+            if mutated:
+                if repr(member.configuration) == prior_repr:
+                    raise RuntimeError("Configuration was not mutated as requested")
+                return True
+        return False
+
     def reincarnate_member(self, prior):
         """
         Reincarnate a prior member. 
         Reincarnate reintroduces a member with variations in configuration
         """
-        member = Member(self)
-        for component in self.components:
-            component.copy_member(member, prior)
+        member = self.make_member_copy(prior)
 
         # Config should be the same
         if repr(member.configuration) != repr(prior.configuration):
@@ -68,28 +115,19 @@ class Simulation:
         random_state = self.random_state
         reincarnated = False
         while not reincarnated:
-            component_index = random_state.randint(0, len(self.components))
-            component = self.components[component_index]
-            mutated = component.mutate_member(member, prior)
-            if mutated != False:
-                member.incarnating()
-                if member.birth > max_attempts:
-                    break
-                form_key = repr(member.configuration)
-                reincarnated = not form_key in self.forms
-            else:
-                find_attempts += 1
-                if find_attempts > max_attempts and member.birth == 0:
-                    raise NotImplementedError("Could not find mutation component")
+            member.incarnating()
+            mutated = self.mutate_member(member)
+            if not mutated:
+                break
+            if member.birth > max_attempts:
+                break
+            form_key = repr(member.configuration)
+            reincarnated = not form_key in self.forms
 
         if reincarnated:
             # Complete the reincarnation
-            form = Form(member)
-            self.forms[form_key] = form
-            form.count += 1
-            self.members.append(member)
+            self.incarnate_member(member)
             self.reincarnations.remove(prior)
-            member.incarnated(form)
         else:
             # Reincarnation failed!
             self.reincarnations.remove(prior)

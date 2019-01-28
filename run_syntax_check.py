@@ -6,3 +6,4 @@ import tests.test_member
 import tests.test_report
 import tests.test_simulation_startup
 import tests.test_simulation_step
+import tests.test_components

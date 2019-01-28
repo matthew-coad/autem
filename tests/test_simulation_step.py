@@ -8,6 +8,9 @@ import unittest
 
 class highest_id_wins(simulators.Component):
 
+    def __init__(self):
+        simulators.Component.__init__(self, "highest_id_wins")
+
     def outline_simulation(self, simulation, outline):
         outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
@@ -23,6 +26,7 @@ class highest_id_wins(simulators.Component):
 class copy_mod_id_on_start(simulators.Component):
 
     def __init__(self, max):
+        simulators.Component.__init__(self, "copy_mod_id_on_start")
         self.max = max
 
     def outline_simulation(self, simulation, outline):

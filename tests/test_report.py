@@ -10,6 +10,7 @@ import genetic.reporters.utility as utility
 class ReportMemory(reporters.Reporter):
 
     def __init__(self):
+        reporters.Reporter.__init__(self, "report_member")
         self.step = None
         self.report = None
 
@@ -24,6 +25,9 @@ class ReportMemory(reporters.Reporter):
         self.report = frame
 
 class highest_id_wins(simulators.Component):
+
+    def __init__(self):
+        simulators.Component.__init__(self, "highest_id_wins")
 
     def start_member(self, member):
         member.configuration.test = member.id

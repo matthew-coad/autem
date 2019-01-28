@@ -9,6 +9,12 @@ import genetic.reporters as reporters
 
 class highest_id_wins(simulators.Component):
 
+    def __init__(self):
+        simulators.Component.__init__(self, "highest_id_wins")
+
+    def start_member(self, member):
+        member.configuration.id = member.id
+
     def contest_members(self, contestant1, contestant2, result):
         if contestant1.id > contestant2.id:
             result.decisive(1)

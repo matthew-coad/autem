@@ -72,6 +72,9 @@ Create benchmark test suite for classification problems **done**
 
 Find why some benchmarks are failing.
 
+*Because some datasets cause problems/warnings for some algorithms. But in general if an algorithm has issues we don't
+care for it, so we now kill any member that has issues. Something else will pick it up.*
+
 Determine target scores.
 
 # Command line
@@ -82,11 +85,22 @@ Print progress reports
 
 Have a fit terminate on any warning. **done**
 
-Errors have priority over model fitness
+Errors kill members immediately. **done**
 
-Have fit report errors
+Have fit report errors **done**
 
-Have evaluation errors as a standard feature and add to meta.
+Have evaluation errors as a standard feature and add to meta. **done**
+
+Report evaluation errors
+
+# Feature selection
+
+Add selectPercentile component.
+
+Add breeding support
+
+Assess accuracy change across benchmark. Add ability to record final accuracy scores. Automatically record them after each
+run. Make them a minimum of information to preserve backwards compatibility over time.
 
 # Live visualization of spotchecking
 

@@ -1,5 +1,4 @@
-from .learner import Learner
-from .parameter import Parameter, ChoiceTuneParameter
+from ..learner import Learner
 
 from sklearn.linear_model import LinearRegression as LinearRegressionModel
 from sklearn.linear_model import Lasso as LassoModel
@@ -13,7 +12,7 @@ class LinearRegression(Learner):
     def __init__(self):
         Learner.__init__(self, "LR", "Linear Regression", [])
 
-    def makeModel(self):
+    def make_model(self):
         return LinearRegressionModel()
 
 class Lasso(Learner):
@@ -21,7 +20,7 @@ class Lasso(Learner):
     def __init__(self):
         Learner.__init__(self, "LASSO", "Lasso", [])
 
-    def makeModel(self):
+    def make_model(self):
         return LassoModel()
 
 class ElasticNet(Learner):
@@ -29,7 +28,7 @@ class ElasticNet(Learner):
     def __init__(self):
         Learner.__init__(self, "EN", "Elastic Net", [])
 
-    def makeModel(self):
+    def make_model(self):
         return ElasticNetModel()
 
 class KNeighborsRegressor(Learner):
@@ -38,7 +37,7 @@ class KNeighborsRegressor(Learner):
         # choices = [3,5,7,9,11,13,15,21,25,31,41,51]
         Learner.__init__(self, "KNR", "K-Neighbors Regression", [])
 
-    def makeModel(self):
+    def make_model(self):
         return KNeighborsRegressorModel()
 
 class DecisionTreeRegressor(Learner):
@@ -46,7 +45,7 @@ class DecisionTreeRegressor(Learner):
     def __init__(self):
         Learner.__init__(self, "CART", "Decision Tree", [])
 
-    def makeModel(self):
+    def make_model(self):
         return DecisionTreeRegressorModel()
 
 class SVR(Learner):
@@ -54,5 +53,5 @@ class SVR(Learner):
     def __init__(self):
         Learner.__init__(self, "SVR", "Support Vector Machine", [])
 
-    def makeModel(self):
+    def make_model(self):
         return SVRModel(gamma='auto')

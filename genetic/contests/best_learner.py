@@ -14,6 +14,7 @@ class BestLearner(Contester):
         """
         P value used to determine if the scores are significantly different
         """
+        Contester.__init__(self, "BestLearner")
         self.p_value = p_value
 
     def outline_simulation(self, simulation, outline):
