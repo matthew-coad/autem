@@ -19,6 +19,7 @@ class Member:
         self.n_victory = 0
         self.n_defeat = 0
         self.dead = 0
+        self.attractive = 0
 
     """
     Notify this member that an attempt is being made to incarnate
@@ -55,3 +56,8 @@ class Member:
         """
         self.dead = 1
 
+    def hubba(self):
+        """
+        Notify this member that it is attractive
+        """
+        self.attractive = 1

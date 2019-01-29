@@ -101,7 +101,7 @@ Implement cross over components **done**
 
 Implement cross over in simulation **done**
 
-Add breeding support
+Add breeding support **done**
 
 Assess accuracy change across benchmark. Add ability to record final accuracy scores. Automatically record them after each
 run. Make them a minimum of information to preserve backwards compatibility over time.

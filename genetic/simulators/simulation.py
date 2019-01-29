@@ -161,6 +161,7 @@ class Simulation:
         outline.append_attribute("birth", Dataset.Battle, [Role.Property])
         outline.append_attribute("death", Dataset.Battle, [Role.Property])
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
+        outline.append_attribute("attractive", Dataset.Battle, [Role.Property])
         outline.append_attribute("n_evaluation", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_errors", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
@@ -231,8 +232,9 @@ class Simulation:
         record.member_id = member_id
         record.birth = member.birth
         record.death = member.dead
-
         record.incarnation = member.incarnation
+        record.attractive = member.attractive
+
         record.n_evaluation = len(member.evaluations)
         record.n_errors = sum(e.errors for e in member.evaluations)
         record.n_contest = len(member.contests)
@@ -296,6 +298,11 @@ class Simulation:
             loser.killed()
             self.members.remove(loser)
 
+        # If contest was classy mark the winner as attrative
+        if contest.is_classy():
+            winner = contestant1 if contest.victor_id() == contestant1.id else contestant2
+            winner.hubba()
+
         # If contest was duplication then move the later incarnation into the reincarnation queue
         if contest.is_duplicated():
             duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
@@ -306,9 +313,10 @@ class Simulation:
         # Repopulate!
         newborn = None
         if self.should_repopulate():
-            if self.reincarnations:
-                prior = self.reincarnations[0]
-                newborn = self.reincarnate_member(prior)
+            if contestant1.attractive and contestant2.attractive:
+                newborn = self.crossover_member(contestant1, contestant2)
+            elif self.reincarnations:
+                newborn = self.reincarnate_member(self.reincarnations[0])
 
         # Report on what happened
         self.n_steps += 1

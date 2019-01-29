@@ -21,6 +21,7 @@ class BestLearner(Contester):
         """
         Outline what information is going to be supplied by a simulation
         """
+        outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
         outline.append_attribute("contest_t", Dataset.Battle, [Role.Measure], "contest t-statistic")
         outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
 
@@ -67,6 +68,12 @@ class BestLearner(Contester):
         """
         Record the state of a member
         """
+
+        record.test_score = None
+        if member.evaluations:
+            test_scores = np.array([e.test_score for e in member.evaluations])
+            record.test_score = test_scores.mean()
+
         outcome = member.contests[-1] if member.contests else None
         record.contest_t = outcome.t_statistic if outcome else None
         record.contest_p = outcome.p_value if outcome else None

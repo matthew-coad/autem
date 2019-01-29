@@ -24,11 +24,13 @@ class Survival(Contester):
         # Supply a "fitness" rating.
         # Members with a low fitness will get killed
         outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
+        outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
         # Make sure we define these extension values
         outcome.survive_p = None
+        outcome.attractive_p = None
 
         if outcome.is_uncontested():
             return None
@@ -40,30 +42,34 @@ class Survival(Contester):
         # We restrict it to contestant1 to stop contests being counted twice
         simulation = contestant1.simulation
         loser = contestant2 if outcome.victor == 1 else contestant1
-        loser_contests = [ c for c in loser.contests if c.is_conclusive()]
-        n_loser_contests = len(loser_contests)
+        loser_victories = loser.n_victory
+        loser_defeats = loser.n_defeat
+        loser_contests = loser_victories + loser_defeats
 
-        if n_loser_contests < 3:
+        winner = contestant1 if outcome.victor == 1 else contestant2
+        winner_victories = winner.n_victory
+        winner_defeats = winner.n_defeat
+        winner_contests = winner_victories + winner_defeats
+
+        total_victories = sum(m.n_victory for m in simulation.members)
+        total_defeats = sum(m.n_defeat for m in simulation.members)
+        total_contests = total_victories + total_defeats
+        if total_contests < 10:
             return None
 
-        n_loser_victories = sum([ int(c.victor_id() == loser.id) for c in loser_contests])
+        total_p = total_victories / total_contests
 
-        all_contests = [ c for m in simulation.members for c in m.contests if m.id == c.member1_id and c.is_conclusive()]
-        n_all_contests = len(all_contests)
-        if n_all_contests < 3:
-            return None
+        survive_p = stats.binom_test(loser_victories, n=loser_contests, p=total_p, alternative='less')
+        attractive_p = stats.binom_test(winner_victories, n=winner_contests, p=total_p, alternative='greater')
 
-        n_all_contests_victories = sum([ int(c.victor == 1) for c in all_contests])
-        all_p = n_all_contests_victories / n_all_contests
+        if survive_p < self.p_value:
+            outcome.fatal()
 
-        test_result = stats.binom_test(n_loser_victories, n=n_loser_contests, p=all_p, alternative='less')
-        outcome.survive_p = test_result
-        required_p_value = self.p_value
+        if attractive_p < self.p_value:
+            outcome.hubba()
 
-        # Need at least the required p-value to have an outcome
-        if outcome.survive_p > required_p_value:
-            return None
-        outcome.fatal()
+        outcome.survive_p = survive_p
+        outcome.attractive_p = attractive_p
 
     def record_member(self, member, record):
         """
@@ -71,3 +77,4 @@ class Survival(Contester):
         """
         outcome = member.contests[-1] if member.contests else None
         record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None
+        record.attractive_p = outcome.attractive_p if outcome and outcome.victor_id() == member.id else None

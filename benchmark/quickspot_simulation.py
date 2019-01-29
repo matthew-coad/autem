@@ -27,11 +27,11 @@ def prepare_OpenML():
     openml.config.apikey = config.OPENML_APIKEY
     openml.config.cache_directory = os.path.expanduser('~/.openml/cache')
 
-def run_quick_spot_simulation(bid):
+def run_quick_spot_simulation(bid, seed):
     prepare_OpenML()
     dataset = openml.datasets.get_dataset(bid)
     x, y, attribute_names = dataset.get_data(target=dataset.default_target_attribute, return_attribute_names=True,)
-    simulation_name = "%s_select" % (dataset.name)
+    simulation_name = "%s_%d_select" % (dataset.name, seed)
 
     simulation = simulators.Simulation(
         simulation_name, 
@@ -48,11 +48,12 @@ def run_quick_spot_simulation(bid):
 
             selectors.SelectPercentile(),
 
-            contests.BestLearner(),
+            contests.BestLearner(), 
             contests.Survival(),
             reporters.Path(simulations_path())
         ], 
-        population_size=20)
+        population_size=20,
+        seed = seed)
     simulation.start()
     for index in range(10):
         simulation.run(100)
@@ -64,5 +65,6 @@ def run_quick_spot_simulation(bid):
 if __name__ == '__main__':
     dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
     dids = [11]
-    for did in dids:
-        run_quick_spot_simulation(did)
+    seeds = [1,2,3,4,5,6,7,8,9,10]
+    for seed in seeds:
+        run_quick_spot_simulation(11, seed)

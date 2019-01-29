@@ -17,6 +17,7 @@ class Outcome(SimpleNamespace):
         self.type = OutcomeType.NoContest
         self.victor = None
         self.fatality = False
+        self.classy = False
 
     def duplicated(self):
         self.type = OutcomeType.Duplication
@@ -46,6 +47,12 @@ class Outcome(SimpleNamespace):
         """
         self.fatality = True
 
+    def hubba(self):
+        """
+        Contest demonstrated the attractiveness of the victor
+        """
+        self.classy = True
+
     def is_duplicated(self):
         return self.type == OutcomeType.Duplication
 
@@ -72,4 +79,8 @@ class Outcome(SimpleNamespace):
 
     def is_fatal(self):
         return self.fatality
+
+    def is_classy(self):
+        return self.classy
+
 
