@@ -1,16 +1,26 @@
-# -*- coding: utf-8 -*-
 import dash
-from dash.dependencies import Input, Output
-import flask
-from pathlib import Path
+import dash_core_components as dcc
+import dash_html_components as html
 
-boston_simulations_path = Path("experiments", "boston", "simulations")
-tune_energy_simulations_path = Path("experiments", "tune_energy", "simulations")
-test_simulations_path = Path("tests", "simulations")
-simulations_path = boston_simulations_path
+app = dash.Dash(__name__)
 
-server = flask.Flask(__name__)
-app = dash.Dash(__name__, server=server)
-app.config.suppress_callback_exceptions = True
+app.layout = html.Div([
+    html.Div(
+        className="app-header",
+        children=[
+            html.Div('Plotly Dash', className="app-header--title")
+        ]
+    ),
+    html.Div(
+        children=html.Div([
+            html.H5('Overview'),
+            html.Div('''
+                This is an example of a simple Dash app with
+                local, customized CSS.
+            ''')
+        ])
+    )
+])
 
-
+if __name__ == '__main__':
+    app.run_server(debug=True)
