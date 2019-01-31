@@ -106,5 +106,13 @@ Add breeding support **done**
 Assess accuracy change across benchmark. Add ability to record final accuracy scores. Automatically record them after each
 run. Make them a minimum of information to preserve backwards compatibility over time.
 
-# Live visualization of spotchecking
+# R Dashboard
+
+Python dashboards are too much of a pain. Implement start in Shiny **done**
+
+# Population metrics
+
+Evaluations. Keep only last evaluation. Use prior evaluation to keep a history
+
+
 

@@ -12,52 +12,84 @@ class Member:
         self.id = simulation.generate_id()
         self.configuration = SimpleNamespace()
         self.form = None
-        self.evaluations = []
-        self.contests = []
-        self.birth = 0
+        self.alive = 0
         self.incarnation = 0
-        self.n_victory = 0
-        self.n_defeat = 0
-        self.dead = 0
+
+        self.cause_death = None
+        self.fault = None
+
         self.attractive = 0
+        self.mature = 0
+        self.victories = 0
+        self.defeats = 0
 
-    """
-    Notify this member that an attempt is being made to incarnate
-    """
-    def incarnating(self):
-        self.birth += 1
+        self.evaluation = None
 
-    """
-    Notify this member that it has incarnated
-    """
-    def incarnated(self, form):
+        self.n_alive = 0
+        self.n_mature = 0
+        self.n_attractive = 0
+
+    def incarnated(self, form, incarnation):
+        """
+        Notify this member that it has incarnated
+        """
+        if self.alive == 1:
+            raise RuntimeError("Member already incarnated")
         self.form = form
-        self.incarnation = form.count
+        self.incarnation = incarnation
+        self.alive = 1
+        self.n_alive = 1
 
-    """
-    Notify this member that it is considered "grown" to adult hood
-    """
-    def grown(self):
-        self.birth = 0
+    def evaluated(self, evaluation):
+        """
+        Notify this member that an evaluation was performed
+        """
+        self.evaluation = evaluation
+
+    def matured(self):
+        """
+        Notify member that it has matured into "Adulthood"
+        """
+        if self.mature == 0:
+            self.mature = 1
+            self.n_mature = 1
+
+    def hubbify(self):
+        """
+        Notify member that it is attractive
+        """
+        if self.attractive == 0:
+            self.attractive = 1
+            self.n_attractive = 1
 
     def contested(self, result):
         """
         Record a battle result
         """
-        if result.victor_id() == self.id:
-            self.n_victory += 1
-        if result.loser_id() == self.id:
-            self.n_defeat += 1
-        self.contests.append(result)
+        self.n_alive = 0
+        self.n_mature = 0
+        self.n_attractive = 0
+    
+    def honour(self):
+        self.victories += 1
 
-    def killed(self):
+    def chastise(self):
+        self.defeats += 1        
+
+    def killed(self, cause_death, fault):
         """
         Notify this member that is has been killed
         """
-        self.dead = 1
+        if not self.cause_death is None:
+            raise RuntimeError("Member already killed")
+        if self.alive == 0:
+            raise RuntimeError("Member not alive")
+        self.alive = 0
+        self.cause_death = cause_death
+        self.fault = fault
 
-    def hubba(self):
-        """
-        Notify this member that it is attractive
-        """
-        self.attractive = 1
+        self.n_alive = -1
+        if self.mature == 1:
+            self.n_mature = -1
+        if self.attractive == 1:
+            self.n_attractive = -1

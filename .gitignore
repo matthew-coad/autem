@@ -7,3 +7,4 @@ benchmark/simulations_*/**
 experiments/**/simulations
 
 xx/xx_tests/simulations
+.Rproj.user

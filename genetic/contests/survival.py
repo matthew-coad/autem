@@ -23,8 +23,8 @@ class Survival(Contester):
         """
         # Supply a "fitness" rating.
         # Members with a low fitness will get killed
-        outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
-        outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
+        #outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
+        #outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -42,17 +42,17 @@ class Survival(Contester):
         # We restrict it to contestant1 to stop contests being counted twice
         simulation = contestant1.simulation
         loser = contestant2 if outcome.victor == 1 else contestant1
-        loser_victories = loser.n_victory
-        loser_defeats = loser.n_defeat
+        loser_victories = loser.victories
+        loser_defeats = loser.defeats
         loser_contests = loser_victories + loser_defeats
 
         winner = contestant1 if outcome.victor == 1 else contestant2
-        winner_victories = winner.n_victory
-        winner_defeats = winner.n_defeat
+        winner_victories = winner.victories
+        winner_defeats = winner.defeats
         winner_contests = winner_victories + winner_defeats
 
-        total_victories = sum(m.n_victory for m in simulation.members)
-        total_defeats = sum(m.n_defeat for m in simulation.members)
+        total_victories = sum(m.victories for m in simulation.members)
+        total_defeats = sum(m.defeats for m in simulation.members)
         total_contests = total_victories + total_defeats
         if total_contests < 10:
             return None
@@ -75,6 +75,7 @@ class Survival(Contester):
         """
         Record the state of a member
         """
-        outcome = member.contests[-1] if member.contests else None
-        record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None
-        record.attractive_p = outcome.attractive_p if outcome and outcome.victor_id() == member.id else None
+        pass
+        #outcome = member.contests[-1] if member.contests else None
+        #record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None
+        #record.attractive_p = outcome.attractive_p if outcome and outcome.victor_id() == member.id else None

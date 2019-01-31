@@ -24,7 +24,6 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.members = []
         self.forms = {}
-        self.reincarnations = []
         self.reports = []
         self.contests = []
         self.n_steps = 0
@@ -47,7 +46,7 @@ class Simulation:
 
     def incarnate_member(self, member):
         """
-        Given a member that is not currently incarnated, incarnate it
+        Incarnate the selected member
         """
         if not member.form is None:
             raise RuntimeError("Member has already been incarnated")
@@ -58,8 +57,7 @@ class Simulation:
         else:
             self.forms[form_key] = form
         form.count += 1
-        member.incarnating()
-        member.incarnated(form)
+        member.incarnated(form, form.count)
         self.members.append(member)
 
     def start_member(self):
@@ -115,41 +113,21 @@ class Simulation:
         self.incarnate_member(member)
         return member
 
-    def reincarnate_member(self, prior):
-        """
-        Reincarnate a prior member. 
-        Reincarnate reintroduces a member with variations in configuration
-        """
-        member = self.make_member_copy(prior)
+    def mature_member(self, member):
+        member.matured()
 
-        # Config should be the same
-        if repr(member.configuration) != repr(prior.configuration):
-            raise RuntimeError("Form was not duplicated")
+    def honour_member(self, member):
+        member.honour()
 
-        # Perform mutations until we have a new form
-        find_attempts = 0
-        max_attempts = 100
-        random_state = self.random_state
-        reincarnated = False
-        while not reincarnated:
-            member.incarnating()
-            mutated = self.mutate_member(member)
-            if not mutated:
-                break
-            if member.birth > max_attempts:
-                break
-            form_key = repr(member.configuration)
-            reincarnated = not form_key in self.forms
+    def chastise_member(self, member):
+        member.chastise()
 
-        if reincarnated:
-            # Complete the reincarnation
-            self.incarnate_member(member)
-            self.reincarnations.remove(prior)
-        else:
-            # Reincarnation failed!
-            self.reincarnations.remove(prior)
-            member.killed()
-        return member
+    def hubbify_member(self, member):
+        member.hubbify()
+
+    def kill_member(self, member, cause_death, fault):
+        member.killed(cause_death, fault)
+        self.members.remove(member)
 
     def _outline_simulation(self):
         """
@@ -158,15 +136,20 @@ class Simulation:
         outline = Outline()
         outline.append_attribute("step", Dataset.Battle, [Role.Dimension])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
-        outline.append_attribute("birth", Dataset.Battle, [Role.Property])
-        outline.append_attribute("death", Dataset.Battle, [Role.Property])
+
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
+        outline.append_attribute("alive", Dataset.Battle, [Role.Property])
+        outline.append_attribute("cause_death", Dataset.Battle, [Role.Property])
+        outline.append_attribute("fault", Dataset.Battle, [Role.Property])
+
+        outline.append_attribute("mature", Dataset.Battle, [Role.Property])
         outline.append_attribute("attractive", Dataset.Battle, [Role.Property])
-        outline.append_attribute("n_evaluation", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_errors", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_contest", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_victory", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_defeat", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("victories", Dataset.Battle, [Role.Property])
+        outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
+
+        outline.append_attribute("n_alive", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_mature", Dataset.Battle, [Role.Measure])
+        outline.append_attribute("n_attractive", Dataset.Battle, [Role.Measure])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -201,13 +184,11 @@ class Simulation:
                 evaluation.failed(ex)
                 break
 
-        member.evaluations.append(evaluation)
+        member.evaluated(evaluation)
         return evaluation
 
     def contest_members(self, contestant1, contestant2):
         contest = Outcome(self.n_steps, contestant1.id, contestant2.id)
-        contestant1.grown()
-        contestant2.grown()
 
         if contestant1.form is contestant2.form:
             # If the contestants have the same form mark that they are duplicated
@@ -230,20 +211,23 @@ class Simulation:
         record = Record()
         record.step = step
         record.member_id = member_id
-        record.birth = member.birth
-        record.death = member.dead
         record.incarnation = member.incarnation
+        record.alive = member.alive
+        record.cause_death = member.cause_death
+        record.fault = str(member.fault)
+
+        record.mature = member.mature
         record.attractive = member.attractive
+        record.victories = member.victories
+        record.defeats = member.defeats
 
-        record.n_evaluation = len(member.evaluations)
-        record.n_errors = sum(e.errors for e in member.evaluations)
-        record.n_contest = len(member.contests)
-        record.n_victory = member.n_victory
-        record.n_defeat = member.n_defeat
+        record.n_alive = member.n_alive
+        record.n_mature = member.n_mature
+        record.n_attractive = member.n_attractive
 
-        if record.n_errors == 0:
-            for component in self.components:
-                component.record_member(member, record)
+        #if record.n_errors == 0:
+        #    for component in self.components:
+        #        component.record_member(member, record)
         return record
 
     def should_repopulate(self):
@@ -268,10 +252,8 @@ class Simulation:
         contestant1 = members[contestant_indexes[0]]
         contestant2 = members[contestant_indexes[1]]
 
-        # Tell them they are grown
-        contest = self.contest_members(contestant1, contestant2)
-
         # Have them contest.
+        contest = self.contest_members(contestant1, contestant2)
 
         # If there was no contest then something is wrong
         if contest.is_uncontested():
@@ -285,38 +267,41 @@ class Simulation:
             # Kill contestants immediately for an error was generated during evaluation
             # They are no use to us
             if evaluation1.errors > 0:
-                contestant1.killed()
-                self.members.remove(contestant1)
+                self.kill_member(contestant1, "fault", evaluation1.fault)
 
             if evaluation2.errors > 0:
-                contestant2.killed()
-                self.members.remove(contestant2)
+                self.kill_member(contestant2, "fault", evaluation2.fault)
+
+        # If the contest was conclusive then the members are now mature
+        if contest.is_conclusive():
+            self.mature_member(contestant1)
+            self.mature_member(contestant2)
+
+        # If the contest was conclusive then hand out the laurels
+        if contest.is_conclusive():
+            winner = contestant1 if contest.victor_id() == contestant1.id else contestant2
+            self.honour_member(winner)
+            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
+            self.chastise_member(loser)
 
         # If contest was fatal remove the loser
         if contest.is_fatal():
-            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
-            loser.killed()
-            self.members.remove(loser)
+            self.kill_member(loser, "fatality", None)
 
         # If contest was classy mark the winner as attrative
         if contest.is_classy():
-            winner = contestant1 if contest.victor_id() == contestant1.id else contestant2
-            winner.hubba()
+            self.hubbify_member(winner)
 
-        # If contest was duplication then move the later incarnation into the reincarnation queue
+        # If contest was between members with duplicate forms kill the later incarnation
         if contest.is_duplicated():
             duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
-            duplicate.killed()
-            self.members.remove(duplicate)
-            self.reincarnations.append(duplicate)
+            self.kill_member(duplicate, "duplicate", None)
 
         # Repopulate!
         newborn = None
         if self.should_repopulate():
             if contestant1.attractive and contestant2.attractive:
                 newborn = self.crossover_member(contestant1, contestant2)
-            elif self.reincarnations:
-                newborn = self.reincarnate_member(self.reincarnations[0])
 
         # Report on what happened
         self.n_steps += 1

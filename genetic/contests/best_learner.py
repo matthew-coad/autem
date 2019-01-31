@@ -21,9 +21,10 @@ class BestLearner(Contester):
         """
         Outline what information is going to be supplied by a simulation
         """
-        outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
-        outline.append_attribute("contest_t", Dataset.Battle, [Role.Measure], "contest t-statistic")
-        outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
+        pass
+        # outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
+        #outline.append_attribute("contest_t", Dataset.Battle, [Role.Measure], "contest t-statistic")
+        #outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -34,8 +35,14 @@ class BestLearner(Contester):
         if outcome.is_conclusive():
             return None
 
-        member1_scores = np.array([e.test_score for e in contestant1.evaluations])
-        member2_scores = np.array([e.test_score for e in contestant2.evaluations])
+        if not contestant1.evaluation is None:
+            member1_scores = np.array(contestant1.evaluation.test_scores)
+        else:
+            member1_scores = np.array([])
+        if not contestant2.evaluation is None:
+            member2_scores = np.array(contestant2.evaluation.test_scores)
+        else:
+            member2_scores = np.array([])
         required_p_value = self.p_value
 
         # Must have at least 3 scores each to make a comparison

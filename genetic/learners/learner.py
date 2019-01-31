@@ -15,14 +15,6 @@ class Learner(Component):
         Component.__init__(self, name, "learner", parameters)
         self.label = label
 
-    def outline_simulation(self, simulation, outline):
-        """
-        Outline what information is going to be supplied by a simulation
-        """
-        super().outline_simulation(simulation, outline)
-        if not outline.has_attribute("test_score", Dataset.Battle):
-            outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
-
     def make_model(self):
         raise NotImplementedError()
 
@@ -31,6 +23,7 @@ class Learner(Component):
         if not self.is_active(member):
             return None
 
+        prior_evaluation = member.evaluation
         simulation = member.simulation
         member_id = member.id
         random_state = simulation.random_state
@@ -62,15 +55,8 @@ class Learner(Component):
         test_score = scorer.score(y_test, y_pred)
 
         evaluation.test_score = test_score
-
-    def record_member(self, member, record):
-        super().record_member(member, record)
-
-        if not self.is_active(member):
-            return None
-
-        record.test_score = None
-        if member.evaluations:
-            test_scores = np.array([e.test_score for e in member.evaluations])
-            record.test_score = test_scores.mean()
-
+        if not prior_evaluation is None:
+            evaluation.test_scores = prior_evaluation.test_scores
+        else:
+            evaluation.test_scores = []
+        evaluation.test_scores.append(test_score)
