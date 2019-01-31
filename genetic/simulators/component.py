@@ -186,7 +186,7 @@ class Component:
         Record the state of a member
         """
         if not self.is_active(member):
-            return False
+            return None
         if not self.group_name is None:
             group = self.get_group(member)
             setattr(record, self.group_name, group.active)
@@ -198,7 +198,7 @@ class Component:
         Record the state of a member
         """
         if not self.is_active(member):
-            return False
+            return None
         if not self.group_name is None:
             group = self.get_group(member)
             setattr(record, self.group_name, group.active)

@@ -19,6 +19,7 @@ class Learner(Component):
         """
         Outline what information is going to be supplied by a simulation
         """
+        super().outline_simulation(simulation, outline)
         if not outline.has_attribute("mean_test_score", Dataset.Battle):
             outline.append_attribute("mean_test_score", Dataset.Battle, [ Role.Measure ], "test score")
             outline.append_attribute("score", Dataset.Ranking, [ Role.KPI ], "Score")
@@ -74,6 +75,10 @@ class Learner(Component):
         """
         Record the state of a member
         """
+        super().record_member(member, record)
+        if not self.is_active(member):
+            return None
+
         record.mean_test_score = None
         if member.evaluation:
             record.mean_test_score = member.evaluation.mean_test_score
@@ -82,5 +87,9 @@ class Learner(Component):
         """
         Record information for the ranking
         """
+        super().record_ranking(member, record)
+        if not self.is_active(member):
+            return None
+
         record.score = member.evaluation.mean_test_score
 
