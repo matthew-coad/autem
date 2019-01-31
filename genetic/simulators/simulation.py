@@ -111,6 +111,20 @@ class Simulation:
         Cross over 2 members
         """
         member = self.make_member_crossover(parent1, parent2)
+        attempts = 0
+        max_attempts = 100
+        searching = True
+        while searching:
+            attempts += 1
+            if attempts > max_attempts:
+                # If after 100 tries we can't find a new form return nothing
+                return None
+            form = Form(member)
+            form_key = form.get_key()
+            if form_key in self.forms:
+                self.mutate_member(member)
+            else:
+                searching = False
         self.incarnate_member(member)
         return member
 
