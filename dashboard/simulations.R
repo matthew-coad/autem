@@ -48,18 +48,18 @@ load_battle_df <- function(path) {
   df
 }
 
-# Load battle data for a simulation
-load_battle_df <- function(path) {
+# Load ranking data for a simulation
+load_ranking_df <- function(path) {
   
-  files <- list.files(path, "Battle*")
+  files <- list.files(path, "Rank*")
   
-  load_battle_file <- function(filename) {
-    battle_path <- file.path(path, filename)
-    df <- suppressMessages(read_csv(battle_path))
+  load_rank_file <- function(filename) {
+    rank_path <- file.path(path, filename)
+    df <- suppressMessages(read_csv(rank_path))
     df
   }
   
-  df <- purrr::map_dfr(files, load_battle_file)
+  df <- purrr::map_dfr(files, load_rank_file)
   df
 }
 
@@ -93,12 +93,12 @@ population_progress_plot <- function(progress_df) {
   plot
 }
 
-progress_kpi_plot <- function(progress_df) {
-  plot <- progress_df %>%
+kpi_progress_plot <- function(ranking_df) {
+  plot <- ranking_df %>%
     ggplot(aes(x = step)) +
     geom_point(aes(y = score), na.rm = TRUE) +
     xlab("Step") +
-    ylab("KPI")
+    ylab("Score")
   plot
 }
 

@@ -6,6 +6,7 @@ from .dataset import Dataset
 from .role import Role
 from .outline import Outline
 from .form import Form
+from .ranking import Ranking
 
 from types import SimpleNamespace
 
@@ -24,8 +25,8 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.members = []
         self.forms = {}
-        self.reports = []
-        self.contests = []
+        self.contest_reports = []
+        self.ranking_reports = []
         self.n_steps = 0
         self.running = False
         self.stopping = False
@@ -129,7 +130,7 @@ class Simulation:
         member.killed(cause_death, fault)
         self.members.remove(member)
 
-    def _outline_simulation(self):
+    def outline_simulation(self):
         """
         Collect the simulation outline
         """
@@ -151,25 +152,16 @@ class Simulation:
         outline.append_attribute("n_mature", Dataset.Battle, [Role.Measure])
         outline.append_attribute("n_attractive", Dataset.Battle, [Role.Measure])
 
+        # Rankings
+        outline.append_attribute("step", Dataset.Ranking, [Role.Dimension])
+        outline.append_attribute("member_id", Dataset.Ranking, [Role.ID])
+
+        outline.append_attribute("incarnation", Dataset.Ranking, [Role.Property])
+        outline.append_attribute("rank", Dataset.Ranking, [Role.Property])
+
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
-
-    def start(self):
-        """
-        Perform simulation startup
-        """
-        self._outline_simulation()
-        for component in self.components:
-            component.start_simulation(self)
-        for index in range(self.population_size):
-            self.start_member()
-        for member in self.members:
-            self.reports.append(self.record_member(member))
-
-        if len(self.members) < 2:
-            raise RuntimeError("Require at least 2 members to start")
-        self.running = True
 
     def evaluate_member(self, member):
         """
@@ -199,8 +191,16 @@ class Simulation:
             component.contest_members(contestant1, contestant2, contest)
         contestant1.contested(contest)
         contestant2.contested(contest)
-        self.contests.append(contest)
         return contest
+
+    def rank_members(self):
+        """
+        Rank all members
+        """
+        ranking = Ranking(self.n_steps)
+        for component in self.components:
+            component.rank_members(self, ranking)
+        return ranking
 
     def record_member(self, member):
         """
@@ -225,9 +225,24 @@ class Simulation:
         record.n_mature = member.n_mature
         record.n_attractive = member.n_attractive
 
-        #if record.n_errors == 0:
-        #    for component in self.components:
-        #        component.record_member(member, record)
+        for component in self.components:
+            component.record_member(member, record)
+        return record
+
+    def record_ranking(self, member, rank):
+        """
+        Generate a record on a member ranking
+        """
+        member_id = member.id
+        step = self.n_steps
+        record = Record()
+        record.step = step
+        record.member_id = member_id
+        record.incarnation = member.incarnation
+        record.rank = rank
+
+        for component in self.components:
+            component.record_ranking(member, record)
         return record
 
     def should_repopulate(self):
@@ -235,6 +250,21 @@ class Simulation:
         Should we try to repopulate?
         """
         return self.running and not self.stopping and self.population_size > len(self.members)
+
+    def start(self):
+        """
+        Perform simulation startup
+        """
+        self.outline_simulation()
+        for component in self.components:
+            component.start_simulation(self)
+        for index in range(self.population_size):
+            self.start_member()
+        for member in self.members:
+            self.contest_reports.append(self.record_member(member))
+        if len(self.members) < 2:
+            raise RuntimeError("Require at least 2 members to start")
+        self.running = True
 
     def step(self):
         """
@@ -303,12 +333,19 @@ class Simulation:
             if contestant1.attractive and contestant2.attractive:
                 newborn = self.crossover_member(contestant1, contestant2)
 
+        # Rank
+
         # Report on what happened
         self.n_steps += 1
-        self.reports.append(self.record_member(contestant1))
-        self.reports.append(self.record_member(contestant2))
+        self.contest_reports.append(self.record_member(contestant1))
+        self.contest_reports.append(self.record_member(contestant2))
         if not newborn is None:
-            self.reports.append(self.record_member(newborn))
+            self.contest_reports.append(self.record_member(newborn))
+
+        ranking = self.rank_members()
+        if ranking.is_conclusive():
+            top_rank = ranking.members[0]
+            self.ranking_reports.append(self.record_ranking(top_rank, 1))
 
         if len(self.members) < 2:
             self.running = False
@@ -334,5 +371,6 @@ class Simulation:
         """
         for component in self.components:
             component.report_simulation(self)
-        self.reports = []
+        self.contest_reports = []
+        self.ranking_reports = []
     

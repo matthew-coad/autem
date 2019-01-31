@@ -50,6 +50,11 @@ class ReportManager():
         full_path = simulation.path.joinpath(filename)
         frame.to_csv(full_path, index=False)
 
+    def update_ranking_report(self, simulation, report_id, frame):
+        filename = "%s_%06d.csv" % ("Rank", report_id)
+        full_path = simulation.path.joinpath(filename)
+        frame.to_csv(full_path, index=False)
+
     def update_outline_report(self, simulation, frame):
         filename = "Outline.csv"
         full_path = simulation.path.joinpath(filename)

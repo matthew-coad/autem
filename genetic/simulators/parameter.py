@@ -27,6 +27,7 @@ class Parameter:
 
     def outline_simulation(self, component, simulation, outline):
         outline.append_attribute(self.get_record_name(component), Dataset.Battle, self.role , self.label)
+        outline.append_attribute(self.get_record_name(component), Dataset.Ranking, self.role , self.label)
 
     def start_simulation(self, component, simulation):
         pass
@@ -66,4 +67,7 @@ class Parameter:
         self.set_value(component, member, value)
 
     def record_member(self, component, member, record):
+        setattr(record, self.get_record_name(component), self.get_value(component, member))
+
+    def record_ranking(self, component, member, record):
         setattr(record, self.get_record_name(component), self.get_value(component, member))

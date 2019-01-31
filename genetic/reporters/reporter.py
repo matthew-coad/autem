@@ -6,7 +6,12 @@ import pandas as pd
 class Reporter(Component):
 
     def get_battle_frame(self, simulation):
-        records = simulation.reports
+        records = simulation.contest_reports
+        frame = get_report_frame(records)
+        return frame
+
+    def get_ranking_frame(self, simulation):
+        records = simulation.ranking_reports
         frame = get_report_frame(records)
         return frame
 

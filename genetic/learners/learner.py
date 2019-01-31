@@ -15,6 +15,14 @@ class Learner(Component):
         Component.__init__(self, name, "learner", parameters)
         self.label = label
 
+    def outline_simulation(self, simulation, outline):
+        """
+        Outline what information is going to be supplied by a simulation
+        """
+        if not outline.has_attribute("mean_test_score", Dataset.Battle):
+            outline.append_attribute("mean_test_score", Dataset.Battle, [ Role.Measure ], "test score")
+            outline.append_attribute("score", Dataset.Ranking, [ Role.KPI ], "Score")
+
     def make_model(self):
         raise NotImplementedError()
 
@@ -60,3 +68,19 @@ class Learner(Component):
         else:
             evaluation.test_scores = []
         evaluation.test_scores.append(test_score)
+        evaluation.mean_test_score = np.array([evaluation.test_scores]).mean()
+
+    def record_member(self, member, record):
+        """
+        Record the state of a member
+        """
+        record.mean_test_score = None
+        if member.evaluation:
+            record.mean_test_score = member.evaluation.mean_test_score
+
+    def record_ranking(self, member, record):
+        """
+        Record information for the ranking
+        """
+        record.score = member.evaluation.mean_test_score
+

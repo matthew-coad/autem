@@ -24,6 +24,7 @@ class Member:
         self.defeats = 0
 
         self.evaluation = None
+        self.contest = None
 
         self.n_alive = 0
         self.n_mature = 0
@@ -62,10 +63,11 @@ class Member:
             self.attractive = 1
             self.n_attractive = 1
 
-    def contested(self, result):
+    def contested(self, contest):
         """
         Record a battle result
         """
+        self.contest = contest
         self.n_alive = 0
         self.n_mature = 0
         self.n_attractive = 0

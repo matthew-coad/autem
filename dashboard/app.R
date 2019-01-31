@@ -30,7 +30,7 @@ progress_tab <- function()
       ),
       box(
         title = "KPI", status = "primary", solidHeader = TRUE, width = 6,
-        plotOutput("progress_kpi", height = 250)
+        plotOutput("kpi_progress", height = 250)
       )
     )
   )
@@ -93,6 +93,14 @@ shinyApp(ui = ui, server = function(input, output, session) {
     battle_df
   })
   
+  rank_df <- reactive({
+    simulation <- input$simulation
+    if (simulation == "Loading...")
+      return(NULL)
+    df <- load_ranking_df(input$simulation)
+    df
+  })
+
   
   progress_df <- reactive({
     battle_df_value <- battle_df()
@@ -115,6 +123,6 @@ shinyApp(ui = ui, server = function(input, output, session) {
     valueBox(paste0(current_status$step), "Steps", color = "purple", icon = icon("list"))
   })
   output$population_progress <- renderPlot({population_progress_plot(progress_df())})
-  output$progress_kpi <- renderPlot({progress_kpi_plot(progress_df())})
+  output$kpi_progress <- renderPlot({kpi_progress_plot(rank_df())})
 
 })

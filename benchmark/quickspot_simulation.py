@@ -64,6 +64,5 @@ def run_quick_spot_simulation(bid, seed):
 
 if __name__ == '__main__':
     dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
-    dids = [11]
     for did in dids:
-        run_quick_spot_simulation(11, 1)
+        run_quick_spot_simulation(did, 1)

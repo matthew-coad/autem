@@ -110,9 +110,15 @@ run. Make them a minimum of information to preserve backwards compatibility over
 
 Python dashboards are too much of a pain. Implement start in Shiny **done**
 
+Track population changes **done**
+
+Simulation KPI
+
 # Population metrics
 
-Evaluations. Keep only last evaluation. Use prior evaluation to keep a history
+Evaluations. Keep only last evaluation. Use prior evaluation to keep a history. **done**
+
+
 
 
 

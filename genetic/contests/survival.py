@@ -23,8 +23,8 @@ class Survival(Contester):
         """
         # Supply a "fitness" rating.
         # Members with a low fitness will get killed
-        #outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
-        #outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
+        outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
+        outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -75,7 +75,6 @@ class Survival(Contester):
         """
         Record the state of a member
         """
-        pass
-        #outcome = member.contests[-1] if member.contests else None
-        #record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None
-        #record.attractive_p = outcome.attractive_p if outcome and outcome.victor_id() == member.id else None
+        outcome = member.contest
+        record.survive_p = outcome.survive_p if outcome and outcome.loser_id() == member.id else None
+        record.attractive_p = outcome.attractive_p if outcome and outcome.victor_id() == member.id else None

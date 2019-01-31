@@ -21,10 +21,7 @@ class BestLearner(Contester):
         """
         Outline what information is going to be supplied by a simulation
         """
-        pass
-        # outline.append_attribute("test_score", Dataset.Battle, [ Role.Measure ], "score")
-        #outline.append_attribute("contest_t", Dataset.Battle, [Role.Measure], "contest t-statistic")
-        #outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
+        outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -71,16 +68,22 @@ class BestLearner(Contester):
         else:
             outcome.decisive(2)
 
+    def rank_members(self, simulation, ranking):
+
+        # To qualify for ranking a member must be
+        # Be alive and attractive 
+
+        candidates = [m for m in simulation.members if m.alive == 1 and m.attractive == 1]
+        if not candidates:
+            ranking.inconclusive()
+            return None
+
+        candidates = sorted(candidates, key=lambda member: member.evaluation.mean_test_score, reverse=True)
+        ranking.conclusive(candidates)
+
     def record_member(self, member, record):
         """
         Record the state of a member
         """
-
-        record.test_score = None
-        if member.evaluations:
-            test_scores = np.array([e.test_score for e in member.evaluations])
-            record.test_score = test_scores.mean()
-
-        outcome = member.contests[-1] if member.contests else None
-        record.contest_t = outcome.t_statistic if outcome else None
-        record.contest_p = outcome.p_value if outcome else None
+        contest = member.contest
+        record.contest_p = contest.p_value if contest else None

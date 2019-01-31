@@ -16,7 +16,7 @@ class Component:
         Outline what information is going to be supplied by a simulation
         """
         if not self.group_name is None and not outline.has_attribute(self.group_name, Dataset.Battle):
-            outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Measure ], self.group_name)
+            outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Dimension ], self.group_name)
         for parameter in self.parameters:
             parameter.outline_simulation(self, simulation, outline)
 
@@ -175,6 +175,12 @@ class Component:
         """
         pass
 
+    def rank_members(self, simulation, ranking):
+        """
+        Rank members in order of importance
+        """
+        pass
+
     def record_member(self, member, record):
         """
         Record the state of a member
@@ -186,6 +192,18 @@ class Component:
             setattr(record, self.group_name, group.active)
         for parameter in self.parameters:
             parameter.record_member(self, member, record)
+
+    def record_ranking(self, member, record):
+        """
+        Record the state of a member
+        """
+        if not self.is_active(member):
+            return False
+        if not self.group_name is None:
+            group = self.get_group(member)
+            setattr(record, self.group_name, group.active)
+        for parameter in self.parameters:
+            parameter.record_ranking(self, member, record)
 
     def report_simulation(self, simulation):
         """
