@@ -7,8 +7,8 @@ class SelectPercentile(Selector):
 
     def __init__(self):
         Selector.__init__(self, "select_perc", parameters=[
-            ChoicesParameter("scorer", [ Role.Dimension ], "Select scorer", ["none", "f_classif", "mutual_info_classif", "chi2" ], None),
-            ChoicesParameter("percentile", [ Role.Dimension ], "Select percent", [10, 20, 50, 80, 90], None),
+            ChoicesParameter("scorer", [ Role.Configuration ], "Select scorer", ["none", "f_classif", "mutual_info_classif", "chi2" ], None),
+            ChoicesParameter("percentile", [ Role.Configuration ], "Select percent", [10, 20, 50, 80, 90], None),
         ])
 
     def evaluate_member(self, member, evaluation):

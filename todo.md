@@ -112,13 +112,15 @@ Python dashboards are too much of a pain. Implement start in Shiny **done**
 
 Track population changes **done**
 
-Simulation KPI
-
-# Population metrics
-
 Evaluations. Keep only last evaluation. Use prior evaluation to keep a history. **done**
 
+Rank members. Report on rankings. **done**
 
+Only update ranking when it changes.
 
+Add evaluations to battle data
 
+Add family info to battle data
+
+Add diagnostics to determine why populations are crashing
 

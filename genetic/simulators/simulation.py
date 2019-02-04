@@ -149,7 +149,7 @@ class Simulation:
         Collect the simulation outline
         """
         outline = Outline()
-        outline.append_attribute("step", Dataset.Battle, [Role.Dimension])
+        outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
 
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
@@ -167,7 +167,7 @@ class Simulation:
         outline.append_attribute("n_attractive", Dataset.Battle, [Role.Measure])
 
         # Rankings
-        outline.append_attribute("step", Dataset.Ranking, [Role.Dimension])
+        outline.append_attribute("step", Dataset.Ranking, [Role.ID])
         outline.append_attribute("member_id", Dataset.Ranking, [Role.ID])
 
         outline.append_attribute("incarnation", Dataset.Ranking, [Role.Property])
@@ -344,10 +344,12 @@ class Simulation:
         # Repopulate!
         newborn = None
         if self.should_repopulate():
-            if contestant1.attractive and contestant2.attractive:
-                newborn = self.crossover_member(contestant1, contestant2)
-
-        # Rank
+            candidates = [ m for m in self.members if m.alive and m.mature ]
+            if len(candidates) >= 2:
+                parent_indexes = random_state.choice(len(candidates), 2, replace=False)
+                parent1 = candidates[parent_indexes[0]]
+                parent2 = candidates[parent_indexes[1]]
+                newborn = self.crossover_member(parent1, parent2)
 
         # Report on what happened
         self.n_steps += 1
@@ -356,6 +358,7 @@ class Simulation:
         if not newborn is None:
             self.contest_reports.append(self.record_member(newborn))
 
+        # Perform ranking
         ranking = self.rank_members()
         if ranking.is_conclusive():
             top_rank = ranking.members[0]

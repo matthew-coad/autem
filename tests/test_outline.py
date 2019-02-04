@@ -23,7 +23,7 @@ class outline_fixture(unittest.TestCase):
     def test_has_attribute(self):
         outline = simulators.Outline()
         self.assertFalse(outline.has_attribute("test", simulators.Dataset.Battle))
-        outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Dimension])
+        outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Configuration])
         self.assertTrue(outline.has_attribute("test", simulators.Dataset.Battle))
 
 if __name__ == '__main__':

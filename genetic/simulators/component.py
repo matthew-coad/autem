@@ -16,7 +16,8 @@ class Component:
         Outline what information is going to be supplied by a simulation
         """
         if not self.group_name is None and not outline.has_attribute(self.group_name, Dataset.Battle):
-            outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Dimension ], self.group_name)
+            outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Configuration ], self.group_name)
+            outline.append_attribute(self.group_name, Dataset.Ranking, [ Role.Configuration ], self.group_name)
         for parameter in self.parameters:
             parameter.outline_simulation(self, simulation, outline)
 

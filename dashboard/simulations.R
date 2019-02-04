@@ -1,6 +1,8 @@
 library(tidyverse)
 library(readr)
 
+test_path <- "D:\\Documents\\autem\\benchmark\\simulations\\balance-scale_1_select"
+
 load_simulations_df <- function(path) {
   dirs <- list.dirs(path, full.names = FALSE) %>% setdiff("")
   
@@ -100,5 +102,16 @@ kpi_progress_plot <- function(ranking_df) {
     xlab("Step") +
     ylab("Score")
   plot
+}
+
+top_configuration <- function(ranking_df, outline_df) {
+  last_rank <- ranking_df %>% filter(row_number()==n()) %>% tidyr::gather("name")
+  properties <- outline_df %>% filter(dataset == "ranking", role == "configuration")
+  last_rank %>% dplyr::inner_join(properties, by="name") %>% select(label, value)
+}
+
+top_score <- function(ranking_df) {
+  last_rank <- ranking_df %>% filter(row_number()==n())
+  last_rank %>% pull(score)
 }
 

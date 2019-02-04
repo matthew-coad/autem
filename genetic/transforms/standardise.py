@@ -7,7 +7,7 @@ class Standardise(Transformer):
 
     def __init__(self):
         Transformer.__init__(self, "standardise", None, [
-            ChoicesParameter("active", [Role.Dimension], "standardise", [0,1], 1)
+            ChoicesParameter("active", [Role.Configuration], "standardise", [0,1], 1)
         ])
 
     def evaluate_member(self, member, evaluation):
