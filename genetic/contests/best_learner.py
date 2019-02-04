@@ -4,6 +4,8 @@ from .contester import Contester
 import numpy as np
 from scipy import stats
 
+from sklearn.model_selection import cross_val_score
+
 class BestLearner(Contester):
     """
     Determines fitness by comparing mean model scores but only
@@ -22,6 +24,17 @@ class BestLearner(Contester):
         Outline what information is going to be supplied by a simulation
         """
         outline.append_attribute("contest_p", Dataset.Battle, [Role.Measure], "contest p value")
+
+    def evaluate_member(self, member, evaluation):
+        super().evaluate_member(member, evaluation)
+        if not self.is_active(member):
+            return None
+
+        prior_evaluation = member.evaluation
+        if hasattr(prior_evaluation, "cross_val_scores"):
+            member.evaluation.cross_val_scores = prior_evaluation.cross_val_scores
+            member.evaluation.cross_val_mean = prior_evaluation.cross_val_mean
+            member.evaluation.cross_val_sd = prior_evaluation.cross_val_sd
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -68,7 +81,24 @@ class BestLearner(Contester):
         else:
             outcome.decisive(2)
 
+    def evaluate_cross_val_score(self, simulation, member):
+
+        if hasattr(member.evaluation, "cross_val_scores"):
+            return None
+
+        scorer = simulation.resources.scorer
+        loader = simulation.resources.loader
+
+        x,y = loader.load_divided()
+        pipeline = member.evaluation.pipeline
+        scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=10)
+        member.evaluation.cross_val_scores = scores
+        member.evaluation.cross_val_mean = scores.mean()
+        member.evaluation.cross_val_sd = scores.std()
+
     def rank_members(self, simulation, ranking):
+
+        super().record_ranking(simulation, ranking)
 
         # To qualify for ranking a member must be
         # Be alive and attractive 
@@ -78,12 +108,32 @@ class BestLearner(Contester):
             ranking.inconclusive()
             return None
 
-        candidates = sorted(candidates, key=lambda member: member.evaluation.mean_test_score, reverse=True)
+        for candidate in candidates:
+            self.evaluate_cross_val_score(simulation, candidate)
+
+        candidates = sorted(candidates, key=lambda member: member.evaluation.cross_val_mean, reverse=True)
         ranking.conclusive(candidates)
 
     def record_member(self, member, record):
         """
         Record the state of a member
         """
+        super().record_member(member, record)
+        if not self.is_active(member):
+            return None
+
         contest = member.contest
         record.contest_p = contest.p_value if contest else None
+
+    def record_ranking(self, member, record):
+        """
+        Record information for the ranking
+        """
+        super().record_ranking(member, record)
+        if not self.is_active(member):
+            return None
+
+        record.score = member.evaluation.cross_val_mean
+        record.score_sd = member.evaluation.cross_val_sd
+
+

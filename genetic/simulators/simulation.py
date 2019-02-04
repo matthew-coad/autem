@@ -25,6 +25,7 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.members = []
         self.forms = {}
+        self.ranking = None
         self.contest_reports = []
         self.ranking_reports = []
         self.n_steps = 0
@@ -214,7 +215,10 @@ class Simulation:
         ranking = Ranking(self.n_steps)
         for component in self.components:
             component.rank_members(self, ranking)
-        return ranking
+        if ranking.is_equivalent(self.ranking):
+            ranking.static(self.ranking)
+        self.ranking = ranking
+        return self.ranking
 
     def record_member(self, member):
         """
@@ -254,7 +258,6 @@ class Simulation:
         record.member_id = member_id
         record.incarnation = member.incarnation
         record.rank = rank
-
         for component in self.components:
             component.record_ranking(member, record)
         return record
@@ -360,7 +363,7 @@ class Simulation:
 
         # Perform ranking
         ranking = self.rank_members()
-        if ranking.is_conclusive():
+        if ranking.is_conclusive() and ranking.original_step == self.n_steps:
             top_rank = ranking.members[0]
             self.ranking_reports.append(self.record_ranking(top_rank, 1))
 
@@ -386,6 +389,11 @@ class Simulation:
         """
         Report on progress of the simulation
         """
+
+        if not self.ranking_reports and self.ranking.is_conclusive():
+            top_rank = self.ranking.members[0]
+            self.ranking_reports.append(self.record_ranking(top_rank, 1))
+
         for component in self.components:
             component.report_simulation(self)
         self.contest_reports = []

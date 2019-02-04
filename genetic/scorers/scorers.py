@@ -13,7 +13,7 @@ def accuracy_scorer(y_true, y_pred):
 class NegativeRMSE(Scorer):
 
     def __init__(self):
-        Scorer.__init__(self, "NegativeRMSE")
+        Scorer.__init__(self, "NegativeRMSE", "neg_mean_squared_error")
 
     def score(self, y_true, y_pred):
         return 0 - mean_squared_error(y_true, y_pred)
@@ -21,7 +21,7 @@ class NegativeRMSE(Scorer):
 class Accuracy(Scorer):
 
     def __init__(self):
-        Scorer.__init__(self, "Accuracy")
+        Scorer.__init__(self, "Accuracy", "accuracy")
 
     def score(self, y_true, y_pred):
         return accuracy_score(y_true, y_pred)

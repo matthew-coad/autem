@@ -68,6 +68,7 @@ class Learner(Component):
             evaluation.test_scores = prior_evaluation.test_scores
         else:
             evaluation.test_scores = []
+        evaluation.pipeline = pipeline
         evaluation.test_scores.append(test_score)
         evaluation.mean_test_score = np.array([evaluation.test_scores]).mean()
 
@@ -82,14 +83,4 @@ class Learner(Component):
         record.mean_test_score = None
         if member.evaluation:
             record.mean_test_score = member.evaluation.mean_test_score
-
-    def record_ranking(self, member, record):
-        """
-        Record information for the ranking
-        """
-        super().record_ranking(member, record)
-        if not self.is_active(member):
-            return None
-
-        record.score = member.evaluation.mean_test_score
 
