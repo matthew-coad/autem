@@ -33,7 +33,8 @@ def run_quick_spot_simulation():
             contests.Survival(),
             reporters.Path(simulations_path())
         ], 
-        population_size=20)
+        population_size=20,
+        properties={ "experiment": "base" })
     simulation.start()
     simulation.run(500)
     simulation.report()
