@@ -4,11 +4,11 @@ The theme is this section is to be able to evaluate the performance of algorithm
 
 ## Tasks
 
-Only generate a ranking when the underlying forms have changed.
+Only generate a ranking when the underlying forms have changed. **done**
 
-Add cross validation score to rankings.
+Add cross validation score to rankings.  **done**
 
-View cross validation score on dashboard.
+View cross validation score on dashboard.  **done**
 
 Add meta information about experiment to simulations.
 

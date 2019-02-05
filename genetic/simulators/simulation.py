@@ -15,9 +15,10 @@ import numpy
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10):
+    def __init__(self, name, components, seed = 1234, population_size = 10, properties = {}):
         self.name = name
         self.components = components
+        self.properties = properties
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
         self.population_size = population_size
@@ -150,6 +151,9 @@ class Simulation:
         Collect the simulation outline
         """
         outline = Outline()
+        outline.append_attribute("simulation", Dataset.Battle, [Role.Configuration])
+        for property_key in self.properties.keys():
+            outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
         outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
 
@@ -227,6 +231,11 @@ class Simulation:
         member_id = member.id
         step = self.n_steps
         record = Record()
+
+        record.simulation = self.name
+        for property_key in self.properties.keys():
+            setattr(record, property_key, self.properties[property_key])
+
         record.step = step
         record.member_id = member_id
         record.incarnation = member.incarnation
@@ -252,8 +261,11 @@ class Simulation:
         Generate a record on a member ranking
         """
         member_id = member.id
-        step = self.n_steps
         record = Record()
+        record.simulation = self.name
+        for property_key in self.properties.keys():
+            setattr(record, property_key, self.properties[property_key])
+        step = self.n_steps
         record.step = step
         record.member_id = member_id
         record.incarnation = member.incarnation

@@ -19,7 +19,7 @@ def run_quick_spot_simulation():
     simulation = simulators.Simulation(
         "quick_spot", 
         [
-            loaders.Data(x,y),
+            loaders.Data("boston", x,y),
             scorers.NegativeRMSE(),
 
             learners.LinearRegression(),
