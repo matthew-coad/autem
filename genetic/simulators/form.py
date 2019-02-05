@@ -2,10 +2,8 @@
 
 class Form:
 
-    def __init__(self, member):
-        self.configuration = member.configuration
+    def __init__(self, id, key):
+        self.id = id
+        self.key = key
         self.count = 0
-
-    def get_key(self):
-        return repr(self.configuration)
 

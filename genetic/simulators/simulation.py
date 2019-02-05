@@ -53,11 +53,11 @@ class Simulation:
         """
         if not member.form is None:
             raise RuntimeError("Member has already been incarnated")
-        form = Form(member)
-        form_key = form.get_key()
+        form_key = repr(member.configuration)
         if form_key in self.forms:
             form = self.forms[form_key]
         else:
+            form = Form(self.generate_id(), form_key)
             self.forms[form_key] = form
         form.count += 1
         member.incarnated(form, form.count)
@@ -121,8 +121,7 @@ class Simulation:
             if attempts > max_attempts:
                 # If after 100 tries we can't find a new form return nothing
                 return None
-            form = Form(member)
-            form_key = form.get_key()
+            form_key = repr(member.configuration)
             if form_key in self.forms:
                 self.mutate_member(member)
             else:
@@ -156,6 +155,7 @@ class Simulation:
             outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
         outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
+        outline.append_attribute("form_id", Dataset.Battle, [Role.ID])
 
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
         outline.append_attribute("alive", Dataset.Battle, [Role.Property])
@@ -239,6 +239,7 @@ class Simulation:
 
         record.step = step
         record.member_id = member_id
+        record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
         record.alive = member.alive
         record.cause_death = member.cause_death
@@ -270,6 +271,7 @@ class Simulation:
         step = self.n_steps
         record.step = step
         record.member_id = member_id
+        record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
         record.rank = rank
         for component in self.components:
