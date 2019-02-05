@@ -7,11 +7,15 @@ class Reporter(Component):
 
     def get_battle_frame(self, simulation):
         records = simulation.contest_reports
+        if not records:
+            return None
         frame = get_report_frame(records)
         return frame
 
     def get_ranking_frame(self, simulation):
         records = simulation.ranking_reports
+        if not records:
+            return None
         frame = get_report_frame(records)
         return frame
 

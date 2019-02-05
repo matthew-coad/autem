@@ -22,8 +22,10 @@ class Path(Reporter):
         battle_frame = self.get_battle_frame(simulation)
         ranking_frame = self.get_ranking_frame(simulation)
         simulation_info = self.get_simulation_info(simulation)
-        self.manager.update_battle_report(simulation_info, report_id, battle_frame)
-        self.manager.update_ranking_report(simulation_info, report_id, ranking_frame)
+        if not battle_frame is None:
+            self.manager.update_battle_report(simulation_info, report_id, battle_frame)
+        if not ranking_frame is None:
+            self.manager.update_ranking_report(simulation_info, report_id, ranking_frame)
 
 
     def start_simulation(self, simulation):

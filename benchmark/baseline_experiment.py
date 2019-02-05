@@ -46,7 +46,8 @@ def run_baseline_simulation(did, experiment_path):
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    for did in benchmark_dids():
+    dids = benchmark_dids()
+    for did in dids:
         run_baseline_simulation(did, experiment_path)
     genetic.ReportManager(simulations_path()).update_combined_reports()
     genetic.ReportManager(experiment_path).update_combined_reports()
