@@ -20,6 +20,7 @@ class Member:
 
         self.attractive = 0
         self.mature = 0
+        self.evaluations = 0
         self.victories = 0
         self.defeats = 0
 
@@ -46,6 +47,7 @@ class Member:
         Notify this member that an evaluation was performed
         """
         self.evaluation = evaluation
+        self.evaluations += 1
 
     def matured(self):
         """

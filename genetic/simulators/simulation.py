@@ -164,6 +164,7 @@ class Simulation:
 
         outline.append_attribute("mature", Dataset.Battle, [Role.Property])
         outline.append_attribute("attractive", Dataset.Battle, [Role.Property])
+        outline.append_attribute("evaluations", Dataset.Battle, [Role.Property])
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
 
@@ -245,6 +246,7 @@ class Simulation:
 
         record.mature = member.mature
         record.attractive = member.attractive
+        record.evaluations = member.evaluations
         record.victories = member.victories
         record.defeats = member.defeats
 
