@@ -10,11 +10,9 @@ Add cross validation score to rankings.  **done**
 
 View cross validation score on dashboard.  **done**
 
-Add meta information about experiment to simulations.
+Add meta information about experiment to simulations. **done**
 
-Load experiment data into a single data frame with meta information.
-
-Allow dynamic adding of new data to loaded data frame.
+Load experiment data into a single data frame with meta information. **done**
 
 Change dashboard to operate on expanded meta information.
 

@@ -255,8 +255,9 @@ class Simulation:
         record.n_mature = member.n_mature
         record.n_attractive = member.n_attractive
 
-        for component in self.components:
-            component.record_member(member, record)
+        if member.fault is None:
+            for component in self.components:
+                component.record_member(member, record)
         return record
 
     def record_ranking(self, member, rank):
@@ -274,8 +275,9 @@ class Simulation:
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
         record.rank = rank
-        for component in self.components:
-            component.record_ranking(member, record)
+        if member.fault is None:
+            for component in self.components:
+                component.record_ranking(member, record)
         return record
 
     def should_repopulate(self):
@@ -330,10 +332,10 @@ class Simulation:
             # Kill contestants immediately for an error was generated during evaluation
             # They are no use to us
             if evaluation1.errors > 0:
-                self.kill_member(contestant1, "fault", evaluation1.fault)
+                self.kill_member(contestant1, "fault", evaluation1.exception)
 
             if evaluation2.errors > 0:
-                self.kill_member(contestant2, "fault", evaluation2.fault)
+                self.kill_member(contestant2, "fault", evaluation2.exception)
 
         # If the contest was conclusive then the members are now mature
         if contest.is_conclusive():
