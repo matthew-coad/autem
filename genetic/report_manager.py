@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import fnmatch
 import shutil
+import pathlib
 
 def prepare_path(path):
     """
@@ -27,8 +28,8 @@ class ReportManager():
     def __init__(self, path):
         self.path = path
 
-    def get_simulation(self, name):
-        path = self.path.joinpath(name)
+    def get_simulation(self, path):
+        name = os.path.basename(path)
         simulation = SimulationInfo(name, path)
         return simulation
 
@@ -36,10 +37,8 @@ class ReportManager():
         """
         List all available simulations
         """
-        if not os.path.isdir(self.path):
-            return []
-        directories = [n for n in os.listdir(self.path) if os.path.isdir(self.path.joinpath(n))]
-        simulations = [self.get_simulation(n) for n in directories]
+        directories = [root for root, dir, files in os.walk(self.path) if any(fnmatch.filter(files, "outline.csv"))]
+        simulations = [self.get_simulation(pathlib.Path(n)) for n in directories]
         return simulations
 
     def prepare_simulation(self, simulation):
@@ -68,3 +67,53 @@ class ReportManager():
         frames = [pd.read_csv(n) for n in files]
         df = pd.concat(frames)
         return df
+
+    def read_combined_battle_report(self):
+        """
+        Combine all battle reports into one frame
+        """
+        simulations = self.get_simulations()
+        files = [s.path.joinpath(n) for s in simulations for n in os.listdir(s.path) if fnmatch.fnmatch(n, 'Battle_*.csv')]
+        frames = [pd.read_csv(n) for n in files]
+        df = pd.concat(frames, sort=False)
+        return df
+
+    def update_combined_battle_report(self):
+        frame = self.read_combined_battle_report()
+        full_path = self.path.joinpath("Battle.csv")
+        frame.to_csv(full_path, index=False)
+
+    def read_combined_ranking_report(self):
+        """
+        Combine all ranking reports into one frame
+        """
+        simulations = self.get_simulations()
+        files = [s.path.joinpath(n) for s in simulations for n in os.listdir(s.path) if fnmatch.fnmatch(n, 'Rank_*.csv')]
+        frames = [pd.read_csv(n) for n in files]
+        df = pd.concat(frames, sort=False)
+        return df
+
+    def update_combined_ranking_report(self):
+        frame = self.read_combined_ranking_report()
+        full_path = self.path.joinpath("Rank.csv")
+        frame.to_csv(full_path, index=False)
+
+    def read_combined_outline_report(self):
+        """
+        Combine all outline reports into one frame
+        """
+        simulations = self.get_simulations()
+        files = [s.path.joinpath(n) for s in simulations for n in os.listdir(s.path) if fnmatch.fnmatch(n, 'Outline.csv')]
+        frames = [pd.read_csv(n) for n in files]
+        df = pd.concat(frames, ignore_index=True).drop_duplicates().reset_index(drop=True)
+        return df
+
+    def update_combined_outline_report(self):
+        frame = self.read_combined_outline_report()
+        full_path = self.path.joinpath("Outline.csv")
+        frame.to_csv(full_path, index=False)
+
+    def update_combined_reports(self):
+        self.update_combined_outline_report()
+        self.update_combined_battle_report()
+        self.update_combined_ranking_report()

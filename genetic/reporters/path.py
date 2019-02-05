@@ -1,4 +1,5 @@
 from .reporter import Reporter
+import os
 
 class Path(Reporter):
 
@@ -9,7 +10,8 @@ class Path(Reporter):
         self.manager = ReportManager(self.path)
 
     def get_simulation_info(self, simulation):
-        simulation_info = self.manager.get_simulation(simulation.name)
+        simulation_path = self.path.joinpath(simulation.name)
+        simulation_info = self.manager.get_simulation(simulation_path)
         return simulation_info
 
     def report_simulation(self, simulation):

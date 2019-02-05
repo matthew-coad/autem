@@ -16,6 +16,7 @@ import openml
 import os
 from pathlib import Path
 import warnings
+import shutil
 
 def data_path():
     return Path("benchmark/data")
@@ -36,7 +37,7 @@ def run_quick_spot_simulation(bid, seed):
     simulation = simulators.Simulation(
         simulation_name, 
         [
-            loaders.Data(x,y),
+            loaders.Data(dataset.name, x,y),
             scorers.Accuracy(),
 
             learners.LogisticRegression(), 
@@ -55,7 +56,7 @@ def run_quick_spot_simulation(bid, seed):
         population_size=20,
         seed = seed)
     simulation.start()
-    for index in range(20):
+    for index in range(5):
         simulation.run(100)
         simulation.report()
         if not simulation.running:
@@ -63,6 +64,11 @@ def run_quick_spot_simulation(bid, seed):
     return simulation
 
 if __name__ == '__main__':
-    dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
+    shutil.rmtree(simulations_path())
+    os.mkdir(simulations_path())
+    # dids = [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
+    dids = [11, 18, 23]
     for did in dids:
         run_quick_spot_simulation(did, 1)
+    genetic.ReportManager(simulations_path()).update_combined_reports()
+
