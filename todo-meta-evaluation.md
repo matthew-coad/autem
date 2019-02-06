@@ -16,3 +16,7 @@ Load experiment data into a single data frame with meta information. **done**
 
 Add multiple experiment views. **done**
 
+Add learner tuning **done**
+
+Survival/attractiveness rated on recent contests
+
