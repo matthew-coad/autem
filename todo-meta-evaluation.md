@@ -14,7 +14,5 @@ Add meta information about experiment to simulations. **done**
 
 Load experiment data into a single data frame with meta information. **done**
 
-Change dashboard to operate on expanded meta information.
-
-Add multiple experiment views.
+Add multiple experiment views. **done**
 

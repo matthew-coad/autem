@@ -2,7 +2,7 @@ library(shinydashboard)
 
 source("simulations.R")
 
-simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations"
+simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\baseline"
 
 header <- function()
   dashboardHeader(title = "Autem")

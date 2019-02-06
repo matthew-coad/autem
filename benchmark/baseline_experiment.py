@@ -16,7 +16,7 @@ from benchmark.benchmark_common import *
 experiment_name = "baseline"
 population_size = 20
 seed = 1
-epochs = 5
+epochs = 40
 
 def run_baseline_simulation(did, experiment_path):
     data_name, x, y = get_benchmark_data(did)
@@ -46,7 +46,7 @@ def run_baseline_simulation(did, experiment_path):
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    dids = benchmark_dids()
+    dids = [11]
     for did in dids:
         run_baseline_simulation(did, experiment_path)
     genetic.ReportManager(simulations_path()).update_combined_reports()

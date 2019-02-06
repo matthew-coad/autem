@@ -23,7 +23,7 @@ class Survival(Contester):
         """
         # Supply a "fitness" rating.
         # Members with a low fitness will get killed
-        outline.append_attribute("survive_p", Dataset.Battle, [Role.Measure], "survive_p")
+        outline.append_attribute("fatality_p", Dataset.Battle, [Role.Measure], "fatality_p")
         outline.append_attribute("attractive_p", Dataset.Battle, [Role.Measure], "attractive_p")
 
     def contest_members(self, contestant1, contestant2, outcome):
@@ -51,25 +51,17 @@ class Survival(Contester):
         winner_defeats = winner.defeats
         winner_contests = winner_victories + winner_defeats
 
-        total_victories = sum(m.victories for m in simulation.members)
-        total_defeats = sum(m.defeats for m in simulation.members)
-        total_contests = total_victories + total_defeats
-        if total_contests < 10:
-            return None
+        fatality_p = stats.binom_test(loser_victories, n=loser_contests, p=0.5, alternative='less')
+        attractive_p = stats.binom_test(winner_victories, n=winner_contests, p=0.5, alternative='greater')
 
-        total_p = total_victories / total_contests
-
-        survive_p = stats.binom_test(loser_victories, n=loser_contests, p=total_p, alternative='less')
-        attractive_p = stats.binom_test(winner_victories, n=winner_contests, p=total_p, alternative='greater')
-
-        if survive_p < self.p_value:
+        if fatality_p < self.p_value:
             outcome.fatal()
 
         if attractive_p < self.p_value:
             outcome.hubba()
 
-        outcome.survive_p = survive_p
-        outcome.attractive_p = attractive_p
+        outcome.fatality_p = 1 - fatality_p
+        outcome.attractive_p = 1 - attractive_p
 
     def record_member(self, member, record):
         """

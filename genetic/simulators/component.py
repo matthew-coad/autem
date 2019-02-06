@@ -1,4 +1,3 @@
-from .group import Group
 from .dataset import Dataset
 from .role import Role
 
@@ -15,7 +14,7 @@ class Component:
         """
         Outline what information is going to be supplied by a simulation
         """
-        if not self.group_name is None and not outline.has_attribute(self.group_name, Dataset.Battle):
+        if self.group_name and not outline.has_attribute(self.group_name, Dataset.Battle):
             outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Configuration ], self.group_name)
             outline.append_attribute(self.group_name, Dataset.Ranking, [ Role.Configuration ], self.group_name)
         for parameter in self.parameters:
@@ -28,29 +27,22 @@ class Component:
         for parameter in self.parameters:
             parameter.start_simulation(self, simulation)
 
-    def get_group(self, member):
-        if self.group_name is None:
-            return None
-        return getattr(member.configuration, self.group_name)
+    def get_group_components(self, member):
+        if not self.group_name:
+            return []
+        simulation = member.simulation
+        components = [ c for c in simulation.components if c.group_name == self.group_name ]
+        return components
 
-    def start_group(self, member):
+    def get_active_name(self, member):
         """
-        Perform member startup for a component group
+        Get the name of the group component that is active
         """
-        if not hasattr(member.configuration, self.group_name):
-            setattr(member.configuration, self.group_name, Group())
-        group = self.get_group(member)
-        group.components.append(self.name)
-        # On start select one component to be the active one
-        random_state = member.simulation.random_state
-        component_index = len(group.components) - 1
-        if component_index > 0:
-            replace = random_state.randint(0, len(group.components)) == 0
-            if replace:
-                delattr(member.configuration, group.active)
-                group.active = group.components[component_index]
-        else:
-            group.active = group.components[component_index]
+        if self.group_name is None:
+            # If the component isn't grouped then its the active one!
+            return self.name
+        active_name = getattr(member.configuration, self.group_name)
+        return active_name
 
     def is_active(self, member):
         """
@@ -59,26 +51,30 @@ class Component:
         if self.group_name is None:
             # Components that aren't grouped are always active
             return True
-        group = self.get_group(member)
-        return group.active == self.name
+        active = self.get_active_name(member) == self.name
+        return active
 
-    def get_active_name(self, member):
+    def start_group(self, member):
         """
-        Get the name of the component that is active
+        Perform member startup for a component group
         """
-        if self.group_name is None:
-            # If the component isn't grouped then its the active one!
-            return self.name
-        group = self.get_group(member)
-        return group.active
+        if hasattr(member.configuration, self.group_name):
+            raise RuntimeError("Group is already started")
+
+        components = self.get_group_components(member)
+        random_state = member.simulation.random_state
+        component_index = random_state.randint(0, len(components))
+        value = components[component_index].name
+        setattr(member.configuration, self.group_name, value)
 
     def start_member(self, member):
         """
         Start a member
         """
-        if not self.group_name is None:
+        if not self.group_name is None and not hasattr(member.configuration, self.group_name):
             self.start_group(member)
-        if self.is_active(member):
+
+        if self.is_active(member) and self.parameters:
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.start_member(self, member)
@@ -90,21 +86,48 @@ class Component:
         if hasattr(member.configuration, self.group_name):
             return None
         prior_group = getattr(prior.configuration, self.group_name)
-        group = Group()
-        group.components = prior_group.components[:]
-        group.active = prior_group.active
-        setattr(member.configuration, self.group_name, group)
+        setattr(member.configuration, self.group_name, prior_group)
 
     def copy_member(self, member, prior):
         """
-        Start a member
+        Start a new member by copying an existing member
         """
         if not self.group_name is None:
             self.copy_group(member, prior)
-        if self.is_active(member):
+        if self.is_active(member) and self.parameters:
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.copy_member(self, member, prior)
+
+    def mutate_group(self, member):
+        configuration = member.configuration
+        components = self.get_group_components(member)
+        if len(components) < 2:
+            return False
+
+        random_state = member.simulation.random_state
+        prior_value = getattr(member.configuration, self.group_name)
+        attempts = 0
+        max_attempts = 50
+        mutated = False
+        while not mutated:
+            choice_index = random_state.randint(0, len(components))
+            value = components[choice_index].name
+            if value != prior_value:
+                mutated = True
+            else:
+                # We expect things to mutate quickly
+                # But make sure we don't get stuck in an infinite loop
+                attempts += 1
+                if attempts > max_attempts:
+                    raise RuntimeError("Attempt to mutate parameter failed")
+        
+        if hasattr(configuration, prior_value):
+            delattr(configuration, prior_value)
+        setattr(configuration, self.group_name, value)
+        component = [c for c in components if c.name == value][0]
+        component.start_member(member)
+        return True
 
     def mutate_member(self, member):
         """
@@ -112,16 +135,24 @@ class Component:
         """
         if not self.is_active(member):
             return False
+
         random_state = member.simulation.random_state
         parameters = self.parameters
+
+        group_name = self.group_name
+        n_group = 1 if group_name  else 0
+        group_index = 0 if group_name else None
         n_parameters = len(parameters)
-        if not n_parameters:
+        if not n_parameters and not n_group:
             return False
 
-        parameter_indexes = random_state.choice(n_parameters, size=n_parameters, replace=False)
+        parameter_indexes = random_state.choice(n_group + n_parameters, size=n_group + n_parameters, replace=False)
         for parameter_index in parameter_indexes:
-            parameter = parameters[parameter_index]
-            mutated = parameter.mutate_member(self, member)
+            if parameter_index == group_index:
+                mutated = self.mutate_group(member)
+            else:
+                parameter = parameters[parameter_index - n_group]
+                mutated = parameter.mutate_member(self, member)
             if mutated:
                 return True
         return False
@@ -130,25 +161,22 @@ class Component:
         random_state = member.simulation.random_state
 
         # If we are in group mode and this is the first group
-        # pick one of the parents to base my group and vcopy it
-        if not self.group_name is None and not hasattr(member.configuration, self.group_name):
-            parent0_group = self.get_group(parent0)
-            parent1_group = self.get_group(parent1)
+        # pick one of the parents to base my group on and copy it
+        if self.group_name and not hasattr(member.configuration, self.group_name):
+            parent0_group = self.get_active_name(parent0)
+            parent1_group = self.get_active_name(parent1)
             parent_index = random_state.randint(0,2)
-            parent_group = parent0_group if parent_index == 0 else parent1_group
-            group = Group()
-            group.active = parent_group.active
-            group.components = parent_group.components[:]
-            setattr(member.configuration, self.group_name, group)
+            active_name = parent0_group if parent_index == 0 else parent1_group
+            setattr(member.configuration, self.group_name, active_name)
         else:
-            group = self.get_group(member)
+            active_name = self.get_active_name(member)
 
-        if not group is None and group.active == self.name:
+        if self.parameters and self.group_name and active_name == self.name:
             # We are crossing over the selected component in group mode
             setattr(member.configuration, self.name, SimpleNamespace())
-            parent0_group = self.get_group(parent0)
-            parent1_group = self.get_group(parent1)
-            if parent0_group.active == parent1_group.active:
+            parent0_group = self.get_active_name(parent0)
+            parent1_group = self.get_active_name(parent1)
+            if parent0_group == parent1_group:
                 # Parents have the same component
                 # Do a parameter wise copy
                 for parameter in self.parameters:
@@ -156,10 +184,10 @@ class Component:
             else:
                 # Parents don't match
                 # Do a copy of the selected parent
-                parent = parent0 if parent0_group.active == group.active else parent1
+                parent = parent0 if parent0_group == active_name else parent1
                 for parameter in self.parameters:
                     parameter.copy_member(self, member, parent)
-        elif group is None:
+        elif self.parameters and not self.group_name:
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.crossover_member(self, member, parent0, parent1)
@@ -189,8 +217,7 @@ class Component:
         if not self.is_active(member):
             return None
         if not self.group_name is None:
-            group = self.get_group(member)
-            setattr(record, self.group_name, group.active)
+            setattr(record, self.group_name, self.get_active_name(member))
         for parameter in self.parameters:
             parameter.record_member(self, member, record)
 
@@ -200,9 +227,8 @@ class Component:
         """
         if not self.is_active(member):
             return None
-        if not self.group_name is None:
-            group = self.get_group(member)
-            setattr(record, self.group_name, group.active)
+        if self.group_name:
+            setattr(record, self.group_name, self.get_active_name(member))
         for parameter in self.parameters:
             parameter.record_ranking(self, member, record)
 

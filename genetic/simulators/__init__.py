@@ -1,6 +1,5 @@
 from .component import Component
 from .member import Member
-from .group import Group
 from .population import Population
 from .simulation import Simulation
 from .outcome import OutcomeType, Outcome

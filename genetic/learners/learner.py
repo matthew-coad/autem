@@ -46,10 +46,10 @@ class Learner(Component):
 
         model = self.make_model()
         learner_name = self.name
-        #if len(self.parameters) > 0:
-        #   pairs = [(p.name, p.getMemberValue(self, member)) for p in self.parameters]
-        #    params = dict(p for p in pairs if not p[1] is None)
-        #    model.set_params(**params)
+        if len(self.parameters) > 0:
+            pairs = [(p.name, p.get_value(self, member)) for p in self.parameters]
+            params = dict(p for p in pairs if not p[1] is None)
+            model.set_params(**params)
 
         if hasattr(evaluation, "steps"):
             steps = evaluation.steps
