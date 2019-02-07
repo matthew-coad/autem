@@ -73,29 +73,10 @@ class BestLearner(Contester):
         loader = simulation.resources.loader
 
         x,y = loader.load_divided()
-        pipeline = member.evaluation.pipeline
+        pipeline = member.preparations.pipeline
         scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=10)
 
         rating = scores.mean()
         rating_sd = scores.std()
         member.rate(rating, rating_sd)
 
-    def rank_members(self, simulation, ranking):
-
-        super().record_ranking(simulation, ranking)
-
-        # To qualify for ranking a member must be
-        # Be alive and attractive 
-
-        candidates = [m for m in simulation.members if m.alive == 1 and m.attractive == 1]
-        if not candidates:
-            ranking.inconclusive()
-            return None
-
-        for candidate in candidates:
-            self.evaluate_cross_val_score(simulation, candidate)
-
-        candidates = sorted(candidates, key=lambda member: member.evaluation.cross_val_mean, reverse=True)
-        ranking.conclusive(candidates)
-
-    

@@ -45,7 +45,7 @@ class Member:
         self.rating = None
         self.rating_sd = None
 
-        self.rank = None
+        self.ranking = None
 
     def incarnated(self, form, incarnation):
         """
@@ -125,8 +125,8 @@ class Member:
         self.rating = rating
         self.rating_sd = rating_sd
 
-    def rank(self, rank):
-        self.rank = rank
+    def rank(self, ranking):
+        self.ranking = ranking
 
     def failed(self, fault):
         """

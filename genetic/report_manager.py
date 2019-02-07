@@ -116,4 +116,4 @@ class ReportManager():
     def update_combined_reports(self):
         self.update_combined_outline_report()
         self.update_combined_battle_report()
-        self.update_combined_ranking_report()
+        # self.update_combined_ranking_report()

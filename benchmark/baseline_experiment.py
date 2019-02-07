@@ -26,6 +26,10 @@ def run_baseline_simulation(did, experiment_path):
             loaders.Data(data_name, x, y),
             scorers.Accuracy(),
 
+            contests.BestLearner(), 
+            contests.Survival(),
+            reporters.Path(experiment_path),
+
             learners.LogisticRegression(), 
             learners.LinearDiscriminantAnalysis(),
             learners.KNeighborsClassifier(), 
@@ -33,9 +37,6 @@ def run_baseline_simulation(did, experiment_path):
             learners.GaussianNB(),
             learners.SVC(),
 
-            contests.BestLearner(), 
-            contests.Survival(),
-            reporters.Path(experiment_path)
         ], 
         population_size=population_size,
         seed = seed,
@@ -46,7 +47,7 @@ def run_baseline_simulation(did, experiment_path):
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    dids = [11]
+    dids = test_benchmark_dids()
     for did in dids:
         run_baseline_simulation(did, experiment_path)
     genetic.ReportManager(simulations_path()).update_combined_reports()

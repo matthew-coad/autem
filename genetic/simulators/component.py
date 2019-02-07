@@ -223,13 +223,6 @@ class Component:
         """
         pass
 
-    def rank_members(self, simulation, ranking):
-        """
-        Rank members in order of importance.
-        Only mature, attractive, rated members get a ranking
-        """
-        pass
-
     def record_member(self, member, record):
         """
         Record the state of a member

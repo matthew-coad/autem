@@ -25,6 +25,7 @@ class Learner(Component):
 
         simulation = member.simulation
         preparations = member.preparations
+        learner_name = self.name
 
         model = self.make_model()
         learner_name = self.name
@@ -33,15 +34,20 @@ class Learner(Component):
             params = dict(p for p in pairs if not p[1] is None)
             model.set_params(**params)
 
-        preparations.model = model
+        if hasattr(preparations, "steps"):
+            steps = preparations.steps
+        else:
+            steps = []
+
+        steps.append((learner_name, model))
+        pipeline = Pipeline(steps=steps)
+        preparations.pipeline = pipeline
 
     def evaluate_member(self, member):
         super().evaluate_member(member)
         if not self.is_active(member):
             return None
 
-        member_id = member.id
-        learner_name = self.name
         simulation = member.simulation
         preparations = member.preparations
         evaluation = member.evaluation
@@ -54,14 +60,7 @@ class Learner(Component):
         test_size = 0.3
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
-        model = preparations.model
-        if hasattr(preparations, "steps"):
-            steps = preparations.steps
-        else:
-            steps = []
-
-        steps.append((learner_name, model))
-        pipeline = Pipeline(steps=steps)
+        pipeline = preparations.pipeline
         pipeline.fit(x_train, y_train)
         y_pred = pipeline.predict(x_test)
         test_score = scorer.score(y_test, y_pred)

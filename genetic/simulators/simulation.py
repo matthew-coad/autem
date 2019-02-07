@@ -166,14 +166,14 @@ class Simulation:
         outline.append_attribute("attractive", Dataset.Battle, [Role.Property])
 
         outline.append_attribute("rating", Dataset.Battle, [ Role.KPI ])
-        outline.append_attribute("rank", Dataset.Battle, [ Role.KPI ])
+        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
         # Rankings
         outline.append_attribute("step", Dataset.Ranking, [Role.ID])
         outline.append_attribute("member_id", Dataset.Ranking, [Role.ID])
 
         outline.append_attribute("incarnation", Dataset.Ranking, [Role.Property])
-        outline.append_attribute("rank", Dataset.Ranking, [Role.Property])
+        outline.append_attribute("ranking", Dataset.Ranking, [Role.Property])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -255,28 +255,49 @@ class Simulation:
         if contestant2.fatality == 1:
             self.kill_member(contestant2, "fatality")
 
+    def rate_member(self, member):
+        """
+        Rate a member
+        """
+
+        if not member.alive or not member.mature or not member.attractive:
+            return None
+
+        for component in self.components:
+            try:
+                component.rate_member(member)
+            except Exception as ex:
+                member.failed(ex)
+                break
+
+        # Kill contestants immediately for an error was generated during evaluation
+        # They are of no use to us
+        if member.alive and not member.fault is None:
+            self.kill_member(member, "rate fault")
+
     def rank_members(self):
         """
         Rank all members
         """
+
+        # Generate ratings if needed
+        for member in self.members[:]:
+            self.rate_member(member)
+
         ranking = Ranking(self.n_steps)
-        for component in self.components:
-            component.rank_members(self, ranking)
+        candidates = [m for m in self.members if not m.rating is None]
+        if not candidates:
+            ranking.inconclusive()
+        else:
+            candidates = sorted(candidates, key=lambda member: member.rating)
+            ranking.conclusive(candidates)
+
         if ranking.is_equivalent(self.ranking):
             ranking.static(self.ranking)
+        else:
+            for rank in range(len(ranking.members)):
+                ranking.members[rank].rank(rank + 1)
         self.ranking = ranking
-
-        for rank in range(len(ranking.members)):
-            member = ranking.members[rank]
-            member.rate(0, rank)
-
-
-        ranking = self.rank_members()
-        if ranking.is_conclusive() and ranking.original_step == self.n_steps:
-            top_rank = ranking.members[0]
-            self.ranking_reports.append(self.record_ranking(top_rank, 1))
-
-        return self.ranking
 
     def should_repopulate(self):
         """
@@ -341,18 +362,15 @@ class Simulation:
                 parent2 = candidates[parent_indexes[1]]
                 newborn = self.crossover_member(parent1, parent2)
 
+        # Perform ranking
+        self.rank_members()
+
         # Report on what happened
         self.n_steps += 1
         self.contest_reports.append(self.record_member(contestant1))
         self.contest_reports.append(self.record_member(contestant2))
         if not newborn is None:
             self.contest_reports.append(self.record_member(newborn))
-
-        # Perform ranking
-        #ranking = self.rank_members()
-        #if ranking.is_conclusive() and ranking.original_step == self.n_steps:
-        #    top_rank = ranking.members[0]
-        #    self.ranking_reports.append(self.record_ranking(top_rank, 1))
 
         if len(self.members) < 2:
             self.running = False
@@ -406,7 +424,7 @@ class Simulation:
         record.attractive = member.attractive
 
         record.rating = member.rating
-        record.rank = member.rank
+        record.ranking = member.ranking
 
         if member.fault is None:
             for component in self.components:
@@ -429,7 +447,7 @@ class Simulation:
         record.incarnation = member.incarnation
 
         record.rating = member.rating
-        record.rank = member.rank
+        record.ranking = member.ranking
 
         if member.fault is None:
             for component in self.components:
