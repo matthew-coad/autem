@@ -192,7 +192,13 @@ class Component:
             for parameter in self.parameters:
                 parameter.crossover_member(self, member, parent0, parent1)
 
-    def evaluate_member(self, member, evaluation):
+    def prepare_member(self, member):
+        """
+        Perform member preparation
+        """
+        pass
+
+    def evaluate_member(self, member):
         """
         Perform a round of member evaluation
         """
@@ -204,15 +210,23 @@ class Component:
         """
         pass
 
-    def fate_members(self, member1, member2, outcome):
+    def stress_members(self, member1, member2, outcome):
         """
         Determine the fate of the members
         """
-        pass        
+        pass
+
+    def rate_member(self, member):
+        """
+        Evaluate the rating for a member.
+        Only mature, attractive members get a rating.
+        """
+        pass
 
     def rank_members(self, simulation, ranking):
         """
-        Rank members in order of importance
+        Rank members in order of importance.
+        Only mature, attractive, rated members get a ranking
         """
         pass
 

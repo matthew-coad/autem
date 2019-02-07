@@ -22,6 +22,10 @@ def run_tune_simulation():
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
 
+            contests.BestLearner(),
+            contests.Survival(),
+            reporters.Path(simulations_path()),
+
             learners.LogisticRegression(), 
             learners.LinearDiscriminantAnalysis(), 
             learners.KNeighborsClassifier(),  
@@ -29,9 +33,6 @@ def run_tune_simulation():
             learners.GaussianNB(), 
             learners.SVC(),
 
-            contests.BestLearner(),
-            contests.Survival(),
-            reporters.Path(simulations_path())
         ], 
         population_size=20)
     simulation.start()
@@ -39,9 +40,9 @@ def run_tune_simulation():
     simulation.report()
 
     manager = genetic.ReportManager(simulations_path())
-    manager.update_combined_battle_report()
-    manager.update_combined_ranking_report()
     manager.update_combined_outline_report()
+    manager.update_combined_battle_report()
+    # manager.update_combined_ranking_report()
 
     return simulation
 

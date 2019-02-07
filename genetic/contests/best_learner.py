@@ -19,40 +19,15 @@ class BestLearner(Contester):
         Contester.__init__(self, "BestLearner")
         self.p_value = p_value
 
-    def outline_simulation(self, simulation, outline):
-        """
-        Outline what information is going to be supplied by a simulation
-        """
-        outline.append_attribute("maturity", Dataset.Battle, [Role.Measure], "Maturity")
-
-    def evaluate_member(self, member, evaluation):
-        super().evaluate_member(member, evaluation)
-        if not self.is_active(member):
-            return None
-
-        prior_evaluation = member.evaluation
-        if hasattr(prior_evaluation, "cross_val_scores"):
-            member.evaluation.cross_val_scores = prior_evaluation.cross_val_scores
-            member.evaluation.cross_val_mean = prior_evaluation.cross_val_mean
-            member.evaluation.cross_val_sd = prior_evaluation.cross_val_sd
-
     def contest_members(self, contestant1, contestant2, outcome):
-
-        # Make sure we define these extension values
-        outcome.maturity = None
 
         if outcome.is_conclusive():
             return None
 
-        if not contestant1.evaluation is None:
-            member1_scores = np.array(contestant1.evaluation.test_scores)
-        else:
-            member1_scores = np.array([])
-        if not contestant2.evaluation is None:
-            member2_scores = np.array(contestant2.evaluation.test_scores)
-        else:
-            member2_scores = np.array([])
         required_p_value = self.p_value
+
+        member1_scores = np.array(contestant1.accuracies)
+        member2_scores = np.array(contestant2.accuracies)
 
         # Must have at least 3 scores each to make a comparison
         if len(member1_scores) < 3 or len(member2_scores) < 3:
@@ -67,10 +42,14 @@ class BestLearner(Contester):
             return None
 
         t_statistic = test_result[0] # positive if 1 > 2
-        outcome.maturity = test_result[1]
+        maturity = test_result[1]
+        mature = 1 if maturity <= required_p_value else 0
+
+        contestant1.maturing(maturity, mature)
+        contestant2.maturing(maturity, mature)
 
         # Need at least the required p-value to have an outcome
-        if outcome.maturity > required_p_value:
+        if maturity > required_p_value:
             outcome.inconclusive()
             return None
 
@@ -80,20 +59,26 @@ class BestLearner(Contester):
         else:
             outcome.decisive(2)
 
-    def evaluate_cross_val_score(self, simulation, member):
+    def rate_member(self, member):
+        """
+        Evaluate the rating for a member.
+        Only mature, attractive members get a rating.
+        """
 
-        if hasattr(member.evaluation, "cross_val_scores"):
+        if not member.rating is None:
+            # Don't rerate! It's expensive
             return None
-
+        simulation = member.simulation
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
         x,y = loader.load_divided()
         pipeline = member.evaluation.pipeline
         scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=10)
-        member.evaluation.cross_val_scores = scores
-        member.evaluation.cross_val_mean = scores.mean()
-        member.evaluation.cross_val_sd = scores.std()
+
+        rating = scores.mean()
+        rating_sd = scores.std()
+        member.rate(rating, rating_sd)
 
     def rank_members(self, simulation, ranking):
 
@@ -113,26 +98,4 @@ class BestLearner(Contester):
         candidates = sorted(candidates, key=lambda member: member.evaluation.cross_val_mean, reverse=True)
         ranking.conclusive(candidates)
 
-    def record_member(self, member, record):
-        """
-        Record the state of a member
-        """
-        super().record_member(member, record)
-        if not self.is_active(member):
-            return None
-
-        contest = member.contest
-        record.maturity = contest.maturity if contest else None
-
-    def record_ranking(self, member, record):
-        """
-        Record information for the ranking
-        """
-        super().record_ranking(member, record)
-        if not self.is_active(member):
-            return None
-
-        record.score = member.evaluation.cross_val_mean
-        record.score_sd = member.evaluation.cross_val_sd
-
-
+    

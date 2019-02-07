@@ -18,5 +18,13 @@ Add multiple experiment views. **done**
 
 Add learner tuning **done**
 
-Survival/attractiveness rated on recent contests
+Survival/attractiveness rated on recent contests **done**
+
+Ranking in battle reports
+
+Show all ranked members in reports
+
+Rank report becomes final rank report
+
+
 

@@ -10,7 +10,7 @@ class Standardise(Transformer):
             ChoicesParameter("active", [Role.Configuration], "standardise", [0,1], 1)
         ])
 
-    def evaluate_member(self, member, evaluation):
+    def evaluate_member(self, member):
         standardise = member.configuration.standardise.active
         if not hasattr(evaluation, "steps"):
             evaluation.steps = []
