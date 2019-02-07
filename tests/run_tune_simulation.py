@@ -35,7 +35,7 @@ def run_tune_simulation():
         ], 
         population_size=20)
     simulation.start()
-    simulation.run(500)
+    simulation.run(200)
     simulation.report()
 
     manager = genetic.ReportManager(simulations_path())

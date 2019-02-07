@@ -20,8 +20,8 @@ class Learner(Component):
         Outline what information is going to be supplied by a simulation
         """
         super().outline_simulation(simulation, outline)
-        if not outline.has_attribute("mean_test_score", Dataset.Battle):
-            outline.append_attribute("mean_test_score", Dataset.Battle, [ Role.Measure ], "test score")
+        if not outline.has_attribute("score", Dataset.Battle):
+            outline.append_attribute("score", Dataset.Battle, [ Role.Measure ], "Score")
             outline.append_attribute("score", Dataset.Ranking, [ Role.KPI ], "Score")
 
     def make_model(self):
@@ -70,7 +70,7 @@ class Learner(Component):
             evaluation.test_scores = []
         evaluation.pipeline = pipeline
         evaluation.test_scores.append(test_score)
-        evaluation.mean_test_score = np.array([evaluation.test_scores]).mean()
+        evaluation.score = np.array([evaluation.test_scores]).mean()
 
     def record_member(self, member, record):
         """
@@ -80,7 +80,7 @@ class Learner(Component):
         if not self.is_active(member):
             return None
 
-        record.mean_test_score = None
+        record.score = None
         if member.evaluation:
-            record.mean_test_score = member.evaluation.mean_test_score
+            record.score = member.evaluation.score
 
