@@ -200,9 +200,15 @@ class Component:
 
     def contest_members(self, member1, member2, outcome):
         """
-        Run a battle between two members
+        Run a contest between two members to determine who is better
         """
         pass
+
+    def fate_members(self, member1, member2, outcome):
+        """
+        Determine the fate of the members
+        """
+        pass        
 
     def rank_members(self, simulation, ranking):
         """

@@ -168,10 +168,6 @@ class Simulation:
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
 
-        outline.append_attribute("n_alive", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_mature", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("n_attractive", Dataset.Battle, [Role.Measure])
-
         # Rankings
         outline.append_attribute("step", Dataset.Ranking, [Role.ID])
         outline.append_attribute("member_id", Dataset.Ranking, [Role.ID])
@@ -200,18 +196,50 @@ class Simulation:
         return evaluation
 
     def contest_members(self, contestant1, contestant2):
-        contest = Outcome(self.n_steps, contestant1.id, contestant2.id)
+        outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
 
         if contestant1.form is contestant2.form:
             # If the contestants have the same form mark that they are duplicated
-            contest.duplicated()
-            return contest
+            outcome.duplicated()
+            duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
+            self.kill_member(duplicate, "duplicate", None)
+            return outcome
 
         for component in self.components:
-            component.contest_members(contestant1, contestant2, contest)
-        contestant1.contested(contest)
-        contestant2.contested(contest)
-        return contest
+            component.contest_members(contestant1, contestant2, outcome)
+
+        # Tell the members they had a contest
+        contestant1.contested(outcome)
+        contestant2.contested(outcome)
+
+        # If the contest was conclusive then the members are now mature
+        if outcome.is_conclusive():
+            self.mature_member(contestant1)
+            self.mature_member(contestant2)
+
+        # If the contest was conclusive then hand out the laurels
+        if outcome.is_conclusive():
+            winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
+            self.honour_member(winner)
+            loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
+            self.chastise_member(loser)
+
+        return outcome
+
+    def fate_members(self, contestant1, contestant2, outcome):
+        for component in self.components:
+            component.fate_members(contestant1, contestant2, outcome)
+
+        winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
+        loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
+
+        # If contest was fatal remove the loser
+        if outcome.is_fatal():
+            self.kill_member(loser, "fatality", None)
+
+        # If contest was classy mark the winner as attrative
+        if outcome.is_classy():
+            self.hubbify_member(winner)
 
     def rank_members(self):
         """
@@ -224,61 +252,6 @@ class Simulation:
             ranking.static(self.ranking)
         self.ranking = ranking
         return self.ranking
-
-    def record_member(self, member):
-        """
-        Generate a record on a member
-        """
-        member_id = member.id
-        step = self.n_steps
-        record = Record()
-
-        record.simulation = self.name
-        for property_key in self.properties.keys():
-            setattr(record, property_key, self.properties[property_key])
-
-        record.step = step
-        record.member_id = member_id
-        record.form_id = member.form.id if member.form else None
-        record.incarnation = member.incarnation
-        record.alive = member.alive
-        record.cause_death = member.cause_death
-        record.fault = str(member.fault)
-
-        record.mature = member.mature
-        record.attractive = member.attractive
-        record.evaluations = member.evaluations
-        record.victories = member.victories
-        record.defeats = member.defeats
-
-        record.n_alive = member.n_alive
-        record.n_mature = member.n_mature
-        record.n_attractive = member.n_attractive
-
-        if member.fault is None:
-            for component in self.components:
-                component.record_member(member, record)
-        return record
-
-    def record_ranking(self, member, rank):
-        """
-        Generate a record on a member ranking
-        """
-        member_id = member.id
-        record = Record()
-        record.simulation = self.name
-        for property_key in self.properties.keys():
-            setattr(record, property_key, self.properties[property_key])
-        step = self.n_steps
-        record.step = step
-        record.member_id = member_id
-        record.form_id = member.form.id if member.form else None
-        record.incarnation = member.incarnation
-        record.rank = rank
-        if member.fault is None:
-            for component in self.components:
-                component.record_ranking(member, record)
-        return record
 
     def should_repopulate(self):
         """
@@ -324,43 +297,22 @@ class Simulation:
         if contest.is_uncontested():
             raise RuntimeError("No contest component defined")
 
+        # If the contest was conclusive then determine the contestants fate!
+        if contest.is_conclusive():
+            self.fate_members(contestant1, contestant2, contest)
+
         # If we can't tell anything we need to do more evaluation
         if contest.is_inconclusive():
             evaluation1 = self.evaluate_member(contestant1)
             evaluation2 = self.evaluate_member(contestant2)
 
             # Kill contestants immediately for an error was generated during evaluation
-            # They are no use to us
+            # They are of no use to us
             if evaluation1.errors > 0:
                 self.kill_member(contestant1, "fault", evaluation1.exception)
 
             if evaluation2.errors > 0:
                 self.kill_member(contestant2, "fault", evaluation2.exception)
-
-        # If the contest was conclusive then the members are now mature
-        if contest.is_conclusive():
-            self.mature_member(contestant1)
-            self.mature_member(contestant2)
-
-        # If the contest was conclusive then hand out the laurels
-        if contest.is_conclusive():
-            winner = contestant1 if contest.victor_id() == contestant1.id else contestant2
-            self.honour_member(winner)
-            loser = contestant1 if contest.loser_id() == contestant1.id else contestant2
-            self.chastise_member(loser)
-
-        # If contest was fatal remove the loser
-        if contest.is_fatal():
-            self.kill_member(loser, "fatality", None)
-
-        # If contest was classy mark the winner as attrative
-        if contest.is_classy():
-            self.hubbify_member(winner)
-
-        # If contest was between members with duplicate forms kill the later incarnation
-        if contest.is_duplicated():
-            duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
-            self.kill_member(duplicate, "duplicate", None)
 
         # Repopulate!
         newborn = None
@@ -402,6 +354,57 @@ class Simulation:
             if not self.running:
                 break
             self.step()
+
+    def record_member(self, member):
+        """
+        Generate a record on a member
+        """
+        member_id = member.id
+        step = self.n_steps
+        record = Record()
+
+        record.simulation = self.name
+        for property_key in self.properties.keys():
+            setattr(record, property_key, self.properties[property_key])
+
+        record.step = step
+        record.member_id = member_id
+        record.form_id = member.form.id if member.form else None
+        record.incarnation = member.incarnation
+        record.alive = member.alive
+        record.cause_death = member.cause_death
+        record.fault = str(member.fault)
+
+        record.mature = member.mature
+        record.attractive = member.attractive
+        record.evaluations = member.evaluations
+        record.victories = member.victories
+        record.defeats = member.defeats
+
+        if member.fault is None:
+            for component in self.components:
+                component.record_member(member, record)
+        return record
+
+    def record_ranking(self, member, rank):
+        """
+        Generate a record on a member ranking
+        """
+        member_id = member.id
+        record = Record()
+        record.simulation = self.name
+        for property_key in self.properties.keys():
+            setattr(record, property_key, self.properties[property_key])
+        step = self.n_steps
+        record.step = step
+        record.member_id = member_id
+        record.form_id = member.form.id if member.form else None
+        record.incarnation = member.incarnation
+        record.rank = rank
+        if member.fault is None:
+            for component in self.components:
+                component.record_ranking(member, record)
+        return record
 
     def report(self):
         """

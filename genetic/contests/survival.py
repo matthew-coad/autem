@@ -26,42 +26,32 @@ class Survival(Contester):
         outline.append_attribute("robustness", Dataset.Battle, [Role.Measure], "robustness")
         outline.append_attribute("attractivness", Dataset.Battle, [Role.Measure], "attractivness")
 
-    def contest_members(self, contestant1, contestant2, outcome):
+    def fate_members(self, contestant1, contestant2, outcome):
 
         # Make sure we define these extension values
-        outcome.survive_p = None
-        outcome.attractive_p = None
+        outcome.robustness = None
+        outcome.attractivness = None
 
-        if outcome.is_uncontested():
-            return None
+        # determine how long a record we will examine
+        record_length = min(len(contestant1.wonlost), len(contestant2.wonlost))
 
-        if outcome.is_inconclusive():
-            return None
-
-        # Get all conclusive contests from current members where the member was contestant1.
-        # We restrict it to contestant1 to stop contests being counted twice
-        simulation = contestant1.simulation
         loser = contestant2 if outcome.victor == 1 else contestant1
-        loser_victories = loser.victories
-        loser_defeats = loser.defeats
-        loser_contests = loser_victories + loser_defeats
-
         winner = contestant1 if outcome.victor == 1 else contestant2
-        winner_victories = winner.victories
-        winner_defeats = winner.defeats
-        winner_contests = winner_victories + winner_defeats
 
-        fatality_p = stats.binom_test(loser_victories, n=loser_contests, p=0.5, alternative='less')
-        attractive_p = stats.binom_test(winner_victories, n=winner_contests, p=0.5, alternative='greater')
+        loser_victories = sum(loser.wonlost[-record_length:])
+        winner_victories = sum(winner.wonlost[-record_length:])
 
-        if fatality_p < self.p_value:
+        robustness_p = stats.binom_test(loser_victories, n=record_length, p=0.5, alternative='less')
+        attractivness_p = stats.binom_test(winner_victories, n=record_length, p=0.5, alternative='greater')
+
+        if robustness_p < self.p_value:
             outcome.fatal()
 
-        if attractive_p < self.p_value:
+        if attractivness_p < self.p_value:
             outcome.hubba()
 
-        outcome.robustness = fatality_p
-        outcome.attractivness = 1 - attractive_p
+        outcome.robustness = robustness_p
+        outcome.attractivness = 1 - attractivness_p
 
     def record_member(self, member, record):
         """

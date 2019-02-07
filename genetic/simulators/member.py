@@ -17,19 +17,17 @@ class Member:
 
         self.cause_death = None
         self.fault = None
-
         self.attractive = 0
         self.mature = 0
+
         self.evaluations = 0
+        self.contests = 0
         self.victories = 0
         self.defeats = 0
+        self.wonlost = []
 
         self.evaluation = None
         self.contest = None
-
-        self.n_alive = 0
-        self.n_mature = 0
-        self.n_attractive = 0
 
     def incarnated(self, form, incarnation):
         """
@@ -40,7 +38,6 @@ class Member:
         self.form = form
         self.incarnation = incarnation
         self.alive = 1
-        self.n_alive = 1
 
     def evaluated(self, evaluation):
         """
@@ -55,7 +52,6 @@ class Member:
         """
         if self.mature == 0:
             self.mature = 1
-            self.n_mature = 1
 
     def hubbify(self):
         """
@@ -63,22 +59,20 @@ class Member:
         """
         if self.attractive == 0:
             self.attractive = 1
-            self.n_attractive = 1
 
     def contested(self, contest):
         """
         Record a battle result
         """
         self.contest = contest
-        self.n_alive = 0
-        self.n_mature = 0
-        self.n_attractive = 0
     
     def honour(self):
         self.victories += 1
+        self.wonlost.append(1)
 
     def chastise(self):
-        self.defeats += 1        
+        self.defeats += 1 
+        self.wonlost.append(0)
 
     def killed(self, cause_death, fault):
         """
@@ -91,9 +85,3 @@ class Member:
         self.alive = 0
         self.cause_death = cause_death
         self.fault = fault
-
-        self.n_alive = -1
-        if self.mature == 1:
-            self.n_mature = -1
-        if self.attractive == 1:
-            self.n_attractive = -1

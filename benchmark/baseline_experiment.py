@@ -27,10 +27,10 @@ def run_baseline_simulation(did, experiment_path):
             scorers.Accuracy(),
 
             learners.LogisticRegression(), 
-            learners.LinearDiscriminantAnalysis(), 
-            learners.KNeighborsClassifier(),  
-            learners.DecisionTreeClassifier(), 
-            learners.GaussianNB(), 
+            learners.LinearDiscriminantAnalysis(),
+            learners.KNeighborsClassifier(), 
+            learners.DecisionTreeClassifier(),
+            learners.GaussianNB(),
             learners.SVC(),
 
             contests.BestLearner(), 
