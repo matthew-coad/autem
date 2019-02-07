@@ -4,7 +4,7 @@ if __name__ == '__main__':
 import genetic
 import genetic.simulators as simulators
 import genetic.scorers as scorers
-import genetic.selectors.classification as selectors
+import genetic.preprocessors as preprocessors
 import genetic.learners.classification as learners
 import genetic.transforms as transforms
 import genetic.loaders as loaders
@@ -13,12 +13,12 @@ import genetic.contests as contests
 
 from benchmark.benchmark_common import *
 
-experiment_name = "baseline"
+experiment_name = "preprocess"
 population_size = 20
 seed = 1
-epochs = 20
+epochs = 40
 
-def run_baseline_simulation(did, experiment_path):
+def run_preprocess_experiment(did, experiment_path):
     data_name, x, y = get_benchmark_data(did)
     simulation = simulators.Simulation(
         data_name, 
@@ -30,13 +30,22 @@ def run_baseline_simulation(did, experiment_path):
             contests.Survival(),
             reporters.Path(experiment_path),
 
+            preprocessors.Binarizer(),
+            preprocessors.FastICA(),
+            preprocessors.FeatureAgglomeration(), 
+            preprocessors.MaxAbsScaler(), 
+            preprocessors.MinMaxScaler(), 
+            preprocessors.Normalizer(), 
+            preprocessors.PCA(), 
+            preprocessors.PolynomialFeatures(), 
+            preprocessors.RBFSampler(),
+            preprocessors.RobustScaler(), 
+            preprocessors.StandardScaler(),
+
             learners.GaussianNB(),
             learners.BernoulliNB(),
             learners.MultinomialNB(),
             learners.DecisionTreeClassifier(),
-            # learners.ExtraTreesClassifier(),
-            # learners.RandomForestClassifier(),
-            # learners.GradientBoostingClassifier(),
             learners.KNeighborsClassifier(),
             learners.LinearSVC(),
             learners.LogisticRegression(),
@@ -53,7 +62,7 @@ def run_experiment():
     prepare_experiment(experiment_path)
     dids = benchmark_dids()
     for did in dids:
-        run_baseline_simulation(did, experiment_path)
+        run_preprocess_experiment(did, experiment_path)
         genetic.ReportManager(simulations_path()).update_combined_reports()
         genetic.ReportManager(experiment_path).update_combined_reports()
 

@@ -1,12 +1,14 @@
 from ..learner import Learner
 from ...simulators import Dataset, Role, ChoicesParameter
 
-from sklearn.linear_model import LogisticRegression as LogisticRegressionModel
-from sklearn.tree import DecisionTreeClassifier as DecisionTreeClassifierModel
-from sklearn.neighbors import KNeighborsClassifier as KNeighborsClassifierModel
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LinearDiscriminantAnalysisModel
-from sklearn.naive_bayes import GaussianNB as GaussianNBModel
-from sklearn.svm import SVC as SVCModel
+import sklearn.linear_model
+import sklearn.neighbors
+import sklearn.discriminant_analysis
+import sklearn.svm
+import sklearn.naive_bayes
+import sklearn.tree
+import sklearn.ensemble
+# import sklearn.xgboost
 
 import numpy as np
 
@@ -34,25 +36,23 @@ classifier_config_dict = {
     },
 
     'sklearn.ensemble.ExtraTreesClassifier': {
-        'n_estimators': [100],
+        #'n_estimators': [100],
         'criterion': ["gini", "entropy"],
         'max_features': np.arange(0.05, 1.01, 0.05),
         'min_samples_split': range(2, 21),
         'min_samples_leaf': range(1, 21),
-        'bootstrap': [True, False]
+        #'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.RandomForestClassifier': {
-        'n_estimators': [100],
         'criterion': ["gini", "entropy"],
         'max_features': np.arange(0.05, 1.01, 0.05),
         'min_samples_split': range(2, 21),
         'min_samples_leaf':  range(1, 21),
-        'bootstrap': [True, False]
+        #'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.GradientBoostingClassifier': {
-        'n_estimators': [100],
         'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
         'max_depth': range(1, 11),
         'min_samples_split': range(2, 21),
@@ -74,6 +74,7 @@ classifier_config_dict = {
         'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
         'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.]
     },
+
 
     'sklearn.linear_model.LogisticRegression': {
         'penalty': ["l1", "l2"],
@@ -101,29 +102,29 @@ def get_parameters(config):
     parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
     return parameters
 
-class LogisticRegression(Learner):
+class GaussianNB(Learner):
 
     def __init__(self):
-        Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression'))
+        Learner.__init__(self, "GNB", "Gaussian Naive Bayes", get_parameters('sklearn.naive_bayes.GaussianNB'))
 
     def make_model(self):
-        return LogisticRegressionModel(solver = 'liblinear', multi_class = 'ovr')
+        return sklearn.naive_bayes.GaussianNB()
 
-class LinearDiscriminantAnalysis(Learner):
+class BernoulliNB(Learner):
 
     def __init__(self):
-        Learner.__init__(self, "LDA", "Linear Discriminant Analysis", [])
+        Learner.__init__(self, "BNB", "Bernoulli Naive-Bayes", get_parameters('sklearn.naive_bayes.BernoulliNB'))
 
     def make_model(self):
-        return LinearDiscriminantAnalysisModel()
+        return sklearn.naive_bayes.BernoulliNB()
 
-class KNeighborsClassifier(Learner):
+class MultinomialNB(Learner):
 
     def __init__(self):
-        Learner.__init__(self, "KNN", "K-Neighbors Classifier", get_parameters('sklearn.neighbors.KNeighborsClassifier'))
+        Learner.__init__(self, "MNB", "Multinomial Naive-Bayes", get_parameters('sklearn.naive_bayes.MultinomialNB'))
 
     def make_model(self):
-        return KNeighborsClassifierModel()
+        return sklearn.naive_bayes.MultinomialNB()
 
 class DecisionTreeClassifier(Learner):
 
@@ -131,20 +132,61 @@ class DecisionTreeClassifier(Learner):
         Learner.__init__(self, "CART", "Decision Tree Classifier", get_parameters('sklearn.tree.DecisionTreeClassifier'))
 
     def make_model(self):
-        return DecisionTreeClassifierModel()
+        return sklearn.tree.DecisionTreeClassifier()
 
-class GaussianNB(Learner):
-
-    def __init__(self):
-        Learner.__init__(self, "NB", "Gaussian Naive Bayes", get_parameters('sklearn.naive_bayes.GaussianNB'))
-
-    def make_model(self):
-        return GaussianNBModel()
-
-class SVC(Learner):
+class ExtraTreesClassifier(Learner):
 
     def __init__(self):
-        Learner.__init__(self, "SVC", "SVM Classifier", get_parameters('sklearn.svm.LinearSVC'))
+        Learner.__init__(self, "EXT", "Extra Trees", get_parameters('sklearn.ensemble.ExtraTreesClassifier'))
 
     def make_model(self):
-        return SVCModel(gamma='auto')
+        return sklearn.tree.ExtraTreeClassifier()
+
+class RandomForestClassifier(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "RF", "Random Forests", get_parameters('sklearn.ensemble.RandomForestClassifier'))
+
+    def make_model(self):
+        return sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
+
+class GradientBoostingClassifier(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "GB", "Gradient Boosting", get_parameters('sklearn.ensemble.GradientBoostingClassifier'))
+
+    def make_model(self):
+        return sklearn.ensemble.GradientBoostingClassifier(n_estimators = 100)
+
+class KNeighborsClassifier(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "KNN", "K-Neighbors Classifier", get_parameters('sklearn.neighbors.KNeighborsClassifier'))
+
+    def make_model(self):
+        return sklearn.neighbors.KNeighborsClassifier()
+
+class LinearSVC(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "LSV", "Linear SVC", get_parameters('sklearn.svm.LinearSVC'))
+
+    def make_model(self):
+        return sklearn.svm.LinearSVC()
+
+class LogisticRegression(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression'))
+
+    def make_model(self):
+        return sklearn.linear_model.LogisticRegression(solver = 'liblinear', multi_class = 'ovr')
+
+class LinearDiscriminantAnalysis(Learner):
+
+    def __init__(self):
+        Learner.__init__(self, "LDA", "Linear Discriminant Analysis", [])
+
+    def make_model(self):
+        return sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
+

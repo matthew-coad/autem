@@ -28,17 +28,19 @@ class Learner(Component):
         learner_name = self.name
 
         model = self.make_model()
+        model_params = model.get_params().keys()
         learner_name = self.name
+        params = {}
         if len(self.parameters) > 0:
             pairs = [(p.name, p.get_value(self, member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
-            model.set_params(**params)
+        if 'n_jobs' in model_params:
+            params['n_jobs'] = -1
+        model.set_params(**params)
 
-        if hasattr(preparations, "steps"):
-            steps = preparations.steps
-        else:
-            steps = []
-
+        if not hasattr(preparations, "steps"):
+            preparations.steps = []
+        steps = preparations.steps
         steps.append((learner_name, model))
         pipeline = Pipeline(steps=steps)
         preparations.pipeline = pipeline
