@@ -17,7 +17,7 @@ class Member:
         self.alive = 0
         self.incarnation = 0
 
-        self.cause_death = None
+        self.event = "initialized"
         self.fault = None
 
         self.preparations = SimpleNamespace()
@@ -56,6 +56,7 @@ class Member:
         self.form = form
         self.incarnation = incarnation
         self.alive = 1
+        self.event = "birth"
 
     def prepared(self):
         """
@@ -81,6 +82,7 @@ class Member:
         self._contested()
         self.contests += 1
         self.standoffs += 1
+        self.event = "standoff"
 
     def honour(self):
         """
@@ -90,12 +92,14 @@ class Member:
         self.contests += 1
         self.victories += 1
         self.wonlost.append(1)
+        self.event = "victory"
 
     def chastise(self):
         self._contested()
         self.contests += 1
         self.defeats += 1 
         self.wonlost.append(0)
+        self.event = "defeat"
 
     def maturing(self, maturity, mature):
         """
@@ -107,8 +111,10 @@ class Member:
 
     def checked_out(self, attractiveness, attractive):
         """
-        Notify member that its being checked out to determine its attractiveness
+        Notify member that its being checked out to determine its fame
         """
+        if self.attractive == 0 and attractive == 1:
+            self.event = "inducted"
         if self.attractive == 0:
             self.attractive = attractive
         self.attractiveness = attractiveness
@@ -128,19 +134,25 @@ class Member:
     def rank(self, ranking):
         self.ranking = ranking
 
-    def failed(self, fault):
+    def faulted(self, fault):
         """
-        Notify this member that is has failed due to an error
+        Notify this member that is has a fault
         """
-        self.fault = fault        
+        self.event = "fault"
+        self.fault = fault
+        self.alive = 0
 
-    def killed(self, cause_death):
+    def killed(self):
         """
         Notify this member that is has been killed
         """
-        if not self.cause_death is None:
-            raise RuntimeError("Member already killed")
         if self.alive == 0:
             raise RuntimeError("Member not alive")
+        self.event = "death"
         self.alive = 0
-        self.cause_death = cause_death
+
+    def finshed(self):
+        """
+        Notify that this member is part of finalisation
+        """
+        self.event = "final"

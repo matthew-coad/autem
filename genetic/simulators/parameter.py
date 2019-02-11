@@ -69,5 +69,3 @@ class Parameter:
     def record_member(self, component, member, record):
         setattr(record, self.get_record_name(component), self.get_value(component, member))
 
-    def record_ranking(self, component, member, record):
-        setattr(record, self.get_record_name(component), self.get_value(component, member))

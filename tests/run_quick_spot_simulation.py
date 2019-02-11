@@ -41,7 +41,6 @@ def run_quick_spot_simulation():
 
     manager = genetic.ReportManager(simulations_path())
     manager.update_combined_battle_report()
-    manager.update_combined_ranking_report()
     manager.update_combined_outline_report()
 
     return simulation

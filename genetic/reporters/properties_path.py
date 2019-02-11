@@ -25,7 +25,6 @@ class PropertiesPath(Reporter):
         ranking_frame = self.get_ranking_frame(simulation)
         simulation_info = self.get_simulation_info(simulation)
         self.manager.update_battle_report(simulation_info, report_id, battle_frame)
-        self.manager.update_ranking_report(simulation_info, report_id, ranking_frame)
 
     def start_simulation(self, simulation):
         simulation_info = self.get_simulation_info(simulation)

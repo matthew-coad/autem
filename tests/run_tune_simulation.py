@@ -31,18 +31,18 @@ def run_tune_simulation():
             learners.KNeighborsClassifier(),  
             learners.DecisionTreeClassifier(), 
             learners.GaussianNB(), 
-            learners.SVC(),
+            learners.LinearSVC(),
 
         ], 
         population_size=20)
     simulation.start()
     simulation.run(200)
+    simulation.finish()
     simulation.report()
 
     manager = genetic.ReportManager(simulations_path())
     manager.update_combined_outline_report()
     manager.update_combined_battle_report()
-    # manager.update_combined_ranking_report()
 
     return simulation
 

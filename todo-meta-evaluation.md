@@ -20,11 +20,9 @@ Add learner tuning **done**
 
 Survival/attractiveness rated on recent contests **done**
 
-Ranking in battle reports
+Ranking in battle reports **done**
 
-Show all ranked members in reports
-
-Rank report becomes final rank report
+Add simulation event field
 
 
 

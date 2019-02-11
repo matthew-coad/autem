@@ -234,17 +234,6 @@ class Component:
         for parameter in self.parameters:
             parameter.record_member(self, member, record)
 
-    def record_ranking(self, member, record):
-        """
-        Record the state of a member
-        """
-        if not self.is_active(member):
-            return None
-        if self.group_name:
-            setattr(record, self.group_name, self.get_active_name(member))
-        for parameter in self.parameters:
-            parameter.record_ranking(self, member, record)
-
     def report_simulation(self, simulation):
         """
         Report on the progress of a simulation

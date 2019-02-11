@@ -27,11 +27,5 @@ class Data(Loader):
             return None
         record.data = self.data_name
 
-    def record_ranking(self, member, record):
-        super().record_ranking(member, record)
-        if not self.is_active(member):
-            return None
-        record.data = self.data_name
-
     def load_divided(self):
         return (self.x, self.y)

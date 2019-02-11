@@ -12,13 +12,6 @@ class Reporter(Component):
         frame = get_report_frame(records)
         return frame
 
-    def get_ranking_frame(self, simulation):
-        records = simulation.ranking_reports
-        if not records:
-            return None
-        frame = get_report_frame(records)
-        return frame
-
     def get_outline_frame(self, simulation):
         outline = simulation.outline
 

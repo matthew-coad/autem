@@ -27,7 +27,6 @@ class Simulation:
         self.forms = {}
         self.ranking = None
         self.contest_reports = []
-        self.ranking_reports = []
         self.n_steps = 0
         self.running = False
         self.stopping = False
@@ -128,11 +127,12 @@ class Simulation:
         self.incarnate_member(member)
         return member
 
-    def hubbify_member(self, member):
-        member.hubbify()
+    def fail_member(self, member, fault):
+        member.faulted(fault)
+        self.members.remove(member)
 
-    def kill_member(self, member, cause_death):
-        member.killed(cause_death)
+    def kill_member(self, member):
+        member.killed()
         self.members.remove(member)
 
     def outline_simulation(self):
@@ -146,10 +146,8 @@ class Simulation:
         outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
         outline.append_attribute("form_id", Dataset.Battle, [Role.ID])
-
         outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
-        outline.append_attribute("alive", Dataset.Battle, [Role.Property])
-        outline.append_attribute("cause_death", Dataset.Battle, [Role.Property])
+        outline.append_attribute("event", Dataset.Battle, [Role.Property])
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
         outline.append_attribute("contests", Dataset.Battle, [Role.Property])
@@ -186,19 +184,15 @@ class Simulation:
         if member.ready:
             raise RuntimeError("Member already prepared")
 
-        if member.fault is None:
-            for component in self.components:
-                try:
-                    component.prepare_member(member)
-                except Exception as ex:
-                    member.failed(ex)
-                    break
-            member.prepared()
+        for component in self.components:
+            try:
+                component.prepare_member(member)
+            except Exception as ex:
+                self.fail_member(member, ex)
+                break
 
-        # Kill contestants immediately for an error was generated
-        # They are of no use to us
-        if not member.fault is None:
-            self.kill_member(member, "prepare fault")
+        if member.alive:
+            member.prepared()
 
     def evaluate_member(self, member):
         """
@@ -212,13 +206,8 @@ class Simulation:
                 try:
                     component.evaluate_member(member)
                 except Exception as ex:
-                    member.failed(ex)
+                    self.fail_member(member, ex)
                     break
-
-        # Kill contestants immediately for an error was generated during evaluation
-        # They are of no use to us
-        if member.alive and not member.fault is None:
-            self.kill_member(member, "evaluate fault")
 
     def contest_members(self, contestant1, contestant2):
         outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
@@ -227,7 +216,7 @@ class Simulation:
             # If the contestants have the same form mark that they are duplicated
             outcome.duplicated()
             duplicate = contestant1 if contestant1.incarnation > contestant2.incarnation else contestant2
-            self.kill_member(duplicate, "duplicate")
+            self.fail_member(duplicate, "duplicate")
             return outcome
 
         for component in self.components:
@@ -250,10 +239,10 @@ class Simulation:
             component.stress_members(contestant1, contestant2, outcome)
 
         if contestant1.fatality == 1:
-            self.kill_member(contestant1, "fatality")
+            self.kill_member(contestant1)
 
         if contestant2.fatality == 1:
-            self.kill_member(contestant2, "fatality")
+            self.kill_member(contestant2)
 
     def rate_member(self, member):
         """
@@ -267,13 +256,8 @@ class Simulation:
             try:
                 component.rate_member(member)
             except Exception as ex:
-                member.failed(ex)
+                self.fail_member(member, ex)
                 break
-
-        # Kill contestants immediately for an error was generated during evaluation
-        # They are of no use to us
-        if member.alive and not member.fault is None:
-            self.kill_member(member, "rate fault")
 
     def rank_members(self):
         """
@@ -375,6 +359,25 @@ class Simulation:
         if len(self.members) < 2:
             self.running = False
 
+    def finish(self):
+        """
+        Perform final simulation processing
+        """
+
+        if self.running:
+            self.running = False
+
+        random_state = self.random_state
+        members = self.members
+
+        for member in members:
+            member.finshed()
+
+        # final report on ranked members
+        ranked_members = [ m for m in self.members if m.alive and m.attractive ]
+        for member in ranked_members:
+            self.contest_reports.append(self.record_member(member))
+
     def stop(self):
         """
         Indicate that the simulation should start stopping
@@ -406,8 +409,7 @@ class Simulation:
         record.member_id = member_id
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
-        record.alive = member.alive
-        record.cause_death = member.cause_death
+        record.event = member.event
         record.fault = str(member.fault)
 
         record.contests = member.contests
@@ -431,40 +433,11 @@ class Simulation:
                 component.record_member(member, record)
         return record
 
-    def record_ranking(self, member):
-        """
-        Generate a record on a member ranking
-        """
-        member_id = member.id
-        record = Record()
-        record.simulation = self.name
-        for property_key in self.properties.keys():
-            setattr(record, property_key, self.properties[property_key])
-        step = self.n_steps
-        record.step = step
-        record.member_id = member_id
-        record.form_id = member.form.id if member.form else None
-        record.incarnation = member.incarnation
-
-        record.rating = member.rating
-        record.ranking = member.ranking
-
-        if member.fault is None:
-            for component in self.components:
-                component.record_ranking(member, record)
-        return record
-
     def report(self):
         """
         Report on progress of the simulation
         """
-
-        #if not self.ranking_reports and self.ranking.is_conclusive():
-        #    top_rank = self.ranking.members[0]
-        #    self.ranking_reports.append(self.record_ranking(top_rank, 1))
-
         for component in self.components:
             component.report_simulation(self)
         self.contest_reports = []
-        self.ranking_reports = []
     
