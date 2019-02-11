@@ -18,8 +18,9 @@ population_size = 20
 seed = 1
 epochs = 40
 
-def run_preprocess_experiment(did, experiment_path):
+def run_preprocess_experiment(did, seed, experiment_path):
     data_name, x, y = get_benchmark_data(did)
+    simulation_path = experiment_path.joinpath(data_name).joinpath(str(seed))
     simulation = simulators.Simulation(
         data_name, 
         [
@@ -28,7 +29,7 @@ def run_preprocess_experiment(did, experiment_path):
 
             contests.BestLearner(), 
             contests.Survival(),
-            reporters.Path(experiment_path),
+            reporters.Path(simulation_path),
 
             preprocessors.Binarizer(),
             preprocessors.FastICA(),
@@ -53,18 +54,21 @@ def run_preprocess_experiment(did, experiment_path):
         ], 
         population_size=population_size,
         seed = seed,
-        properties= { "experiment": experiment_name })
+        properties= { "experiment": experiment_name, "seed": seed })
     run_simulation(simulation, epochs)
+    genetic.ReportManager(simulation_path).update_combined_reports()
     return simulation
 
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
     dids = benchmark_dids()
+    seeds = benchmark_seeds()
     for did in dids:
-        run_preprocess_experiment(did, experiment_path)
-        genetic.ReportManager(simulations_path()).update_combined_reports()
-        genetic.ReportManager(experiment_path).update_combined_reports()
+        for seed in seeds:
+            run_preprocess_experiment(did, seed, experiment_path)
+            genetic.ReportManager(simulations_path()).update_combined_reports()
+            genetic.ReportManager(experiment_path).update_combined_reports()
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)

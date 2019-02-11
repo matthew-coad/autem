@@ -15,6 +15,9 @@ def data_path():
 def simulations_path():
     return Path("benchmark/simulations")
 
+def benchmark_seeds():
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
 def full_benchmark_dids():
     return [11, 18, 23, 36, 37, 50, 54, 333, 334, 335, 375, 469, 1462, 1464, 1480, 1489, 40496, 40981]
 

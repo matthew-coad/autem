@@ -10,8 +10,7 @@ class Path(Reporter):
         self.manager = ReportManager(self.path)
 
     def get_simulation_info(self, simulation):
-        simulation_path = self.path.joinpath(simulation.name)
-        simulation_info = self.manager.get_simulation(simulation_path)
+        simulation_info = self.manager.get_simulation(self.path)
         return simulation_info
 
     def report_simulation(self, simulation):
@@ -23,7 +22,6 @@ class Path(Reporter):
         simulation_info = self.get_simulation_info(simulation)
         if not battle_frame is None:
             self.manager.update_battle_report(simulation_info, report_id, battle_frame)
-
 
     def start_simulation(self, simulation):
         simulation_info = self.get_simulation_info(simulation)
