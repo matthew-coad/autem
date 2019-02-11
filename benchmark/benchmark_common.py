@@ -15,6 +15,12 @@ def data_path():
 def simulations_path():
     return Path("benchmark/simulations")
 
+def benchmark_epochs():
+    return 40
+
+def benchmark_population_size():
+    return 20
+
 def benchmark_seeds():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -53,6 +59,8 @@ def run_simulation(simulation, epochs):
     simulation.start()
     for index in range(epochs):
         simulation.run(100)
+        if index == epochs - 1 or not simulation.running:
+            simulation.finish()
         simulation.report()
         if not simulation.running:
             break

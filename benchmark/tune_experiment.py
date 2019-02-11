@@ -13,12 +13,9 @@ import genetic.contests as contests
 
 from benchmark.benchmark_common import *
 
-experiment_name = "baseline"
-population_size = 20
-seed = 1
-epochs = 40
+experiment_name = "tune"
 
-def run_baseline_simulation(did, seed, experiment_path):
+def run_tune_simulation(did, seed, experiment_path, epochs, population_size):
     data_name, x, y = get_benchmark_data(did)
     simulation_path = experiment_path.joinpath(data_name).joinpath(str(seed))
     simulation = simulators.Simulation(
@@ -52,9 +49,11 @@ def run_experiment():
     prepare_experiment(experiment_path)
     dids = benchmark_dids()
     seeds = benchmark_seeds()
+    epochs = benchmark_epochs()
+    population_size = benchmark_population_size()
     for did in dids:
         for seed in seeds:
-            run_baseline_simulation(did, seed, experiment_path)
+            run_tune_simulation(did, seed, experiment_path, epochs, population_size)
             genetic.ReportManager(simulations_path()).update_combined_reports()
             genetic.ReportManager(experiment_path).update_combined_reports()
 
