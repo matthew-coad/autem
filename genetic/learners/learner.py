@@ -8,6 +8,7 @@ from sklearn.pipeline import Pipeline
 import numpy as np
 from scipy import stats
 
+import time
 
 class Learner(Component):
 
@@ -58,13 +59,19 @@ class Learner(Component):
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
+        start = time.time()
+
         x,y = loader.load_divided()
         test_size = 0.3
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
+
+        end = time.time()
+        duration = end - start
 
         pipeline = preparations.pipeline
         pipeline.fit(x_train, y_train)
         y_pred = pipeline.predict(x_test)
         test_score = scorer.score(y_test, y_pred)
         member.accuracy_measured(test_score)
+        member.duration_measured(duration)
 

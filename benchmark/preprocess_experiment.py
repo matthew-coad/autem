@@ -24,6 +24,7 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
             scorers.Accuracy(),
 
             contests.BestLearner(), 
+            contests.PreferFast(),
             contests.Survival(),
             reporters.Path(simulation_path),
 
@@ -60,6 +61,10 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
             learners.LinearSVC(),
             learners.LogisticRegression(),
             learners.LinearDiscriminantAnalysis(),
+
+            learners.ExtraTreesClassifier(),
+            learners.RandomForestClassifier(),
+            learners.GradientBoostingClassifier(),
         ], 
         population_size=population_size,
         seed = seed,

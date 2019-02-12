@@ -154,8 +154,11 @@ class Simulation:
         outline.append_attribute("standoffs", Dataset.Battle, [Role.Property])
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
+        outline.append_attribute("dominations", Dataset.Battle, [Role.Property])
+        outline.append_attribute("thrashings", Dataset.Battle, [Role.Property])
 
         outline.append_attribute("accuracy", Dataset.Battle, [ Role.Measure ])
+        outline.append_attribute("duration", Dataset.Battle, [ Role.Measure ])
         outline.append_attribute("maturity", Dataset.Battle, [Role.Measure])
         outline.append_attribute("mature", Dataset.Battle, [Role.Property])
         outline.append_attribute("robustness", Dataset.Battle, [Role.Property])
@@ -165,13 +168,6 @@ class Simulation:
 
         outline.append_attribute("rating", Dataset.Battle, [ Role.KPI ])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
-
-        # Rankings
-        outline.append_attribute("step", Dataset.Ranking, [Role.ID])
-        outline.append_attribute("member_id", Dataset.Ranking, [Role.ID])
-
-        outline.append_attribute("incarnation", Dataset.Ranking, [Role.Property])
-        outline.append_attribute("ranking", Dataset.Ranking, [Role.Property])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -227,10 +223,11 @@ class Simulation:
             contestant2.stand_off()
 
         if outcome.is_conclusive():
+            decisive = outcome.is_decisive()
             winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
-            winner.honour()
+            winner.victory(decisive)
             loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
-            loser.chastise()
+            loser.defeat(decisive)
 
         return outcome
 
@@ -416,8 +413,11 @@ class Simulation:
         record.standoffs = member.standoffs
         record.victories = member.victories
         record.defeats = member.defeats
+        record.dominations = member.dominations
+        record.thrashings = member.thrashings
 
         record.accuracy = member.accuracy
+        record.duration = member.duration
         record.maturity = member.maturity
         record.mature = member.mature
         record.robustness = member.robustness

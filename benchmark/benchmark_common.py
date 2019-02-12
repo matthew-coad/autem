@@ -45,7 +45,6 @@ def prepare_directory(path):
     os.mkdir(path)
 
 def prepare_experiment(path):
-    warnings.filterwarnings("error")
     prepare_OpenML()
     prepare_directory(path)
 

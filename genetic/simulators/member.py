@@ -27,6 +27,8 @@ class Member:
 
         self.accuracies = []
         self.accuracy = None
+        self.durations = []
+        self.duration = None
 
         self.maturity = None
         self.mature = 0
@@ -35,6 +37,8 @@ class Member:
         self.standoffs = 0
         self.victories = 0
         self.defeats = 0
+        self.dominations = 0
+        self.thrashings = 0
         self.wonlost = []
 
         self.robustness = None
@@ -71,6 +75,13 @@ class Member:
         self.accuracies.append(accuracy)
         self.accuracy = np.array(self.accuracies).mean()
 
+    def duration_measured(self, duration):
+        """
+        Notify this member that its duration was measured
+        """
+        self.durations.append(duration)
+        self.duration = np.array(self.durations).mean()        
+
     def _contested(self):
         self.attractiveness = None
         self.robustness = None
@@ -84,22 +95,31 @@ class Member:
         self.standoffs += 1
         self.event = "standoff"
 
-    def honour(self):
+    def victory(self, decisive):
         """
         Record a victory
         """
         self._contested()
         self.contests += 1
         self.victories += 1
+        if decisive:
+            self.dominations += 1
+            self.event = "domination"
+        else:
+            self.event = "victory"
         self.wonlost.append(1)
-        self.event = "victory"
 
-    def chastise(self):
+    def defeat(self, decisive):
         self._contested()
         self.contests += 1
         self.defeats += 1 
+        if decisive:
+            self.thrashings += 1
+            self.event = "thrashing"
+        else:
+            self.event = "defeat"
+
         self.wonlost.append(0)
-        self.event = "defeat"
 
     def maturing(self, maturity, mature):
         """

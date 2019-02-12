@@ -53,11 +53,18 @@ class BestLearner(Contester):
             outcome.inconclusive()
             return None
 
-        # TODO Differentiate between decisive and indecisive
+        # Determine the victor
         if t_statistic > 0:
-            outcome.decisive(1)
+            victor = 1
         else:
-            outcome.decisive(2)
+            victor = 2
+
+        decisive = maturity < required_p_value / 2
+        
+        if decisive:
+            outcome.decisive(victor)
+        else:
+            outcome.indecisive(victor)
 
     def rate_member(self, member):
         """

@@ -48,6 +48,12 @@ class Outcome(SimpleNamespace):
     def is_conclusive(self):
         return self.type == OutcomeType.Decisive or self.type == OutcomeType.Indecisive
 
+    def is_decisive(self):
+        return self.type == OutcomeType.Decisive
+
+    def is_indecisive(self):
+        return self.type == OutcomeType.Indecisive
+
     def is_inconclusive(self):
         return self.type == OutcomeType.Inconclusive
 
