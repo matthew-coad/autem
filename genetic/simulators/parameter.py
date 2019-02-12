@@ -13,6 +13,9 @@ class Parameter:
     def get_mutated_value(self, component, member):
         raise NotImplementedError()
 
+    def has_configuration(self, component, member):
+        return hasattr(member.configuration, component.name)
+
     def get_configuration(self, component, member):
         return getattr(member.configuration, component.name)
 
@@ -67,5 +70,9 @@ class Parameter:
         self.set_value(component, member, value)
 
     def record_member(self, component, member, record):
-        setattr(record, self.get_record_name(component), self.get_value(component, member))
+        if self.has_configuration(component, member):
+            setattr(record, self.get_record_name(component), self.get_value(component, member))
+        else:
+            setattr(record, self.get_record_name(component), None)
+
 

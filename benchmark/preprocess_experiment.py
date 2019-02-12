@@ -6,7 +6,6 @@ import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.preprocessors as preprocessors
 import genetic.learners.classification as learners
-import genetic.transforms as transforms
 import genetic.loaders as loaders
 import genetic.reporters as reporters
 import genetic.contests as contests
@@ -28,17 +27,30 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
             contests.Survival(),
             reporters.Path(simulation_path),
 
-            preprocessors.Binarizer(),
-            preprocessors.FastICA(),
-            preprocessors.FeatureAgglomeration(), 
-            preprocessors.MaxAbsScaler(), 
-            preprocessors.MinMaxScaler(), 
-            preprocessors.Normalizer(), 
-            preprocessors.PCA(), 
-            preprocessors.PolynomialFeatures(), 
-            preprocessors.RBFSampler(),
-            preprocessors.RobustScaler(), 
+            # Engineers
+            preprocessors.NoEngineering(),
+            preprocessors.PolynomialFeatures(),
+
+            # Scalers
+            preprocessors.NoScaler(),
+            preprocessors.MaxAbsScaler(),
+            preprocessors.MinMaxScaler(),
+            preprocessors.Normalizer(),
+            preprocessors.RobustScaler(),
             preprocessors.StandardScaler(),
+            preprocessors.Binarizer(),
+
+            # Feature Reducers
+            preprocessors.NoReducer(),
+            preprocessors.FastICA(),
+            preprocessors.FeatureAgglomeration(),
+            preprocessors.PCA(),
+            preprocessors.SelectPercentile(),
+
+            # Approximators
+            preprocessors.NoApproximator(),
+            preprocessors.RBFSampler(),
+            preprocessors.Nystroem(),
 
             learners.GaussianNB(),
             learners.BernoulliNB(),
@@ -59,16 +71,15 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    dids = benchmark_dids()
+    dids = benchmark_dids()[0:1]
     seeds = benchmark_seeds()
-    epochs = benchmark_epochs()
+    epochs = 100
     population_size = benchmark_population_size()
 
     for did in dids:
-        for seed in seeds:
-            run_preprocess_experiment(did, seed, experiment_path, epochs, population_size)
-            genetic.ReportManager(simulations_path()).update_combined_reports()
-            genetic.ReportManager(experiment_path).update_combined_reports()
+        run_preprocess_experiment(did, seeds[0], experiment_path, epochs, population_size)
+        genetic.ReportManager(simulations_path()).update_combined_reports()
+        genetic.ReportManager(experiment_path).update_combined_reports()
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)

@@ -227,9 +227,7 @@ class Component:
         """
         Record the state of a member
         """
-        if not self.is_active(member):
-            return None
-        if not self.group_name is None:
+        if not self.group_name is None and not hasattr(record, self.group_name):
             setattr(record, self.group_name, self.get_active_name(member))
         for parameter in self.parameters:
             parameter.record_member(self, member, record)
