@@ -76,10 +76,10 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    dids = benchmark_dids()[0:1]
+    dids = benchmark_dids()[1:]
     seeds = benchmark_seeds()
-    epochs = 100
     population_size = benchmark_population_size()
+    epochs = benchmark_epochs()
 
     for did in dids:
         run_preprocess_experiment(did, seeds[0], experiment_path, epochs, population_size)

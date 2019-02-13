@@ -151,6 +151,7 @@ class Simulation:
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
         outline.append_attribute("contests", Dataset.Battle, [Role.Property])
+        outline.append_attribute("evaluations", Dataset.Battle, [Role.Property])
         outline.append_attribute("standoffs", Dataset.Battle, [Role.Property])
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
@@ -204,6 +205,7 @@ class Simulation:
                 except Exception as ex:
                     self.fail_member(member, ex)
                     break
+        member.evaluated()
 
     def contest_members(self, contestant1, contestant2):
         outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
@@ -330,8 +332,10 @@ class Simulation:
 
         # If we can't tell anything we need to do more evaluation
         if contest.is_inconclusive():
-            self.evaluate_member(contestant1)
-            self.evaluate_member(contestant2)
+            if contestant1.evaluations < contestant2.evaluations:
+                self.evaluate_member(contestant1)
+            else:
+                self.evaluate_member(contestant2)
 
         # Repopulate!
         newborn = None
@@ -410,6 +414,7 @@ class Simulation:
         record.fault = str(member.fault)
 
         record.contests = member.contests
+        record.evaluations = member.evaluations
         record.standoffs = member.standoffs
         record.victories = member.victories
         record.defeats = member.defeats

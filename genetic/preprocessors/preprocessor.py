@@ -22,7 +22,7 @@ class Preprocesssor(Component):
         Component.__init__(self, name, group, parameters)
         self.label = label
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         raise NotImplementedError()
 
     def configure_preprocessor(self, member, pre_processor):
@@ -41,7 +41,7 @@ class Preprocesssor(Component):
         simulation = member.simulation
         preparations = member.preparations
         processor_name = self.name
-        preprocessor = self.make_preprocessor()
+        preprocessor = self.make_preprocessor(member)
         if preprocessor is None:
             return None
 
@@ -64,7 +64,7 @@ class NoEngineering(Engineer):
     def __init__(self):
         Engineer.__init__(self, "ENO", "No Engineering", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return None
 
 class PolynomialFeatures(Engineer):
@@ -74,7 +74,7 @@ class PolynomialFeatures(Engineer):
     def __init__(self):
         Engineer.__init__(self, "PLY", "Polynomial Features", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.PolynomialFeatures(degree=2, include_bias = False, interaction_only = False)
 
 # Scalers
@@ -89,7 +89,7 @@ class NoScaler(Scaler):
     def __init__(self):
         Scaler.__init__(self, "SNO", "No Scaling", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return None
 
 class MaxAbsScaler(Scaler):
@@ -97,7 +97,7 @@ class MaxAbsScaler(Scaler):
     def __init__(self):
         Scaler.__init__(self, "MAS", "Max Absolute Scaler", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.MaxAbsScaler()
 
 class MinMaxScaler(Scaler):
@@ -105,7 +105,7 @@ class MinMaxScaler(Scaler):
     def __init__(self):
         Scaler.__init__(self, "MMS", "Min Max Scaler", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.MinMaxScaler()
 
 class Normalizer(Scaler):
@@ -117,7 +117,7 @@ class Normalizer(Scaler):
     def __init__(self):
         Scaler.__init__(self, "NOR", "Normalizer", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.Normalizer()
 
 class RobustScaler(Scaler):
@@ -125,7 +125,7 @@ class RobustScaler(Scaler):
     def __init__(self):
         Scaler.__init__(self, "RBS", "Robust Scaler", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.RobustScaler()
 
 class StandardScaler(Scaler):
@@ -133,7 +133,7 @@ class StandardScaler(Scaler):
     def __init__(self):
         Scaler.__init__(self, "SCL", "Standard Scaler", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.RobustScaler()
 
 class Binarizer(Scaler):
@@ -145,7 +145,7 @@ class Binarizer(Scaler):
     def __init__(self):
         Scaler.__init__(self, "BIN", "Binarizer", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.Binarizer()
 
 class PowerTransformer(Scaler):
@@ -158,7 +158,7 @@ class PowerTransformer(Scaler):
     def __init__(self):
         Scaler.__init__(self, "PWR", "Power Transform", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.preprocessing.PowerTransformer()
 
 # Feature Reducers
@@ -173,7 +173,7 @@ class NoReducer(Reducer):
     def __init__(self):
         Reducer.__init__(self, "RNO", "No Reducer", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return None
 
 class FastICA(Reducer):
@@ -185,7 +185,7 @@ class FastICA(Reducer):
     def __init__(self):
         Reducer.__init__(self, "FIC", "Fast ICA", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.decomposition.FastICA()
 
 class FeatureAgglomeration(Reducer):
@@ -198,7 +198,7 @@ class FeatureAgglomeration(Reducer):
     def __init__(self):
         Reducer.__init__(self, "FAG", "Feature Agglomeration", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.cluster.FeatureAgglomeration()
 
 class PCA(Reducer):
@@ -210,7 +210,7 @@ class PCA(Reducer):
     def __init__(self):
         Reducer.__init__(self, "PCA", "PCA", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.decomposition.PCA(svd_solver = 'randomized')
 
 class SelectPercentile(Reducer):
@@ -223,9 +223,11 @@ class SelectPercentile(Reducer):
     def __init__(self):
         Reducer.__init__(self, "SPC", "Select Percentile", self.config)
 
-    def make_preprocessor(self):
-        scorer = [p for p in self.parameters if p.name == "scorer" ][0]
-        percentile = [p for p in self.parameters if p.name == "percentile" ][0]
+    def make_preprocessor(self, member):
+        scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]
+        percentile_param = [p for p in self.parameters if p.name == "percentile" ][0]
+        scorer = scorer_param.get_value(self, member)
+        percentile = percentile_param.get_value(self, member)
         score_func = None
         if scorer == "f_classif":
             score_func = sklearn.feature_selection.f_classif
@@ -252,7 +254,7 @@ class NoApproximator(Approximator):
     def __init__(self):
         Approximator.__init__(self, "ANO", "No Approximator", {})
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return None
 
 class RBFSampler(Approximator):
@@ -264,7 +266,7 @@ class RBFSampler(Approximator):
     def __init__(self):
         Approximator.__init__(self, "RBF", "RBF Sampler", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.kernel_approximation.RBFSampler()
 
 class Nystroem(Approximator):
@@ -278,6 +280,6 @@ class Nystroem(Approximator):
     def __init__(self):
         Approximator.__init__(self, "NYS", "Nystroem", self.config)
 
-    def make_preprocessor(self):
+    def make_preprocessor(self, member):
         return sklearn.kernel_approximation.Nystroem()
 

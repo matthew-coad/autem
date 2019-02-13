@@ -34,6 +34,7 @@ class Member:
         self.mature = 0
 
         self.contests = 0
+        self.evaluations = 0
         self.standoffs = 0
         self.victories = 0
         self.defeats = 0
@@ -67,6 +68,9 @@ class Member:
         Notify this member that it has been prepared
         """
         self.ready = 1
+
+    def evaluated(self):
+        self.evaluations += 1
 
     def accuracy_measured(self, accuracy):
         """
