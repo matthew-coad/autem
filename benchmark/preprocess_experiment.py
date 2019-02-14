@@ -12,20 +12,22 @@ import genetic.contests as contests
 
 from benchmark.benchmark_common import *
 
+from openML_rater import OpenMLRater
+
 experiment_name = "preprocess"
 
-def run_preprocess_experiment(did, seed, experiment_path, epochs, population_size):
+def run_preprocess_experiment(did, task_id, seed, experiment_path, epochs, population_size):
     data_name, x, y = get_benchmark_data(did)
-    simulation_path = experiment_path.joinpath(data_name).joinpath(str(seed))
+    simulation_path = experiment_path.joinpath(data_name)
     simulation = simulators.Simulation(
         data_name, 
         [
             loaders.Data(data_name, x, y),
             scorers.Accuracy(),
 
-            contests.BestLearner(), 
-            contests.PreferFast(),
+            contests.BestLearner(),
             contests.Survival(),
+            OpenMLRater(task_id),
             reporters.Path(simulation_path),
 
             # Engineers
@@ -62,9 +64,9 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
             learners.LogisticRegression(),
             learners.LinearDiscriminantAnalysis(),
 
-            learners.ExtraTreesClassifier(),
-            learners.RandomForestClassifier(),
-            learners.GradientBoostingClassifier(),
+            # learners.ExtraTreesClassifier(),
+            #learners.RandomForestClassifier(),
+            # learners.GradientBoostingClassifier(),
         ], 
         population_size=population_size,
         seed = seed,
@@ -76,15 +78,20 @@ def run_preprocess_experiment(did, seed, experiment_path, epochs, population_siz
 def run_experiment():
     experiment_path = simulations_path().joinpath(experiment_name)
     prepare_experiment(experiment_path)
-    dids = benchmark_dids()[1:]
+
+    # EEG eye state: data_id:1471, task_id:14951
+    did = 1471
+    task_id = 14951
     seeds = benchmark_seeds()
     population_size = benchmark_population_size()
     epochs = benchmark_epochs()
 
-    for did in dids:
-        run_preprocess_experiment(did, seeds[0], experiment_path, epochs, population_size)
-        genetic.ReportManager(simulations_path()).update_combined_reports()
-        genetic.ReportManager(experiment_path).update_combined_reports()
+    run_preprocess_experiment(did, task_id, seeds[0], experiment_path, epochs, population_size)
+
+#    for did in dids:
+#        run_preprocess_experiment(did, seeds[0], experiment_path, epochs, population_size)
+#        genetic.ReportManager(simulations_path()).update_combined_reports()
+#        genetic.ReportManager(experiment_path).update_combined_reports()
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)

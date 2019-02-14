@@ -10,6 +10,13 @@ class Component:
         self.group_name = group_name
         self.parameters = parameters
 
+    def start_simulation(self, simulation):
+        """
+        Start a simulation
+        """
+        for parameter in self.parameters:
+            parameter.start_simulation(self, simulation)
+
     def outline_simulation(self, simulation, outline):
         """
         Outline what information is going to be supplied by a simulation
@@ -19,13 +26,6 @@ class Component:
             outline.append_attribute(self.group_name, Dataset.Ranking, [ Role.Configuration ], self.group_name)
         for parameter in self.parameters:
             parameter.outline_simulation(self, simulation, outline)
-
-    def start_simulation(self, simulation):
-        """
-        Start a simulation
-        """
-        for parameter in self.parameters:
-            parameter.start_simulation(self, simulation)
 
     def get_group_components(self, member):
         if not self.group_name:

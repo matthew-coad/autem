@@ -297,10 +297,10 @@ class Simulation:
             component.start_simulation(self)
         for index in range(self.population_size):
             self.start_member()
-        for member in self.members:
-            self.contest_reports.append(self.record_member(member))
         if len(self.members) < 2:
             raise RuntimeError("Require at least 2 members to start")
+        for member in self.members:
+            self.contest_reports.append(self.record_member(member))
         self.running = True
 
     def step(self):

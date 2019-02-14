@@ -66,24 +66,3 @@ class BestLearner(Contester):
         else:
             outcome.indecisive(victor)
 
-    def rate_member(self, member):
-        """
-        Evaluate the rating for a member.
-        Only mature, attractive members get a rating.
-        """
-
-        if not member.rating is None:
-            # Don't rerate! It's expensive
-            return None
-        simulation = member.simulation
-        scorer = simulation.resources.scorer
-        loader = simulation.resources.loader
-
-        x,y = loader.load_divided()
-        pipeline = member.preparations.pipeline
-        scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=10)
-
-        rating = scores.mean()
-        rating_sd = scores.std()
-        member.rate(rating, rating_sd)
-

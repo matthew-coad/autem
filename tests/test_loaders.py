@@ -16,7 +16,7 @@ class sources_fixture(unittest.TestCase):
         simulation.start()
         loader = simulation.resources.loader
 
-        l_x, l_y = loader.load_divided()
+        l_x, l_y = loader.load_divided(simulation)
 
         self.assertTrue(np.array_equal(l_x, x))
         self.assertTrue(np.array_equal(l_y, y))

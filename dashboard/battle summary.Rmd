@@ -1,0 +1,145 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(tidyverse)
+library(readr)
+library(scales)
+
+coltype = cols(
+  simulation = col_character(),
+  experiment = col_character(),
+  seed = col_integer(),
+  step = col_integer(),
+  member_id = col_integer(),
+  form_id = col_integer(),
+  incarnation = col_integer(),
+  event = col_character(),
+  fault = col_character(),
+  contests = col_integer(),
+  standoffs = col_integer(),
+  victories = col_integer(),
+  defeats = col_integer(),
+  dominations = col_double(),
+  thrashings = col_double(),
+  accuracy = col_double(),
+  duration = col_double(),
+  maturity = col_double(),
+  mature = col_integer(),
+  robustness = col_double(),
+  fatality = col_integer(),
+  attractiveness = col_double(),
+  attractive = col_integer(),
+  rating = col_double(),
+  ranking = col_double(),
+  data = col_character(),
+  Engineer = col_character(),
+  Scaler = col_character(),
+  NOR_norm = col_character(),
+  BIN_threshold = col_double(),
+  Reducer = col_character(),
+  FIC_tol = col_double(),
+  FAG_linkage = col_character(),
+  FAG_affinity = col_character(),
+  PCA_iterated_power = col_double(),
+  SPC_scorer = col_character(),
+  SPC_percentile = col_double(),
+  Approximator = col_character(),
+  RBF_gamma = col_double(),
+  NYS_kernel = col_character(),
+  NYS_gamma = col_double(),
+  NYS_n_components = col_double(),
+  learner = col_character(),
+  BNB_alpha = col_double(),
+  BNB_fit_prior = col_character(),
+  MNB_alpha = col_character(),
+  MNB_fit_prior = col_character(),
+  CART_criterion = col_character(),
+  CART_max_depth = col_double(),
+  CART_min_samples_split = col_double(),
+  CART_min_samples_leaf = col_double(),
+  KNN_n_neighbors = col_double(),
+  KNN_weights = col_character(),
+  KNN_p = col_double(),
+  LSV_penalty = col_character(),
+  LSV_loss = col_character(),
+  LSV_dual = col_character(),
+  LSV_tol = col_double(),
+  LSV_C = col_double(),
+  LGR_penalty = col_character(),
+  LGR_C = col_double(),
+  LGR_dual = col_character(),
+  EXT_criterion = col_character(),
+  EXT_max_features = col_double(),
+  EXT_min_samples_split = col_double(),
+  EXT_min_samples_leaf = col_double(),
+  RF_criterion = col_character(),
+  RF_max_features = col_double(),
+  RF_min_samples_split = col_double(),
+  RF_min_samples_leaf = col_double(),
+  GB_learning_rate = col_double(),
+  GB_max_depth = col_double(),
+  GB_min_samples_split = col_double(),
+  GB_min_samples_leaf = col_double(),
+  GB_subsample = col_double(),
+  GB_max_features = col_double(),
+  evaluations = col_character()
+)
+  
+df <- read_csv("D:\\Documents\\autem\\benchmark\\data\\Preprocess vs Tune Battle 1.csv")
+
+```
+
+```{r}
+
+baselines <- tribble(
+   ~data, ~benchmark,
+  "balance-scale", 1,
+  "analcatdata_dmft", .215,
+  "Australian", .87,
+  "banknote-authentication", 0.99,
+  "blood-transfusion-service-center", 0.785,
+  "cmc", 0.575,
+  "diabetes", 0.77,
+  "ilpd", 0.73,
+  "JapaneseVowels", 0.99,
+  "LED-display-domain-7digit", 0.745,
+  "mfeat-morphological", 0.774,
+  "monks-problems-3", 0.989,
+  "phoneme", 0.91,
+  "segment", 0.99,
+  "tic-tac-toe", 0.99,
+  "vehicle", 0.84
+)
+
+```
+
+```{r}
+rp <- df %>% filter(experiment == "preprocess", seed == 1) %>% filter(event == "final") %>% group_by(data) %>% filter(ranking == max(ranking)) %>% select(data, contests, standoffs, victories, defeats, rating)
+rp <- rp %>% inner_join(baselines, by = "data")
+
+rp["rating"] <- percent(rp[["rating"]])
+rp["benchmark"] <- percent(rp[["benchmark"]])
+print(rp %>% select(data, accuracy = rating, benchmark))
+
+
+```
+
+```{r}
+
+df %>% 
+  filter(experiment == "preprocess", seed == 1, simulation =="balance-scale" ) %>%
+  filter(!is.na(accuracy)) %>%
+  select(step, accuracy, learner) %>%
+  ggplot() + 
+  geom_point(aes(x = step, y = accuracy, color = learner), size = 1) +
+  ggtitle("balance-scale progress") +
+  xlab("Progress") +
+  ylab("Accuracy") +
+  theme_light()
+  
+
+```

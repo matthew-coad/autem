@@ -5,10 +5,10 @@ import genetic
 import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners.classification as learners
-import genetic.transforms as transforms
 import genetic.loaders as loaders
 import genetic.reporters as reporters
 import genetic.contests as contests
+import genetic.raters as raters
 
 from tests.datasets import load_iris
 from tests.config import simulations_path
@@ -24,7 +24,8 @@ def run_tune_simulation():
 
             contests.BestLearner(),
             contests.Survival(),
-            reporters.Path(simulations_path()),
+            raters.CrossValidationRater(),
+            reporters.Path(simulations_path().joinpath("tune")),
 
             learners.LogisticRegression(), 
             learners.LinearDiscriminantAnalysis(), 

@@ -27,5 +27,5 @@ class Data(Loader):
             return None
         record.data = self.data_name
 
-    def load_divided(self):
+    def load_divided(self, simulation):
         return (self.x, self.y)
