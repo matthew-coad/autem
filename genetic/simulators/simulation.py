@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from .feedback import printProgressBar
 
 import numpy
+import time
 
 class Simulation:
 
@@ -407,7 +408,7 @@ class Simulation:
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
         record.event = member.event
-        record.time = member.event_time
+        record.time = time.ctime(member.event_time)
         record.fault = str(member.fault)
 
         record.rating = member.rating
