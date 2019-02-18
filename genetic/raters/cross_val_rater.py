@@ -33,4 +33,9 @@ class CrossValidationRater(Rater):
         scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv)
 
         rating = scores.mean()
+        rating_sd = scores.std()
+
+        member.ratings.predictive_accuracy = rating
+        member.ratings.predictive_accuracy_sd = rating_sd
+
         member.rated(rating)

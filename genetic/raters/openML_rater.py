@@ -39,9 +39,8 @@ class OpenMLRater(Rater):
 
         rating = scores.mean()
         rating_sd = scores.std()
-        members.ratings.rating = scores.mean()
-        members.ratings.rating_sd = scores.mean()
 
-    def record_member(self, member, record):
-        record.rating = members.ratings.rating
-        record.rating_sd = members.ratings.rating_sd
+        member.ratings.predictive_accuracy = rating
+        member.ratings.predictive_accuracy_sd = rating_sd
+
+        member.rated(rating)

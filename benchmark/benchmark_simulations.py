@@ -1,6 +1,9 @@
 if __name__ == '__main__':
     import context
 
+
+import openml
+
 import genetic
 import genetic.simulators as simulators
 import genetic.scorers as scorers
@@ -9,26 +12,26 @@ import genetic.learners.classification as learners
 import genetic.loaders as loaders
 import genetic.reporters as reporters
 import genetic.contests as contests
+import genetic.raters as raters
 
-from benchmark.benchmark_common import *
+import benchmark.utility as utility
 
-from openML_rater import OpenMLRater
+from pathlib import Path
 
-experiment_name = "preprocess"
+def simulations_path():
+    return Path("benchmark/simulations")
 
-def run_preprocess_experiment(did, task_id, seed, experiment_path, epochs, population_size):
-    data_name, x, y = get_benchmark_data(did)
-    simulation_path = experiment_path.joinpath(data_name)
+def make_openml_light_classifier_simulation(name, data_id, task_id, seed, population_size, path, properties = {}):
     simulation = simulators.Simulation(
-        data_name, 
+        name, 
         [
-            loaders.Data(data_name, x, y),
+            loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
             contests.BestLearner(),
             contests.Survival(),
-            OpenMLRater(task_id),
-            reporters.Path(simulation_path),
+            raters.OpenMLRater(task_id),
+            reporters.Path(path),
 
             # Engineers
             preprocessors.NoEngineering(),
@@ -63,35 +66,34 @@ def run_preprocess_experiment(did, task_id, seed, experiment_path, epochs, popul
             learners.LinearSVC(),
             learners.LogisticRegression(),
             learners.LinearDiscriminantAnalysis(),
-
-            # learners.ExtraTreesClassifier(),
-            #learners.RandomForestClassifier(),
-            # learners.GradientBoostingClassifier(),
         ], 
-        population_size=population_size,
+        population_size = population_size,
         seed = seed,
-        properties= { "experiment": experiment_name, "seed": seed })
-    run_simulation(simulation,  epochs)
-    genetic.ReportManager(simulation_path).update_combined_reports()
+        properties = properties)
     return simulation
 
-def run_experiment():
-    experiment_path = simulations_path().joinpath(experiment_name)
-    prepare_experiment(experiment_path)
+def run_simulation(simulation, epochs):
+    simulation.start()
+    for index in range(epochs):
+        simulation.run(100)
+        if index == epochs - 1 or not simulation.running:
+            simulation.finish()
+        simulation.report()
+        if not simulation.running:
+            break
 
-    # EEG eye state: data_id:1471, task_id:14951
-    did = 1471
-    task_id = 14951
-    seeds = benchmark_seeds()
-    population_size = benchmark_population_size()
-    epochs = benchmark_epochs()
+def run_tic_tac_toe():
+    simulation_name = "tic-tac-toe"
+    data_id = 50
+    task_id = 145804
+    seed = 1
+    epochs = 2
+    population_size = 20
+    path = simulations_path().joinpath(simulation_name)
 
-    run_preprocess_experiment(did, task_id, seeds[0], experiment_path, epochs, population_size)
-
-#    for did in dids:
-#        run_preprocess_experiment(did, seeds[0], experiment_path, epochs, population_size)
-#        genetic.ReportManager(simulations_path()).update_combined_reports()
-#        genetic.ReportManager(experiment_path).update_combined_reports()
+    utility.prepare_OpenML()
+    simulation = make_openml_light_classifier_simulation(simulation_name, data_id, task_id, seed, population_size, path)
+    run_simulation(simulation, epochs)
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)
@@ -99,4 +101,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_experiment()
+    run_tic_tac_toe()

@@ -1,4 +1,6 @@
 from .loader import Loader
+from ..simulators import Dataset, Role
+
 import openml
 
 class OpenMLLoader(Loader):
