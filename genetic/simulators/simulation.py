@@ -253,11 +253,13 @@ class Simulation:
         """
         inductees = [m for m in self.members if m.alive and m.mature and m.attractive ]
         n_inductees = len(inductees)
+        progress_prefix = "Rating %s" % self.name
+        print("")
         if n_inductees > 0:
             for index in range(n_inductees):
-                printProgressBar(index, n_inductees, prefix = 'Rating:', length = 50)
+                printProgressBar(index, n_inductees, prefix = progress_prefix, length = 50)
                 self.rate_member(inductees[index])
-            printProgressBar(n_inductees, n_inductees, prefix = 'Rating:', length = 50)
+            printProgressBar(n_inductees, n_inductees, prefix = progress_prefix, length = 50)
 
         candidates = [m for m in inductees if not m.rating is None]
         ranking = Ranking(self.n_steps)
@@ -379,12 +381,14 @@ class Simulation:
         """
         Run the simulation for a number of steps
         """
-        name = "Running %s:" % self.n_steps
+        name = "Running %s %s:" % (self.name, self.n_steps)
+        print("")
         for step in range(steps):
             if not self.running:
                 break
             self.step()
             printProgressBar(step, steps, prefix = name, length = 50)
+        printProgressBar(steps, steps, prefix = name, length = 50)            
 
     def record_member(self, member):
         """

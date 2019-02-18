@@ -75,10 +75,10 @@ def make_openml_light_classifier_simulation(name, data_id, task_id, seed, popula
         properties = properties)
     return simulation
 
-def run_simulation(simulation, epochs):
+def run_simulation(simulation, steps, epochs):
     simulation.start()
     for index in range(epochs):
-        simulation.run(100)
+        simulation.run(steps)
         if index == epochs - 1 or not simulation.running:
             simulation.finish()
         simulation.report()
@@ -89,13 +89,32 @@ def run_tic_tac_toe():
     name = "tic-tac-toe"
     data_id, task_id = baselines.get_baseline_configuration(name)
     seed = 1
-    epochs = 2
+    steps = 100
+    epochs = 20
     population_size = 20
     path = simulations_path().joinpath(name)
 
     utility.prepare_OpenML()
     simulation = make_openml_light_classifier_simulation(name, data_id, task_id, seed, population_size, path)
-    run_simulation(simulation, epochs)
+    run_simulation(simulation, steps, epochs)
+
+def run_benchmark_simulation(baseline_name):
+    data_id, task_id = baselines.get_baseline_configuration(baseline_name)
+    name = baseline_name
+    seed = 1
+    epochs = 40
+    steps = 100
+    population_size = 20
+    path = simulations_path().joinpath(name)
+
+    utility.prepare_OpenML()
+    simulation = make_openml_light_classifier_simulation(name, data_id, task_id, seed, population_size, path)
+    run_simulation(simulation, steps, epochs)
+
+def run_benchmark_simulations():
+    baseline_names = baselines.get_baseline_names()
+    for baseline_name in baseline_names:
+        run_benchmark_simulation(baseline_name)
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)
@@ -103,4 +122,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_tic_tac_toe()
+    run_benchmark_simulations()

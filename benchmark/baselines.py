@@ -23,11 +23,15 @@ def load_baseline_configuration_data():
     df = pandas.read_csv(filename)
     return df
 
+def get_baseline_names():
+    df = load_baseline_configuration_data()
+    return df.name
+
 def get_baseline_configuration(name):
     df = load_baseline_configuration_data()
     dfa = df[df['name'] == name]
-    data_id = dfa.data_id[0]
-    task_id = dfa.task_id[0]
+    data_id = list(dfa.data_id)[0]
+    task_id = list(dfa.task_id)[0]
 
     return (data_id, task_id)
 
