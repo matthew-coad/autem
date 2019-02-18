@@ -49,6 +49,7 @@ class Member:
 
         self.ratings = SimpleNamespace()
         self.rating = None
+        self.rating_sd = None
         self.ranking = None
 
     def incarnated(self, form, incarnation):
@@ -150,11 +151,12 @@ class Member:
             self.fatality = fatality
         self.robustness = robustness
 
-    def rated(self, rating):
+    def rated(self, rating, rating_sd):
         """
         Set the members rating in the hall of fame
         """
         self.rating = rating
+        self.rating_sd = rating_sd
 
     def ranked(self, ranking):
         """

@@ -253,10 +253,11 @@ class Simulation:
         """
         inductees = [m for m in self.members if m.alive and m.mature and m.attractive ]
         n_inductees = len(inductees)
-        for index in range(n_inductees):
-            printProgressBar(index, n_inductees, prefix = 'Rating:', length = 50)
-            self.rate_member(inductees[index])
-        printProgressBar(n_inductees, n_inductees, prefix = 'Rating:', length = 50)
+        if n_inductees > 0:
+            for index in range(n_inductees):
+                printProgressBar(index, n_inductees, prefix = 'Rating:', length = 50)
+                self.rate_member(inductees[index])
+            printProgressBar(n_inductees, n_inductees, prefix = 'Rating:', length = 50)
 
         candidates = [m for m in inductees if not m.rating is None]
         ranking = Ranking(self.n_steps)
@@ -405,6 +406,7 @@ class Simulation:
         record.fault = str(member.fault)
 
         record.rating = member.rating
+        record.rating_sd = member.rating_sd
         record.ranking = member.ranking
 
         record.mature = member.mature

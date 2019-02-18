@@ -33,6 +33,7 @@ def make_openml_light_classifier_simulation(name, data_id, task_id, seed, popula
             contests.Survival(),
             raters.OpenMLRater(task_id),
             baselines.BaselineRater(name),
+            raters.HoldoutValidator(),
             reporters.Path(path),
 
             # Engineers

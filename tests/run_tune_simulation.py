@@ -25,6 +25,7 @@ def run_tune_simulation():
             contests.BestLearner(),
             contests.Survival(),
             raters.CrossValidationRater(),
+            raters.HoldoutValidator(),
             reporters.Path(simulations_path().joinpath("tune")),
 
             learners.LogisticRegression(), 
@@ -37,7 +38,7 @@ def run_tune_simulation():
         ], 
         population_size=20)
     simulation.start()
-    simulation.run(200)
+    simulation.run(300)
     simulation.finish()
     simulation.report()
 

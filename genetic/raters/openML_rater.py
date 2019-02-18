@@ -43,4 +43,4 @@ class OpenMLRater(Rater):
         member.ratings.predictive_accuracy = rating
         member.ratings.predictive_accuracy_sd = rating_sd
 
-        member.rated(rating)
+        member.rated(rating, rating_sd)
