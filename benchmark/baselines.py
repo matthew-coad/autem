@@ -30,10 +30,8 @@ def get_baseline_names():
 def get_baseline_configuration(name):
     df = load_baseline_configuration_data()
     dfa = df[df['name'] == name]
-    data_id = list(dfa.data_id)[0]
     task_id = list(dfa.task_id)[0]
-
-    return (data_id, task_id)
+    return (task_id)
 
 def baseline_directory(baseline_name):
     return baselines_directory().joinpath(baseline_name)
