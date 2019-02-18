@@ -62,16 +62,27 @@ class Learner(Component):
         start = time.time()
 
         x,y = loader.load_training_data(simulation)
-        test_size = 0.3
+        test_size = 0.2
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
-
-        end = time.time()
-        duration = end - start
 
         pipeline = preparations.pipeline
         pipeline.fit(x_train, y_train)
         y_pred = pipeline.predict(x_test)
-        test_score = scorer.score(y_test, y_pred)
-        member.accuracy_measured(test_score)
-        member.duration_measured(duration)
+
+        accuracy = scorer.score(y_test, y_pred)
+        if not hasattr(evaluation, "accuracies"):
+            evaluation.accuracies = []
+
+        evaluation.accuracies.append(accuracy)
+        evaluation.accuracy = np.array(evaluation.accuracies).mean()
+
+        end = time.time()
+        duration = end - start
+        performance = -duration
+
+        if not hasattr(evaluation, "performances"):
+            evaluation.performances = []
+
+        evaluation.performances.append(performance)
+        evaluation.performance = np.array(evaluation.performances).mean()
 

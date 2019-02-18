@@ -25,14 +25,8 @@ class Member:
 
         self.evaluation = SimpleNamespace()
 
-        self.accuracies = []
-        self.accuracy = None
-        self.durations = []
-        self.duration = None
-
         self.maturity = None
         self.mature = 0
-
         self.contests = 0
         self.evaluations = 0
         self.standoffs = 0
@@ -71,20 +65,6 @@ class Member:
 
     def evaluated(self):
         self.evaluations += 1
-
-    def accuracy_measured(self, accuracy):
-        """
-        Notify this member that its accuracy was measured
-        """
-        self.accuracies.append(accuracy)
-        self.accuracy = np.array(self.accuracies).mean()
-
-    def duration_measured(self, duration):
-        """
-        Notify this member that its duration was measured
-        """
-        self.durations.append(duration)
-        self.duration = np.array(self.durations).mean()        
 
     def _contested(self):
         self.attractiveness = None

@@ -6,7 +6,7 @@ from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class PreferFast(Contester):
+class Peformance(Contester):
     """
     Establishes a preference for members that are quicker to evaluate
     """

@@ -421,9 +421,6 @@ class Simulation:
         record.victories = member.victories
         record.defeats = member.defeats
 
-        record.accuracy = member.accuracy
-        record.duration = member.duration
-
         if member.fault is None:
             for component in self.components:
                 component.record_member(member, record)

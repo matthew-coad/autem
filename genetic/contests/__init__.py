@@ -1,4 +1,4 @@
 from .contester import Contester
-from .best_learner import BestLearner
-from .prefer_fast import PreferFast
+from .accuracy import Accuracy
+from .performance import Peformance
 from .survival import Survival

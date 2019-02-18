@@ -1,10 +1,12 @@
 from ..simulators import  Component, Dataset, Role, ChoicesParameter
 
+import sklearn.impute
 import sklearn.preprocessing
 import sklearn.decomposition
 import sklearn.cluster
 import sklearn.kernel_approximation
 import sklearn.feature_selection
+import sklearn.pipeline
 
 import numpy as np
 
@@ -51,6 +53,58 @@ class Preprocesssor(Component):
             
         steps = preparations.steps
         steps.append((processor_name, preprocessor))
+
+# Imputers
+
+class Imputer(Preprocesssor):
+
+    def __init__(self, name, label, config):
+        Preprocesssor.__init__(self, name, "Imputer", label, config)
+
+class NoImputer(Imputer):
+
+    def __init__(self):
+        Engineer.__init__(self, "INO", "No Imputer", {})
+
+    def make_preprocessor(self, member):
+        return None
+
+class SimpleImputer(Imputer):
+
+    config = {
+        'strategy ': ['mean', 'median', 'most_frequent']
+    }
+
+    def __init__(self):
+        Scaler.__init__(self, "SMP", "Simple Imputer", self.config)
+
+    def make_preprocessor(self, member):
+        return sklearn.impute.SimpleImputer()
+
+class MissingIndicatorImputer(Imputer):
+
+    config = {
+        'strategy ': ['mean', 'median', 'most_frequent']
+    }
+
+    def __init__(self):
+        Scaler.__init__(self, "SMP", "Simple Imputer", self.config)
+
+    def make_preprocessor(self, member):
+        return sklearn.impute.SimpleImputer()
+
+    def make_preprocessor(self, member):
+        strategy_param = [p for p in self.parameters if p.name == "strategy" ][0]
+        strategy = strategy_param.get_value(self, member)
+
+        transformer = sklearn.pipeline.FeatureUnion(
+            transformer_list=[
+                ('features', sklearn.impute.SimpleImputer(strategy=strategy)),
+                ('indicators', sklearn.impute.MissingIndicator())])
+        return transformer
+
+    def configure_preprocessor(self, member, pre_processor):
+        pass
 
 # Engineers
 

@@ -6,7 +6,7 @@ from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class BestLearner(Contester):
+class Accuracy(Contester):
     """
     Determines fitness by comparing mean model scores but only
     if the difference is considered significant
@@ -26,8 +26,15 @@ class BestLearner(Contester):
 
         required_p_value = self.p_value
 
-        member1_scores = np.array(contestant1.accuracies)
-        member2_scores = np.array(contestant2.accuracies)
+        if hasattr(contestant1.evaluation, "accuracies"):
+            member1_scores = np.array(contestant1.evaluation.accuracies)
+        else:
+            member1_scores = []
+
+        if hasattr(contestant2.evaluation, "accuracies"):
+            member2_scores = np.array(contestant2.evaluation.accuracies)
+        else:
+            member2_scores = []
 
         # Must have at least 3 scores each to make a comparison
         if len(member1_scores) < 3 or len(member2_scores) < 3:
@@ -66,3 +73,16 @@ class BestLearner(Contester):
         else:
             outcome.indecisive(victor)
 
+    def record_member(self, member, record):
+        super().record_member(member, record)
+
+        evaluation = member.evaluation
+        if hasattr(evaluation, "accuracy"):
+            record.accuracy = evaluation.accuracy
+        else:
+            record.accuracy = None
+
+        if hasattr(evaluation, "performance"):
+            record.performance = evaluation.performance
+        else:
+            record.performance = None

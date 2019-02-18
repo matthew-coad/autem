@@ -22,7 +22,7 @@ def run_tune_simulation():
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
 
-            contests.BestLearner(),
+            contests.Accuracy(),
             contests.Survival(),
             raters.CrossValidationRater(),
             raters.HoldoutValidator(),
