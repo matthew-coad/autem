@@ -381,7 +381,7 @@ class Simulation:
         """
         Run the simulation for a number of steps
         """
-        name = "Running %s %s:" % (self.name, self.n_steps)
+        name = "Running %s %s:" % (self.name, self.n_steps + steps)
         print("")
         for step in range(steps):
             if not self.running:
@@ -407,6 +407,7 @@ class Simulation:
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
         record.event = member.event
+        record.time = member.event_time
         record.fault = str(member.fault)
 
         record.rating = member.rating

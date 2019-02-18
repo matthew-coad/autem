@@ -33,7 +33,7 @@ class Preprocesssor(Component):
         if len(self.parameters) > 0:
             pairs = [(p.name, p.get_value(self, member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
-        pre_processor.set_params(**params)
+            pre_processor.set_params(**params)
 
     def prepare_member(self, member):
         super().prepare_member(member)
@@ -64,7 +64,7 @@ class Imputer(Preprocesssor):
 class NoImputer(Imputer):
 
     def __init__(self):
-        Engineer.__init__(self, "INO", "No Imputer", {})
+        Imputer.__init__(self, "INO", "No Imputer", {})
 
     def make_preprocessor(self, member):
         return None
@@ -72,11 +72,11 @@ class NoImputer(Imputer):
 class SimpleImputer(Imputer):
 
     config = {
-        'strategy ': ['mean', 'median', 'most_frequent']
+        'strategy': ['mean', 'median', 'most_frequent']
     }
 
     def __init__(self):
-        Scaler.__init__(self, "SMP", "Simple Imputer", self.config)
+        Imputer.__init__(self, "SMP", "Simple Imputer", self.config)
 
     def make_preprocessor(self, member):
         return sklearn.impute.SimpleImputer()
@@ -84,11 +84,11 @@ class SimpleImputer(Imputer):
 class MissingIndicatorImputer(Imputer):
 
     config = {
-        'strategy ': ['mean', 'median', 'most_frequent']
+        'strategy': ['mean', 'median', 'most_frequent']
     }
 
     def __init__(self):
-        Scaler.__init__(self, "SMP", "Simple Imputer", self.config)
+        Imputer.__init__(self, "MII", "Missing Indicator Imputer", self.config)
 
     def make_preprocessor(self, member):
         return sklearn.impute.SimpleImputer()

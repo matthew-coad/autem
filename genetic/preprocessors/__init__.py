@@ -1,3 +1,7 @@
+# Imputers
+
+from .preprocessor import NoImputer, SimpleImputer, MissingIndicatorImputer
+
 # Engineers
 from .preprocessor import NoEngineering, PolynomialFeatures
 

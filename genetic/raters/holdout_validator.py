@@ -34,13 +34,13 @@ class HoldoutValidator(Rater):
         pipeline = member.preparations.pipeline
         pipeline.fit(x, y)
         y_pred = pipeline.predict(x_validation)
-        validation_rating = scorer.score(y_validation, y_pred)
+        validation_accuracy = scorer.score(y_validation, y_pred)
 
-        member.ratings.validation_rating = validation_rating
+        member.ratings.validation_accuracy = validation_accuracy
 
     def record_member(self, member, record):
 
-        if hasattr(member.ratings, "validation_rating"):
-            record.validation_rating = member.ratings.validation_rating
+        if hasattr(member.ratings, "validation_accuracy"):
+            record.validation_accuracy = member.ratings.validation_accuracy
         else:
-            record.validation_rating = None
+            record.validation_accuracy = None

@@ -29,12 +29,17 @@ def make_openml_light_classifier_simulation(name, data_id, task_id, seed, popula
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            contests.BestLearner(),
+            contests.Accuracy(),
             contests.Survival(),
             raters.OpenMLRater(task_id),
             baselines.BaselineRater(name),
             raters.HoldoutValidator(),
             reporters.Path(path),
+
+            # Imputers
+            preprocessors.NoImputer(),
+            preprocessors.SimpleImputer(),
+            preprocessors.MissingIndicatorImputer(),
 
             # Engineers
             preprocessors.NoEngineering(),
@@ -85,12 +90,12 @@ def run_simulation(simulation, steps, epochs):
         if not simulation.running:
             break
 
-def run_tic_tac_toe():
-    name = "tic-tac-toe"
+def run_test_simulation():
+    name = "breast-w"
     data_id, task_id = baselines.get_baseline_configuration(name)
     seed = 1
     steps = 100
-    epochs = 20
+    epochs = 5
     population_size = 20
     path = simulations_path().joinpath(name)
 
@@ -122,4 +127,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations()
+    run_test_simulation()

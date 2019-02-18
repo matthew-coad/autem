@@ -89,23 +89,23 @@ class BaselineRater(Rater):
         simulation = member.simulation
         stats = simulation.resources.baseline_stats
 
-        member.ratings.baseline_max = stats["max_score"]
-        member.ratings.baseline_top1 = stats["top_1p"]
-        member.ratings.baseline_top10 = stats["top_10p"]
-        member.ratings.baseline_top25 = stats["top_qtr"]
+        member.ratings.top_accuracy = stats["max_score"]
+        member.ratings.top_1p_accuracy = stats["top_1p"]
+        member.ratings.top_10p_accuracy = stats["top_10p"]
+        member.ratings.top_25p_accuracy = stats["top_qtr"]
 
     def record_member(self, member, record):
 
-        if hasattr(member.ratings, "baseline_max"):
-            record.baseline_max = member.ratings.baseline_max
-            record.baseline_top1 = member.ratings.baseline_top1
-            record.baseline_top10 = member.ratings.baseline_top10
-            record.baseline_top25 = member.ratings.baseline_top25
+        if hasattr(member.ratings, "top_accuracy"):
+            record.top_accuracy = member.ratings.top_accuracy
+            record.top_1p_accuracy = member.ratings.top_1p_accuracy
+            record.top_10p_accuracy = member.ratings.top_10p_accuracy
+            record.top_25p_accuracy = member.ratings.top_25p_accuracy
         else:
-            record.baseline_max = None
-            record.baseline_top1 = None
-            record.baseline_top10 = None
-            record.baseline_top25 = None
+            record.top_accuracy = None
+            record.top_1p_accuracy = None
+            record.top_10p_accuracy = None
+            record.top_25p_accuracy = None
 
 if __name__ == '__main__':
     print(get_baseline_stats("tic-tac-toe"))

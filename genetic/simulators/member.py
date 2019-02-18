@@ -1,6 +1,8 @@
 from .component import Component
 from .outcome import OutcomeType
 
+import time
+
 from types import SimpleNamespace
 import numpy as np
 
@@ -18,6 +20,7 @@ class Member:
         self.incarnation = 0
 
         self.event = "initialized"
+        self.event_time = None
         self.fault = None
 
         self.preparations = SimpleNamespace()
@@ -56,6 +59,7 @@ class Member:
         self.incarnation = incarnation
         self.alive = 1
         self.event = "birth"
+        self.event_time = time.time()
 
     def prepared(self):
         """
@@ -78,6 +82,7 @@ class Member:
         self.contests += 1
         self.standoffs += 1
         self.event = "standoff"
+        self.event_time = time.time()
 
     def victory(self, decisive):
         """
@@ -91,6 +96,7 @@ class Member:
             self.event = "domination"
         else:
             self.event = "victory"
+        self.event_time = time.time()
         self.wonlost.append(1)
 
     def defeat(self, decisive):
@@ -102,7 +108,7 @@ class Member:
             self.event = "thrashing"
         else:
             self.event = "defeat"
-
+        self.event_time = time.time()
         self.wonlost.append(0)
 
     def maturing(self, maturity, mature):
@@ -119,6 +125,7 @@ class Member:
         """
         if self.attractive == 0 and attractive == 1:
             self.event = "inducted"
+            self.event_time = time.time()
         if self.attractive == 0:
             self.attractive = attractive
         self.attractiveness = attractiveness
@@ -149,6 +156,7 @@ class Member:
         Notify this member that is has a fault
         """
         self.event = "fault"
+        self.event_time = time.time()
         self.fault = fault
         self.alive = 0
 
@@ -159,6 +167,7 @@ class Member:
         if self.alive == 0:
             raise RuntimeError("Member not alive")
         self.event = "death"
+        self.event_time = time.time()
         self.alive = 0
 
     def finshed(self):
@@ -166,3 +175,4 @@ class Member:
         Notify that this member is part of finalisation
         """
         self.event = "final"
+        self.event_time = time.time()
