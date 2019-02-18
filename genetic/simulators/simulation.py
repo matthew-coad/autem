@@ -378,11 +378,12 @@ class Simulation:
         """
         Run the simulation for a number of steps
         """
+        name = "Running %s:" % self.n_steps
         for step in range(steps):
             if not self.running:
                 break
             self.step()
-            printProgressBar(step, steps, prefix = 'Running:', length = 50)
+            printProgressBar(step, steps, prefix = name, length = 50)
 
     def record_member(self, member):
         """

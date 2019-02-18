@@ -15,6 +15,7 @@ import genetic.contests as contests
 import genetic.raters as raters
 
 import benchmark.utility as utility
+import benchmark.baselines as baselines
 
 from pathlib import Path
 
@@ -31,6 +32,7 @@ def make_openml_light_classifier_simulation(name, data_id, task_id, seed, popula
             contests.BestLearner(),
             contests.Survival(),
             raters.OpenMLRater(task_id),
+            baselines.BaselineRater(name),
             reporters.Path(path),
 
             # Engineers
@@ -83,16 +85,15 @@ def run_simulation(simulation, epochs):
             break
 
 def run_tic_tac_toe():
-    simulation_name = "tic-tac-toe"
-    data_id = 50
-    task_id = 145804
+    name = "tic-tac-toe"
+    data_id, task_id = baselines.get_baseline_configuration(name)
     seed = 1
     epochs = 2
     population_size = 20
-    path = simulations_path().joinpath(simulation_name)
+    path = simulations_path().joinpath(name)
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(simulation_name, data_id, task_id, seed, population_size, path)
+    simulation = make_openml_light_classifier_simulation(name, data_id, task_id, seed, population_size, path)
     run_simulation(simulation, epochs)
 
 def combine_reports():

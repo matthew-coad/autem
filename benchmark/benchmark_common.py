@@ -55,4 +55,3 @@ def get_benchmark_data(did):
     x, y = dataset.get_data(target=dataset.default_target_attribute)
     name = dataset.name
     return (name, x, y)
-
