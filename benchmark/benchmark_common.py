@@ -15,6 +15,9 @@ def data_path():
 def simulations_path():
     return Path("benchmark/simulations")
 
+def openml_path():
+    return Path("benchmark/openml")
+
 def benchmark_epochs():
     return 40
 
@@ -38,11 +41,13 @@ def prepare_OpenML():
     openml.config.cache_directory = os.path.expanduser('~/.openml/cache')
 
 def prepare_directory(path):
-    if os.path.exists((path)):
+    if os.path.exists(path):
         shutil.rmtree(path)
-    if not os.path.exists(simulations_path()):
-        os.mkdir(simulations_path())
-    os.mkdir(path)
+    os.makedirs(path)        
+
+def prepare_cache_directory(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 def prepare_experiment(path):
     prepare_OpenML()

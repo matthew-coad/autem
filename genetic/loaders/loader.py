@@ -1,6 +1,5 @@
 from ..simulators import Component
 
-
 class Loader(Component):
     
     def load_divided(self, simulation):

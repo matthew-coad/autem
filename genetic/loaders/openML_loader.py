@@ -1,6 +1,5 @@
-from genetic.loaders import Loader
+from .loader import Loader
 import openml
-
 
 class OpenMLLoader(Loader):
 

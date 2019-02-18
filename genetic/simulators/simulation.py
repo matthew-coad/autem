@@ -6,8 +6,8 @@ from .role import Role
 from .outline import Outline
 from .form import Form
 from .ranking import Ranking
-
 from types import SimpleNamespace
+from .feedback import printProgressBar
 
 import numpy
 
@@ -150,25 +150,18 @@ class Simulation:
         outline.append_attribute("event", Dataset.Battle, [Role.Property])
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
+        outline.append_attribute("mature", Dataset.Battle, [Role.Property])
+        outline.append_attribute("famous", Dataset.Battle, [Role.Property])
+        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
+
         outline.append_attribute("contests", Dataset.Battle, [Role.Property])
         outline.append_attribute("evaluations", Dataset.Battle, [Role.Property])
         outline.append_attribute("standoffs", Dataset.Battle, [Role.Property])
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
-        outline.append_attribute("dominations", Dataset.Battle, [Role.Property])
-        outline.append_attribute("thrashings", Dataset.Battle, [Role.Property])
 
         outline.append_attribute("accuracy", Dataset.Battle, [ Role.Measure ])
         outline.append_attribute("duration", Dataset.Battle, [ Role.Measure ])
-        outline.append_attribute("maturity", Dataset.Battle, [Role.Measure])
-        outline.append_attribute("mature", Dataset.Battle, [Role.Property])
-        outline.append_attribute("robustness", Dataset.Battle, [Role.Property])
-        outline.append_attribute("fatality", Dataset.Battle, [Role.Property])
-        outline.append_attribute("attractiveness", Dataset.Battle, [Role.Property])
-        outline.append_attribute("attractive", Dataset.Battle, [Role.Property])
-
-        outline.append_attribute("rating", Dataset.Battle, [ Role.KPI ])
-        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -247,10 +240,6 @@ class Simulation:
         """
         Rate a member
         """
-
-        if not member.alive or not member.mature or not member.attractive:
-            return None
-
         for component in self.components:
             try:
                 component.rate_member(member)
@@ -262,24 +251,25 @@ class Simulation:
         """
         Rank all members
         """
+        inductees = [m for m in self.members if m.alive and m.mature and m.attractive ]
+        n_inductees = len(inductees)
+        for index in range(n_inductees):
+            printProgressBar(index, n_inductees, prefix = 'Rating:', length = 50)
+            self.rate_member(inductees[index])
+        printProgressBar(n_inductees, n_inductees, prefix = 'Rating:', length = 50)
 
-        # Generate ratings if needed
-        for member in self.members[:]:
-            self.rate_member(member)
-
+        candidates = [m for m in inductees if not m.rating is None]
         ranking = Ranking(self.n_steps)
-        candidates = [m for m in self.members if not m.rating is None]
         if not candidates:
             ranking.inconclusive()
         else:
             candidates = sorted(candidates, key=lambda member: member.rating)
             ranking.conclusive(candidates)
 
-        if ranking.is_equivalent(self.ranking):
-            ranking.static(self.ranking)
-        else:
-            for rank in range(len(ranking.members)):
-                ranking.members[rank].rank(rank + 1)
+        rank = len(candidates)
+        for candidate in candidates:
+            candidate.ranked(rank)
+            rank -= 1
         self.ranking = ranking
 
     def should_repopulate(self):
@@ -347,9 +337,6 @@ class Simulation:
                 parent2 = candidates[parent_indexes[1]]
                 newborn = self.crossover_member(parent1, parent2)
 
-        # Perform ranking
-        self.rank_members()
-
         # Report on what happened
         self.n_steps += 1
         self.contest_reports.append(self.record_member(contestant1))
@@ -374,9 +361,11 @@ class Simulation:
         for member in members:
             member.finshed()
 
+        # Perform ranking
+        self.rank_members()
+
         # final report on ranked members
-        ranked_members = [ m for m in self.members if m.alive and m.attractive ]
-        for member in ranked_members:
+        for member in self.ranking.members:
             self.contest_reports.append(self.record_member(member))
 
     def stop(self):
@@ -393,6 +382,7 @@ class Simulation:
             if not self.running:
                 break
             self.step()
+            printProgressBar(step, steps, prefix = 'Running:', length = 50)
 
     def record_member(self, member):
         """
@@ -413,25 +403,19 @@ class Simulation:
         record.event = member.event
         record.fault = str(member.fault)
 
+        record.rating = member.rating
+        record.ranking = member.ranking
+
+        record.mature = member.mature
+        record.famous = member.attractive
         record.contests = member.contests
         record.evaluations = member.evaluations
         record.standoffs = member.standoffs
         record.victories = member.victories
         record.defeats = member.defeats
-        record.dominations = member.dominations
-        record.thrashings = member.thrashings
 
         record.accuracy = member.accuracy
         record.duration = member.duration
-        record.maturity = member.maturity
-        record.mature = member.mature
-        record.robustness = member.robustness
-        record.fatality = member.fatality
-        record.attractiveness = member.attractiveness
-        record.attractive = member.attractive
-
-        record.rating = member.rating
-        record.ranking = member.ranking
 
         if member.fault is None:
             for component in self.components:

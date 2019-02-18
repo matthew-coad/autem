@@ -24,18 +24,13 @@ class CrossValidationRater(Rater):
         Only mature, attractive members get a rating.
         """
 
-        if not member.rating is None:
-            # Don't rerate! It's expensive
-            return None
-
         simulation = member.simulation
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
-        x,y = loader.load_divided()
+        x,y = loader.load_divided(member)
         pipeline = member.preparations.pipeline
         scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv)
 
         rating = scores.mean()
-        rating_sd = scores.std()
-        member.rate(rating, rating_sd)
+        member.rated(rating)

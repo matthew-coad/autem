@@ -22,7 +22,9 @@ Survival/attractiveness rated on recent contests **done**
 
 Ranking in battle reports **done**
 
-Add simulation event field
+Add simulation event field **done**
+
+Download openml runs related to a run 
 
 
 

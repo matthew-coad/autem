@@ -1,5 +1,5 @@
 
-from genetic.raters import Rater
+from .rater import Rater
 import openml
 
 import numpy as np
@@ -39,4 +39,9 @@ class OpenMLRater(Rater):
 
         rating = scores.mean()
         rating_sd = scores.std()
-        member.rate(rating, rating_sd)
+        members.ratings.rating = scores.mean()
+        members.ratings.rating_sd = scores.mean()
+
+    def record_member(self, member, record):
+        record.rating = members.ratings.rating
+        record.rating_sd = members.ratings.rating_sd
