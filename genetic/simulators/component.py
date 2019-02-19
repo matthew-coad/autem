@@ -9,7 +9,7 @@ class Component:
         self.name = name
         self.group_name = group_name
         self.parameters = parameters
-        self.priority = 1
+        self.importance = 1
 
     def start_simulation(self, simulation):
         """
@@ -105,6 +105,17 @@ class Component:
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.copy_member(self, member, prior)
+
+    def is_mutator(self):
+        """
+        Does this component support member mutation
+        """
+        group_name = self.group_name
+        n_group = 1 if group_name else 0
+        n_parameters = len(self.parameters)
+        if not n_parameters and not n_group:
+            return False
+        return True
 
     def mutate_group(self, member):
         configuration = member.configuration

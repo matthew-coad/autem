@@ -25,6 +25,7 @@ def run_tune_simulation():
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
+            evaluators.ComponentImportance(),
             
             reporters.Path(simulations_path().joinpath("tune")),
 

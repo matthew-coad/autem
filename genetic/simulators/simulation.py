@@ -94,12 +94,12 @@ class Simulation:
         Mutate a member, making a guaranteed modification to its configuration
         """
         random_state = self.random_state
-        components = self.components
+        components = [ c for c in self.components if c.is_mutator() ]
         n_components = len(components)
 
-        # Work out the component probabilities
-        total_p = sum((c.priority for c in components))
-        component_p = [c.priority / total_p for c in components]
+        # Work out the component probabilities based on their importance
+        total_p = sum((c.importance for c in components))
+        component_p = [c.importance / total_p for c in components]
 
         # Try each component in a random order until a component claims to have mutated the state
         prior_repr = repr(member.configuration)
