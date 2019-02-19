@@ -112,8 +112,8 @@ def run_benchmark_simulation(baseline_name):
     task_id = baselines.get_baseline_configuration(baseline_name)
     name = baseline_name
     seed = 1
-    epochs = 2
-    steps = 2
+    epochs = 40
+    steps = 100
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
 

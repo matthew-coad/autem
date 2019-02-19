@@ -1,13 +1,14 @@
 
-from .rater import Rater
+from .evaluator import Evaluater
+
 import openml
 
 import numpy as np
 from scipy import stats
 
-class OpenMLRater(Rater):
+class OpenMLRater(Evaluater):
     """
-    Rates a model by using an openml task
+    Rates model
     """
 
     def __init__(self, task_id):

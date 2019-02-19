@@ -1,10 +1,10 @@
 from ..simulators import Dataset, Role
-from .contester import Contester
+from .evaluator import Evaluater
 
 import numpy as np
 from scipy import stats
  
-class Survival(Contester):
+class Survival(Evaluater):
     """
     After a contest check who lives and who dies.
     Compares the losers defeats against that of the general population. If its significanly more then its adios muchachos.
@@ -14,7 +14,7 @@ class Survival(Contester):
         """
         P value used to determine if the survival history is significanly different from the general populations
         """
-        Contester.__init__(self, "BestLearner")
+        Evaluater.__init__(self, "Survival")
         self.p_value = p_value
 
     def stress_members(self, contestant1, contestant2, outcome):

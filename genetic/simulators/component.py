@@ -9,6 +9,7 @@ class Component:
         self.name = name
         self.group_name = group_name
         self.parameters = parameters
+        self.priority = 1
 
     def start_simulation(self, simulation):
         """
@@ -26,6 +27,12 @@ class Component:
             outline.append_attribute(self.group_name, Dataset.Ranking, [ Role.Configuration ], self.group_name)
         for parameter in self.parameters:
             parameter.outline_simulation(self, simulation, outline)
+
+    def start_epoch(self, simulation):
+        """
+        Start a simulation epoch
+        """
+        pass
 
     def get_group_components(self, member):
         if not self.group_name:
@@ -188,6 +195,7 @@ class Component:
                 for parameter in self.parameters:
                     parameter.copy_member(self, member, parent)
         elif self.parameters and not self.group_name:
+            # We are crossing over a non grouped component
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.crossover_member(self, member, parent0, parent1)

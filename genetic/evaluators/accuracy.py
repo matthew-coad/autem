@@ -1,12 +1,15 @@
 from ..simulators import Dataset, Role
-from .contester import Contester
+from .evaluator import Evaluater
 
 import numpy as np
 from scipy import stats
 
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.pipeline import Pipeline
 
-class Accuracy(Contester):
+import time
+
+class Accuracy(Evaluater):
     """
     Determines fitness by comparing mean model scores but only
     if the difference is considered significant
@@ -16,8 +19,48 @@ class Accuracy(Contester):
         """
         P value used to determine if the scores are significantly different
         """
-        Contester.__init__(self, "BestLearner")
+        Evaluater.__init__(self, "Accuracy")
         self.p_value = p_value
+
+    def evaluate_member(self, member):
+        super().evaluate_member(member)
+        if not self.is_active(member):
+            return None
+
+        simulation = member.simulation
+        preparations = member.preparations
+        evaluation = member.evaluation
+        random_state = simulation.random_state
+
+        scorer = simulation.resources.scorer
+        loader = simulation.resources.loader
+
+        start = time.time()
+
+        x,y = loader.load_training_data(simulation)
+        test_size = 0.2
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
+
+        pipeline = preparations.pipeline
+        pipeline.fit(x_train, y_train)
+        y_pred = pipeline.predict(x_test)
+
+        accuracy = scorer.score(y_test, y_pred)
+        if not hasattr(evaluation, "accuracies"):
+            evaluation.accuracies = []
+
+        evaluation.accuracies.append(accuracy)
+        evaluation.accuracy = np.array(evaluation.accuracies).mean()
+
+        end = time.time()
+        duration = end - start
+        performance = -duration
+
+        if not hasattr(evaluation, "performances"):
+            evaluation.performances = []
+
+        evaluation.performances.append(performance)
+        evaluation.performance = np.array(evaluation.performances).mean()
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -81,8 +124,3 @@ class Accuracy(Contester):
             record.accuracy = evaluation.accuracy
         else:
             record.accuracy = None
-
-        if hasattr(evaluation, "performance"):
-            record.performance = evaluation.performance
-        else:
-            record.performance = None

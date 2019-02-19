@@ -6,9 +6,8 @@ import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners.classification as learners
 import genetic.loaders as loaders
+import genetic.evaluators as evaluators
 import genetic.reporters as reporters
-import genetic.contests as contests
-import genetic.raters as raters
 
 from tests.datasets import load_iris
 from tests.config import simulations_path
@@ -22,10 +21,11 @@ def run_tune_simulation():
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
 
-            contests.Accuracy(),
-            contests.Survival(),
-            raters.CrossValidationRater(),
-            raters.HoldoutValidator(),
+            evaluators.Accuracy(),
+            evaluators.Survival(),
+            evaluators.CrossValidationRater(),
+            evaluators.HoldoutValidator(),
+            
             reporters.Path(simulations_path().joinpath("tune")),
 
             learners.LogisticRegression(), 
@@ -38,7 +38,8 @@ def run_tune_simulation():
         ], 
         population_size=20)
     simulation.start()
-    simulation.run(300)
+    simulation.run(100)
+    simulation.run(100)
     simulation.finish()
     simulation.report()
 

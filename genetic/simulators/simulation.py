@@ -29,6 +29,7 @@ class Simulation:
         self.ranking = None
         self.contest_reports = []
         self.n_steps = 0
+        self.epoch = None
         self.running = False
         self.stopping = False
 
@@ -95,9 +96,14 @@ class Simulation:
         random_state = self.random_state
         components = self.components
         n_components = len(components)
+
+        # Work out the component probabilities
+        total_p = sum((c.priority for c in components))
+        component_p = [c.priority / total_p for c in components]
+
         # Try each component in a random order until a component claims to have mutated the state
         prior_repr = repr(member.configuration)
-        component_indexes = random_state.choice(n_components, size=n_components, replace=False)
+        component_indexes = random_state.choice(n_components, size=n_components, replace=False, p=component_p)
         for component_index in component_indexes:
             component = components[component_index]
             mutated = component.mutate_member(member)
@@ -144,6 +150,7 @@ class Simulation:
         outline.append_attribute("simulation", Dataset.Battle, [Role.Configuration])
         for property_key in self.properties.keys():
             outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
+        outline.append_attribute("epoch", Dataset.Battle, [Role.ID])
         outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
         outline.append_attribute("form_id", Dataset.Battle, [Role.ID])
@@ -167,6 +174,53 @@ class Simulation:
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
+
+    def record_member(self, member):
+        """
+        Generate a record on a member
+        """
+        member_id = member.id
+        epoch = self.epoch
+        step = self.n_steps
+        record = Record()
+
+        record.simulation = self.name
+        for property_key in self.properties.keys():
+            setattr(record, property_key, self.properties[property_key])
+
+        record.epoch = epoch
+        record.step = step
+        record.member_id = member_id
+        record.form_id = member.form.id if member.form else None
+        record.incarnation = member.incarnation
+        record.event = member.event
+        record.time = time.ctime(member.event_time)
+        record.fault = str(member.fault)
+
+        record.rating = member.rating
+        record.rating_sd = member.rating_sd
+        record.ranking = member.ranking
+
+        record.mature = member.mature
+        record.famous = member.attractive
+        record.contests = member.contests
+        record.evaluations = member.evaluations
+        record.standoffs = member.standoffs
+        record.victories = member.victories
+        record.defeats = member.defeats
+
+        if member.fault is None:
+            for component in self.components:
+                component.record_member(member, record)
+        return record
+
+    def report(self):
+        """
+        Report on progress of the simulation
+        """
+        for component in self.components:
+            component.report_simulation(self)
+        self.contest_reports = []
 
     def prepare_member(self, member):
         """
@@ -286,6 +340,7 @@ class Simulation:
         """
         Perform simulation startup
         """
+        self.epoch = 0
         self.outline_simulation()
         for component in self.components:
             component.start_simulation(self)
@@ -351,6 +406,22 @@ class Simulation:
         if len(self.members) < 2:
             self.running = False
 
+    def run(self, steps):
+        """
+        Run an epoch
+        """
+        name = "Running %s %s:" % (self.name, self.n_steps + steps)
+        self.epoch += 1
+        print("")
+        for component in self.components:
+            component.start_epoch(self)
+        for step in range(steps):
+            if not self.running:
+                break
+            self.step()
+            printProgressBar(step, steps, prefix = name, length = 50)
+        printProgressBar(steps, steps, prefix = name, length = 50)            
+
     def finish(self):
         """
         Perform final simulation processing
@@ -378,61 +449,3 @@ class Simulation:
         """
         self.stopping = True
 
-    def run(self, steps):
-        """
-        Run the simulation for a number of steps
-        """
-        name = "Running %s %s:" % (self.name, self.n_steps + steps)
-        print("")
-        for step in range(steps):
-            if not self.running:
-                break
-            self.step()
-            printProgressBar(step, steps, prefix = name, length = 50)
-        printProgressBar(steps, steps, prefix = name, length = 50)            
-
-    def record_member(self, member):
-        """
-        Generate a record on a member
-        """
-        member_id = member.id
-        step = self.n_steps
-        record = Record()
-
-        record.simulation = self.name
-        for property_key in self.properties.keys():
-            setattr(record, property_key, self.properties[property_key])
-
-        record.step = step
-        record.member_id = member_id
-        record.form_id = member.form.id if member.form else None
-        record.incarnation = member.incarnation
-        record.event = member.event
-        record.time = time.ctime(member.event_time)
-        record.fault = str(member.fault)
-
-        record.rating = member.rating
-        record.rating_sd = member.rating_sd
-        record.ranking = member.ranking
-
-        record.mature = member.mature
-        record.famous = member.attractive
-        record.contests = member.contests
-        record.evaluations = member.evaluations
-        record.standoffs = member.standoffs
-        record.victories = member.victories
-        record.defeats = member.defeats
-
-        if member.fault is None:
-            for component in self.components:
-                component.record_member(member, record)
-        return record
-
-    def report(self):
-        """
-        Report on progress of the simulation
-        """
-        for component in self.components:
-            component.report_simulation(self)
-        self.contest_reports = []
-    

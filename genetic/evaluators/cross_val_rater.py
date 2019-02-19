@@ -1,12 +1,12 @@
 from ..simulators import Dataset, Role
-from .rater import Rater
+from .evaluator import Evaluater
 
 import numpy as np
 from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class CrossValidationRater(Rater):
+class CrossValidationRater(Evaluater):
     """
     Evaluates a final model rating by using cross validation
     """
@@ -15,7 +15,7 @@ class CrossValidationRater(Rater):
         """
         P value used to determine if the scores are significantly different
         """
-        Rater.__init__(self, "CrossValidationRater")
+        Evaluater.__init__(self, "CrossValidationRater")
         self.cv = cv
 
     def rate_member(self, member):

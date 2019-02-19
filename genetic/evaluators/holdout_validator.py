@@ -1,12 +1,12 @@
 from ..simulators import Dataset, Role
-from .rater import Rater
+from .evaluator import Evaluater
 
 import numpy as np
 from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class HoldoutValidator(Rater):
+class HoldoutValidator(Evaluater):
     """
     Performs final validation by fitting the pipeline to the entire training data set
     and calculating the performance on the validation dataset
@@ -16,7 +16,7 @@ class HoldoutValidator(Rater):
         """
         P value used to determine if the scores are significantly different
         """
-        Rater.__init__(self, "CrossValidationRater")
+        Evaluater.__init__(self, "CrossValidationRater")
 
     def rate_member(self, member):
         """

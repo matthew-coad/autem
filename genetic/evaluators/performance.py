@@ -1,22 +1,26 @@
 from ..simulators import Dataset, Role
-from .contester import Contester
+from .evaluator import Evaluater
 
 import numpy as np
 from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class Peformance(Contester):
+class Peformance(Evaluater):
     """
     Establishes a preference for members that are quicker to evaluate
+    Depends on the Accurancy component
     """
 
     def __init__(self, p_value = 0.1):
         """
         P value used to determine if the scores are significantly different
         """
-        Contester.__init__(self, "PreferFast")
+        Evaluater.__init__(self, "Performance")
         self.p_value = p_value
+
+    # Performance evaluation is actually done by the accurancy component as
+    # its done during the model fit.
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -56,3 +60,12 @@ class Peformance(Contester):
             outcome.decisive(victor)
         else:
             outcome.indecisive(victor)
+
+    def record_member(self, member, record):
+        super().record_member(member, record)
+
+        evaluation = member.evaluation
+        if hasattr(evaluation, "performance"):
+            record.performance = evaluation.performance
+        else:
+            record.performance = None
