@@ -32,6 +32,11 @@ class Parameter(Component):
             raise RuntimeError("Group not selected")
         return getattr(member.configuration, self.group_name)
 
+    def has_configuration(self, member):
+        if not self.group_name:
+            raise RuntimeError("Group not selected")
+        return hasattr(member.configuration, self.group_name)
+
     def get_value(self, member):
         return getattr(self.get_configuration(member), self.name)
 
@@ -47,7 +52,10 @@ class Parameter(Component):
         outline.append_attribute(self.get_record_name(), Dataset.Battle, [ Role.Parameter ], self.label)
 
     def record_member(self, member, record):
-        setattr(record, self.get_record_name(), self.get_value(member))
+        if self.has_configuration(member):
+            setattr(record, self.get_record_name(), self.get_value(member))
+        else:
+            setattr(record, self.get_record_name(), None)
 
     def initialize_member(self, member):
         value = self.get_initial_value(member)

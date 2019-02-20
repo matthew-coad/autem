@@ -89,6 +89,8 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
                 learners.LinearSVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
+                learners.RandomForestClassifier(),
+                learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,
@@ -107,11 +109,11 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    name = "breast-w"
+    name = "tic-tac-toe"
     task_id = baselines.get_baseline_configuration(name)
     seed = 1
     steps = 100
-    epochs = 50
+    epochs = 5
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
 
@@ -123,7 +125,7 @@ def run_benchmark_simulation(baseline_name):
     task_id = baselines.get_baseline_configuration(baseline_name)
     name = baseline_name
     seed = 1
-    epochs = 40
+    epochs = 50
     steps = 100
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
@@ -143,4 +145,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_test_simulation()
+    run_benchmark_simulations()

@@ -29,7 +29,8 @@ class Choice(HyperParameter):
         Record the state of a member
         """
         setattr(record, self.group_name, self.get_active_component_name(member))
-        self.get_active_component(member).record_member(member, record)
+        for component in self.components:
+            component.record_member(member, record)
 
     # Active component
 

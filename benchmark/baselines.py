@@ -52,7 +52,8 @@ def get_baseline_stats(baseline_name):
     max_score = np.max(scores)
     min_score = np.min(scores)
     top_1p = np.percentile(scores, 99)
-    top_10p = np.percentile(scores, 95)
+    top_5p = np.percentile(scores, 95)
+    top_10p = np.percentile(scores, 90)
     top_qtr = np.percentile(scores, 75)
 
     stats = {
@@ -61,6 +62,7 @@ def get_baseline_stats(baseline_name):
         "max_score": max_score,
         "min_score": min_score,
         "top_1p": top_1p,
+        "top_5p": top_5p,
         "top_10p": top_10p,
         "top_qtr": top_qtr
     }
@@ -88,6 +90,7 @@ class BaselineRater(Evaluater):
 
         member.ratings.top_accuracy = stats["max_score"]
         member.ratings.top_1p_accuracy = stats["top_1p"]
+        member.ratings.top_5p_accuracy = stats["top_5p"]
         member.ratings.top_10p_accuracy = stats["top_10p"]
         member.ratings.top_25p_accuracy = stats["top_qtr"]
 
@@ -96,11 +99,13 @@ class BaselineRater(Evaluater):
         if hasattr(member.ratings, "top_accuracy"):
             record.top_accuracy = member.ratings.top_accuracy
             record.top_1p_accuracy = member.ratings.top_1p_accuracy
+            record.top_5p_accuracy = member.ratings.top_5p_accuracy
             record.top_10p_accuracy = member.ratings.top_10p_accuracy
             record.top_25p_accuracy = member.ratings.top_25p_accuracy
         else:
             record.top_accuracy = None
             record.top_1p_accuracy = None
+            record.top_5p_accuracy = None
             record.top_10p_accuracy = None
             record.top_25p_accuracy = None
 
