@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 class OpenMLLoader(Loader):
 
     def __init__(self, did, validation_size = 0.2):
-        Loader.__init__(self, "OpenMLData")
         self.did = did
         self.validation_size = validation_size
 

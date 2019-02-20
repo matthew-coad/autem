@@ -258,15 +258,12 @@ class PCA(Reducer):
     def make_preprocessor(self, member):
         return sklearn.decomposition.PCA(svd_solver = 'randomized')
 
-class SelectPercentile(Reducer):
-
-    config = {
-        'scorer': ['f_classif', 'mutual_info_classif', 'chi2'],
-        'percentile': range(1, 100),
-    }
+class SelectPercentile(Preprocesssor):
 
     def __init__(self):
-        Reducer.__init__(self, "SPC", "Select Percentile", self.config)
+        scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'], 'f_classif')
+        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], None)
+        Preprocesssor.__init__(self, "SPC", "Select Percentile", [scorer_parameter, percentile_parameter])
 
     def make_preprocessor(self, member):
         scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]

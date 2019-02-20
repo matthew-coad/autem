@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import context
 
-from genetic.raters import Rater
+from genetic.evaluators import Evaluater
 
 from benchmark.benchmark_common import *    
 from pathlib import Path
@@ -66,14 +66,13 @@ def get_baseline_stats(baseline_name):
     }
     return stats
 
-class BaselineRater(Rater):
+class BaselineRater(Evaluater):
 
     """
     Rater that reports on the members baseline
     """
 
     def __init__(self, baseline_name):
-        Rater.__init__(self, "BaselineRater")
         self.baseline_name = baseline_name
 
     def start_simulation(self, simulation):

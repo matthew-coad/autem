@@ -11,8 +11,7 @@ import genetic.preprocessors as preprocessors
 import genetic.learners.classification as learners
 import genetic.loaders as loaders
 import genetic.reporters as reporters
-import genetic.contests as contests
-import genetic.raters as raters
+import genetic.evaluators as evaluators
 
 import benchmark.utility as utility
 import benchmark.baselines as baselines
@@ -34,51 +33,63 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            contests.Accuracy(),
-            contests.Survival(),
-            raters.OpenMLRater(task_id),
+            evaluators.Accuracy(),
+            evaluators.Survival(),
+            evaluators.OpenMLRater(task_id),
             baselines.BaselineRater(name),
-            raters.HoldoutValidator(),
+            evaluators.HoldoutValidator(),
             reporters.Path(path),
 
             # Imputers
-            preprocessors.NoImputer(),
-            preprocessors.SimpleImputer(),
-            preprocessors.MissingIndicatorImputer(),
+            simulators.Choice("Imputer", [
+                preprocessors.NoImputer(),
+                preprocessors.SimpleImputer(),
+                preprocessors.MissingIndicatorImputer(),
+            ]),
 
             # Engineers
-            preprocessors.NoEngineering(),
-            preprocessors.PolynomialFeatures(),
+            simulators.Choice("Engineer", [
+                preprocessors.NoEngineering(),
+                preprocessors.PolynomialFeatures(),
+            ]),
 
             # Scalers
-            preprocessors.NoScaler(),
-            preprocessors.MaxAbsScaler(),
-            preprocessors.MinMaxScaler(),
-            preprocessors.Normalizer(),
-            preprocessors.RobustScaler(),
-            preprocessors.StandardScaler(),
-            preprocessors.Binarizer(),
+            simulators.Choice("Scaler", [
+                preprocessors.NoScaler(),
+                preprocessors.MaxAbsScaler(),
+                preprocessors.MinMaxScaler(),
+                preprocessors.Normalizer(),
+                preprocessors.RobustScaler(),
+                preprocessors.StandardScaler(),
+                preprocessors.Binarizer(),
+            ]),
 
             # Feature Reducers
-            preprocessors.NoReducer(),
-            preprocessors.FastICA(),
-            preprocessors.FeatureAgglomeration(),
-            preprocessors.PCA(),
-            preprocessors.SelectPercentile(),
+            simulators.Choice("Reducer", [
+                preprocessors.NoReducer(),
+                preprocessors.FastICA(),
+                preprocessors.FeatureAgglomeration(),
+                preprocessors.PCA(),
+                preprocessors.SelectPercentile(),
+            ]),
 
             # Approximators
-            preprocessors.NoApproximator(),
-            preprocessors.RBFSampler(),
-            preprocessors.Nystroem(),
+            simulators.Choice("Approximator", [
+                preprocessors.NoApproximator(),
+                preprocessors.RBFSampler(),
+                preprocessors.Nystroem(),
+            ]),
 
-            learners.GaussianNB(),
-            learners.BernoulliNB(),
-            learners.MultinomialNB(),
-            learners.DecisionTreeClassifier(),
-            learners.KNeighborsClassifier(),
-            learners.LinearSVC(),
-            learners.LogisticRegression(),
-            learners.LinearDiscriminantAnalysis(),
+            simulators.Choice("Learner", [
+                learners.GaussianNB(),
+                learners.BernoulliNB(),
+                learners.MultinomialNB(),
+                learners.DecisionTreeClassifier(),
+                learners.KNeighborsClassifier(),
+                learners.LinearSVC(),
+                learners.LogisticRegression(),
+                learners.LinearDiscriminantAnalysis(),
+            ]),
         ], 
         population_size = population_size,
         seed = seed,
@@ -99,8 +110,8 @@ def run_test_simulation():
     name = "breast-w"
     task_id = baselines.get_baseline_configuration(name)
     seed = 1
-    steps = 10
-    epochs = 2
+    steps = 100
+    epochs = 50
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
 
@@ -132,4 +143,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations()
+    run_test_simulation()

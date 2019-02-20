@@ -12,7 +12,6 @@ class OpenMLRater(Evaluater):
     """
 
     def __init__(self, task_id):
-        Rater.__init__(self, "OpenMLRater")
         self.task_id = task_id
 
     def start_simulation(self, simulation):
