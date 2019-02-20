@@ -5,7 +5,6 @@ if __name__ == '__main__':
 import openml
 
 import genetic
-import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.preprocessors as preprocessors
 import genetic.learners.classification as learners
@@ -27,7 +26,7 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
     dataset = openml.datasets.get_dataset(data_id)
     dataset_name = dataset.name
     properties['dataset'] = dataset_name
-    simulation = simulators.Simulation(
+    simulation = genetic.Simulation(
         name, 
         [
             loaders.OpenMLLoader(data_id),
@@ -42,20 +41,20 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             reporters.Path(path),
 
             # Imputers
-            simulators.Choice("Imputer", [
+            genetic.Choice("Imputer", [
                 preprocessors.NoImputer(),
                 preprocessors.SimpleImputer(),
                 preprocessors.MissingIndicatorImputer(),
             ]),
 
             # Engineers
-            simulators.Choice("Engineer", [
+            genetic.Choice("Engineer", [
                 preprocessors.NoEngineering(),
                 preprocessors.PolynomialFeatures(),
             ]),
 
             # Scalers
-            simulators.Choice("Scaler", [
+            genetic.Choice("Scaler", [
                 preprocessors.NoScaler(),
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
@@ -66,7 +65,7 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             ]),
 
             # Feature Reducers
-            simulators.Choice("Reducer", [
+            genetic.Choice("Reducer", [
                 preprocessors.NoReducer(),
                 preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
@@ -75,13 +74,13 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             ]),
 
             # Approximators
-            simulators.Choice("Approximator", [
+            genetic.Choice("Approximator", [
                 preprocessors.NoApproximator(),
                 preprocessors.RBFSampler(),
                 preprocessors.Nystroem(),
             ]),
 
-            simulators.Choice("Learner", [
+            genetic.Choice("Learner", [
                 learners.GaussianNB(),
                 learners.BernoulliNB(),
                 learners.MultinomialNB(),

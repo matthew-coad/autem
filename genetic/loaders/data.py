@@ -1,7 +1,7 @@
 from .loader import Loader
 
-from ..simulators import Dataset
-from ..simulators import Role
+from .. import Dataset
+from .. import Role
 
 from sklearn.model_selection import train_test_split
 

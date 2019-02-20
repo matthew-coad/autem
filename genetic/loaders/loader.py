@@ -1,4 +1,4 @@
-from ..simulators import Controller
+from .. import Controller
 
 class Loader(Controller):
 

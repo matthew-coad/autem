@@ -1,5 +1,5 @@
 from ..learner import Learner
-from ...simulators import Dataset, Role, ChoicesParameter
+from ... import Dataset, Role, ChoicesParameter
 
 import sklearn.linear_model
 import sklearn.neighbors

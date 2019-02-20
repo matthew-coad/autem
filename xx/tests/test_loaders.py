@@ -3,7 +3,7 @@ if __name__ == '__main__':
 import unittest
 from tests import datasets
 
-from genetic.simulators import Simulation
+from genetic import Simulation
 from genetic.loaders import Data
 
 import numpy as np
@@ -12,7 +12,7 @@ class sources_fixture(unittest.TestCase):
 
     def test_data_available_in_simulation(self):
         x,y = datasets.load_iris()
-        simulation = Simulation("test_sources_fixture", [Data(x, y)])
+        simulation = Simulation("test_sources_fixture", [Data("Test", x, y)])
         simulation.start()
         loader = simulation.resources.loader
 
@@ -20,3 +20,6 @@ class sources_fixture(unittest.TestCase):
 
         self.assertTrue(np.array_equal(l_x, x))
         self.assertTrue(np.array_equal(l_y, y))
+
+if __name__ == '__main__':
+    unittest.main()

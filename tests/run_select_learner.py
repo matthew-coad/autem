@@ -2,7 +2,6 @@ if __name__ == '__main__':
     import context
 
 import genetic
-import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners.classification as learners
 import genetic.loaders as loaders
@@ -15,7 +14,7 @@ from tests.config import simulations_path
 def run_select_learner():
 
     x,y = load_iris()
-    simulation = simulators.Simulation(
+    simulation = genetic.Simulation(
         "select_learner", 
         [
             loaders.Data("iris", x,y),
@@ -29,7 +28,7 @@ def run_select_learner():
             
             reporters.Path(simulations_path().joinpath("select_learner")),
 
-            simulators.Choice("learner", [
+            genetic.Choice("learner", [
                 learners.LogisticRegression(), 
                 learners.LinearDiscriminantAnalysis(), 
                 learners.KNeighborsClassifier(),  

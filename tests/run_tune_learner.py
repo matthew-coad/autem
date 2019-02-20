@@ -2,7 +2,6 @@ if __name__ == '__main__':
     import context
 
 import genetic
-import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners.classification as learners
 import genetic.loaders as loaders
@@ -16,7 +15,7 @@ def run_tune_learner():
 
     x,y = load_iris()
     path = simulations_path().joinpath("tune_learner")
-    simulation = simulators.Simulation(
+    simulation = genetic.Simulation(
         "tune", 
         [
             loaders.Data("iris", x,y),

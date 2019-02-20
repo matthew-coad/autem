@@ -2,7 +2,6 @@ if __name__ == '__main__':
     import context
 
 import genetic
-import genetic.simulators as simulators
 import genetic.scorers as scorers
 import genetic.learners.classification as learners
 import genetic.loaders as loaders
@@ -16,7 +15,7 @@ from tests.config import simulations_path
 def run_preprocessing():
 
     x,y = load_iris()
-    simulation = simulators.Simulation(
+    simulation = genetic.Simulation(
         "preprocessing", 
         [
             loaders.Data("iris", x,y),
@@ -30,20 +29,20 @@ def run_preprocessing():
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
             # Imputers
-            simulators.Choice("imputer", [
+            genetic.Choice("imputer", [
                 preprocessors.NoImputer(),
                 preprocessors.SimpleImputer(),
                 preprocessors.MissingIndicatorImputer(),
             ]),
 
             # Engineers
-            simulators.Choice("engineer", [
+            genetic.Choice("engineer", [
                 preprocessors.NoEngineering(),
                 preprocessors.PolynomialFeatures(),
             ]),
 
             # Scalers
-            simulators.Choice("scaler", [
+            genetic.Choice("scaler", [
                 preprocessors.NoScaler(),
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
@@ -52,7 +51,7 @@ def run_preprocessing():
                 preprocessors.StandardScaler(),
             ]),
 
-            simulators.Choice("learner", [
+            genetic.Choice("learner", [
                 learners.LogisticRegression(), 
                 learners.LinearDiscriminantAnalysis(), 
                 learners.KNeighborsClassifier(),  

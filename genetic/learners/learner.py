@@ -1,4 +1,4 @@
-from ..simulators import Parameter, Group, Dataset, Role, Controller
+from .. import Parameter, Group, Dataset, Role, Controller
 
 from types import SimpleNamespace
 

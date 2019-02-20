@@ -1,4 +1,4 @@
-from ..simulators import Group, Dataset, Role, ChoicesParameter
+from .. import Group, Dataset, Role, ChoicesParameter
 
 import sklearn.impute
 import sklearn.preprocessing

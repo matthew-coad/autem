@@ -3,7 +3,7 @@ if __name__ == '__main__':
 
 from tests.config import simulations_path
 
-import genetic.simulators as simulators
+import genetic
 import genetic.reporters as reporters
 
 class configure_id(simulators.HyperParameter):
@@ -20,7 +20,7 @@ class highest_id_wins(simulators.Controller):
             result.decisive(2)
 
 def run_highest_id_wins():
-    simulation = simulators.Simulation("highest_id_wins", [configure_id(), highest_id_wins(), reporters.Path(simulations_path())], population_size=2)
+    simulation = genetic.Simulation("highest_id_wins", [configure_id(), highest_id_wins(), reporters.Path(simulations_path())], population_size=2)
     simulation.start()
     simulation.step()
     simulation.step()

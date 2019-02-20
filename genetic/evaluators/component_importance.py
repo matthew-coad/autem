@@ -1,5 +1,5 @@
 from .evaluator import Evaluater
-from ..simulators import Choice
+from .. import Choice
 
 import pandas as pd
 import numpy as np

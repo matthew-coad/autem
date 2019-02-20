@@ -3,7 +3,7 @@ if __name__ == '__main__':
 
 from genetic.evaluators import Evaluater
 
-from benchmark.benchmark_common import *    
+from benchmark.utility import *    
 from pathlib import Path
 import os
 import csv
