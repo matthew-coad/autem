@@ -38,6 +38,7 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             evaluators.OpenMLRater(task_id),
             baselines.BaselineStats(name),
             evaluators.HoldoutValidator(),
+            evaluators.ComponentImportance(),
             reporters.Path(path),
 
             # Imputers
@@ -109,7 +110,7 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    name = "eucalyptus"
+    name = "tic-tac-toe"
     task_id = baselines.get_baseline_configuration(name)
     seed = 1
     steps = 100

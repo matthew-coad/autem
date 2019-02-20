@@ -62,8 +62,10 @@ def run_preprocessing():
         ], 
         population_size=20)
     simulation.start()
-    simulation.run(100)
-    simulation.run(100)
+    simulation.run(500)
+    simulation.run(500)
+    simulation.run(500)
+    simulation.run(500)
     simulation.finish()
     simulation.report()
 
