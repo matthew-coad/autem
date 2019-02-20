@@ -1,58 +1,70 @@
 from .dataset import Dataset
+from .role import Role
+from .component import Component
 
-class Parameter:
+class Parameter(Component):
 
-    def __init__(self, name, role, label):
+    def __init__(self, name, label):
         self.name = name
-        self.role = Role
         self.label = label
+        self.group_name = None
 
-    def get_start_value(self, component, member):
+    def is_hyper_parameter(self):
+        """
+        Is this component a hyper parameter for the simulation
+        """
+        return True
+
+    def is_controller(self):
+        """
+        Is this component responsible for controlling the simulation
+        """
+        return False
+
+    def get_initial_value(self, member):
         raise NotImplementedError()
 
-    def get_mutated_value(self, component, member):
+    def get_mutated_value(self, member):
         raise NotImplementedError()
 
-    def has_configuration(self, component, member):
-        return hasattr(member.configuration, component.name)
+    def get_configuration(self, member):
+        if not self.group_name:
+            raise RuntimeError("Group not selected")
+        return getattr(member.configuration, self.group_name)
 
-    def get_configuration(self, component, member):
-        return getattr(member.configuration, component.name)
+    def get_value(self, member):
+        return getattr(self.get_configuration(member), self.name)
 
-    def get_value(self, component, member):
-        return getattr(self.get_configuration(component, member), self.name)
+    def set_value(self, member, value):
+        return setattr(self.get_configuration(member), self.name, value)
 
-    def set_value(self, component, member, value):
-        return setattr(self.get_configuration(component, member), self.name, value)
+    def get_record_name(self):
+        if not self.group_name:
+            raise RuntimeError("Group not selected")
+        return "%s_%s" % (self.group_name, self.name)
 
-    def get_record_name(self, component):
-        return "%s_%s" % (component.name, self.name)
+    def outline_simulation(self, simulation, outline):
+        outline.append_attribute(self.get_record_name(), Dataset.Battle, [ Role.Parameter ], self.label)
 
-    def outline_simulation(self, component, simulation, outline):
-        outline.append_attribute(self.get_record_name(component), Dataset.Battle, self.role , self.label)
-        outline.append_attribute(self.get_record_name(component), Dataset.Ranking, self.role , self.label)
+    def record_member(self, member, record):
+        setattr(record, self.get_record_name(), self.get_value(member))
 
-    def start_simulation(self, component, simulation):
-        pass
+    def initialize_member(self, member):
+        value = self.get_initial_value(member)
+        self.set_value(member, value)
 
-    def start_member(self, component, member):
-        self.set_value(component, member, self.get_start_value(component, member))
+    def copy_member(self, member, prior):
+        self.set_value(member, self.get_value(prior))
 
-    def start_member(self, component, member):
-        self.set_value(component, member, self.get_start_value(component, member))
-
-    def copy_member(self, component, member, prior):
-        self.set_value(component, member, self.get_value(component, prior))
-
-    def mutate_member(self, component, member):
-        prior_value = self.get_value(component, member)
+    def mutate_member(self, member):
+        prior_value = self.get_value(member)
         attempts = 0
         max_attempts = 50
         mutated = False
         while True:
-            value = self.get_mutated_value(component, member)
+            value = self.get_mutated_value(member)
             if value != prior_value:
-                self.set_value(component, member, value)
+                self.set_value(member, value)
                 return True
 
             # We expect things to mutate quickly
@@ -62,17 +74,10 @@ class Parameter:
                 raise RuntimeError("Attempt to mutate parameter failed")
         return False
 
-    def crossover_member(self, component, member, parent0, parent1):
+    def crossover_member(self, member, parent0, parent1):
         random_state = member.simulation.random_state
         parent_index = random_state.randint(0, 2)
         parent = parent0 if parent_index == 0 else parent1
-        value = self.get_value(component, parent)
-        self.set_value(component, member, value)
-
-    def record_member(self, component, member, record):
-        if self.has_configuration(component, member):
-            setattr(record, self.get_record_name(component), self.get_value(component, member))
-        else:
-            setattr(record, self.get_record_name(component), None)
-
+        value = self.get_value(parent)
+        self.set_value(member, value)
 

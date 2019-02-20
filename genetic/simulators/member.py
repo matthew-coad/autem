@@ -23,8 +23,8 @@ class Member:
         self.event_time = None
         self.fault = None
 
-        self.preparations = SimpleNamespace()
-        self.ready = 0
+        self.resources = SimpleNamespace()
+        self.starts = 0
 
         self.evaluation = SimpleNamespace()
 
@@ -61,11 +61,13 @@ class Member:
         self.event = "birth"
         self.event_time = time.time()
 
-    def prepared(self):
+    def started(self):
         """
-        Notify this member that it has been prepared
+        Notify this member that it has been started
         """
-        self.ready = 1
+        if self.starts:
+            raise RuntimeError("Member already started")
+        self.starts += 1
 
     def evaluated(self):
         self.evaluations += 1
@@ -172,7 +174,10 @@ class Member:
 
     def finshed(self):
         """
-        Notify that this member is part of finalisation
+        Notify that this member it is finished with, because the simulation has finished
         """
+        if self.alive == 0:
+            raise RuntimeError("Member not alive")
         self.event = "final"
         self.event_time = time.time()
+        self.alive = 0

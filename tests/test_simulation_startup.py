@@ -13,7 +13,7 @@ class copy_id_on_start(simulators.Component):
     def outline_simulation(self, simulation, outline):
         outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
-    def start_member(self, member):
+    def prepare_member(self, member):
         member.configuration.test = member.id
 
 class copy_mod_id_on_start(simulators.Component):
@@ -25,7 +25,7 @@ class copy_mod_id_on_start(simulators.Component):
     def outline_simulation(self, simulation, outline):
         outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
-    def start_member(self, member):
+    def prepare_member(self, member):
         member.configuration.test = member.id % self.max
 
 class simulation_startup_fixture(unittest.TestCase):

@@ -97,7 +97,7 @@ def get_parameters(config):
     learner_dict = classifier_config_dict[config]
 
     def _parameter(key, values):
-        return ChoicesParameter(key, [ Role.Configuration ], key, values, None)
+        return ChoicesParameter(key, key, values, None)
 
     parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
     return parameters

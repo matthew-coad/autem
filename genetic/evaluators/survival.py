@@ -14,7 +14,6 @@ class Survival(Evaluater):
         """
         P value used to determine if the survival history is significanly different from the general populations
         """
-        Evaluater.__init__(self, "Survival")
         self.p_value = p_value
 
     def stress_members(self, contestant1, contestant2, outcome):

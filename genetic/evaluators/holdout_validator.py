@@ -12,12 +12,6 @@ class HoldoutValidator(Evaluater):
     and calculating the performance on the validation dataset
     """
 
-    def __init__(self):
-        """
-        P value used to determine if the scores are significantly different
-        """
-        Evaluater.__init__(self, "CrossValidationRater")
-
     def rate_member(self, member):
         """
         Evaluate the rating for a member.
@@ -31,7 +25,7 @@ class HoldoutValidator(Evaluater):
         x,y = loader.load_training_data(simulation)
         x_validation, y_validation = loader.load_validation_data(simulation)
 
-        pipeline = member.preparations.pipeline
+        pipeline = member.resources.pipeline
         pipeline.fit(x, y)
         y_pred = pipeline.predict(x_validation)
         validation_accuracy = scorer.score(y_validation, y_pred)

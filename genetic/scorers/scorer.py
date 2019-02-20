@@ -1,9 +1,9 @@
-from ..simulators import Component
+from ..simulators import Controller
 
-class Scorer(Component):
+class Scorer(Controller):
 
     def __init__(self, name, scoring):
-        Component.__init__(self, name)
+        self.name = name
         self.scoring = scoring
 
     def score(self, y_true, y_pred):

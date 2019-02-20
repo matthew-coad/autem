@@ -6,14 +6,12 @@ from tests.config import simulations_path
 import genetic.simulators as simulators
 import genetic.reporters as reporters
 
+class configure_id(simulators.HyperParameter):
 
-class highest_id_wins(simulators.Component):
-
-    def __init__(self):
-        simulators.Component.__init__(self, "highest_id_wins")
-
-    def start_member(self, member):
+    def initialize_member(self, member):
         member.configuration.id = member.id
+
+class highest_id_wins(simulators.Controller):
 
     def contest_members(self, contestant1, contestant2, result):
         if contestant1.id > contestant2.id:
@@ -22,7 +20,7 @@ class highest_id_wins(simulators.Component):
             result.decisive(2)
 
 def run_highest_id_wins():
-    simulation = simulators.Simulation("highest_id_wins", [highest_id_wins(), reporters.Path(simulations_path())], population_size=2)
+    simulation = simulators.Simulation("highest_id_wins", [configure_id(), highest_id_wins(), reporters.Path(simulations_path())], population_size=2)
     simulation.start()
     simulation.step()
     simulation.step()

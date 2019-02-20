@@ -14,7 +14,7 @@ class highest_id_wins(simulators.Component):
     def outline_simulation(self, simulation, outline):
         outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
-    def start_member(self, member):
+    def prepare_member(self, member):
         member.configuration.test = member.id
 
     def contest_members(self, contestant1, contestant2, result):
@@ -32,7 +32,7 @@ class copy_mod_id_on_start(simulators.Component):
     def outline_simulation(self, simulation, outline):
         outline.append_attribute("test", simulators.Dataset.Battle, [simulators.Role.Property])
 
-    def start_member(self, member):
+    def prepare_member(self, member):
         member.configuration.test = member.id % self.max
 
     def copy_member(self, member, prior):

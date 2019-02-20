@@ -47,7 +47,7 @@ class ComponentImportance(Evaluater):
 
         simulation = member.simulation
         components = [ c for c in simulation.components if c.is_mutator() ]
-        columns = [ (p.get_record_name(c), p.get_value(c, member ) ) for c in components if c.is_active(member) for p in c.parameters ]
+        columns = [ (p.get_record_name(c), p.get_value(member ) ) for c in components if c.is_active(member) for p in c.parameters ]
         columns.append(("accuracy", member.evaluation.accuracy))
 
         df = simulation.resources.component_importance_data.append(dict(columns), ignore_index=True)

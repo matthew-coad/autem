@@ -52,8 +52,6 @@ class OpenMLLoader(Loader):
         Record the state of a member
         """
         super().record_member(member, record)
-        if not self.is_active(member):
-            return None
 
         simulation = member.simulation
         record.data = simulation.resources.dataset.name

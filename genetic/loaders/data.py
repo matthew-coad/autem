@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 class Data(Loader):
     
     def __init__(self, data_name, x, y, validation_size = 0.2):
-        Loader.__init__(self, "Data")
         self.data_name = data_name
         self.x = x
         self.y = y
@@ -39,8 +38,6 @@ class Data(Loader):
         Record the state of a member
         """
         super().record_member(member, record)
-        if not self.is_active(member):
-            return None
         record.data = self.data_name
 
     def load_divided_data(self, simulation):

@@ -32,7 +32,7 @@ class OpenMLRater(Evaluater):
 
         simulation = member.simulation
         task = simulation.resources.task 
-        pipeline = member.preparations.pipeline
+        pipeline = member.resources.pipeline
 
         run = openml.runs.run_model_on_task(task, pipeline)
         predictive_accuracy = run.fold_evaluations['predictive_accuracy']

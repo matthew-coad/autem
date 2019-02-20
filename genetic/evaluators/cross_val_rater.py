@@ -15,7 +15,6 @@ class CrossValidationRater(Evaluater):
         """
         P value used to determine if the scores are significantly different
         """
-        Evaluater.__init__(self, "CrossValidationRater")
         self.cv = cv
 
     def rate_member(self, member):
@@ -29,7 +28,7 @@ class CrossValidationRater(Evaluater):
         loader = simulation.resources.loader
 
         x,y = loader.load_training_data(simulation)
-        pipeline = member.preparations.pipeline
+        pipeline = member.resources.pipeline
         scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv)
 
         rating = scores.mean()

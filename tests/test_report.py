@@ -29,7 +29,7 @@ class highest_id_wins(simulators.Component):
     def __init__(self):
         simulators.Component.__init__(self, "highest_id_wins")
 
-    def start_member(self, member):
+    def prepare_member(self, member):
         member.configuration.test = member.id
 
     def contest_members(self, contestant1, contestant2, result):

@@ -5,7 +5,6 @@ class Path(Reporter):
 
     def __init__(self, path):
         from genetic import ReportManager
-        Reporter.__init__(self, "Path")
         self.path = path
         self.manager = ReportManager(self.path)
 

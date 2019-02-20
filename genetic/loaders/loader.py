@@ -1,6 +1,6 @@
-from ..simulators import Component
+from ..simulators import Controller
 
-class Loader(Component):
+class Loader(Controller):
 
     def load_divided_data(self, simulation):
         """

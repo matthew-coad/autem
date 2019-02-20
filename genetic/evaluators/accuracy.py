@@ -19,16 +19,13 @@ class Accuracy(Evaluater):
         """
         P value used to determine if the scores are significantly different
         """
-        Evaluater.__init__(self, "Accuracy")
         self.p_value = p_value
 
     def evaluate_member(self, member):
         super().evaluate_member(member)
-        if not self.is_active(member):
-            return None
 
         simulation = member.simulation
-        preparations = member.preparations
+        resources = member.resources
         evaluation = member.evaluation
         random_state = simulation.random_state
 
@@ -41,7 +38,7 @@ class Accuracy(Evaluater):
         test_size = 0.2
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
-        pipeline = preparations.pipeline
+        pipeline = resources.pipeline
         pipeline.fit(x_train, y_train)
         y_pred = pipeline.predict(x_test)
 

@@ -1,12 +1,12 @@
-from ..simulators import Component
+from ..simulators import Controller
 from .utility import get_report_columns, get_report_frame
 
 import pandas as pd
 
-class Reporter(Component):
+class Reporter(Controller):
 
     def get_battle_frame(self, simulation):
-        records = simulation.contest_reports
+        records = simulation.reports
         if not records:
             return None
         frame = get_report_frame(records)

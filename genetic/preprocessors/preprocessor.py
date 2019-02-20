@@ -1,4 +1,4 @@
-from ..simulators import  Component, Dataset, Role, ChoicesParameter
+from ..simulators import Group, Dataset, Role, ChoicesParameter
 
 import sklearn.impute
 import sklearn.preprocessing
@@ -12,16 +12,15 @@ import numpy as np
 
 def _convert_config(config_dict):
     def _parameter(key, values):
-        return ChoicesParameter(key, [ Role.Configuration ], key, values, None)
+        return ChoicesParameter(key, key, values, None)
 
     parameters = [ _parameter(k, config_dict[k]) for k in config_dict]
     return parameters
 
-class Preprocesssor(Component):
+class Preprocesssor(Group):
 
-    def __init__(self, name, group, label, config = {}):
-        parameters = _convert_config(config)
-        Component.__init__(self, name, group, parameters)
+    def __init__(self, name, label, parameters):
+        Group.__init__(self, name, parameters)
         self.label = label
 
     def make_preprocessor(self, member):
@@ -31,71 +30,63 @@ class Preprocesssor(Component):
         pre_processor_params = pre_processor.get_params().keys()
         params = {}
         if len(self.parameters) > 0:
-            pairs = [(p.name, p.get_value(self, member)) for p in self.parameters]
+            pairs = [(p.name, p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
             pre_processor.set_params(**params)
 
     def prepare_member(self, member):
         super().prepare_member(member)
-        if not self.is_active(member):
-            return None
 
         simulation = member.simulation
-        preparations = member.preparations
+        resources = member.resources
         processor_name = self.name
         preprocessor = self.make_preprocessor(member)
         if preprocessor is None:
             return None
 
         self.configure_preprocessor(member, preprocessor)
-        if not hasattr(preparations, "steps"):
-            preparations.steps = []
+        if not hasattr(resources, "steps"):
+            resources.steps = []
             
-        steps = preparations.steps
+        steps = resources.steps
         steps.append((processor_name, preprocessor))
 
 # Imputers
 
 class Imputer(Preprocesssor):
 
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, "Imputer", label, config)
+    def __init__(self, name, label, parameters):
+        Preprocesssor.__init__(self, name, label, parameters)
 
 class NoImputer(Imputer):
 
     def __init__(self):
-        Imputer.__init__(self, "INO", "No Imputer", {})
+        Imputer.__init__(self, "INO", "No Imputer", [])
 
     def make_preprocessor(self, member):
         return None
 
 class SimpleImputer(Imputer):
 
-    config = {
-        'strategy': ['mean', 'median', 'most_frequent']
-    }
-
     def __init__(self):
-        Imputer.__init__(self, "SMP", "Simple Imputer", self.config)
+        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+        Imputer.__init__(self, "SMP", "Simple Imputer", [config_parameter])
 
     def make_preprocessor(self, member):
         return sklearn.impute.SimpleImputer()
 
 class MissingIndicatorImputer(Imputer):
 
-    config = {
-        'strategy': ['mean', 'median', 'most_frequent']
-    }
-
     def __init__(self):
-        Imputer.__init__(self, "MII", "Missing Indicator Imputer", self.config)
+        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+        Imputer.__init__(self, "MII", "Missing Indicator Imputer", [config_parameter])
 
     def make_preprocessor(self, member):
         return sklearn.impute.SimpleImputer()
 
     def make_preprocessor(self, member):
         strategy_param = [p for p in self.parameters if p.name == "strategy" ][0]
-        strategy = strategy_param.get_value(self, member)
+        strategy = strategy_param.get_value(member)
 
         transformer = sklearn.pipeline.FeatureUnion(
             transformer_list=[
@@ -111,7 +102,7 @@ class MissingIndicatorImputer(Imputer):
 class Engineer(Preprocesssor):
 
     def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, "Engineer", label, config)
+        Preprocesssor.__init__(self, name, label, _convert_config(config))
 
 class NoEngineering(Engineer):
 
@@ -136,7 +127,7 @@ class PolynomialFeatures(Engineer):
 class Scaler(Preprocesssor):
 
     def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, "Scaler", label, config)
+        Preprocesssor.__init__(self, name, label, _convert_config(config))
 
 class NoScaler(Scaler):
 
@@ -220,7 +211,7 @@ class PowerTransformer(Scaler):
 class Reducer(Preprocesssor):
 
     def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, "Reducer", label, config)
+        Preprocesssor.__init__(self, name, label, _convert_config(config))
 
 class NoReducer(Reducer):
 
@@ -280,8 +271,8 @@ class SelectPercentile(Reducer):
     def make_preprocessor(self, member):
         scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]
         percentile_param = [p for p in self.parameters if p.name == "percentile" ][0]
-        scorer = scorer_param.get_value(self, member)
-        percentile = percentile_param.get_value(self, member)
+        scorer = scorer_param.get_value(member)
+        percentile = percentile_param.get_value(member)
         score_func = None
         if scorer == "f_classif":
             score_func = sklearn.feature_selection.f_classif
@@ -301,7 +292,7 @@ class SelectPercentile(Reducer):
 class Approximator(Preprocesssor):
 
     def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, "Approximator", label, config)
+        Preprocesssor.__init__(self, name, label, _convert_config(config))
 
 class NoApproximator(Approximator):
 

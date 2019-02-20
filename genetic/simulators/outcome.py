@@ -3,10 +3,9 @@ from types import SimpleNamespace
 
 class OutcomeType(Enum):
     NoContest = 0,
-    Duplication = 1,
-    Inconclusive = 2,
-    Indecisive = 3,
-    Decisive = 4
+    Inconclusive = 1,
+    Indecisive = 2,
+    Decisive = 3
 
 class Outcome(SimpleNamespace):
 
@@ -15,10 +14,6 @@ class Outcome(SimpleNamespace):
         self.member1_id = member1_id
         self.member2_id = member2_id
         self.type = OutcomeType.NoContest
-        self.victor = None
-
-    def duplicated(self):
-        self.type = OutcomeType.Duplication
         self.victor = None
 
     def inconclusive(self):
@@ -38,9 +33,6 @@ class Outcome(SimpleNamespace):
         """
         self.type = OutcomeType.Decisive
         self.victor = victor
-
-    def is_duplicated(self):
-        return self.type == OutcomeType.Duplication
 
     def is_uncontested(self):
         return self.type == OutcomeType.NoContest
