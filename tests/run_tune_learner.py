@@ -26,7 +26,7 @@ def run_tune_learner():
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
-            #evaluators.ComponentImportance(),
+            evaluators.ComponentImportance(),
             
             reporters.Path(path),
             learners.KNeighborsClassifier()

@@ -25,6 +25,7 @@ def run_preprocessing():
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
+            evaluators.ComponentImportance(),
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
