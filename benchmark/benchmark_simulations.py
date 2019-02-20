@@ -36,7 +36,7 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             evaluators.Accuracy(),
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
-            baselines.BaselineRater(name),
+            baselines.BaselineStats(name),
             evaluators.HoldoutValidator(),
             reporters.Path(path),
 
@@ -109,11 +109,11 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    name = "tic-tac-toe"
+    name = "eucalyptus"
     task_id = baselines.get_baseline_configuration(name)
     seed = 1
     steps = 100
-    epochs = 5
+    epochs = 50
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
 
@@ -145,4 +145,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations()
+    run_test_simulation()

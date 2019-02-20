@@ -34,6 +34,13 @@ class Choice(HyperParameter):
 
     # Active component
 
+    def get_component_names(self):
+        """
+        Get all component names
+        """
+        component_names = [ c.name for c in self.components ]
+        return component_names
+
     def get_active_component_name(self, member):
         """
         Get the name of the component that is active for the member
@@ -67,11 +74,30 @@ class Choice(HyperParameter):
         self.set_active_component_name(member, component.name)
         component.initialize_member(member)
 
+    def copy_member(self, member, prior):
+        """
+        Copy the component configuration
+        """
+        component_name = self.get_active_component_name(prior)
+        self.set_active_component_name(member, component_name)
+        self.get_active_component(member).copy_member(member, prior)
+
+    def force_member(self, member, component_name):
+        """
+        Initialize a member forced to take on a specific value
+        """
+        prior_active_component = self.get_active_component_name(member)
+        if prior_active_component != component_name:
+            if hasattr(member.configuration, prior_active_component):
+                delattr(member.configuration, prior_active_component)
+            self.set_active_component_name(member, component_name)
+            self.get_active_component(member).initialize_member(member)
+
     # Mutation
 
     def mutate_member(self, member):
         """
-        To mutate a member simply forward the request to the active component
+        To mutate select a component to switch to
         """
         return self.get_active_component(member).mutate_member(member)
 

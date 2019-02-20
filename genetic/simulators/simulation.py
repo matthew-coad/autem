@@ -8,6 +8,7 @@ from .form import Form
 from .ranking import Ranking
 from types import SimpleNamespace
 from .feedback import printProgressBar
+from .choice import Choice
 
 import numpy
 import time
@@ -26,6 +27,7 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.hyper_parameters = None
         self.controllers = None
+        self.initial_mutations = []
         self.members = []
         self.forms = {}
         self.ranking = None
@@ -60,16 +62,27 @@ class Simulation:
         """
         Mutate a member, making a guaranteed modification to its configuration
         """
+        prior_repr = repr(member.configuration)
         random_state = self.random_state
         components = self.hyper_parameters
         n_components = len(components)
+        initial_mutations = self.initial_mutations
+
+        if initial_mutations:
+            mutation_index = random_state.randint(0, len(initial_mutations))
+            mutation = initial_mutations[mutation_index]
+            del initial_mutations[mutation_index]
+            group_name = mutation["group_name"]
+            choice_name = mutation["choice_name"]
+            choice = [ c for c in components if c.name == group_name ][0]
+            choice.force_member(member, choice_name)
+            return True
 
         # Work out the component probabilities based on their importance
         # total_p = sum((c.importance for c in components))
         # component_p = [c.importance / total_p for c in components]
 
         # Try each component in a random order until a component claims to have mutated the state
-        prior_repr = repr(member.configuration)
         # component_indexes = random_state.choice(n_components, size=n_components, replace=False, p=component_p)
         component_indexes = random_state.choice(n_components, size=n_components, replace=False)
         for component_index in component_indexes:
@@ -99,6 +112,20 @@ class Simulation:
             else:
                 searching = False
         return True
+
+    def make_initial_mutations(self):
+        """
+        Make initial member muations list
+        The initial mutation list ensures that every component choice gets selected a minimum number of times
+        """
+        mutations = []
+        for repeat in range(2):
+            for component in self.hyper_parameters:
+                if isinstance(component, Choice):
+                    choice_names = component.get_component_names()
+                    for choice_name in choice_names:
+                        mutations.append( { "repeat": repeat, "group_name": component.name, "choice_name": choice_name } )
+        self.initial_mutations = mutations
 
     def make_member(self):
         """
@@ -270,6 +297,8 @@ class Simulation:
         self.outline_simulation()
         for component in self.controllers:
             component.start_simulation(self)
+
+        self.make_initial_mutations()
 
         for index in range(self.population_size):
             self.make_member()

@@ -68,7 +68,7 @@ def get_baseline_stats(baseline_name):
     }
     return stats
 
-class BaselineRater(Evaluater):
+class BaselineStats(Evaluater):
 
     """
     Rater that reports on the members baseline
@@ -84,30 +84,16 @@ class BaselineRater(Evaluater):
         stats = get_baseline_stats(baseline_name)
         simulation.resources.baseline_stats = stats
 
-    def rate_member(self, member):
+    def record_member(self, member, record):
+
         simulation = member.simulation
         stats = simulation.resources.baseline_stats
 
-        member.ratings.top_accuracy = stats["max_score"]
-        member.ratings.top_1p_accuracy = stats["top_1p"]
-        member.ratings.top_5p_accuracy = stats["top_5p"]
-        member.ratings.top_10p_accuracy = stats["top_10p"]
-        member.ratings.top_25p_accuracy = stats["top_qtr"]
-
-    def record_member(self, member, record):
-
-        if hasattr(member.ratings, "top_accuracy"):
-            record.top_accuracy = member.ratings.top_accuracy
-            record.top_1p_accuracy = member.ratings.top_1p_accuracy
-            record.top_5p_accuracy = member.ratings.top_5p_accuracy
-            record.top_10p_accuracy = member.ratings.top_10p_accuracy
-            record.top_25p_accuracy = member.ratings.top_25p_accuracy
-        else:
-            record.top_accuracy = None
-            record.top_1p_accuracy = None
-            record.top_5p_accuracy = None
-            record.top_10p_accuracy = None
-            record.top_25p_accuracy = None
+        record.top_accuracy = stats["max_score"]
+        record.top_1p_accuracy = stats["top_1p"]
+        record.top_5p_accuracy = stats["top_5p"]
+        record.top_10p_accuracy = stats["top_10p"]
+        record.top_25p_accuracy = stats["top_qtr"]
 
 if __name__ == '__main__':
     print(get_baseline_stats("tic-tac-toe"))
