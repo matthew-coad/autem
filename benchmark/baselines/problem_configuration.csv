@@ -1,4 +1,7 @@
 name,task_id
 hill-valley,145847,Very long fits time
 mfeat-factors,12,Very long initial fits
-
+kr-vs-kp,3,Stuck at start
+breast-w,1779,Fails due to Nas
+eucalyptus,2125,Fails due to nas
+balance-scale,11,Missings target

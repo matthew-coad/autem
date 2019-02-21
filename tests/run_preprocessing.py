@@ -24,32 +24,29 @@ def run_preprocessing():
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
-            evaluators.ComponentImportance(),
+            evaluators.PreferImportantChoices(),
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
             # Imputers
             genetic.Choice("imputer", [
-                preprocessors.NoImputer(),
                 preprocessors.SimpleImputer(),
                 preprocessors.MissingIndicatorImputer(),
-            ]),
+            ], preprocessors.NoImputer()),
 
             # Engineers
             genetic.Choice("engineer", [
-                preprocessors.NoEngineering(),
                 preprocessors.PolynomialFeatures(),
-            ]),
+            ], preprocessors.NoEngineering()),
 
             # Scalers
             genetic.Choice("scaler", [
-                preprocessors.NoScaler(),
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
                 preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
-            ]),
+            ], preprocessors.NoScaler()),
 
             genetic.Choice("learner", [
                 learners.LogisticRegression(), 

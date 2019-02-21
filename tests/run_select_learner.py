@@ -24,7 +24,7 @@ def run_select_learner():
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
-            evaluators.ComponentImportance(),
+            evaluators.PreferImportantChoices(),
             
             reporters.Path(simulations_path().joinpath("select_learner")),
 

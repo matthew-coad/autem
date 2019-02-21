@@ -1,11 +1,4 @@
 name,task_id
-balance-scale,11
-breast-w,1779
-cardiotocography,9979
-eeg-eye-state,9983
-eucalyptus,2125
-JapaneseVowels,4544
-kr-vs-kp,3
 letter,6
 mfeat-fourier,1778
 mfeat-karhunen,16

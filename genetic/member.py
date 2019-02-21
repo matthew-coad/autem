@@ -166,8 +166,6 @@ class Member:
         """
         Notify this member that is has been killed
         """
-        if self.alive == 0:
-            raise RuntimeError("Member not alive")
         self.event = "death"
         self.event_time = time.time()
         self.alive = 0

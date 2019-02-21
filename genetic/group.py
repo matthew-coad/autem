@@ -9,9 +9,10 @@ class Group(HyperParameter):
     """
     Defines a group of hyper parameters
     """
-    def __init__(self, name, parameters):
+    def __init__(self, name, parameters, preference = 0):
         HyperParameter.__init__(self, name)
         self.parameters = parameters
+        self.preference = preference
         for parameter in parameters:
             parameter.group_name = self.name
 

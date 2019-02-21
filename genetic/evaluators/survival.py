@@ -20,6 +20,8 @@ class Survival(Evaluater):
 
         # determine how long a record we will examine
         record_length = min(len(contestant1.wonlost), len(contestant2.wonlost))
+        if record_length == 0:
+            return None
 
         loser = contestant2 if outcome.victor == 1 else contestant1
         winner = contestant1 if outcome.victor == 1 else contestant2

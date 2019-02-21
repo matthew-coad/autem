@@ -9,9 +9,12 @@ class Choice(HyperParameter):
     Defines a set of components where only one component can be active for a member
     Groups can only act as hyper parameters
     """
-    def __init__(self, group_name = None, components = []):
+    def __init__(self, group_name = None, components = [], no_choice = None):
         HyperParameter.__init__(self, group_name)
         self.group_name = group_name
+        self.no_choice = no_choice
+        if no_choice:
+            components.append(no_choice)
         self.components = components
 
     # Outline

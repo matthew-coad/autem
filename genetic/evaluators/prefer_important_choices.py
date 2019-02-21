@@ -13,10 +13,15 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import ExtraTreesRegressor
 
-class ComponentImportance(Evaluater):
+from types import SimpleNamespace
+
+class PreferImportantChoices(Evaluater):
     """
     Evaluates the importance of each component choice using RandomForest
     """
+
+    def __init__(self, required_importance = 0.05):
+        self.required_importance = required_importance
 
     def start_simulation(self, simulation):
         """
@@ -90,11 +95,52 @@ class ComponentImportance(Evaluater):
 
         simulation.resources.choice_importances = choice_importances
 
-    def record_member(self, member, record):
-        simulation = member.simulation
+    def contest_members(self, contestant1, contestant2, contest):
+
+        # Don't proceed if we have no importance data or we already have a conclusion
+        contestant1.evaluation.irrelevants = None
+        contestant2.evaluation.irrelevants = None
+
+        if contest.is_conclusive():
+            return None
+
+        simulation = contestant1.simulation
         if not hasattr(simulation.resources, "choice_importances"):
             return None
-        choice_importances = simulation.resources.choice_importances
 
+        # Collect info
+        required_importance = self.required_importance
+        choice_importances = simulation.resources.choice_importances
+        choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
+
+        # Determine which choices are unimportant
+        unimportant_choices = [ c for c in choices if choice_importances[c.name]["importance"] < required_importance and c.no_choice ]
+
+        # For a member make a configuration that contains only the important choices
+        def evaluate_irrelevants(member):
+            return sum(c.no_choice.name != c.get_active_component_name(member) for c in unimportant_choices)
+
+        contestant1.evaluation.irrelevants = evaluate_irrelevants(contestant1)
+        contestant2.evaluation.irrelevants = evaluate_irrelevants(contestant2)
+
+        if contestant1.evaluation.irrelevants > 0 or contestant2.evaluation.irrelevants > 0:
+            contest.unconventional()
+
+    def stress_members(self, contestant1, contestant2, contest):
+
+        if contestant1.evaluation.irrelevants:
+            contestant1.stressed(0, 1)
+        if contestant2.evaluation.irrelevants:
+            contestant2.stressed(0, 1)
+
+    def record_member(self, member, record):
+        simulation = member.simulation
+
+        if hasattr(member.evaluation, "irrelevants"):
+            record.irrelevants = member.evaluation.irrelevants
+        if not hasattr(simulation.resources, "choice_importances"):
+            return None
+
+        choice_importances = simulation.resources.choice_importances
         for key in choice_importances:
             setattr(record, "%s_importance" % key, choice_importances[key]["importance"])

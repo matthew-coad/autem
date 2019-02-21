@@ -35,7 +35,6 @@ class Simulation:
         self.n_steps = 0
         self.epoch = None
         self.running = False
-        self.stopping = False
 
     def generate_id(self):
         id = self.next_id
@@ -212,7 +211,7 @@ class Simulation:
             contestant1.stand_off()
             contestant2.stand_off()
 
-        if outcome.is_conclusive():
+        if outcome.is_zero_sum():
             decisive = outcome.is_decisive()
             winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
             winner.victory(decisive)
@@ -271,7 +270,7 @@ class Simulation:
         self.ranking = ranking
 
     def repopulate(self):
-        repopulate = self.running and not self.stopping and self.population_size > len(self.members)
+        repopulate = self.running and self.population_size > len(self.members)
         if not repopulate:
             return None
         random_state = self.random_state
@@ -282,6 +281,9 @@ class Simulation:
             parent1 = candidates[parent_indexes[0]]
             parent2 = candidates[parent_indexes[1]]
             newborn = self.crossover_member(parent1, parent2)
+        else:
+            newborn = self.make_member()
+
         if not newborn is None:
             self.prepare_member(newborn)
         return newborn
@@ -335,16 +337,16 @@ class Simulation:
         if contest.is_uncontested():
             raise RuntimeError("No contest component defined")
 
-        # If the contest was conclusive then determine the contestants fate!
-        if contest.is_conclusive():
-            self.stress_members(contestant1, contestant2, contest)
-
         # If we can't tell anything we need to do more evaluation
         if contest.is_inconclusive():
             if contestant1.evaluations < contestant2.evaluations:
                 self.evaluate_member(contestant1)
             else:
                 self.evaluate_member(contestant2)
+
+        # Determine the contestants fate!
+        if contest.is_conclusive():
+            self.stress_members(contestant1, contestant2, contest)
 
         # Repopulate!
         newborn = self.repopulate()
@@ -379,9 +381,7 @@ class Simulation:
         """
         Perform final simulation processing
         """
-
-        if self.running:
-            self.running = False
+        self.running = False
 
         random_state = self.random_state
         members = self.members
@@ -399,9 +399,9 @@ class Simulation:
 
     def stop(self):
         """
-        Indicate that the simulation should start stopping
+        Indicate that the simulation should stop
         """
-        self.stopping = True
+        self.running = False
 
     def outline_simulation(self):
         """

@@ -37,48 +37,43 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             evaluators.OpenMLRater(task_id),
             baselines.BaselineStats(name),
             evaluators.HoldoutValidator(),
-            evaluators.ComponentImportance(),
+            evaluators.PreferImportantChoices(),
             reporters.Path(path),
 
             # Imputers
             genetic.Choice("Imputer", [
-                preprocessors.NoImputer(),
                 preprocessors.SimpleImputer(),
                 preprocessors.MissingIndicatorImputer(),
-            ]),
+            ], preprocessors.NoImputer()),
 
             # Engineers
             genetic.Choice("Engineer", [
-                preprocessors.NoEngineering(),
                 preprocessors.PolynomialFeatures(),
-            ]),
+            ], preprocessors.NoEngineering()),
 
             # Scalers
             genetic.Choice("Scaler", [
-                preprocessors.NoScaler(),
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
                 preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
                 preprocessors.Binarizer(),
-            ]),
+            ], preprocessors.NoScaler()),
 
             # Feature Reducers
             genetic.Choice("Reducer", [
-                preprocessors.NoReducer(),
                 preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
                 preprocessors.PCA(),
                 preprocessors.SelectPercentile(),
-            ]),
+            ], preprocessors.NoReducer()),
 
             # Approximators
             genetic.Choice("Approximator", [
-                preprocessors.NoApproximator(),
                 preprocessors.RBFSampler(),
                 preprocessors.Nystroem(),
-            ]),
+            ], preprocessors.NoApproximator()),
 
             genetic.Choice("Learner", [
                 learners.GaussianNB(),
@@ -109,11 +104,11 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    name = "tic-tac-toe"
+    name = "breast-w"
     task_id = baselines.get_baseline_configuration(name)
     seed = 1
     steps = 100
-    epochs = 50
+    epochs = 40
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
 
@@ -125,7 +120,7 @@ def run_benchmark_simulation(baseline_name):
     task_id = baselines.get_baseline_configuration(baseline_name)
     name = baseline_name
     seed = 1
-    epochs = 50
+    epochs = 40
     steps = 100
     population_size = 20
     path = simulations_path().joinpath(name).joinpath(str(task_id))
@@ -145,4 +140,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_test_simulation()
+    run_benchmark_simulations()
