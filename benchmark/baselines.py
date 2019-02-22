@@ -24,7 +24,6 @@ def load_baseline_configuration_data():
     return df
 
 def get_baseline_names(experiment, status = "Run"):
-    status = "Run"
     df = load_baseline_configuration_data()
     dfa = df[df[experiment] == status]
     return dfa.Name

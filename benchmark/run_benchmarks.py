@@ -136,15 +136,21 @@ def run_benchmark_simulation(baseline_name, experiment):
     utility.prepare_OpenML()
     simulation = make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
+    autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulations(experiment):
     baseline_names = baselines.get_baseline_names(experiment)
     for baseline_name in baseline_names:
         run_benchmark_simulation(baseline_name, experiment)
 
-def combine_reports(experiment):
+def combine_reports(experiment, baseline):
+    experiment_path = simulations_path().joinpath(experiment).joinpath(baseline)
+    autem.ReportManager(experiment_path).update_combined_reports()
+
+def combine_experiment_reports(experiment):
     experiment_path = simulations_path().joinpath(experiment)
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    combine_reports("Run_Light")
+    for baseline in baselines.get_baseline_names("Run_Light", "Complete"):
+        combine_reports("Run_Light", baseline)
