@@ -262,7 +262,7 @@ class SelectPercentile(Preprocesssor):
 
     def __init__(self):
         scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'], 'f_classif')
-        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], None)
+        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], 10)
         Preprocesssor.__init__(self, "SPC", "Select Percentile", [scorer_parameter, percentile_parameter])
 
     def make_preprocessor(self, member):
