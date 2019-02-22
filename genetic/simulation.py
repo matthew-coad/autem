@@ -349,14 +349,17 @@ class Simulation:
             self.stress_members(contestant1, contestant2, contest)
 
         # Repopulate!
-        newborn = self.repopulate()
+        newborn1 = self.repopulate()
+        newborn2 = self.repopulate()
 
         # Report on what happened
         self.n_steps += 1
         self.reports.append(self.record_member(contestant1))
         self.reports.append(self.record_member(contestant2))
-        if not newborn is None:
-            self.reports.append(self.record_member(newborn))
+        if not newborn1 is None:
+            self.reports.append(self.record_member(newborn1))
+        if not newborn2 is None:
+            self.reports.append(self.record_member(newborn2))
 
         if len(self.members) < 2:
             self.stop()
