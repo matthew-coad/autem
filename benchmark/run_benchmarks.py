@@ -1,7 +1,6 @@
 if __name__ == '__main__':
     import context
 
-
 import openml
 
 import genetic
@@ -20,14 +19,20 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-def make_openml_light_classifier_simulation(name, task_id, seed, population_size, path, properties = {}):
+version = 2
+
+def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
     dataset_name = dataset.name
+    simulation_name = "%s_%s_v%d" % (experiment, baseline_name, version)
     properties['dataset'] = dataset_name
+    properties['experiment'] = experiment
+    properties['version'] = version
+    
     simulation = genetic.Simulation(
-        name, 
+        simulation_name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
@@ -35,16 +40,16 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
             evaluators.Accuracy(),
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
-            baselines.BaselineStats(name),
+            baselines.BaselineStats(baseline_name),
             evaluators.HoldoutValidator(),
             evaluators.PreferImportantChoices(),
             reporters.Path(path),
 
             # Imputers
             genetic.Choice("Imputer", [
-                preprocessors.SimpleImputer(),
-                preprocessors.MissingIndicatorImputer(),
-            ], preprocessors.NoImputer()),
+                preprocessors.NoImputer(),
+                preprocessors.SimpleImputer()
+            ]),
 
             # Engineers
             genetic.Choice("Engineer", [
@@ -94,6 +99,7 @@ def make_openml_light_classifier_simulation(name, task_id, seed, population_size
     return simulation
 
 def run_simulation(simulation, steps, epochs):
+    print("Running %s" % simulation.name)
     simulation.start()
     for index in range(epochs):
         simulation.run(steps)
@@ -104,35 +110,38 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    name = "breast-w"
-    task_id = baselines.get_baseline_configuration(name)
+    baseline_name = "diabetes"
+    experiment = "Run_Light"
+    configuration = baselines.get_baseline_configuration(baseline_name)
+    task_id = configuration["task_id"]
     seed = 1
     steps = 100
     epochs = 40
     population_size = 20
-    path = simulations_path().joinpath(name).joinpath(str(task_id))
+    path = simulations_path().joinpath("test").joinpath(str(experiment)).joinpath(baseline_name)
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(name, task_id, seed, population_size, path)
+    simulation = make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
 
-def run_benchmark_simulation(baseline_name):
-    task_id = baselines.get_baseline_configuration(baseline_name)
-    name = baseline_name
+def run_benchmark_simulation(baseline_name, experiment):
+    configuration = baselines.get_baseline_configuration(baseline_name)
+    task_id = configuration["task_id"]
     seed = 1
     epochs = 40
     steps = 100
     population_size = 20
-    path = simulations_path().joinpath(name).joinpath(str(task_id))
+    path = simulations_path().joinpath(str(experiment)).joinpath(baseline_name)
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(name, task_id, seed, population_size, path)
+    simulation = make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
 
-def run_benchmark_simulations():
-    baseline_names = baselines.get_baseline_names()
+
+def run_benchmark_simulations(experiment):
+    baseline_names = baselines.get_baseline_names(experiment)
     for baseline_name in baseline_names:
-        run_benchmark_simulation(baseline_name)
+        run_benchmark_simulation(baseline_name, experiment)
 
 def combine_reports():
     experiment_path = simulations_path().joinpath(experiment_name)
@@ -140,4 +149,4 @@ def combine_reports():
     genetic.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations()
+    run_test_simulation()

@@ -16,22 +16,24 @@ def baselines_directory():
     return Path("benchmark/baselines")
 
 def baseline_configuration_filename():
-    return baselines_directory().joinpath("configuration.csv")
+    return baselines_directory().joinpath("openml_100.xlsx")
 
 def load_baseline_configuration_data():
     filename = baseline_configuration_filename()
-    df = pandas.read_csv(filename)
+    df = pandas.read_excel(filename)
     return df
 
-def get_baseline_names():
+def get_baseline_names(experiment, status = "Run"):
+    status = "Run"
     df = load_baseline_configuration_data()
-    return df.name
+    dfa = df[df[experiment] == status]
+    return dfa.Name
 
 def get_baseline_configuration(name):
     df = load_baseline_configuration_data()
-    dfa = df[df['name'] == name]
-    task_id = list(dfa.task_id)[0]
-    return (task_id)
+    dfa = df[df['Name'] == name]
+    configuration = dfa.to_dict('records')[0]
+    return configuration
 
 def baseline_directory(baseline_name):
     return baselines_directory().joinpath(baseline_name)
@@ -96,5 +98,7 @@ class BaselineStats(Evaluater):
         record.top_25p_accuracy = stats["top_qtr"]
 
 if __name__ == '__main__':
-    print(get_baseline_stats("tic-tac-toe"))
+    names = get_baseline_names("Run_Light")
+    for name in names:
+        print(get_baseline_stats(name))
 
