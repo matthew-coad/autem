@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import context
 
-from genetic.simulators import Outcome, OutcomeType
+from autem.simulators import Outcome, OutcomeType
 
 import unittest
 

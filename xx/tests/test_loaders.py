@@ -3,8 +3,8 @@ if __name__ == '__main__':
 import unittest
 from tests import datasets
 
-from genetic import Simulation
-from genetic.loaders import Data
+from autem import Simulation
+from autem.loaders import Data
 
 import numpy as np
 

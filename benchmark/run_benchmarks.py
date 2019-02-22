@@ -3,13 +3,13 @@ if __name__ == '__main__':
 
 import openml
 
-import genetic
-import genetic.scorers as scorers
-import genetic.preprocessors as preprocessors
-import genetic.learners.classification as learners
-import genetic.loaders as loaders
-import genetic.reporters as reporters
-import genetic.evaluators as evaluators
+import autem
+import autem.scorers as scorers
+import autem.preprocessors as preprocessors
+import autem.learners.classification as learners
+import autem.loaders as loaders
+import autem.reporters as reporters
+import autem.evaluators as evaluators
 
 import benchmark.utility as utility
 import benchmark.baselines as baselines
@@ -31,7 +31,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
     properties['experiment'] = experiment
     properties['version'] = version
     
-    simulation = genetic.Simulation(
+    simulation = autem.Simulation(
         simulation_name,
         [
             loaders.OpenMLLoader(data_id),
@@ -46,18 +46,18 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             reporters.Path(path),
 
             # Imputers
-            genetic.Choice("Imputer", [
+            autem.Choice("Imputer", [
                 preprocessors.NoImputer(),
                 preprocessors.SimpleImputer()
             ]),
 
             # Engineers
-            genetic.Choice("Engineer", [
+            autem.Choice("Engineer", [
                 preprocessors.PolynomialFeatures(),
             ], preprocessors.NoEngineering()),
 
             # Scalers
-            genetic.Choice("Scaler", [
+            autem.Choice("Scaler", [
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
                 preprocessors.Normalizer(),
@@ -67,7 +67,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             ], preprocessors.NoScaler()),
 
             # Feature Reducers
-            genetic.Choice("Reducer", [
+            autem.Choice("Reducer", [
                 preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
                 preprocessors.PCA(),
@@ -75,12 +75,12 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             ], preprocessors.NoReducer()),
 
             # Approximators
-            genetic.Choice("Approximator", [
+            autem.Choice("Approximator", [
                 preprocessors.RBFSampler(),
                 preprocessors.Nystroem(),
             ], preprocessors.NoApproximator()),
 
-            genetic.Choice("Learner", [
+            autem.Choice("Learner", [
                 learners.GaussianNB(),
                 learners.BernoulliNB(),
                 learners.MultinomialNB(),
@@ -137,16 +137,14 @@ def run_benchmark_simulation(baseline_name, experiment):
     simulation = make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
 
-
 def run_benchmark_simulations(experiment):
     baseline_names = baselines.get_baseline_names(experiment)
     for baseline_name in baseline_names:
         run_benchmark_simulation(baseline_name, experiment)
 
-def combine_reports():
-    experiment_path = simulations_path().joinpath(experiment_name)
-    genetic.ReportManager(simulations_path()).update_combined_reports()
-    genetic.ReportManager(experiment_path).update_combined_reports()
+def combine_reports(experiment):
+    experiment_path = simulations_path().joinpath(experiment)
+    autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_test_simulation()
+    combine_reports("Run_Light")

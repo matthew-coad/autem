@@ -1,10 +1,10 @@
 if __name__ == '__main__':
     import context
 
-import genetic.simulators as simulators
-import genetic.learners.regression as learners
-import genetic.scorers as scorers
-import genetic.loaders as loaders
+import autem.simulators as simulators
+import autem.learners.regression as learners
+import autem.scorers as scorers
+import autem.loaders as loaders
 
 from tests.datasets import load_boston
 

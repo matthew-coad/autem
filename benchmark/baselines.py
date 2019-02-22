@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import context
 
-from genetic.evaluators import Evaluater
+from autem.evaluators import Evaluater
 
 from benchmark.utility import *    
 from pathlib import Path

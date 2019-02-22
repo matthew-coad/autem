@@ -1,13 +1,13 @@
 if __name__ == '__main__':
     import context
 
-import genetic
-import genetic.scorers as scorers
-import genetic.learners.classification as learners
-import genetic.loaders as loaders
-import genetic.evaluators as evaluators
-import genetic.reporters as reporters
-import genetic.preprocessors as preprocessors
+import autem
+import autem.scorers as scorers
+import autem.learners.classification as learners
+import autem.loaders as loaders
+import autem.evaluators as evaluators
+import autem.reporters as reporters
+import autem.preprocessors as preprocessors
 
 from tests.datasets import load_iris
 from tests.config import simulations_path
@@ -15,7 +15,7 @@ from tests.config import simulations_path
 def run_preprocessing():
 
     x,y = load_iris()
-    simulation = genetic.Simulation(
+    simulation = autem.Simulation(
         "preprocessing", 
         [
             loaders.Data("iris", x,y),
@@ -29,18 +29,18 @@ def run_preprocessing():
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
             # Imputers
-            genetic.Choice("imputer", [
+            autem.Choice("imputer", [
                 preprocessors.SimpleImputer(),
                 preprocessors.MissingIndicatorImputer(),
             ], preprocessors.NoImputer()),
 
             # Engineers
-            genetic.Choice("engineer", [
+            autem.Choice("engineer", [
                 preprocessors.PolynomialFeatures(),
             ], preprocessors.NoEngineering()),
 
             # Scalers
-            genetic.Choice("scaler", [
+            autem.Choice("scaler", [
                 preprocessors.MaxAbsScaler(),
                 preprocessors.MinMaxScaler(),
                 preprocessors.Normalizer(),
@@ -48,7 +48,7 @@ def run_preprocessing():
                 preprocessors.StandardScaler(),
             ], preprocessors.NoScaler()),
 
-            genetic.Choice("learner", [
+            autem.Choice("learner", [
                 learners.LogisticRegression(), 
                 learners.LinearDiscriminantAnalysis(), 
                 learners.KNeighborsClassifier(),  

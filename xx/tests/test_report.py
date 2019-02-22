@@ -3,9 +3,9 @@ if __name__ == '__main__':
 
 import unittest
 
-import genetic.simulators as simulators
-import genetic.reporters as reporters
-import genetic.reporters.utility as utility
+import autem.simulators as simulators
+import autem.reporters as reporters
+import autem.reporters.utility as utility
 
 class ReportMemory(reporters.Reporter):
 

@@ -1,12 +1,12 @@
 if __name__ == '__main__':
     import context
 
-import genetic
-import genetic.scorers as scorers
-import genetic.learners.classification as learners
-import genetic.loaders as loaders
-import genetic.evaluators as evaluators
-import genetic.reporters as reporters
+import autem
+import autem.scorers as scorers
+import autem.learners.classification as learners
+import autem.loaders as loaders
+import autem.evaluators as evaluators
+import autem.reporters as reporters
 
 from tests.datasets import load_iris
 from tests.config import simulations_path
@@ -15,7 +15,7 @@ def run_tune_learner():
 
     x,y = load_iris()
     path = simulations_path().joinpath("tune_learner")
-    simulation = genetic.Simulation(
+    simulation = autem.Simulation(
         "tune", 
         [
             loaders.Data("iris", x,y),
@@ -37,7 +37,7 @@ def run_tune_learner():
     simulation.finish()
     simulation.report()
 
-    manager = genetic.ReportManager(path)
+    manager = autem.ReportManager(path)
     #manager.update_combined_outline_report()
     manager.update_combined_battle_report()
 

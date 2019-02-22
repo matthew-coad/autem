@@ -1,8 +1,8 @@
 if __name__ == '__main__':
     import context
 
-import genetic.simulators as simulators
-import genetic.learners as learners
+import autem.simulators as simulators
+import autem.learners as learners
 
 import unittest
 

@@ -3,9 +3,9 @@
 if __name__ == '__main__':
     import context
 
-import genetic
-import genetic.scorers as scorers
-import genetic.learners as learners
+import autem
+import autem.scorers as scorers
+import autem.learners as learners
 
 from pathlib import Path
 from pandas import read_csv
@@ -32,8 +32,8 @@ def run_overwhelm_diverse_learner():
     seed = 7
 
     components = [
-        genetic.Data(x, y, .3),
-        genetic.FixedPopulationSize(100),
+        autem.Data(x, y, .3),
+        autem.FixedPopulationSize(100),
 
         # Learners
         learners.LinearRegression(),
@@ -45,14 +45,14 @@ def run_overwhelm_diverse_learner():
         learners.LearnerChoice(),
 
         # Transforms
-        genetic.StandardiseTransform(),
+        autem.StandardiseTransform(),
 
-        genetic.ModelScorer(scorers.neg_mean_squared_error_scorer),
-        genetic.ModelScoreSignificantFitness(0.1),
-        genetic.BattleCompetition(5, 5, .5),
-        genetic.SavePath(simulation_path)
+        autem.ModelScorer(scorers.neg_mean_squared_error_scorer),
+        autem.ModelScoreSignificantFitness(0.1),
+        autem.BattleCompetition(5, 5, .5),
+        autem.SavePath(simulation_path)
     ]
-    simulation = genetic.Simulation(simulation_name, components, seed = 1)
+    simulation = autem.Simulation(simulation_name, components, seed = 1)
     for round in range(simulation_rounds):
         simulation.run()
 
