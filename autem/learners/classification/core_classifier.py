@@ -93,7 +93,10 @@ classifier_config_dict = {
 
 }
 
-def get_parameters(config):
+def get_parameters(config, override_parameters = None):
+    if not override_parameters is None:
+        return override_parameters
+
     learner_dict = classifier_config_dict[config]
 
     def _parameter(key, values):
@@ -104,87 +107,87 @@ def get_parameters(config):
 
 class GaussianNB(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "GNB", "Gaussian Naive Bayes", get_parameters('sklearn.naive_bayes.GaussianNB'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "GNB", "Gaussian Naive Bayes", get_parameters('sklearn.naive_bayes.GaussianNB', parameters))
 
     def make_model(self):
         return sklearn.naive_bayes.GaussianNB()
 
 class BernoulliNB(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "BNB", "Bernoulli Naive-Bayes", get_parameters('sklearn.naive_bayes.BernoulliNB'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "BNB", "Bernoulli Naive-Bayes", get_parameters('sklearn.naive_bayes.BernoulliNB', parameters))
 
     def make_model(self):
         return sklearn.naive_bayes.BernoulliNB()
 
 class MultinomialNB(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "MNB", "Multinomial Naive-Bayes", get_parameters('sklearn.naive_bayes.MultinomialNB'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "MNB", "Multinomial Naive-Bayes", get_parameters('sklearn.naive_bayes.MultinomialNB', parameters))
 
     def make_model(self):
         return sklearn.naive_bayes.MultinomialNB()
 
 class DecisionTreeClassifier(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "CART", "Decision Tree Classifier", get_parameters('sklearn.tree.DecisionTreeClassifier'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "CART", "Decision Tree Classifier", get_parameters('sklearn.tree.DecisionTreeClassifier', parameters))
 
     def make_model(self):
         return sklearn.tree.DecisionTreeClassifier()
 
 class ExtraTreesClassifier(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "EXT", "Extra Trees", get_parameters('sklearn.ensemble.ExtraTreesClassifier'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "EXT", "Extra Trees", get_parameters('sklearn.ensemble.ExtraTreesClassifier', parameters))
 
     def make_model(self):
         return sklearn.tree.ExtraTreeClassifier()
 
 class RandomForestClassifier(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "RF", "Random Forests", get_parameters('sklearn.ensemble.RandomForestClassifier'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "RF", "Random Forests", get_parameters('sklearn.ensemble.RandomForestClassifier', parameters))
 
     def make_model(self):
         return sklearn.ensemble.RandomForestClassifier(n_estimators = 100)
 
 class GradientBoostingClassifier(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "GB", "Gradient Boosting", get_parameters('sklearn.ensemble.GradientBoostingClassifier'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "GB", "Gradient Boosting", get_parameters('sklearn.ensemble.GradientBoostingClassifier', parameters))
 
     def make_model(self):
         return sklearn.ensemble.GradientBoostingClassifier(n_estimators = 100)
 
 class KNeighborsClassifier(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "KNN", "K-Neighbors Classifier", get_parameters('sklearn.neighbors.KNeighborsClassifier'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "KNN", "K-Neighbors Classifier", get_parameters('sklearn.neighbors.KNeighborsClassifier', parameters))
 
     def make_model(self):
         return sklearn.neighbors.KNeighborsClassifier()
 
 class LinearSVC(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "LSV", "Linear SVC", get_parameters('sklearn.svm.LinearSVC'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "LSV", "Linear SVC", get_parameters('sklearn.svm.LinearSVC', parameters))
 
     def make_model(self):
         return sklearn.svm.LinearSVC()
 
 class LogisticRegression(Learner):
 
-    def __init__(self):
-        Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression'))
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression', parameters))
 
     def make_model(self):
         return sklearn.linear_model.LogisticRegression(solver =  'lbfgs', multi_class = 'ovr')
 
 class LinearDiscriminantAnalysis(Learner):
 
-    def __init__(self):
+    def __init__(self, parameters = None):
         Learner.__init__(self, "LDA", "Linear Discriminant Analysis", [])
 
     def make_model(self):

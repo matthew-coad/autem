@@ -68,9 +68,11 @@ class NoImputer(Imputer):
 
 class SimpleImputer(Imputer):
 
-    def __init__(self):
-        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
-        Imputer.__init__(self, "SMP", "Simple Imputer", [config_parameter])
+    def __init__(self, parameters = None):
+        if parameters is None:
+            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+            parameters = [config_parameter]
+        Imputer.__init__(self, "SMP", "Simple Imputer", parameters)
 
     def make_preprocessor(self, member):
         return sklearn.impute.SimpleImputer()
@@ -159,8 +161,10 @@ class Normalizer(Scaler):
         'norm': ['l1', 'l2', 'max']
     }
 
-    def __init__(self):
-        Scaler.__init__(self, "NOR", "Normalizer", self.config)
+    def __init__(self, config = None):
+        if config is None:
+            config = self.config
+        Scaler.__init__(self, "NOR", "Normalizer", config)
 
     def make_preprocessor(self, member):
         return sklearn.preprocessing.Normalizer()
@@ -179,7 +183,7 @@ class StandardScaler(Scaler):
         Scaler.__init__(self, "SCL", "Standard Scaler", {})
 
     def make_preprocessor(self, member):
-        return sklearn.preprocessing.RobustScaler()
+        return sklearn.preprocessing.StandardScaler()
 
 class Binarizer(Scaler):
 
