@@ -24,7 +24,4 @@ Ranking in battle reports **done**
 
 Add simulation event field **done**
 
-Download openml runs related to a run 
-
-
-
+Download openml runs related to a run **manual task**

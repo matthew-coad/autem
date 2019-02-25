@@ -95,10 +95,6 @@ read_battle_file <- function(file_name) {
 clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$event_time <- lubridate::parse_date_time(df$time, orders = "amd HMS Y")
-  df %>%
-    group_by(simulation) %>%
-    arrange(date, .by_group = TRUE) %>%
-    mutate(diff = value - lag(value, default = first(value)))
   df
 }
 

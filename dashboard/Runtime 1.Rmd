@@ -71,6 +71,8 @@ runtime_summary_df <-
     secs_per_value = seconds / values
   )
 
+runtime_summary_df <- runtime_summary_df %>% filter(minutes >= 15)
+
 print(runtime_summary_df)
   
 
@@ -97,13 +99,25 @@ runtime_summary_df %>%
 ```{r}
 
 runtime_summary_df %>%
-  filter(experiment == "Light") %>%
   mutate(dataset = forcats::fct_reorder(dataset, secs_per_value)) %>%
   ggplot(aes(x = dataset, y = secs_per_value)) +
   ylab("Runtime (sec)") +
   geom_col() + 
   coord_flip() +
+  facet_wrap(~ experiment) +
   ggtitle("Runtime per value")
+
+```
+
+```{r}
+
+runtime_summary_df %>%
+  filter(experiment == "Light") %>%
+  ggplot(aes(x = seconds, y = secs_per_instance)) +
+  geom_text(aes(label = dataset), check_overlap = TRUE) +
+  xlab("Runtime (s)") +
+  ylab("Runtime per instance") +
+  ggtitle("Runtime versus Runtime per row")
 
 ```
 
