@@ -12,6 +12,7 @@ from .choice import Choice
 
 import numpy
 import time
+import warnings
 
 class Simulation:
 
@@ -192,7 +193,11 @@ class Simulation:
 
         for component in self.controllers:
             try:
-                component.evaluate_member(member)
+                with warnings.catch_warnings() as ws:
+                    warnings.simplefilter("error")
+
+                    component.evaluate_member(member)
+
             except Exception as ex:
                 self.fail_member(member, ex)
                 break
