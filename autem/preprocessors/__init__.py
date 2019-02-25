@@ -6,7 +6,7 @@ from .preprocessor import NoImputer, SimpleImputer, MissingIndicatorImputer
 from .preprocessor import NoEngineering, PolynomialFeatures
 
 # Scalers
-from .preprocessor import NoScaler, MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, PowerTransformer, Binarizer
+from .preprocessor import NoScaler, MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, PowerTransformer, Binarizer, BoxCoxTransform, YeoJohnsonTransform
 
 # Feature Reducers
 from .preprocessor import NoReducer, FastICA, FeatureAgglomeration, PCA, SelectPercentile

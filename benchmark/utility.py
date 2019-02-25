@@ -5,6 +5,9 @@ import shutil
 import config
 import openml
 
+def benchmark_directory():
+    return Path("benchmark")
+
 def prepare_experiment_directory(path):
     if os.path.exists(path):
         shutil.rmtree(path)

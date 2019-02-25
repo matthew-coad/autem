@@ -16,7 +16,7 @@ def baselines_directory():
     return Path("benchmark/baselines")
 
 def baseline_configuration_filename():
-    return baselines_directory().joinpath("openml_100.xlsx")
+    return benchmark_directory().joinpath("Configuration.xlsx")
 
 def load_baseline_configuration_data():
     filename = baseline_configuration_filename()

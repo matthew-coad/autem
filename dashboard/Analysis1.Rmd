@@ -1,0 +1,216 @@
+---
+title: "Analysis1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+source("battle.r")
+source("baseline.r")
+
+simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
+simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run33_1_PCA Slow"
+
+baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Load
+
+```{r Load}
+
+battle_df <- read_battle(simulations_path)
+print("Battle data loaded")
+
+```
+
+# Simulation Summary
+
+```{r}
+
+error_df <- 
+  battle_df %>%
+  filter(fault != "None") %>%
+  group_by(dataset, experiment, fault) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  mutate(fault = str_sub(fault, 1, 80)) %>%
+  select(dataset, experiment, n, fault)
+
+error_count_df <-
+  error_df %>%
+  group_by(dataset, experiment) %>%
+  summarise(n_error = sum(n)) %>%
+  ungroup()
+  
+
+summary_df <-
+  battle_df %>%
+  filter(ranking == 1) %>%
+  group_by(dataset, experiment) %>%
+  right_join(error_count_df, by = c("dataset","experiment")) %>%
+  arrange(experiment, dataset) %>%
+  select(experiment, dataset, ranking, rating, top_5p_accuracy, validation_accuracy, n_error) %>%
+  ungroup()
+
+
+print(summary_df, digits = 3)
+
+```
+
+# Error details
+
+```{r}
+
+print(error_count_df)
+
+
+```
+
+# Data Set Performance
+
+# Calculate performance
+
+```{r}
+
+baselines <- levels(factor(summary_df$dataset))
+
+baseline_accuracy <- function(baseline_name) {
+  
+  baseline_df <- read_baseline_file(baseline_path, baseline_name)
+  baseline_accuracy_df <- 
+    baseline_df %>%
+    mutate(
+      experiment = "baseline",
+      dataset = baseline_name,
+      accuracy = predictive_accuracy
+    ) %>%
+    select(experiment, dataset, accuracy)
+  min_accuracy <- min(baseline_accuracy_df$accuracy)
+  max_accuracy <- max(baseline_accuracy_df$accuracy)
+  
+  battle_accuracy_df <-
+    summary_df %>%
+    filter(dataset == baseline_name) %>%
+    mutate(
+      accuracy = rating
+    ) %>%
+    select(experiment, dataset, accuracy)
+
+  accuracy_df <- 
+    bind_rows(baseline_accuracy_df, battle_accuracy_df) %>%
+    mutate(percentage = percent_rank(accuracy) * 100)
+  
+  accuracy_df$normal_accuracy <- (accuracy_df$accuracy - min_accuracy) / (max_accuracy - min_accuracy)
+  
+  accuracy_df
+
+}
+
+baseline_accuracy_df <- baselines %>% map_dfr(baseline_accuracy)
+
+print(baseline_accuracy_df)
+
+```
+
+## Plot combined performance
+
+```{r}
+
+plot(ggplot(data = baseline_accuracy_df, aes(x = percentage, y = normal_accuracy)) +
+  geom_point(data = filter(baseline_accuracy_df, experiment == "baseline"), color = "Grey", size = .1) +
+  geom_point(data = filter(baseline_accuracy_df, experiment == "Light"), size = 2))
+
+
+```
+
+## Plot individual performance
+
+```{r}
+for (baseline_name in baselines) {
+  
+  accuracy_df <- baseline_accuracy_df %>% filter(dataset == baseline_name)
+  plot(ggplot(data = accuracy_df,aes(x = percentage, y = accuracy)) +
+    geom_count(data = filter(accuracy_df, experiment == "baseline"), color = "DarkGrey") +
+    geom_point(data = filter(accuracy_df, experiment != "baseline"), aes(color = experiment), size = 3) +
+    geom_rug(data = filter(accuracy_df, experiment != "baseline"), aes(color = experiment), sides="trbl") +
+    ggtitle(baseline_name)
+  )
+
+}
+
+
+```
+
+
+
+# Accuracy Contributors
+
+## Learner
+
+```{r}
+
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = Learner), size = 0.5) +
+    ggtitle(baseline_name)
+  plot(p)
+}
+
+
+```
+
+## Engineer
+
+```{r}
+
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = Engineer), size = 0.5) +
+    ggtitle(baseline_name)
+  plot(p)
+}
+```
+
+
+## Scaler
+
+```{r}
+
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = Scaler), size = 0.5) +
+    ggtitle(baseline_name)
+  plot(p)
+}
+```
+
+## Reducer
+
+```{r}
+
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = Reducer), size = 0.5) +
+    ggtitle(baseline_name)
+  plot(p)
+}
+```
+
+
+
+
+

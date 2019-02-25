@@ -1,0 +1,135 @@
+---
+title: "Performance v1"
+output: html_document
+---
+
+# Autem Runtime Analysis
+
+Runtimes are long for some datasets. We need to assess to find targets for improvement.
+
+We need to find out:
+
++ Which datasets are taking an excessively long time to execute.
+
++ View how that relates to number of observations, number of features and the product of the two.
+
++ Determine which components are taking 
+
+```{r setup, include=FALSE}
+
+source("battle.r")
+source("baseline.r")
+source("configuration.r")
+
+simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
+baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
+benchmark_path <- "D:\\Documents\\autem\\benchmark"
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# Load
+
+```{r Load}
+
+battle_df <- read_battle(simulations_path)
+battle_df <- clean_battle(battle_df)
+configuration_df <- read_configuration_file(benchmark_path) %>% select(dataset = Name, everything())
+
+print("Data loaded")
+
+```
+
+# Build data summary
+
+```{r}
+
+runtime_summary_df <-
+  battle_df %>%
+  group_by(experiment, dataset, version) %>%
+  summarise(
+    start_time = min(event_time), 
+    end_time = max(event_time), 
+    seconds = as.integer(lubridate::seconds(lubridate::interval(start_time, end_time))),
+    minutes = seconds / 60
+  ) %>%
+  ungroup()
+
+runtime_summary_df <- 
+  runtime_summary_df %>% 
+  inner_join(configuration_df, by = "dataset") %>% 
+  select(
+    experiment, dataset, version, start_time, end_time, seconds, minutes, 
+    classes = NumberOfClasses, features = NumberOfFeatures, instances = NumberOfInstances)
+
+runtime_summary_df <- 
+  runtime_summary_df %>%
+  mutate(
+    secs_per_instance = seconds / instances,
+    values = instances * features,
+    secs_per_value = seconds / values
+  )
+
+print(runtime_summary_df)
+  
+
+```
+
+# Execution time per dataset
+
+## Total execution time
+
+```{r}
+
+runtime_summary_df %>%
+  filter(experiment == "Light") %>%
+  mutate(dataset = forcats::fct_reorder(dataset, seconds)) %>%
+  ggplot(aes(x = dataset, y = minutes)) +
+  ylab("Runtime (min)") +
+  geom_col() + 
+  coord_flip()
+
+```
+
+## Execution time per value
+
+```{r}
+
+runtime_summary_df %>%
+  filter(experiment == "Light") %>%
+  mutate(dataset = forcats::fct_reorder(dataset, secs_per_value)) %>%
+  ggplot(aes(x = dataset, y = secs_per_value)) +
+  ylab("Runtime (sec)") +
+  geom_col() + 
+  coord_flip() +
+  ggtitle("Runtime per value")
+
+```
+
+```{r}
+
+runtime_summary_df %>%
+  filter(experiment == "Light") %>%
+  ggplot(aes(x = seconds, y = secs_per_value)) +
+  geom_text(aes(label = dataset), check_overlap = TRUE) +
+  xlab("Runtime (s)") +
+  ylab("Runtime per value") +
+  ggtitle("Runtime versus Runtime per value")
+
+```
+
+## Execution time per row * instances
+
+```{r}
+
+runtime_summary_df %>%
+  filter(experiment == "Light") %>%
+  mutate(secs_per_value = seconds / (instances * features)) %>%
+  ggplot(aes(x = dataset, y = secs_per_value)) +
+  ylab("Runtime per row (sec)") +
+  geom_col() + 
+  coord_flip()
+
+```
+

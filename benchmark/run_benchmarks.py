@@ -163,9 +163,9 @@ def make_openml_lightx_classifier_simulation(baseline_name, experiment, task_id,
 
             # Feature Reducers
             autem.Choice("Reducer", [
-                preprocessors.FastICA(),
+                #preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
-                preprocessors.PCA(),
+                #preprocessors.PCA(),
                 preprocessors.SelectPercentile(),
             ], preprocessors.NoReducer()),
 
@@ -214,14 +214,10 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             evaluators.OpenMLRater(task_id),
             baselines.BaselineStats(baseline_name),
             evaluators.HoldoutValidator(),
-            evaluators.PreferImportantChoices(),
             reporters.Path(path),
 
             # Imputers
-            autem.Choice("Imputer", [
-                preprocessors.NoImputer(),
-                preprocessors.SimpleImputer()
-            ]),
+            preprocessors.SimpleImputer(),
 
             # Engineers
             autem.Choice("Engineer", [
@@ -236,13 +232,15 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
                 preprocessors.Binarizer(),
+                preprocessors.BoxCoxTransform(),
+                preprocessors.YeoJohnsonTransform()
             ], preprocessors.NoScaler()),
 
             # Feature Reducers
             autem.Choice("Reducer", [
-                preprocessors.FastICA(),
+                # preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
-                preprocessors.PCA(),
+                # preprocessors.PCA(),
                 preprocessors.SelectPercentile(),
             ], preprocessors.NoReducer()),
 
@@ -294,8 +292,8 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "breast-w"
-    configuation = "Tune"
+    baseline_name = "mfeat-fourier"
+    configuation = "LightX"
     experiment = "Run_Test"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
@@ -316,7 +314,7 @@ def run_benchmark_simulation(configuration, baseline_name, experiment):
     epochs = 40
     steps = 100
     population_size = 20
-    path = simulations_path().joinpath(str(experiment)).joinpath(baseline_name)
+    path = simulations_path().joinpath("Run").joinpath(str(experiment)).joinpath(baseline_name)
 
     utility.prepare_OpenML()
     simulation = make_openml_classifier_simulation(configuration, baseline_name, experiment, task_id, seed, population_size, path)
@@ -338,5 +336,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations(["LightX", "Light", "Tune", "Select"])
+    run_benchmark_simulations(["Light"])
     # run_benchmark_simulations("Run_Tune")

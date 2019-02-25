@@ -196,7 +196,7 @@ class Binarizer(Scaler):
 
     def make_preprocessor(self, member):
         return sklearn.preprocessing.Binarizer()
-
+        
 class PowerTransformer(Scaler):
 
     config = {
@@ -209,6 +209,24 @@ class PowerTransformer(Scaler):
 
     def make_preprocessor(self, member):
         return sklearn.preprocessing.PowerTransformer()
+
+class BoxCoxTransform(Scaler):
+
+    def __init__(self):
+        Scaler.__init__(self, "BXC", "Box-Cox Transform", {})
+
+    def make_preprocessor(self, member):
+        return sklearn.preprocessing.PowerTransformer(method = "box-cox", standardize=True)
+
+class YeoJohnsonTransform(Scaler):
+
+    def __init__(self):
+        Scaler.__init__(self, "YJH", "Yeo-Johnson Transform", {})
+
+    def make_preprocessor(self, member):
+        return sklearn.preprocessing.PowerTransformer(method = "yeo-johnson", standardize=True)
+
+
 
 # Feature Reducers
 
