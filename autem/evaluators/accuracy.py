@@ -51,13 +51,12 @@ class Accuracy(Evaluater):
 
         end = time.time()
         duration = end - start
-        performance = -duration
 
-        if not hasattr(evaluation, "performances"):
-            evaluation.performances = []
+        if not hasattr(evaluation, "durations"):
+            evaluation.durations = []
 
-        evaluation.performances.append(performance)
-        evaluation.performance = np.array(evaluation.performances).mean()
+        evaluation.duration = duration
+        evaluation.durations.append(duration)
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -121,3 +120,9 @@ class Accuracy(Evaluater):
             record.accuracy = evaluation.accuracy
         else:
             record.accuracy = None
+
+        evaluation = member.evaluation
+        if hasattr(evaluation, "duration"):
+            record.duration = evaluation.duration
+        else:
+            record.duration = None

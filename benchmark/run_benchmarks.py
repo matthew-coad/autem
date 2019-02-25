@@ -21,54 +21,6 @@ def simulations_path():
 
 version = 2
 
-def make_openml_select_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
-    task = openml.tasks.get_task(task_id)
-    data_id = task.dataset_id
-    dataset = openml.datasets.get_dataset(data_id)
-    dataset_name = dataset.name
-    simulation_name = "%s_%s_v%d" % (experiment, baseline_name, version)
-    properties['dataset'] = dataset_name
-    properties['experiment'] = experiment
-    properties['version'] = version
-    
-    simulation = autem.Simulation(
-        simulation_name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-
-            evaluators.Accuracy(),
-            evaluators.Survival(),
-            evaluators.OpenMLRater(task_id),
-            baselines.BaselineStats(baseline_name),
-            evaluators.HoldoutValidator(),
-            reporters.Path(path),
-
-            # Imputers
-            preprocessors.SimpleImputer([]),
-
-            # Scalers
-            preprocessors.Normalizer({}),
-            preprocessors.StandardScaler(),
-
-            autem.Choice("Learner", [
-                learners.GaussianNB([]),
-                learners.BernoulliNB([]),
-                learners.MultinomialNB([]),
-                learners.DecisionTreeClassifier([]),
-                learners.KNeighborsClassifier([]),
-                learners.LinearSVC([]),
-                learners.LogisticRegression([]),
-                learners.LinearDiscriminantAnalysis([]),
-                learners.RandomForestClassifier([]),
-                learners.ExtraTreesClassifier([]),
-            ]),
-        ], 
-        population_size = population_size,
-        seed = seed,
-        properties = properties)
-    return simulation
-
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
@@ -98,82 +50,6 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
             # Scalers
             preprocessors.Normalizer({}),
             preprocessors.StandardScaler(),
-
-            autem.Choice("Learner", [
-                learners.GaussianNB(),
-                learners.BernoulliNB(),
-                learners.MultinomialNB(),
-                learners.DecisionTreeClassifier(),
-                learners.KNeighborsClassifier(),
-                learners.LinearSVC(),
-                learners.LogisticRegression(),
-                learners.LinearDiscriminantAnalysis(),
-                learners.RandomForestClassifier(),
-                learners.ExtraTreesClassifier(),
-            ]),
-        ], 
-        population_size = population_size,
-        seed = seed,
-        properties = properties)
-    return simulation
-
-def make_openml_lightx_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
-    task = openml.tasks.get_task(task_id)
-    data_id = task.dataset_id
-    dataset = openml.datasets.get_dataset(data_id)
-    dataset_name = dataset.name
-    simulation_name = "%s_%s_v%d" % (experiment, baseline_name, version)
-    properties['dataset'] = dataset_name
-    properties['experiment'] = experiment
-    properties['version'] = version
-    
-    simulation = autem.Simulation(
-        simulation_name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-
-            evaluators.Accuracy(),
-            evaluators.Survival(),
-            evaluators.OpenMLRater(task_id),
-            baselines.BaselineStats(baseline_name),
-            evaluators.HoldoutValidator(),
-            reporters.Path(path),
-
-            # Imputers
-            autem.Choice("Imputer", [
-                preprocessors.NoImputer(),
-                preprocessors.SimpleImputer()
-            ]),
-
-            # Engineers
-            autem.Choice("Engineer", [
-                preprocessors.PolynomialFeatures(),
-            ], preprocessors.NoEngineering()),
-
-            # Scalers
-            autem.Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.MinMaxScaler(),
-                preprocessors.Normalizer(),
-                preprocessors.RobustScaler(),
-                preprocessors.StandardScaler(),
-                preprocessors.Binarizer(),
-            ], preprocessors.NoScaler()),
-
-            # Feature Reducers
-            autem.Choice("Reducer", [
-                #preprocessors.FastICA(),
-                preprocessors.FeatureAgglomeration(),
-                #preprocessors.PCA(),
-                preprocessors.SelectPercentile(),
-            ], preprocessors.NoReducer()),
-
-            # Approximators
-            autem.Choice("Approximator", [
-                preprocessors.RBFSampler(),
-                preprocessors.Nystroem(),
-            ], preprocessors.NoApproximator()),
 
             autem.Choice("Learner", [
                 learners.GaussianNB(),
@@ -238,9 +114,9 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
 
             # Feature Reducers
             autem.Choice("Reducer", [
-                # preprocessors.FastICA(),
+                preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
-                # preprocessors.PCA(),
+                preprocessors.PCA(),
                 preprocessors.SelectPercentile(),
             ], preprocessors.NoReducer()),
 
@@ -292,8 +168,8 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "mfeat-fourier"
-    configuation = "LightX"
+    baseline_name = "diabetes"
+    configuation = "Light"
     experiment = "Run_Test"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
@@ -336,5 +212,6 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations(["Light"])
+    run_test_simulation()
+    # run_benchmark_simulations(["Light"])
     # run_benchmark_simulations("Run_Tune")

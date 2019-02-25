@@ -31,11 +31,21 @@ Don't have the data. Need runtime per evaluation which I don't collect.
 
 ## Development
 
-### Validation SD
+### Validation Confidence
 
 Allows confidence interval checking.
 
+*outcome*
 
+Oops - Validation checking is not cross validated. We have no confidence interval.
+
+### Decisiveness Evaluation
+
+Evaluate decisiveness as which percentile a score is within the scores that the members have encountered.
+
+
+
+### Validation Confidence
 
 # Idea Dump
 
