@@ -20,11 +20,11 @@ def run_preprocessing():
         [
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
+            evaluators.ComponentAccuracyContest(),
             evaluators.Accuracy(),
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
-            evaluators.PreferImportantChoices(),
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
@@ -58,10 +58,8 @@ def run_preprocessing():
         ], 
         population_size=20)
     simulation.start()
-    simulation.run(500)
-    simulation.run(500)
-    simulation.run(500)
-    simulation.run(500)
+    simulation.run(100)
+    simulation.run(100)
     simulation.finish()
     simulation.report()
 

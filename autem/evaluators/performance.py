@@ -29,15 +29,15 @@ class Peformance(Evaluater):
 
         required_p_value = self.p_value
 
-        member1_scores = np.array(contestant1.durations)
-        member2_scores = np.array(contestant2.durations)
+        member1_accuracies = np.array(contestant1.durations)
+        member2_accuracies = np.array(contestant2.durations)
 
         # Must have at least 3 scores each to make a comparison
-        if len(member1_scores) < 3 or len(member2_scores) < 3:
+        if len(member1_accuracies) < 3 or len(member2_accuracies) < 3:
             return None
 
         # Run the t-test
-        test_result = stats.ttest_ind(member1_scores, member2_scores)
+        test_result = stats.ttest_ind(member1_accuracies, member2_accuracies)
 
         t_statistic = test_result[0] # positive if 1 > 2
         fastness = test_result[1]

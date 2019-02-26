@@ -30,6 +30,8 @@ class Simulation:
         self.controllers = None
         self.initial_mutations = []
         self.members = []
+        self.graveyard = []
+        self.failures = []
         self.forms = {}
         self.ranking = None
         self.reports = []
@@ -176,10 +178,12 @@ class Simulation:
     def fail_member(self, member, fault):
         member.faulted(fault)
         self.members.remove(member)
+        self.failures.append(member)
 
     def kill_member(self, member):
         member.killed()
         self.members.remove(member)
+        self.graveyard.append(member)
 
     def evaluate_member(self, member):
         """

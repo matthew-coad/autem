@@ -13,7 +13,6 @@ We need to find out:
 
 + View how that relates to number of observations, number of features and the product of the two.
 
-+ Determine which components are taking 
 
 ```{r setup, include=FALSE}
 
@@ -22,6 +21,9 @@ source("baseline.r")
 source("configuration.r")
 
 simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
+simulations_other_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
+
+
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 benchmark_path <- "D:\\Documents\\autem\\benchmark"
 
@@ -34,6 +36,10 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r Load}
 
 battle_df <- read_battle(simulations_path)
+if (!is_null(simulations_other_path)) {
+  battle_other_df <- read_battle(simulations_other_path)
+  battle_df <- bind_rows(battle_df, battle_other_df)
+}
 battle_df <- clean_battle(battle_df)
 configuration_df <- read_configuration_file(benchmark_path) %>% select(dataset = Name, everything())
 
@@ -71,8 +77,6 @@ runtime_summary_df <-
     secs_per_value = seconds / values
   )
 
-runtime_summary_df <- runtime_summary_df %>% filter(minutes >= 15)
-
 print(runtime_summary_df)
   
 
@@ -89,6 +93,7 @@ runtime_summary_df %>%
   mutate(dataset = forcats::fct_reorder(dataset, seconds)) %>%
   ggplot(aes(x = dataset, y = minutes)) +
   ylab("Runtime (min)") +
+  facet_wrap(~ version) +
   geom_col() + 
   coord_flip()
 
@@ -104,7 +109,7 @@ runtime_summary_df %>%
   ylab("Runtime (sec)") +
   geom_col() + 
   coord_flip() +
-  facet_wrap(~ experiment) +
+  facet_wrap(~ version) +
   ggtitle("Runtime per value")
 
 ```
@@ -112,7 +117,6 @@ runtime_summary_df %>%
 ```{r}
 
 runtime_summary_df %>%
-  filter(experiment == "Light") %>%
   ggplot(aes(x = seconds, y = secs_per_instance)) +
   geom_text(aes(label = dataset), check_overlap = TRUE) +
   xlab("Runtime (s)") +
@@ -142,8 +146,21 @@ runtime_summary_df %>%
   mutate(secs_per_value = seconds / (instances * features)) %>%
   ggplot(aes(x = dataset, y = secs_per_value)) +
   ylab("Runtime per row (sec)") +
+  facet_wrap(~ version) +
   geom_col() + 
   coord_flip()
 
 ```
 
+```{r}
+
+battle_component_df <- battle_df %>% group_by(dataset, experiment, version, member_id) %>% filter(step == max(step)) %>% select(experiment, dataset, version, member_id, accuracy, duration, Imputer:EXT_min_samples_leaf) %>% ungroup()
+
+battle_component_df %>% 
+  filter(!is.na(duration)) %>% 
+  group_by(dataset, version, Reducer) %>% 
+  summarise(duration  = mean(duration)) %>%
+  ungroup()
+
+
+```

@@ -19,7 +19,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-version = 2
+version = 3
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -86,6 +86,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             scorers.Accuracy(),
 
             evaluators.Accuracy(),
+
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
             baselines.BaselineStats(baseline_name),
@@ -93,7 +94,9 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             reporters.Path(path),
 
             # Imputers
-            preprocessors.SimpleImputer(),
+            autem.Choice("Imputer", [
+                preprocessors.SimpleImputer(),
+            ], preprocessors.NoImputer()),
 
             # Engineers
             autem.Choice("Engineer", [
@@ -168,9 +171,9 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "diabetes"
+    baseline_name = "vehicle"
     configuation = "Light"
-    experiment = "Run_Test"
+    experiment = "Run_Next"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
@@ -211,7 +214,9 @@ def combine_experiment_reports(experiment):
     experiment_path = simulations_path().joinpath(experiment)
     autem.ReportManager(experiment_path).update_combined_reports()
 
+import warnings
+import sklearn.exceptions
+
 if __name__ == '__main__':
-    run_test_simulation()
-    # run_benchmark_simulations(["Light"])
-    # run_benchmark_simulations("Run_Tune")
+    warnings.simplefilter("error", sklearn.exceptions.ConvergenceWarning)
+    run_benchmark_simulations(["Light"])

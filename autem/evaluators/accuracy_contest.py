@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 
 import time
 
-class Accuracy(Evaluater):
+class AccuracyContest(Evaluater):
     """
     Determines fitness by comparing mean model scores but only
     if the difference is considered significant
@@ -66,23 +66,23 @@ class Accuracy(Evaluater):
         required_p_value = self.p_value
 
         if hasattr(contestant1.evaluation, "accuracies"):
-            member1_scores = np.array(contestant1.evaluation.accuracies)
+            member1_accuracies = np.array(contestant1.evaluation.accuracies)
         else:
-            member1_scores = []
+            member1_accuracies = []
 
         if hasattr(contestant2.evaluation, "accuracies"):
-            member2_scores = np.array(contestant2.evaluation.accuracies)
+            member2_accuracies = np.array(contestant2.evaluation.accuracies)
         else:
-            member2_scores = []
+            member2_accuracies = []
 
         # Must have at least 3 scores each to make a comparison
-        if len(member1_scores) < 3 or len(member2_scores) < 3:
+        if len(member1_accuracies) < 3 or len(member2_accuracies) < 3:
             outcome.inconclusive()
             return None
 
         # Run the t-test
         try:
-            test_result = stats.ttest_ind(member1_scores, member2_scores)
+            test_result = stats.ttest_ind(member1_accuracies, member2_accuracies)
         except:
             outcome.inconclusive()
             return None
@@ -126,3 +126,9 @@ class Accuracy(Evaluater):
             record.duration = evaluation.duration
         else:
             record.duration = None
+
+        if hasattr(evaluation, "similar_contest"):
+            record.similar_contest = evaluation.similar_contest
+        else:
+            record.similar_contest = None
+
