@@ -34,7 +34,7 @@ read_battle_file <- function(file_name) {
     top_5p_accuracy = col_double(),
     top_10p_accuracy = col_double(),
     top_25p_accuracy = col_double(),
-    validation_accuracy = col_character(),
+    validation_accuracy = col_double(),
     Imputer = col_character(),
     SMP_strategy = col_character(),
     Engineer = col_character(),

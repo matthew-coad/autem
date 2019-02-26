@@ -22,6 +22,8 @@ source("configuration.r")
 
 simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
 simulations_other_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
+# simulations_other2_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_3"
+simulations_other2_path <- NULL
 
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
@@ -38,6 +40,10 @@ knitr::opts_chunk$set(echo = FALSE)
 battle_df <- read_battle(simulations_path)
 if (!is_null(simulations_other_path)) {
   battle_other_df <- read_battle(simulations_other_path)
+  battle_df <- bind_rows(battle_df, battle_other_df)
+}
+if (!is_null(simulations_other2_path)) {
+  battle_other_df <- read_battle(simulations_other2_path)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
 battle_df <- clean_battle(battle_df)

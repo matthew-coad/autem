@@ -12,8 +12,8 @@ source("baseline.r")
 # simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\test\\Run_Next"
 simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
 simulations_other_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
-# simulations_other_path <- NULL
-detail_version <- 3
+# simulations_other2_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_3"
+detail_version <- 4
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 
@@ -29,6 +29,10 @@ if (!is_null(simulations_other_path)) {
   battle_other_df <- read_battle(simulations_other_path)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
+#if (!is_null(simulations_other2_path)) {
+#  battle_other_df <- read_battle(simulations_other2_path)
+#  battle_df <- bind_rows(battle_df, battle_other_df)
+#}
 print("Battle data loaded")
 
 ```
@@ -59,20 +63,11 @@ summary_df <-
   group_by(dataset, experiment, version) %>%
   left_join(error_count_df, by = c("dataset","experiment", "version")) %>%
   arrange(experiment, dataset, version) %>%
-  select(experiment, dataset, version, ranking, rating, top_5p_accuracy, validation_accuracy, n_error) %>%
+  select(experiment, dataset, version, rating, rating_sd, top_5p_accuracy, validation_accuracy, n_error) %>%
   ungroup()
 
 
 print(summary_df, digits = 3)
-
-```
-
-# Error details
-
-```{r}
-
-print(error_count_df)
-
 
 ```
 
@@ -93,9 +88,11 @@ baseline_accuracy <- function(baseline_name) {
       experiment = "baseline",
       dataset = baseline_name,
       version = 0,
-      accuracy = predictive_accuracy
+      accuracy = predictive_accuracy,
+      accuracy_sd = NA,
+      validation_accuracy = NA
     ) %>%
-    select(experiment, dataset, version, accuracy)
+    select(experiment, dataset, version, accuracy, accuracy_sd, validation_accuracy)
   min_accuracy <- min(baseline_accuracy_df$accuracy)
   max_accuracy <- max(baseline_accuracy_df$accuracy)
   
@@ -103,23 +100,25 @@ baseline_accuracy <- function(baseline_name) {
     summary_df %>%
     filter(dataset == baseline_name) %>%
     mutate(
-      accuracy = rating
+      accuracy = rating,
+      accuracy_sd = rating_sd
     ) %>%
-    select(experiment, dataset, version, accuracy)
+    select(experiment, dataset, version, accuracy, accuracy_sd, validation_accuracy)
 
   accuracy_df <- 
     bind_rows(baseline_accuracy_df, battle_accuracy_df) %>%
     mutate(percentage = percent_rank(accuracy) * 100)
   
   accuracy_df$normal_accuracy <- (accuracy_df$accuracy - min_accuracy) / (max_accuracy - min_accuracy)
+  accuracy_df$normal_accuracy_sd <- accuracy_df$accuracy_sd / (max_accuracy - min_accuracy)
+  accuracy_df$normal_validation_accuracy <- (accuracy_df$validation_accuracy - min_accuracy) / (max_accuracy - min_accuracy)
   
   accuracy_df
 
 }
 
 baseline_accuracy_df <- baselines %>% map_dfr(baseline_accuracy)
-
-print(baseline_accuracy_df)
+baseline_accuracy_df %>% filter(!is.na(accuracy_sd))
 
 ```
 
@@ -129,8 +128,8 @@ print(baseline_accuracy_df)
 
 plot(ggplot(data = baseline_accuracy_df, aes(x = percentage, y = normal_accuracy)) +
   geom_point(data = filter(baseline_accuracy_df, experiment == "baseline"), color = "Grey", size = .1) +
-  geom_point(data = filter(baseline_accuracy_df, experiment == "Light"), aes(color = version), size = 2))
-
+  geom_point(data = filter(baseline_accuracy_df, experiment == "Light"), aes(color = version), size = 2)
+)
 
 ```
 
@@ -139,11 +138,15 @@ plot(ggplot(data = baseline_accuracy_df, aes(x = percentage, y = normal_accuracy
 ```{r}
 for (baseline_name in baselines) {
   
-  accuracy_df <- baseline_accuracy_df %>% filter(dataset == baseline_name)
-  plot(ggplot(data = accuracy_df,aes(x = percentage, y = accuracy)) +
-    geom_count(data = filter(accuracy_df, experiment == "baseline"), color = "DarkGrey") +
-    geom_point(data = filter(accuracy_df, experiment != "baseline"), aes(shape = experiment, color = version), size = 3) +
-    geom_rug(data = filter(accuracy_df, experiment != "baseline"), aes(color = version), sides="trbl") +
+  baseline_df <- baseline_accuracy_df %>% filter(dataset == baseline_name, experiment == "baseline")
+  experiment_df <- baseline_accuracy_df %>% filter(dataset == baseline_name, experiment != "baseline")
+
+  plot(ggplot(experiment_df, aes(x = percentage, y = accuracy)) +
+    geom_count(data = baseline_df, color = "DarkGrey") +
+    geom_point(aes(shape = experiment, color = version), size = 3) +
+    geom_rug(aes(color = version), sides="trbl") +
+    geom_errorbar(aes(ymin=accuracy-accuracy_sd, ymax=accuracy+accuracy_sd), width = 2, na.rm = TRUE) +
+    geom_point(aes(y = validation_accuracy, shape = "Validation", color = version), size = 3) +
     ggtitle(baseline_name)
   )
 
