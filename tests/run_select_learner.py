@@ -20,7 +20,7 @@ def run_select_learner():
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
 
-            evaluators.Accuracy(),
+            evaluators.AccuracyContest(),
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),

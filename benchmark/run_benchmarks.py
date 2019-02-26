@@ -19,7 +19,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-version = 3
+version = 4
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -37,7 +37,7 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            evaluators.Accuracy(),
+            evaluators.AccuracyContest(),
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
             baselines.BaselineStats(baseline_name),
@@ -85,7 +85,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            evaluators.Accuracy(),
+            evaluators.AccuracyContest(),
 
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
@@ -173,7 +173,7 @@ def run_simulation(simulation, steps, epochs):
 def run_test_simulation():
     baseline_name = "vehicle"
     configuation = "Light"
-    experiment = "Run_Next"
+    experiment = "Test_Light"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
@@ -218,5 +218,4 @@ import warnings
 import sklearn.exceptions
 
 if __name__ == '__main__':
-    warnings.simplefilter("error", sklearn.exceptions.ConvergenceWarning)
-    run_benchmark_simulations(["Light"])
+    run_test_simulation()

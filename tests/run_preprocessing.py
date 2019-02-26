@@ -20,8 +20,7 @@ def run_preprocessing():
         [
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
-            evaluators.ComponentAccuracyContest(),
-            evaluators.Accuracy(),
+            evaluators.AccuracyContest(),
             evaluators.Survival(),
             evaluators.CrossValidationRater(),
             evaluators.HoldoutValidator(),
