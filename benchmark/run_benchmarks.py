@@ -86,6 +86,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             scorers.Accuracy(),
 
             evaluators.AccuracyContest(),
+            evaluators.DurationContest(),
 
             evaluators.Survival(),
             evaluators.OpenMLRater(task_id),
@@ -218,4 +219,5 @@ import warnings
 import sklearn.exceptions
 
 if __name__ == '__main__':
-    run_test_simulation()
+    run_benchmark_simulations(["Light"])
+    # run_test_simulation()

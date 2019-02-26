@@ -35,8 +35,6 @@ class Member:
         self.standoffs = 0
         self.victories = 0
         self.defeats = 0
-        self.dominations = 0
-        self.thrashings = 0
         self.wonlost = []
 
         self.robustness = None
@@ -86,30 +84,22 @@ class Member:
         self.event = "standoff"
         self.event_time = time.time()
 
-    def victory(self, decisive):
+    def victory(self):
         """
         Record a victory
         """
         self._contested()
         self.contests += 1
         self.victories += 1
-        if decisive:
-            self.dominations += 1
-            self.event = "domination"
-        else:
-            self.event = "victory"
+        self.event = "victory"
         self.event_time = time.time()
         self.wonlost.append(1)
 
-    def defeat(self, decisive):
+    def defeat(self):
         self._contested()
         self.contests += 1
         self.defeats += 1 
-        if decisive:
-            self.thrashings += 1
-            self.event = "thrashing"
-        else:
-            self.event = "defeat"
+        self.event = "defeat"
         self.event_time = time.time()
         self.wonlost.append(0)
 

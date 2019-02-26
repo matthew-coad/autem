@@ -221,11 +221,10 @@ class Simulation:
             contestant2.stand_off()
 
         if outcome.is_zero_sum():
-            decisive = outcome.is_decisive()
             winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
-            winner.victory(decisive)
+            winner.victory()
             loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
-            loser.defeat(decisive)
+            loser.defeat()
 
         return outcome
 

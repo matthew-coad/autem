@@ -1,7 +1,7 @@
 from .evaluator import Evaluater
 
 from .accuracy_contest import AccuracyContest
-from .performance import Peformance
+from .duration_contest import DurationContest
 from .survival import Survival
 from .component_accuracy_contest import ComponentAccuracyContest
 

@@ -60,29 +60,46 @@ class AccuracyContest(Evaluater):
 
     def contest_members(self, contestant1, contestant2, outcome):
 
+        required_p_value = self.p_value
+        contestant1.evaluation.accuracy_contest = None
+        contestant2.evaluation.accuracy_contest = None
+
         if outcome.is_conclusive():
             return None
 
-        required_p_value = self.p_value
-
         if hasattr(contestant1.evaluation, "accuracies"):
-            member1_accuracies = np.array(contestant1.evaluation.accuracies)
+            contestant1_accuracies = np.array(contestant1.evaluation.accuracies)
+            contestant1_accuracy = contestant1.evaluation.accuracy
         else:
-            member1_accuracies = []
+            contestant1_accuracies = []
+            contestant1_accuracy = None
 
         if hasattr(contestant2.evaluation, "accuracies"):
-            member2_accuracies = np.array(contestant2.evaluation.accuracies)
+            contestant2_accuracies = np.array(contestant2.evaluation.accuracies)
+            contestant2_accuracy = contestant2.evaluation.accuracy
         else:
-            member2_accuracies = []
+            contestant2_accuracies = []
+            contestant2_accuracy = None
+
+        # Record the accuracies each member has encountered so we can assess decisiveness in later contests
+        if not contestant2_accuracy is None:
+            if not hasattr(contestant1.evaluation, "accuracies_encountered"):
+                contestant1.evaluation.accuracies_encountered = []
+            contestant1.evaluation.accuracies_encountered.append(contestant2_accuracy)
+
+        if not contestant1_accuracy is None:
+            if not hasattr(contestant2.evaluation, "accuracies_encountered"):
+                contestant2.evaluation.accuracies_encountered = []
+            contestant2.evaluation.accuracies_encountered.append(contestant1_accuracy)
 
         # Must have at least 3 scores each to make a comparison
-        if len(member1_accuracies) < 3 or len(member2_accuracies) < 3:
+        if len(contestant1_accuracies) < 3 or len(contestant2_accuracies) < 3:
             outcome.inconclusive()
             return None
 
         # Run the t-test
         try:
-            test_result = stats.ttest_ind(member1_accuracies, member2_accuracies)
+            test_result = stats.ttest_ind(contestant1_accuracies, contestant2_accuracies)
         except:
             outcome.inconclusive()
             return None
@@ -96,6 +113,8 @@ class AccuracyContest(Evaluater):
 
         # Need at least the required p-value to have an outcome
         if maturity > required_p_value:
+            contestant1.evaluation.accuracy_contest = "Inconclusive"
+            contestant2.evaluation.accuracy_contest = "Inconclusive"
             outcome.inconclusive()
             return None
 
@@ -105,11 +124,30 @@ class AccuracyContest(Evaluater):
         else:
             victor = 2
 
-        decisive = maturity < required_p_value / 2
+        victorious_contestant = contestant1 if victor == 1 else contestant2
+        defeated_contestant = contestant2 if victor == 1 else contestant1
+
+        # Determine decisiveness. A victory is decisive if its in the top half of the accuracies that each
+        # member has encountered
+
+        victorious_encounters = victorious_contestant.evaluation.accuracies_encountered
+        defeated_encounters = defeated_contestant.evaluation.accuracies_encountered
+        max_encounters = max(len(victorious_encounters), len(defeated_encounters))
+        victorious_encounters = victorious_encounters[-max_encounters:]
+        defeated_encounters = defeated_encounters[-max_encounters:]
+
+        encounter_cutoff = defeated_contestant.evaluation.accuracy
+        encounters = [ e for e in victorious_encounters + defeated_encounters if e >= encounter_cutoff ]
+        decisive_cutoff = np.percentile(encounters, 55)
+        decisive = victorious_contestant.evaluation.accuracy >= decisive_cutoff
         
         if decisive:
+            victorious_contestant.evaluation.accuracy_contest = "Victory"
+            defeated_contestant.evaluation.accuracy_contest = "Defeat"
             outcome.decisive(victor)
         else:
+            victorious_contestant.evaluation.accuracy_contest = "Win"
+            defeated_contestant.evaluation.accuracy_contest = "Loss"
             outcome.indecisive(victor)
 
     def record_member(self, member, record):
@@ -127,8 +165,7 @@ class AccuracyContest(Evaluater):
         else:
             record.duration = None
 
-        if hasattr(evaluation, "similar_contest"):
-            record.similar_contest = evaluation.similar_contest
+        if hasattr(evaluation, "accuracy_contest"):
+            record.accuracy_contest = evaluation.accuracy_contest
         else:
-            record.similar_contest = None
-
+            record.accuracy_contest = None
