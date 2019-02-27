@@ -9,11 +9,9 @@ source("battle.r")
 source("baseline.r")
 
 
-# simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\test\\Run_Next"
-simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run"
-simulations_other_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
-# simulations_other2_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_3"
-detail_version <- 4
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
+simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
+simulations_path3 <- NULL
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 
@@ -24,15 +22,15 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r Load}
 
-battle_df <- read_battle(simulations_path)
-if (!is_null(simulations_other_path)) {
-  battle_other_df <- read_battle(simulations_other_path)
+battle_df <- read_battle(simulations_path1)
+if (!is_null(simulations_path2)) {
+  battle_other_df <- read_battle(simulations_path2)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
-#if (!is_null(simulations_other2_path)) {
-#  battle_other_df <- read_battle(simulations_other2_path)
-#  battle_df <- bind_rows(battle_df, battle_other_df)
-#}
+if (!is_null(simulations_path3)) {
+  battle_other_df <- read_battle(simulations_path3)
+  battle_df <- bind_rows(battle_df, battle_other_df)
+}
 print("Battle data loaded")
 
 ```
@@ -65,17 +63,6 @@ summary_df <-
   arrange(experiment, dataset, version) %>%
   select(experiment, dataset, version, rating, rating_sd, top_5p_accuracy, validation_accuracy, n_error) %>%
   ungroup()
-
-
-print(summary_df, digits = 3)
-
-```
-
-# Data Set Performance
-
-# Calculate performance
-
-```{r}
 
 baselines <- levels(factor(summary_df$dataset))
 
@@ -118,9 +105,13 @@ baseline_accuracy <- function(baseline_name) {
 }
 
 baseline_accuracy_df <- baselines %>% map_dfr(baseline_accuracy)
-baseline_accuracy_df %>% filter(!is.na(accuracy_sd))
+
+
+print(summary_df, digits = 3)
 
 ```
+
+# Data Set Performance
 
 ## Plot combined performance
 

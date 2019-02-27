@@ -6,7 +6,7 @@ import config
 import openml
 import os
 from pathlib import Path
-import warnings
+
 import shutil
 
 def data_path():

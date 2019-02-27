@@ -21,7 +21,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-version = 4
+version = 5
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -90,7 +90,6 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             scorers.Accuracy(),
 
             evaluators.AccuracyContest(),
-            evaluators.DurationContest(),
             evaluators.ContestSurvival(),
             evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
@@ -201,7 +200,7 @@ def run_benchmark_simulation(configuration, baseline_name, experiment):
     epochs = 40
     steps = 100
     population_size = 20
-    path = simulations_path().joinpath("Run").joinpath(str(experiment)).joinpath(baseline_name)
+    path = simulations_path().joinpath("Run_%d" % version).joinpath(str(experiment)).joinpath(baseline_name)
 
     utility.prepare_OpenML()
     simulation = make_openml_classifier_simulation(configuration, baseline_name, experiment, task_id, seed, population_size, path)
@@ -223,5 +222,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_test_simulation()
+    run_benchmark_simulations(["Light"])
     # run_test_simulation()
