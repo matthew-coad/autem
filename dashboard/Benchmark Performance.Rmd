@@ -10,7 +10,7 @@ source("baseline.r")
 
 
 simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
-simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
+simulations_path2 <- NULL
 simulations_path3 <- NULL
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
@@ -168,23 +168,6 @@ for (baseline_name in baselines) {
 
 ```
 
-## Engineer
-
-```{r}
-
-for (baseline_name in baselines) {
-  dataset_name <- baseline_name
-  p <- battle_df %>%
-    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
-    ggplot(aes(x = step, y = accuracy)) +
-    geom_point(aes(color = Engineer), size = 0.5) +
-    ggtitle(baseline_name) +
-    facet_wrap(~ version)
-  plot(p)
-}
-```
-
-
 ## Scaler
 
 ```{r}
@@ -217,7 +200,20 @@ for (baseline_name in baselines) {
 }
 ```
 
+## Approximator
 
+```{r}
 
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = Approximator), size = 0.5) +
+    ggtitle(baseline_name) +
+    facet_wrap(~ version)
+  plot(p)
+}
+```
 
 

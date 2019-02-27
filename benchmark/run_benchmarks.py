@@ -105,9 +105,9 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             ], preprocessors.NoImputer()),
 
             # Engineers
-            autem.Choice("Engineer", [
-                preprocessors.PolynomialFeatures(),
-            ], preprocessors.NoEngineering()),
+            ##autem.Choice("Engineer", [
+            ##    preprocessors.PolynomialFeatures(),
+            ##], preprocessors.NoEngineering()),
 
             # Scalers
             autem.Choice("Scaler", [
@@ -144,8 +144,8 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
                 learners.LinearSVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
-                learners.RandomForestClassifier(),
-                learners.ExtraTreesClassifier(),
+                # learners.RandomForestClassifier(),
+                #learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,

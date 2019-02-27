@@ -94,7 +94,7 @@ class BaselineStats(Evaluater):
         record.top_5p_accuracy = stats["top_5p"]
 
 if __name__ == '__main__':
-    names = get_baseline_names("Run_Light")
+    names = get_baseline_names("Select")
     for name in names:
         print(get_baseline_stats(name))
 

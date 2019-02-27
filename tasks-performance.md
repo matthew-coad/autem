@@ -43,6 +43,12 @@ Oops - Validation checking is not cross validated. We have no confidence interva
 
 Evaluate decisiveness as which percentile a score is within the scores that the members have encountered.
 
+### Poor performers
+
+Most Frequent Impuation on large number of features
+
+PolynomialFeatures with large number of features
+
 
 
 ### Validation Confidence

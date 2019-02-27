@@ -70,7 +70,8 @@ class SimpleImputer(Imputer):
 
     def __init__(self, parameters = None):
         if parameters is None:
-            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+            # config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
             parameters = [config_parameter]
         Imputer.__init__(self, "SMP", "Simple Imputer", parameters)
 
@@ -80,7 +81,8 @@ class SimpleImputer(Imputer):
 class MissingIndicatorImputer(Imputer):
 
     def __init__(self):
-        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+        # config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
+        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
         Imputer.__init__(self, "MII", "Missing Indicator Imputer", [config_parameter])
 
     def make_preprocessor(self, member):
