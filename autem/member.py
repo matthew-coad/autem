@@ -22,6 +22,9 @@ class Member:
         self.event = "initialized"
         self.event_time = None
         self.fault = None
+        self.fault_operation = None
+        self.fault_component = None
+        self.fault_message = None
 
         self.resources = SimpleNamespace()
         self.starts = 0
@@ -39,8 +42,10 @@ class Member:
 
         self.robustness = None
         self.fatality = 0
-        self.attractiveness = None
-        self.attractive = 0
+        self.famousness = None
+        self.famous = 0
+
+        self.final = 0
 
         self.ratings = SimpleNamespace()
         self.rating = None
@@ -71,7 +76,7 @@ class Member:
         self.evaluations += 1
 
     def _contested(self):
-        self.attractiveness = None
+        self.famousness = None
         self.robustness = None
 
     def stand_off(self):
@@ -111,16 +116,16 @@ class Member:
             self.mature = mature
         self.maturity = maturity
 
-    def checked_out(self, attractiveness, attractive):
+    def nominated(self, famousness, famous):
         """
         Notify member that its being checked out to determine its fame
         """
-        if self.attractive == 0 and attractive == 1:
+        if self.famous == 0 and famous == 1:
             self.event = "inducted"
             self.event_time = time.time()
-        if self.attractive == 0:
-            self.attractive = attractive
-        self.attractiveness = attractiveness
+        if self.famous == 0:
+            self.famous = famous
+        self.famousness = famousness
 
     def stressed(self, robustness, fatality):
         """
@@ -143,13 +148,16 @@ class Member:
         """
         self.ranking = ranking
 
-    def faulted(self, fault):
+    def faulted(self, fault, operation, component):
         """
         Notify this member that is has a fault
         """
         self.event = "fault"
         self.event_time = time.time()
         self.fault = fault
+        self.fault_operation = operation
+        self.fault_component = component
+        self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
         self.alive = 0
 
     def killed(self):
@@ -159,6 +167,7 @@ class Member:
         self.event = "death"
         self.event_time = time.time()
         self.alive = 0
+        self.final = 1
 
     def finshed(self):
         """
@@ -169,3 +178,4 @@ class Member:
         self.event = "final"
         self.event_time = time.time()
         self.alive = 0
+        self.final = 1

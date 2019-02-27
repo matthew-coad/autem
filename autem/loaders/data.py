@@ -4,6 +4,7 @@ from .. import Dataset
 from .. import Role
 
 from sklearn.model_selection import train_test_split
+import pandas as pd
 
 class Data(Loader):
     
@@ -26,6 +27,7 @@ class Data(Loader):
         validation_size = self.validation_size
         x = self.x
         y = self.y
+
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
         simulation.resources.x_train = x_train

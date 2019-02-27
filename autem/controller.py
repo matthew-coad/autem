@@ -48,7 +48,7 @@ class Controller(Component):
     def rate_member(self, member):
         """
         Evaluate the rating for a member.
-        Only mature, attractive members get a rating.
+        Only mature, famous members get a rating.
         """
         pass
 

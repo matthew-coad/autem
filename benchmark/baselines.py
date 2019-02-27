@@ -91,10 +91,7 @@ class BaselineStats(Evaluater):
         stats = simulation.resources.baseline_stats
 
         record.top_accuracy = stats["max_score"]
-        record.top_1p_accuracy = stats["top_1p"]
         record.top_5p_accuracy = stats["top_5p"]
-        record.top_10p_accuracy = stats["top_10p"]
-        record.top_25p_accuracy = stats["top_qtr"]
 
 if __name__ == '__main__':
     names = get_baseline_names("Run_Light")

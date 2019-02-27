@@ -77,7 +77,7 @@ classifier_config_dict = {
 
 
     'sklearn.linear_model.LogisticRegression': {
-        # 'penalty': ["l1", "l2"],
+        'penalty': ["l1", "l2"],
         'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
         'dual': [True, False]
     },
@@ -183,7 +183,7 @@ class LogisticRegression(Learner):
         Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression', parameters))
 
     def make_model(self):
-        return sklearn.linear_model.LogisticRegression(solver =  'lbfgs', multi_class = 'ovr')
+        return sklearn.linear_model.LogisticRegression(solver = 'saga', multi_class = 'ovr')
 
 class LinearDiscriminantAnalysis(Learner):
 

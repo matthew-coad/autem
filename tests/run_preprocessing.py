@@ -20,17 +20,18 @@ def run_preprocessing():
         [
             loaders.Data("iris", x,y),
             scorers.Accuracy(),
+            
             evaluators.AccuracyContest(),
-            evaluators.Survival(),
+            evaluators.ContestSurvival(),
             evaluators.CrossValidationRater(),
-            evaluators.HoldoutValidator(),
+            evaluators.DummyClassifierAccuracy(),
+            evaluators.ValidationAccuracy(),
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
             # Imputers
             autem.Choice("imputer", [
                 preprocessors.SimpleImputer(),
-                preprocessors.MissingIndicatorImputer(),
             ], preprocessors.NoImputer()),
 
             # Engineers

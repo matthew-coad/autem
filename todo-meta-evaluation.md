@@ -18,7 +18,7 @@ Add multiple experiment views. **done**
 
 Add learner tuning **done**
 
-Survival/attractiveness rated on recent contests **done**
+Survival/famousness rated on recent contests **done**
 
 Ranking in battle reports **done**
 

@@ -9,10 +9,10 @@ from .ranking import Ranking
 from types import SimpleNamespace
 from .feedback import printProgressBar
 from .choice import Choice
+from .warning_interceptor import WarningInterceptor
 
 import numpy
 import time
-import warnings
 
 class Simulation:
 
@@ -169,14 +169,17 @@ class Simulation:
 
         for component in self.hyper_parameters:
             try:
-                component.prepare_member(member)
+                with WarningInterceptor() as warnings:
+                    component.prepare_member(member)
+                if warnings:
+                    self.fail_member(member, warnings[0], "prepare", component)
             except Exception as ex:
-                self.fail_member(member, ex)
+                self.fail_member(member, ex, "prepare", component)
                 break
         member.started()
 
-    def fail_member(self, member, fault):
-        member.faulted(fault)
+    def fail_member(self, member, fault, operation, component):
+        member.faulted(fault, operation, component.__class__.__name__)
         self.members.remove(member)
         self.failures.append(member)
 
@@ -197,13 +200,12 @@ class Simulation:
 
         for component in self.controllers:
             try:
-                with warnings.catch_warnings() as ws:
-                    warnings.simplefilter("error")
-
+                with WarningInterceptor() as warnings:
                     component.evaluate_member(member)
-
+                if warnings:
+                    self.fail_member(member, warnings[0], "evaluate", component)
             except Exception as ex:
-                self.fail_member(member, ex)
+                self.fail_member(member, ex, "evaluate", component)
                 break
         member.evaluated()
 
@@ -214,7 +216,16 @@ class Simulation:
             raise RuntimeError("Two contestants have duplicate forms")
 
         for component in self.controllers:
-            component.contest_members(contestant1, contestant2, outcome)
+            try:
+                with WarningInterceptor() as warnings:
+                    component.contest_members(contestant1, contestant2, outcome)
+                if warnings:
+                    self.fail_member(contestant1, warnings[0], "contest", component)
+                    self.fail_member(contestant2, warnings[0], "contest", component)
+            except Exception as ex:
+                self.fail_member(contestant1, ex, "contest", component)
+                self.fail_member(contestant2, ex, "contest", component)
+                break
 
         if outcome.is_inconclusive():
             contestant1.stand_off()
@@ -244,16 +255,19 @@ class Simulation:
         """
         for component in self.controllers:
             try:
-                component.rate_member(member)
+                with WarningInterceptor() as warnings:
+                    component.rate_member(member)
+                if warnings:
+                    self.fail_member(member, warnings[0], "rate", component)
             except Exception as ex:
-                self.fail_member(member, ex)
+                self.fail_member(member, ex, "rate", component)
                 break
 
     def rank_members(self):
         """
         Rank all members
         """
-        inductees = [m for m in self.members if m.alive and m.mature and m.attractive ]
+        inductees = [m for m in self.members if m.alive and m.mature and m.famous ]
         n_inductees = len(inductees)
         progress_prefix = "Rating %s" % self.name
         print("")
@@ -282,7 +296,9 @@ class Simulation:
         if not repopulate:
             return None
         random_state = self.random_state
-        candidates = [ m for m in self.members if m.alive and m.mature ]
+        candidates = [ m for m in self.members if m.alive and m.mature and m.famous ]
+        if len(candidates) < 5:
+            candidates = [ m for m in self.members if m.alive and m.mature ]
         newborn = None
         if len(candidates) >= 2:
             parent_indexes = random_state.choice(len(candidates), 2, replace=False)
@@ -432,13 +448,11 @@ class Simulation:
 
         outline.append_attribute("mature", Dataset.Battle, [Role.Property])
         outline.append_attribute("famous", Dataset.Battle, [Role.Property])
+        outline.append_attribute("alive", Dataset.Battle, [Role.Property])
+        outline.append_attribute("final", Dataset.Battle, [Role.Property])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
-        outline.append_attribute("contests", Dataset.Battle, [Role.Property])
         outline.append_attribute("evaluations", Dataset.Battle, [Role.Property])
-        outline.append_attribute("standoffs", Dataset.Battle, [Role.Property])
-        outline.append_attribute("victories", Dataset.Battle, [Role.Property])
-        outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
@@ -463,19 +477,18 @@ class Simulation:
         record.incarnation = member.incarnation
         record.event = member.event
         record.time = time.ctime(member.event_time)
-        record.fault = str(member.fault)
+        record.fault = member.fault_message
 
         record.rating = member.rating
         record.rating_sd = member.rating_sd
         record.ranking = member.ranking
 
         record.mature = member.mature
-        record.famous = member.attractive
-        record.contests = member.contests
+        record.famous = member.famous
+        record.alive = member.alive
+        record.final = member.final
+
         record.evaluations = member.evaluations
-        record.standoffs = member.standoffs
-        record.victories = member.victories
-        record.defeats = member.defeats
 
         for component in self.components:
             component.record_member(member, record)

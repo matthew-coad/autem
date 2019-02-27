@@ -77,10 +77,10 @@ evaluate_progress_df <- function(battle_df) {
     mutate(
       alive = cumsum(n_alive), 
       mature = cumsum(n_mature), 
-      attractive = cumsum(n_attractive),
+      famous = cumsum(n_famous),
       score = 0
     ) %>% 
-    select(step, alive, mature, attractive, score)
+    select(step, alive, mature, famous, score)
   df
 }
 
@@ -89,7 +89,7 @@ population_progress_plot <- function(progress_df) {
     ggplot(aes(x = step)) +
     geom_line(aes(y = alive, color = "alive")) +
     geom_line(aes(y = mature, color = "mature")) +
-    geom_line(aes(y = attractive, color = "attractive")) +
+    geom_line(aes(y = famous, color = "famous")) +
     xlab("Step") +
     ylab("Population")
   plot

@@ -4,6 +4,7 @@ from .. import Dataset, Role
 import openml
 
 from sklearn.model_selection import train_test_split
+import pandas as pd
 
 class OpenMLLoader(Loader):
 

@@ -6,7 +6,7 @@ from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
-class HoldoutValidator(Evaluater):
+class ValidationAccuracy(Evaluater):
     """
     Performs final validation by fitting the pipeline to the entire training data set
     and calculating the performance on the validation dataset
@@ -15,7 +15,7 @@ class HoldoutValidator(Evaluater):
     def rate_member(self, member):
         """
         Evaluate the rating for a member.
-        Only mature, attractive members get a rating.
+        Only mature, famous members get a rating.
         """
 
         simulation = member.simulation

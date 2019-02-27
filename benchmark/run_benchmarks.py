@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import context
 
-import openml
+# Must import Autem before *anything* except context to set up the warning interceptors
 
 import autem
 import autem.scorers as scorers
@@ -10,6 +10,8 @@ import autem.learners.classification as learners
 import autem.loaders as loaders
 import autem.reporters as reporters
 import autem.evaluators as evaluators
+
+import openml
 
 import benchmark.utility as utility
 import benchmark.baselines as baselines
@@ -38,9 +40,12 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
             scorers.Accuracy(),
 
             evaluators.AccuracyContest(),
-            evaluators.Survival(),
+            evaluators.ContestSurvival(),
+            evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
-            evaluators.HoldoutValidator(),
+            evaluators.DummyClassifierAccuracy(),
+            evaluators.ValidationAccuracy(),
+
             reporters.Path(path),
 
             # Imputers
@@ -86,11 +91,13 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
 
             evaluators.AccuracyContest(),
             evaluators.DurationContest(),
-
-            evaluators.Survival(),
+            evaluators.ContestSurvival(),
+            evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
+            evaluators.DummyClassifierAccuracy(),
+            evaluators.ValidationAccuracy(),
             baselines.BaselineStats(baseline_name),
-            evaluators.HoldoutValidator(),
+
             reporters.Path(path),
 
             # Imputers
@@ -171,20 +178,21 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "vehicle"
+    baseline_name = "diabetes"
     configuation = "Light"
     experiment = "Test_Light"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 40
+    epochs = 5
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(str(experiment)).joinpath(baseline_name)
 
     utility.prepare_OpenML()
     simulation = make_openml_classifier_simulation(configuation, baseline_name, experiment, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
+    autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulation(configuration, baseline_name, experiment):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
@@ -214,11 +222,6 @@ def combine_experiment_reports(experiment):
     experiment_path = simulations_path().joinpath(experiment)
     autem.ReportManager(experiment_path).update_combined_reports()
 
-import warnings
-import sklearn.exceptions
-
 if __name__ == '__main__':
-    import sklearn
-
-    run_benchmark_simulations(["Light"])
+    run_test_simulation()
     # run_test_simulation()

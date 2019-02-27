@@ -1,3 +1,6 @@
+# Warning interceptor must be imported first!
+from .warning_interceptor import WarningInterceptor
+
 from .report_manager import ReportManager
 from .simulation_info import SimulationInfo
 
