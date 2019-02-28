@@ -228,7 +228,54 @@ class YeoJohnsonTransform(Scaler):
     def make_preprocessor(self, member):
         return sklearn.preprocessing.PowerTransformer(method = "yeo-johnson", standardize=True)
 
+# Feature Selectors
 
+class Selector(Preprocesssor):
+
+    def __init__(self, name, label, parameters):
+        Preprocesssor.__init__(self, name, label, parameters)
+
+class NoSelector(Selector):
+
+    def __init__(self):
+        Selector.__init__(self, "LNO", "No Selector", {})
+
+    def make_preprocessor(self, member):
+        return None
+
+class SelectPercentile(Selector):
+
+    def __init__(self):
+        scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'], 'f_classif')
+        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], 10)
+        Selector.__init__(self, "LPC", "Select Percentile", [scorer_parameter, percentile_parameter])
+
+    def make_preprocessor(self, member):
+        scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]
+        percentile_param = [p for p in self.parameters if p.name == "percentile" ][0]
+        scorer = scorer_param.get_value(member)
+        percentile = percentile_param.get_value(member)
+        score_func = None
+        if scorer == "f_classif":
+            score_func = sklearn.feature_selection.f_classif
+        elif scorer == "mutual_info_classif":
+            score_func = sklearn.feature_selection.mutual_info_classif
+        elif scorer == "chi2":
+            score_func = sklearn.feature_selection.chi2
+        selector = sklearn.feature_selection.SelectPercentile(score_func=score_func, percentile=percentile)
+        return selector
+
+    def configure_preprocessor(self, member, pre_processor):
+        pass
+
+class VarianceThreshold(Selector):
+
+    def __init__(self):
+        threshold_parameter = ChoicesParameter("threshold", "threshold", [0.0, 0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5], None)
+        Selector.__init__(self, "LVT", "Variance Threshold", [threshold_parameter])
+
+    def make_preprocessor(self, member):
+        return sklearn.feature_selection.VarianceThreshold()
 
 # Feature Reducers
 
@@ -281,31 +328,6 @@ class PCA(Reducer):
 
     def make_preprocessor(self, member):
         return sklearn.decomposition.PCA(svd_solver = 'randomized')
-
-class SelectPercentile(Preprocesssor):
-
-    def __init__(self):
-        scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'], 'f_classif')
-        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], 10)
-        Preprocesssor.__init__(self, "SPC", "Select Percentile", [scorer_parameter, percentile_parameter])
-
-    def make_preprocessor(self, member):
-        scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]
-        percentile_param = [p for p in self.parameters if p.name == "percentile" ][0]
-        scorer = scorer_param.get_value(member)
-        percentile = percentile_param.get_value(member)
-        score_func = None
-        if scorer == "f_classif":
-            score_func = sklearn.feature_selection.f_classif
-        elif scorer == "mutual_info_classif":
-            score_func = sklearn.feature_selection.mutual_info_classif
-        elif scorer == "chi2":
-            score_func = sklearn.feature_selection.chi2
-        selector = sklearn.feature_selection.SelectPercentile(score_func=score_func, percentile=percentile)
-        return selector
-
-    def configure_preprocessor(self, member, pre_processor):
-        pass
 
 
 # Approximations

@@ -59,5 +59,21 @@ Should move the focus to famous members which need more run-time and given them 
 
 Attempt as version 6.
 
+Complete. Configurations now ruthlessly exploit the selected configuration.
+
+*Closed*
+
+## Variance Threshold not supported
+
+Analysis of the member priority runs revealed that VarianceThreshold is a good performer which we aren't supporting.
+
+Add it to version 6.
+
+## Getting stuck in local minima
+
+
+
+
+
 ## Brain-dump
 

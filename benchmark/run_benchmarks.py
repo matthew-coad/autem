@@ -121,12 +121,17 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
                 preprocessors.YeoJohnsonTransform()
             ], preprocessors.NoScaler()),
 
+            # Feature Selectors
+            autem.Choice("Selector", [
+                preprocessors.SelectPercentile(),
+                preprocessors.VarianceThreshold()
+            ], preprocessors.NoSelector()),
+
             # Feature Reducers
             autem.Choice("Reducer", [
                 preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
                 preprocessors.PCA(),
-                preprocessors.SelectPercentile(),
             ], preprocessors.NoReducer()),
 
             # Approximators
@@ -177,14 +182,14 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "diabetes"
+    baseline_name = "cylinder-bands"
     configuation = "Light"
-    experiment = "Test_Light"
+    experiment = "Light"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 5
+    epochs = 60
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(str(experiment)).joinpath(baseline_name)
 
@@ -222,5 +227,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations(["Light"])
-    # run_test_simulation()
+    # run_benchmark_simulations(["Light"])
+    run_test_simulation()
