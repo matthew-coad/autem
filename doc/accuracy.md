@@ -1,54 +1,63 @@
-Currently we are stopping before some components have converged.
+# Accuracy
 
+## Decisiveness
 
+Part of the original concept was to have the idea of decisiveness. If a contest was considered "indecisive" this would allow the issue
+to be determined on other issues, like fit duration.
 
-### Validation Confidence
+**Evaluate decisiveness as percentile score cutoff of scores that members have encountered**
 
-Allows confidence interval checking.
+Didn't really work as expected. Indecisive solutions tended to be the stable solutions and it was famous-vs-famous contests that get eliminted.
+Its hard enough saying that one member is better than the other without getting into degrees.
 
-*outcome*
+*Closed*
 
-Oops - Validation checking is not cross validated. We have no confidence interval.
+**Alternative contests accumulate the same win/loss record**
 
-### Decisiveness Evaluation
+Much simpler alternative that tries to work with the same infrastructure. Each contest can be considered seperately and don't have to pipeline.
 
-Evaluate decisiveness as which percentile a score is within the scores that the members have encountered.
+Definitely not certain so compare with Light 5.
 
-### Validation Confidence
+## Accuracy Prediction
 
-# Idea Dump
+As the simulation proceeds we could start building a predictive model of the accuracy/duration and use that
+to search the solution space.
 
-Report validation accuracy on reports
+## Component Reporting
 
-Report error bars
+Need more reporting on use of individual components.
 
-Report on how often a component was used.
+*Component utilization count*
 
-Decisiveness as fraction of the scores the competitors have encountered
+Data is already in the log.
 
-Select mutations priority via predictive model for a component selection
+*Component duration*
 
-Show validation score sd
+Perform transforms in the evaluation object. Track the execution time of each component. Also a precursor to caching.
 
-Calculate dummy score for comparison
-
-Report range from dummy score to top 5% score
-
-
-## v1 Assessment
-
-
-However feature reduction is a good way to speed up processing time.
-
-Because its early in the queue its a target for caching.
+## Early stopping
 
 Currently we are stopping before some components have converged.
 
-Component elimination might help by dropping out invalid areas of investigation and giving
-clearly areas of investigation.
+## Member priority
 
-Components that make no difference for some models IE Imputing cause problems as we have no cut-off to
-stop investigation. The LightX experiment indicates that cutting off components early can have a big impact on evaluation performance.
+Giving certain members processing priority might improve accuracy, duration.
 
+Once problems start to converge famous members tend to ride on the backs of up-comers.
 
+Also lucky solutions tend not to get evaluated. A good-outlier tends to get ignored for a while before it takes over the simulation.
+
+*Change member selection priority*
+
+Have a priority calculation. Normal members get priority 1. Famous members get priority 2. Best member gets priority 3.
+
+At each step member selection is weighted by the priority.
+
+Revert breeding code so that it can only apply to the selected members.
+
+Should move the focus to famous members which need more run-time and given them a better chance of breeding new solutions.
+
+Attempt as version 6.
+
+## Brain-dump
 

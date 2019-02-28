@@ -10,7 +10,7 @@ source("baseline.r")
 
 
 simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
-simulations_path2 <- NULL
+simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
 simulations_path3 <- NULL
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
@@ -31,6 +31,7 @@ if (!is_null(simulations_path3)) {
   battle_other_df <- read_battle(simulations_path3)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
+focus_version <- 6
 print("Battle data loaded")
 
 ```
@@ -65,6 +66,16 @@ summary_df <-
   ungroup()
 
 baselines <- levels(factor(summary_df$dataset))
+
+if (!is.null(focus_version)) {
+  baselines <- summary_df %>%
+    filter(version == focus_version) %>%
+    group_by(dataset) %>%
+    pull(dataset)
+}
+
+summary_df <- summary_df %>% filter(dataset %in% baselines)
+
 
 baseline_accuracy <- function(baseline_name) {
   
@@ -113,12 +124,6 @@ print(summary_df, digits = 3)
 
 ```
 
-```{r}
-
-baseline_accuracy("analcatdata_dmft") %>% filter(experiment != "baseline")
-
-```
-
 # Data Set Performance
 
 ## Plot combined performance
@@ -138,6 +143,7 @@ plot(ggplot(data = baseline_accuracy_df, aes(x = percentage, y = normal_accuracy
 for (baseline_name in baselines) {
   
   baseline_df <- baseline_accuracy_df %>% filter(dataset == baseline_name, experiment == "baseline")
+  baseline_max_df <- baseline_df %>% summarise(max_accuracy = max(accuracy))
   experiment_df <- baseline_accuracy_df %>% filter(dataset == baseline_name, experiment != "baseline")
 
   plot(ggplot(experiment_df, aes(x = percentage, y = accuracy)) +
@@ -146,6 +152,8 @@ for (baseline_name in baselines) {
     geom_rug(aes(color = version), sides="trbl") +
     geom_errorbar(aes(ymin=accuracy-accuracy_sd, ymax=accuracy+accuracy_sd), width = 2, na.rm = TRUE) +
     geom_point(aes(y = validation_accuracy, shape = "Validation", color = version), size = 3) +
+    geom_hline(data = baseline_max_df, aes(yintercept = max_accuracy), linetype = 'dotted') +
+      
     ggtitle(baseline_name)
   )
 

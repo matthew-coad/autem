@@ -291,23 +291,39 @@ class Simulation:
             rank -= 1
         self.ranking = ranking
 
-    def repopulate(self):
-        repopulate = self.running and self.population_size > len(self.members)
+    def prioritize_members(self, members):
+        """
+        Evaluate an evaluation priority for the given members
+        """
+        accuracies = [ m.evaluation.accuracy if hasattr(m.evaluation, "accuracy") else None for m in members ]
+        present_accuracies = [ a for a in accuracies if a is not None ]
+        top_accuracy = max(present_accuracies) if present_accuracies else None
+        famous_members = [ m for m in members if m.famous ]
+        def member_priority(index):
+            member = members[index]
+            if member.famous and not top_accuracy is None and not accuracies[index] is None and accuracies[index] >= top_accuracy:
+                return len(famous_members) + 1
+            elif member.famous:
+                return 2
+            else:
+                return 1
+
+        priorities = [ member_priority(i) for i in range(len(members)) ]
+        return priorities
+
+    def repopulate(self, parent1, parent2):
+        current_population = len(self.members)
+        repopulate = self.running and self.population_size > current_population
+        force_repopulate = self.running and self.population_size > current_population * 2
         if not repopulate:
             return None
-        random_state = self.random_state
-        candidates = [ m for m in self.members if m.alive and m.mature and m.famous ]
-        if len(candidates) < 5:
-            candidates = [ m for m in self.members if m.alive and m.mature ]
         newborn = None
-        if len(candidates) >= 2:
-            parent_indexes = random_state.choice(len(candidates), 2, replace=False)
-            parent1 = candidates[parent_indexes[0]]
-            parent2 = candidates[parent_indexes[1]]
+        if parent1.alive and parent2.alive:
             newborn = self.crossover_member(parent1, parent2)
-        else:
+        elif force_repopulate:
             newborn = self.make_member()
-
+        else:
+            newborn = None
         if not newborn is None:
             self.prepare_member(newborn)
         return newborn
@@ -347,12 +363,21 @@ class Simulation:
             raise RuntimeError("Simulation is not running")
 
         random_state = self.random_state
-        members = self.members
+        candidates = self.members
+
+        # If we run out of search space the population can crash.
+        # Make sure we don't get into an infinite loop.
+        if len(candidates) < 2:
+            self.stop()
+            return None
 
         # Pick 2 members
-        contestant_indexes = random_state.choice(len(members), 2, replace=False)
-        contestant1 = members[contestant_indexes[0]]
-        contestant2 = members[contestant_indexes[1]]
+        priorities = self.prioritize_members(candidates)
+        total_priority = sum(priorities)
+        probabilities = [ p / total_priority for p in priorities ]
+        contestant_indexes = random_state.choice(len(candidates), 2, replace=False, p = probabilities)
+        contestant1 = candidates[contestant_indexes[0]]
+        contestant2 = candidates[contestant_indexes[1]]
 
         # Have them contest.
         contest = self.contest_members(contestant1, contestant2)
@@ -373,8 +398,8 @@ class Simulation:
             self.stress_members(contestant1, contestant2, contest)
 
         # Repopulate!
-        newborn1 = self.repopulate()
-        newborn2 = self.repopulate()
+        newborn1 = self.repopulate(contestant1, contestant2)
+        newborn2 = self.repopulate(contestant1, contestant2)
 
         # Report on what happened
         self.n_steps += 1
@@ -384,9 +409,6 @@ class Simulation:
             self.reports.append(self.record_member(newborn1))
         if not newborn2 is None:
             self.reports.append(self.record_member(newborn2))
-
-        if len(self.members) < 2:
-            self.stop()
 
     def run(self, steps):
         """

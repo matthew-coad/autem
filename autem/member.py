@@ -18,9 +18,11 @@ class Member:
 
         self.alive = 0
         self.incarnation = 0
+        self.final = 0
 
         self.event = "initialized"
         self.event_time = None
+
         self.fault = None
         self.fault_operation = None
         self.fault_component = None
@@ -45,11 +47,10 @@ class Member:
         self.famousness = None
         self.famous = 0
 
-        self.final = 0
-
         self.ratings = SimpleNamespace()
         self.rating = None
         self.rating_sd = None
+
         self.ranking = None
 
     def incarnated(self, form, incarnation):

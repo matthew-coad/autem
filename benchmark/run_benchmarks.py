@@ -21,7 +21,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-version = 5
+version = 6
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -197,7 +197,7 @@ def run_benchmark_simulation(configuration, baseline_name, experiment):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 40
+    epochs = 60
     steps = 100
     population_size = 20
     path = simulations_path().joinpath("Run_%d" % version).joinpath(str(experiment)).joinpath(baseline_name)
