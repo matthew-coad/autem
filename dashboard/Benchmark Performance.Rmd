@@ -68,7 +68,9 @@ baselines <- levels(factor(summary_df$dataset))
 
 baseline_accuracy <- function(baseline_name) {
   
-  baseline_df <- read_baseline_file(baseline_path, baseline_name)
+  baseline_df <- read_baseline_file(baseline_path, baseline_name) %>%
+    filter(!is.na(predictive_accuracy))
+    
   baseline_accuracy_df <- 
     baseline_df %>%
     mutate(
@@ -108,6 +110,12 @@ baseline_accuracy_df <- baselines %>% map_dfr(baseline_accuracy)
 
 
 print(summary_df, digits = 3)
+
+```
+
+```{r}
+
+baseline_accuracy("analcatdata_dmft") %>% filter(experiment != "baseline")
 
 ```
 

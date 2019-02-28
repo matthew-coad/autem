@@ -70,12 +70,18 @@ Create benchmark test suite for classification problems **done**
 
 # Benchmarking problems
 
-Find why some benchmarks are failing.
+*Find why some benchmarks are failing.*
 
-*Because some datasets cause problems/warnings for some algorithms. But in general if an algorithm has issues we don't
-care for it, so we now kill any member that has issues. Something else will pick it up.*
+Because some datasets cause problems/warnings for some algorithms. But in general if an algorithm has issues we don't
+care for it, so we now kill any member that has issues. Something else will pick it up.
 
-Determine target scores.
+*done*
+
+## Determine target scores.
+
+Download results from openml and use this as finaly targets
+
+*done*
 
 # Command line
 
@@ -91,7 +97,7 @@ Have fit report errors **done**
 
 Have evaluation errors as a standard feature and add to meta. **done**
 
-Report evaluation errors
+Report evaluation errors **done**
 
 # Feature selection
 
@@ -106,6 +112,8 @@ Add breeding support **done**
 Assess accuracy change across benchmark. Add ability to record final accuracy scores. Automatically record them after each
 run. Make them a minimum of information to preserve backwards compatibility over time.
 
+**done**
+
 # R Dashboard
 
 Python dashboards are too much of a pain. Implement start in Shiny **done**
@@ -116,11 +124,11 @@ Evaluations. Keep only last evaluation. Use prior evaluation to keep a history. 
 
 Rank members. Report on rankings. **done**
 
-Only update ranking when it changes.
+Only update ranking at end. **done**
 
-Add evaluations to battle data
+Add evaluations to battle data  **done**
 
-Add family info to battle data
+Add family info to battle data **done**
 
-Add diagnostics to determine why populations are crashing
+Add diagnostics to determine why populations are crashing. **done**
 

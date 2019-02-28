@@ -20,10 +20,9 @@ source("battle.r")
 source("baseline.r")
 source("configuration.r")
 
-simulations_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
-simulations_other_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_2"
-# simulations_other2_path <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_3"
-simulations_other2_path <- NULL
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
+simulations_path2 <- NULL
+simulations_path3 <- NULL
 
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
@@ -37,13 +36,13 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r Load}
 
-battle_df <- read_battle(simulations_path)
-if (!is_null(simulations_other_path)) {
-  battle_other_df <- read_battle(simulations_other_path)
+battle_df <- read_battle(simulations_path1)
+if (!is_null(simulations_path2)) {
+  battle_other_df <- read_battle(simulations_path2)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
-if (!is_null(simulations_other2_path)) {
-  battle_other_df <- read_battle(simulations_other2_path)
+if (!is_null(simulations_path3)) {
+  battle_other_df <- read_battle(simulations_path3)
   battle_df <- bind_rows(battle_df, battle_other_df)
 }
 battle_df <- clean_battle(battle_df)
@@ -83,8 +82,10 @@ runtime_summary_df <-
     secs_per_value = seconds / values
   )
 
-print(runtime_summary_df)
-  
+runtime_summary_df %>% 
+  arrange(desc(secs_per_value)) %>%
+  select(experiment, dataset, version, minutes, classes, features, instances, values, secs_per_value) %>% print()
+
 
 ```
 
@@ -120,16 +121,6 @@ runtime_summary_df %>%
 
 ```
 
-```{r}
-
-runtime_summary_df %>%
-  ggplot(aes(x = seconds, y = secs_per_instance)) +
-  geom_text(aes(label = dataset), check_overlap = TRUE) +
-  xlab("Runtime (s)") +
-  ylab("Runtime per instance") +
-  ggtitle("Runtime versus Runtime per row")
-
-```
 
 ```{r}
 
@@ -143,30 +134,14 @@ runtime_summary_df %>%
 
 ```
 
-## Execution time per row * instances
 
 ```{r}
 
 runtime_summary_df %>%
-  filter(experiment == "Light") %>%
-  mutate(secs_per_value = seconds / (instances * features)) %>%
-  ggplot(aes(x = dataset, y = secs_per_value)) +
-  ylab("Runtime per row (sec)") +
-  facet_wrap(~ version) +
-  geom_col() + 
-  coord_flip()
-
-```
-
-```{r}
-
-battle_component_df <- battle_df %>% group_by(dataset, experiment, version, member_id) %>% filter(step == max(step)) %>% select(experiment, dataset, version, member_id, accuracy, duration, Imputer:EXT_min_samples_leaf) %>% ungroup()
-
-battle_component_df %>% 
-  filter(!is.na(duration)) %>% 
-  group_by(dataset, version, Reducer) %>% 
-  summarise(duration  = mean(duration)) %>%
-  ungroup()
-
+  ggplot(aes(x = seconds, y = secs_per_instance)) +
+  geom_text(aes(label = dataset), check_overlap = TRUE) +
+  xlab("Runtime (s)") +
+  ylab("Runtime per instance") +
+  ggtitle("Runtime versus Runtime per instance")
 
 ```

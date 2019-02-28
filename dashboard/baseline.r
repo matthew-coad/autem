@@ -15,13 +15,14 @@ read_baseline_file <- function(baseline_path, baseline_name) {
     predictive_accuracy = col_double(),
     Hyperparameters = col_character()
   )
-  df = read_csv(filename, col_types = col_types)
+  df = read_csv(filename, col_types = col_types, na = c("",NA, "NULL", "null"))
   df
 }
 
 baseline_accuracy <- function(baseline_name) {
   
-  baseline_df <- read_baseline_file(baseline_path, baseline_name)
+  baseline_df <- read_baseline_file(baseline_path, baseline_name) %>% 
+    filter(!is.na(predictive_accuracy))
   baseline_accuracy_df <- 
     baseline_df %>%
     mutate(
