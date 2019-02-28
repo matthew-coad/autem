@@ -9,9 +9,9 @@ source("battle.r")
 source("baseline.r")
 
 
-simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
 simulations_path2 <- NULL # "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
-simulations_path3 <- "D:\\Documents\\autem\\benchmark\\simulations\\test\\Light"
+simulations_path3 <- NULL# "D:\\Documents\\autem\\benchmark\\simulations\\test\\Light"
 
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 
@@ -33,6 +33,7 @@ if (!is_null(simulations_path3)) {
 }
 focus_version <- 6
 print("Battle data loaded")
+
 
 ```
 
@@ -165,6 +166,24 @@ for (baseline_name in baselines) {
 
 
 # Accuracy Contributors
+
+## Famous
+
+```{r}
+
+for (baseline_name in baselines) {
+  dataset_name <- baseline_name
+  p <- battle_df %>%
+    filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
+    ggplot(aes(x = step, y = accuracy)) +
+    geom_point(aes(color = famous), size = 0.5) +
+    ggtitle(baseline_name) +
+    facet_wrap(~ version)
+  plot(p)
+}
+
+
+```
 
 ## Learner
 

@@ -100,9 +100,36 @@ class Choice(HyperParameter):
 
     def mutate_member(self, member):
         """
-        To mutate select a component to switch to
+        Forward mutation to the selected component
         """
         return self.get_active_component(member).mutate_member(member)
+
+    def transmute_member(self, member):
+        """
+        Perform a major change to the member
+        """
+        random_state = member.simulation.random_state
+        current_active_component_name = self.get_active_component_name(member)
+        components = self.components
+        if len(components) < 2:
+            return False
+
+        attempts = 0
+        max_attempts = 50
+        mutated = False
+        component_name = None
+        while component_name is None:
+            component_index = random_state.randint(0, len(components))
+            if components[component_index].name != current_active_component_name:
+                component_name = components[component_index].name
+            else:
+                # We expect things to mutate quickly
+                # But make sure we don't get stuck in an infinite loop
+                attempts += 1
+                if attempts > max_attempts:
+                    raise RuntimeError("Attempt to transmute choice failed")
+        self.force_member(member, component_name)
+        return True
 
     # Cross over
 

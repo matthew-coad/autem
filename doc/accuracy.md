@@ -71,6 +71,21 @@ Add it to version 6.
 
 ## Getting stuck in local minima
 
+With the benchmarks now operating well and the algorithm effectively searching its now apparent we are getting stuck in local minima.
+
+*Add component mutation*
+
+Currently mutation operations cannot change components. Once a solution is well established
+their is no chance to try out other components.
+
+Add a "Major muation" feature that allows large scale changes as a feature of muation. We will then
+set a frequency by which major mutation is attempted.
+
+This will slow down local searching but its now pretty efficient.
+
+
+
+
 
 
 

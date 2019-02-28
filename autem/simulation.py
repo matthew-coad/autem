@@ -17,7 +17,7 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, properties = {}):
+    def __init__(self, name, components, seed = 1234, population_size = 10, transmutation_rate = 0.5, fame_priority = 2, top_priority = 4, properties = {}):
         self.name = name
         self.components = components
         self.properties = properties
@@ -38,6 +38,9 @@ class Simulation:
         self.n_steps = 0
         self.epoch = None
         self.running = False
+        self.transmutation_rate = transmutation_rate
+        self.fame_priority = fame_priority
+        self.top_priority = top_priority
 
     def generate_id(self):
         id = self.next_id
@@ -60,7 +63,7 @@ class Simulation:
         member.incarnated(form, form.count)
         self.members.append(member)
 
-    def mutate_member(self, member):
+    def mutate_member(self, member, transmute):
         """
         Mutate a member, making a guaranteed modification to its configuration
         """
@@ -89,7 +92,10 @@ class Simulation:
         component_indexes = random_state.choice(n_components, size=n_components, replace=False)
         for component_index in component_indexes:
             component = components[component_index]
-            mutated = component.mutate_member(member)
+            if not transmute:
+                mutated = component.mutate_member(member)
+            else:
+                mutated = component.transmute_member(member)
             if mutated:
                 if repr(member.configuration) == prior_repr:
                     raise RuntimeError("Configuration was not mutated as requested")
@@ -103,6 +109,9 @@ class Simulation:
         attempts = 0
         max_attempts = 100
         searching = True
+        random_state = self.random_state
+        # Sometimes transmute the first mutation attept
+        transmute = random_state.random_sample() <= self.transmutation_rate
         while searching:
             attempts += 1
             if attempts > max_attempts:
@@ -110,7 +119,8 @@ class Simulation:
                 return False
             form_key = repr(member.configuration)
             if form_key in self.forms:
-                self.mutate_member(member)
+                self.mutate_member(member, transmute)
+                transmute = False
             else:
                 searching = False
         return True
@@ -291,25 +301,23 @@ class Simulation:
             rank -= 1
         self.ranking = ranking
 
-    def prioritize_members(self, members):
-        """
-        Evaluate an evaluation priority for the given members
-        """
-        accuracies = [ m.evaluation.accuracy if hasattr(m.evaluation, "accuracy") else None for m in members ]
-        present_accuracies = [ a for a in accuracies if a is not None ]
-        top_accuracy = max(present_accuracies) if present_accuracies else None
-        famous_members = [ m for m in members if m.famous ]
-        def member_priority(index):
-            member = members[index]
-            if member.famous and not top_accuracy is None and not accuracies[index] is None and accuracies[index] >= top_accuracy:
-                return len(famous_members) + 1
-            elif member.famous:
-                return 2
-            else:
-                return 1
+    def choose_competitors(self):
+        # Choose one contestant at random
+        candidates = self.members
+        if len(candidates) < 2:
+            raise RuntimeError("Need at least 2 members to choose from")
+        random_state = self.random_state
+        contestant1_index = random_state.choice(len(candidates))
+        contestant1 = candidates[contestant1_index]
 
-        priorities = [ member_priority(i) for i in range(len(members)) ]
-        return priorities
+        minimum_fame = 1 if contestant1.famous == 0 else 0
+        candidates2 = []
+        while not candidates2:
+            candidates2 = [ c for c in candidates if c.id != contestant1.id and c.famous >= minimum_fame ]
+            minimum_fame -= 1
+        contestant2_index = random_state.choice(len(candidates2))
+        contestant2 = candidates2[contestant2_index]
+        return (contestant1, contestant2)
 
     def repopulate(self, parent1, parent2):
         current_population = len(self.members)
@@ -372,12 +380,13 @@ class Simulation:
             return None
 
         # Pick 2 members
-        priorities = self.prioritize_members(candidates)
-        total_priority = sum(priorities)
-        probabilities = [ p / total_priority for p in priorities ]
-        contestant_indexes = random_state.choice(len(candidates), 2, replace=False, p = probabilities)
-        contestant1 = candidates[contestant_indexes[0]]
-        contestant2 = candidates[contestant_indexes[1]]
+        contestant1, contestant2 = self.choose_competitors()
+
+        # Have a round of evaluation
+        if contestant1.evaluations < contestant2.evaluations:
+            self.evaluate_member(contestant1)
+        else:
+            self.evaluate_member(contestant2)
 
         # Have them contest.
         contest = self.contest_members(contestant1, contestant2)
@@ -385,13 +394,6 @@ class Simulation:
         # If there was no contest then something is wrong
         if contest.is_uncontested():
             raise RuntimeError("No contest component defined")
-
-        # If we can't tell anything we need to do more evaluation
-        if contest.is_inconclusive():
-            if contestant1.evaluations < contestant2.evaluations:
-                self.evaluate_member(contestant1)
-            else:
-                self.evaluate_member(contestant2)
 
         # Determine the contestants fate!
         if contest.is_conclusive():

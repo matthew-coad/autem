@@ -100,9 +100,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
             reporters.Path(path),
 
             # Imputers
-            autem.Choice("Imputer", [
-                preprocessors.SimpleImputer(),
-            ], preprocessors.NoImputer()),
+            preprocessors.SimpleImputer([]),
 
             # Engineers
             ##autem.Choice("Engineer", [
@@ -202,7 +200,7 @@ def run_benchmark_simulation(configuration, baseline_name, experiment):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 60
+    epochs = 100
     steps = 100
     population_size = 20
     path = simulations_path().joinpath("Run_%d" % version).joinpath(str(experiment)).joinpath(baseline_name)
@@ -227,5 +225,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    # run_benchmark_simulations(["Light"])
-    run_test_simulation()
+    run_benchmark_simulations(["Light"])
+    #run_test_simulation()

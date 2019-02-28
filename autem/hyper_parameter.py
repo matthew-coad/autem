@@ -35,6 +35,13 @@ class HyperParameter(Component):
         """
         raise NotImplementedError()
 
+    def transmute_member(self, member):
+        """
+        Transmute a member
+        """
+        # Forward to mutate by default
+        return self.mutate_member(member)
+
     def crossover_member(self, member, parent0, parent1):
         raise NotImplementedError()
 
