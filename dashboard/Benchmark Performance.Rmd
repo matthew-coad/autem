@@ -10,9 +10,6 @@ source("baseline.r")
 
 
 simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
-simulations_path2 <- NULL # "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
-simulations_path3 <- NULL# "D:\\Documents\\autem\\benchmark\\simulations\\test\\Light"
-
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 
 knitr::opts_chunk$set(echo = FALSE)
@@ -23,14 +20,6 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r Load}
 
 battle_df <- read_battle(simulations_path1)
-if (!is_null(simulations_path2)) {
-  battle_other_df <- read_battle(simulations_path2)
-  battle_df <- bind_rows(battle_df, battle_other_df)
-}
-if (!is_null(simulations_path3)) {
-  battle_other_df <- read_battle(simulations_path3)
-  battle_df <- bind_rows(battle_df, battle_other_df)
-}
 focus_version <- 6
 print("Battle data loaded")
 
@@ -63,7 +52,7 @@ summary_df <-
   group_by(dataset, experiment, version) %>%
   left_join(error_count_df, by = c("dataset","experiment", "version")) %>%
   arrange(experiment, dataset, version) %>%
-  select(experiment, dataset, version, rating, rating_sd, top_5p_accuracy, validation_accuracy, n_error) %>%
+  select(experiment, dataset, version, rating, rating_sd, top_accuracy, top_5p_accuracy, validation_accuracy, n_error) %>%
   ungroup()
 
 baselines <- levels(factor(summary_df$dataset))
@@ -176,7 +165,7 @@ for (baseline_name in baselines) {
   p <- battle_df %>%
     filter(dataset == dataset_name, experiment == "Light", !is.na(accuracy)) %>%
     ggplot(aes(x = step, y = accuracy)) +
-    geom_point(aes(color = famous), size = 0.5) +
+    geom_point(aes(color = factor(famous)), size = 0.5) +
     ggtitle(baseline_name) +
     facet_wrap(~ version)
   plot(p)

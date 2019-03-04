@@ -20,7 +20,7 @@ source("battle.r")
 source("baseline.r")
 source("configuration.r")
 
-simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_5"
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
 simulations_path2 <- NULL
 simulations_path3 <- NULL
 

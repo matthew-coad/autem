@@ -10,3 +10,4 @@ xx/xx_tests/simulations
 .Rproj.user
 dashboard/.RData
 dashboard/.Rhistory
+dashboard/*.RDS

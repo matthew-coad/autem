@@ -389,15 +389,16 @@ class Simulation:
             self.evaluate_member(contestant2)
 
         # Have them contest.
-        contest = self.contest_members(contestant1, contestant2)
+        if contestant1.alive and contestant2.alive:
+            contest = self.contest_members(contestant1, contestant2)
 
-        # If there was no contest then something is wrong
-        if contest.is_uncontested():
-            raise RuntimeError("No contest component defined")
+            # If there was no contest then something is wrong
+            if contest.is_uncontested():
+                raise RuntimeError("No contest component defined")
 
-        # Determine the contestants fate!
-        if contest.is_conclusive():
-            self.stress_members(contestant1, contestant2, contest)
+            # Determine the contestants fate!
+            if contest.is_conclusive():
+                self.stress_members(contestant1, contestant2, contest)
 
         # Repopulate!
         newborn1 = self.repopulate(contestant1, contestant2)
