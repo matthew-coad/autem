@@ -83,7 +83,46 @@ set a frequency by which major mutation is attempted.
 
 This will slow down local searching but its now pretty efficient.
 
+# Datasets
 
+## profb
+
+Profb has worst accuracy
+
+Evaluate why?
+
+Dummy value is quite high. The best is not much better.
+
+Very few instances. But other datasets can also do well.
+
+sklearn.pipeline.Pipeline(
+    columntransformer = sklearn.compose._column_transformer.ColumnTransformer(
+        numeric=sklearn.pipeline.Pipeline(
+            imputer=sklearn.preprocessing.imputation.Imputer,
+            standardscaler=sklearn.preprocessing.data.StandardScaler
+        ),
+        nominal=sklearn.pipeline.Pipeline(
+            simpleimputer=sklearn.impute.SimpleImputer,
+            onehotencoder=sklearn.preprocessing._encoders.OneHotEncoder)
+        ),
+        variancethreshold=sklearn.feature_selection.variance_threshold.VarianceThreshold,
+            svc=sklearn.svm.classes.SVC)(1)
+
+axis:0,
+copy:true,
+values:"NaN",
+strategy:"most_frequent",
+verbose:0,
+copy:true,
+mean:true,
+std:true,
+memory:null,copy:true,value:-1,values:NaN,strategy:"constant",verbose:0,features:null,categories:null,dtype:float64"},
+
+unknown:"ignore",values:null,sparse:true,C:6130666076544,size:200,weight:null,coef0:0.0,shape:"ovr",degree:3,gamma:008612352454384955,kernel:"rbf",iter:-1,probability:false,state:23375,shrinking:false,tol:0004289062260660228,
+verbose:false,jobs:null,remainder:"passthrough",
+threshold:0.3,weights:null,memory:null,threshold:0.0,memory:null
+
+axis:0,copy:true,values:"NaN",strategy:"most_frequent",verbose:0,copy:true,mean:true,std:true,memory:null,copy:tr
 
 
 

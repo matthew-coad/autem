@@ -4,10 +4,11 @@ experiments/simulations
 problems/simulations
 benchmark/simulations
 benchmark/simulations_*/**
+benchmark/data
 experiments/**/simulations
 
 xx/xx_tests/simulations
 .Rproj.user
 dashboard/.RData
 dashboard/.Rhistory
-dashboard/*.RDS
+dashboard/data

@@ -93,16 +93,19 @@ classifier_config_dict = {
 
 }
 
+def convert_parameters(learner_dict):
+    def _parameter(key, values):
+        return ChoicesParameter(key, key, values, None)
+
+    parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
+    return parameters
+
 def get_parameters(config, override_parameters = None):
     if not override_parameters is None:
         return override_parameters
 
     learner_dict = classifier_config_dict[config]
-
-    def _parameter(key, values):
-        return ChoicesParameter(key, key, values, None)
-
-    parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
+    parameters = convert_parameters(learner_dict)
     return parameters
 
 class GaussianNB(Learner):
@@ -176,6 +179,16 @@ class LinearSVC(Learner):
 
     def make_model(self):
         return sklearn.svm.LinearSVC()
+
+class RadialBasisSVC(Learner):
+
+    config_dict = { 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000] }
+
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "RSV", "Radial Basis SVC", convert_parameters(self.config_dict))
+
+    def make_model(self):
+        return sklearn.svm.SVC(kernel='rbf', gamma='auto')/
 
 class LogisticRegression(Learner):
 

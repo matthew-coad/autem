@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
+    theme: cosmo
 runtime: shiny
 ---
 
@@ -16,27 +17,28 @@ library(tidyverse)
 ```{r load, include=FALSE}
 
 # Load data
-step_detail_df <- reactive({ read_rds("step_detail.RDS") })
-epoch_summary_df <- reactive({ read_rds("epoch_summary.RDS") })
-simulation_summary_df <- reactive({ read_rds("simulation_summary.RDS") })
-normal_baseline_df <- reactive({ read_rds("normal_baseline.RDS") })
-breakdown_df <- reactive({ read_rds("breakdown.RDS") })
+step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
+epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
+simulation_summary_rdf <- reactive({ read_rds("data\\simulation_summary.RDS") })
+baseline_detail_rdf <- reactive({ read_rds("data\\baseline_detail.RDS") })
+baseline_summary_rdf <- reactive({ read_rds("data\\baseline_summary.RDS") })
+breakdown_rdf <- reactive({ read_rds("data\\breakdown.RDS") })
 
 all_value = "__all__"
 
-dataset_list <- reactive({ sort(unique(simulation_summary_df()$dataset)) })
-breakdown_list <- reactive({ breakdown_df()$breakdown })
-filtered_data <- function(.data, .dataset) {
-  if (.dataset == all_value)
+experiment_rlist <- reactive({ sort(unique(simulation_summary_rdf()$experiment)) })
+breakdown_rlist <- reactive({ breakdown_rdf()$breakdown })
+
+filtered_data <- function(.data, .experiment) {
+  if (.experiment == all_value)
     .data
   else
-    filter(.data, dataset == .dataset)
+    filter(.data, experiment == .experiment)
 }
 
 # Formatters
-minutes <- scales::unit_format(unit = "min", accuracy = 3)
-accuracy <- scales::number_format(accuracy = .01)
-
+minutes_format <- scales::unit_format(unit = "min", accuracy = 3)
+accuracy_format <- scales::number_format(accuracy = .01)
 
 ```
 
@@ -47,230 +49,161 @@ Sidebar {.sidebar}
 
 renderUI({
   tagList(
-    selectInput("dataset", "Dataset:", dataset_list())
+    selectInput("experiment", "Experiment:", experiment_rlist()),
+    selectInput("breakdown", "Breakdown:", breakdown_rlist())
   )
 })
 
 ```
 
-Summary
-=====================================  
-
-Summary Report
------------------------------------------------------------------------
-
-### Dataset Summary
-
-```{r}
-
-DT::renderDT({
-  req(simulation_summary_df(), input$dataset, cancelOutput = TRUE)
-
-  data <- 
-    simulation_summary_df() %>%
-    mutate(
-      `Run time` = minutes(run_time_secs / 60),
-      `Rating` = accuracy(rating),
-      `Rating SD` = accuracy(rating_sd),
-      `Validation` = accuracy(validation_accuracy),
-      `Dummy` = accuracy(dummy_accuracy),
-      `Min Baseline` = accuracy(min_baseline_accuracy),
-      `Max Baseline` = accuracy(max_baseline_accuracy)
-    ) %>%
-    select(
-      experiment, 
-      configuration, 
-      dataset, 
-      status, 
-      `Run time`,
-      `Rating`,
-      `Rating SD`,
-      `Dummy`,
-      `Validation`,
-      `Min Baseline`,
-      `Max Baseline`
-  )
-}, options = list(lengthChange = FALSE))
-
-```
 
 Baselines {data-orientation=columns}
 =====================================  
 
-Baselines
+Overview
 -----------------------------------------------------------------------
 
-### Baseline
+### All progress
 
 ```{r}
 
 renderPlot({
-  req(simulation_summary_df(), cancelOutput = TRUE)
+  req(simulation_summary_rdf(), cancelOutput = TRUE)
   
-  df <- simulation_summary_df()
-  min_x <- 0
-  max_x <- max(df$normal_rating + df$normal_rating_sd, df$normal_valiation_accuracy)
-  max_x <- if (max_x < 1) 1 else max_x
+  df <- simulation_summary_rdf()
+  min_y <- 0
+  max_y <- max(df$progress + df$progress_sd)
+  max_y <- if (max_y < 1) 1 else max_y
 
-  simulation_summary_df() %>%
-    mutate(dataset = forcats::fct_reorder(dataset, desc(normal_rating))) %>%
-    ggplot(aes(x = dataset)) +
-    geom_errorbar(aes(ymin = normal_rating-normal_rating_sd, ymax=normal_rating+normal_rating_sd), width = 0.5, na.rm = TRUE) +
-    geom_point(aes(y = normal_rating, color = "rating")) +
-    geom_point(aes(y = normal_validation_accuracy, color = "validation")) +
-    ylim(min_x, max_x) +
+  df %>%
+    mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
+    ggplot(aes(x = experiment, color = study)) +
+    geom_point(aes(y = progress)) +
+    ylim(min_y, max_y) +
+    ylab("Progress") +
     coord_flip()
 
 })
 
 ```
 
-
-
-Normalised
+Drilldown
 -----------------------------------------------------------------------
 
-### All
+### Progress Density
 
 ```{r}
 
 renderPlot({
-  req(simulation_summary_df(), cancelOutput = TRUE)
+  req(simulation_summary_rdf(), cancelOutput = TRUE)
   
-  df <- simulation_summary_df()
+  df <- simulation_summary_rdf()
   min_x <- 0
-  max_x <- max(df$normal_rating + df$normal_rating_sd)
+  max_x <- max(df$progress + df$progress_sd)
   max_x <- if (max_x < 1) 1 else max_x
   df %>%
-  ggplot(aes(x = normal_rating, color  = experiment)) +
+  ggplot(aes(x = progress, color = study)) +
     geom_density() +
     xlim(min_x, max_x) +
-    xlab("Normalised Rating")
+    xlab("Progress") +
+    ylab("Density")
 
 })
 
 ```
 
-### Selected
+### Experiment Progress
 
 ```{r}
 
 renderPlot({
-  req(normal_baseline_df(), simulation_summary_df(), input$dataset, cancelOutput = TRUE)
+  req(simulation_summary_rdf(), baseline_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  summary_df <- simulation_summary_df() %>% filtered_data(input$dataset)
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  simulation_summary_df <-
+    simulation_summary_df %>%
+    mutate(validation_progress = (validation_score - progress_bottom_score) / (progress_top_score - progress_bottom_score))
+  
+  baseline_detail_df <- baseline_detail_rdf() %>% filter(dataset == simulation_summary_df$dataset)
+  
   min_x <- 0
-  max_x <- max(summary_df$normal_rating + summary_df$normal_rating_sd)
+  max_x <- max(simulation_summary_df$progress + simulation_summary_df$progress_sd, simulation_summary_df$validation_progress)
   max_x <- if (max_x < 1) 1 else max_x
 
-  baseline_df <- normal_baseline_df() %>% filtered_data(input$dataset)
-  rating <- summary_df$rating
-  summary_df$baseline_percent <- baseline_df %>% filter(baseline_accuracy <= rating) %>% pull(baseline_percent) %>% max()
-  summary_df$normal_baseline_accuracy <- summary_df$normal_rating
+  baseline_progress_df <-
+    simulation_summary_df %>%
+    right_join(baseline_detail_df, by = c("dataset")) %>%
+    mutate(
+      baseline_progress = (baseline_score - progress_bottom_score) / (progress_top_score - progress_bottom_score)
+    ) %>%
+    select(study, experiment, baseline_score, baseline_rank, baseline_percent, baseline_progress) %>%
+    filter(baseline_progress >= 0)
 
-  baseline_df %>%
-    ggplot(aes(x = baseline_percent, y = normal_baseline_accuracy)) +
-    geom_count(color = "DarkGrey") +
-    geom_point(data = summary_df, aes(color = "rating"), size = 3) +
-    geom_rug(data = summary_df, aes(color = "rating"), sides="trbl") +
-    geom_errorbar(data = summary_df, aes(ymin = normal_rating-normal_rating_sd, ymax=normal_rating+normal_rating_sd), width = 0.05, na.rm = TRUE) +
-    geom_point(data = summary_df, aes(y = normal_validation_accuracy, color ="validation"), size = 3) +
-    geom_hline(data = summary_df, aes(yintercept = normal_max_baseline_accuracy), linetype = 'dotted') +
-    geom_hline(data = summary_df, aes(yintercept = normal_dummy_accuracy), linetype = 'dotted') +
+  score <- simulation_summary_df$score
+  simulation_summary_df$baseline_percent <- baseline_progress_df %>% filter(baseline_score <= score) %>% pull(baseline_percent) %>% max()
+    
+  baseline_progress_df %>%
+    ggplot() +
+    geom_count(aes(x = baseline_percent, y = baseline_progress), color = "DarkGrey") +
+    geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study, shape ="score"), size = 3) +
+    geom_rug(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study), sides="trbl") +
+    geom_errorbar(data = simulation_summary_df, aes(x = baseline_percent, ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.05, na.rm = TRUE) +
+    geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = validation_progress, color = study, shape ="validation"), size = 3) +
+    geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+    geom_hline(aes(yintercept = 0.0), linetype = 'dotted') +
+    xlim(0.0, 1.0) +
+    xlab("Baseline rank") +
     ylim(min_x, max_x) +
-    ylab("Normalised Rating")
+    ylab("Progress")
 })
 
 ```
 
 
-Processing
-===================================== 
+Scores {data-orientation=rows}
+=====================================
 
-Values
+Step score
 -----------------------------------------------------------------------
-
-### Status
-
-```{r}
-
-renderValueBox({
-  req(simulation_summary_df(),input$dataset, cancelOutput = TRUE)
-  status <- simulation_summary_df() %>%
-    filter(dataset == input$dataset) %>%
-    pull(status)
-  if (length(status) == 0)
-    status <- NULL
-  valueBox(status)
-})
-
-```
-
-### Runtime
-
-```{r}
-
-renderValueBox({
-  req(simulation_summary_df(),input$dataset, cancelOutput = TRUE)
-  runtime_secs <- simulation_summary_df() %>% 
-    filter(dataset == input$dataset) %>% 
-    pull(run_time_secs)
-  valueBox(minutes(runtime_secs / 60))
-})
-
-```
-
-
-Epochs
------------------------------------------------------------------------
-
-### Events
 
 ```{r}
 
 renderPlot({
-  req(epoch_summary_df(),input$dataset, cancelOutput = TRUE)
-  epoch_summary_df() %>% 
-    filter(dataset == input$dataset) %>%
-    ggplot(aes(x = epoch)) +
-    geom_line(aes(y = faults, color = "faults")) +
-    geom_line(aes(y = nominations, color = "nominations")) +
-    geom_line(aes(y = deaths, color = "deaths")) +
-    ylab("Epoch") +
-    ylab("Count")
+  req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(score))
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  
+  step_detail_df %>%
+    ggplot(aes(x = step, y = score)) +
+    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
+    geom_hline(data = simulation_summary_df, aes(yintercept = baseline_top_score), linetype = 'dotted') +
+    geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_top_score, label = accuracy_format(baseline_top_score))) +
+    geom_hline(data = simulation_summary_df, aes(yintercept = dummy_score), linetype = 'dotted') +
+    geom_label(data = simulation_summary_df, aes(x = 0, y = dummy_score, label = accuracy_format(dummy_score))) +
+    facet_wrap(~ study)
 })
 
 ```
 
+Durations {data-orientation=rows}
+=====================================
 
-Steps
+Step duration
 -----------------------------------------------------------------------
 
-### Accuracy
-
 ```{r}
 
 renderPlot({
-  req(step_detail_df(),input$dataset, cancelOutput = TRUE)
-  step_detail_df() %>% 
-    filter(dataset == input$dataset, !is.na(accuracy)) %>%
-    ggplot(aes(x = step, y = accuracy)) +
-    geom_point(size = 0.5)
-})
-
-```
-
-### Duration
-
-```{r}
-
-renderPlot({
-  req(step_detail_df(),input$dataset, cancelOutput = TRUE)
-  step_detail_df() %>% 
-    filter(dataset == input$dataset, !is.na(accuracy)) %>%
+  req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(duration))
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  
+  step_detail_df %>%
     ggplot(aes(x = step, y = duration)) +
-    geom_point(size = 0.5)
+    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
+    facet_wrap(~ study)
 })
 
 ```
-

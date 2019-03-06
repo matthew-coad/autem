@@ -98,6 +98,10 @@ read_battle_file <- function(file_name) {
 clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$version <- factor(df$version)
+  df$mature <- factor(df$mature)
+  df$famous <- factor(df$famous)
+  df$alive <- factor(df$alive)
+  df$final <- factor(df$final)
   df$event_time <- lubridate::parse_date_time(df$time, orders = "amd HMS Y")
   df
 }
@@ -111,9 +115,15 @@ read_battle <- function(path) {
 build_step_detail <- function(battle_df) {
   step_df <-
     battle_df %>%
+    mutate(
+      study = paste0("S", version),
+      configuration = paste0(experiment),
+      experiment = paste0(dataset)
+    ) %>%
     select(
-      experiment = version,
-      configuration = experiment, 
+      study,
+      experiment,
+      configuration, 
       dataset,
       epoch,
       step,
@@ -126,38 +136,41 @@ build_step_detail <- function(battle_df) {
       alive,
       final,
       evaluations,
-      accuracy,
+      score = accuracy,
       duration,
-      dummy_accuracy,
       Scaler:LGR_dual
     )
   step_df
 }
 
 build_ranking_detail <- function(battle_df) {
-  
   ranking_df <-
     battle_df %>%
     filter(!is.na(ranking)) %>%
-     select(
-       experiment = version, 
-       configuration = experiment, 
-       dataset, 
+    mutate(
+      study = paste0("S", version),
+      configuration = paste0(experiment),
+      experiment = paste0(dataset)
+    ) %>%    
+    select(
+       study,
+       experiment,
        ranking,
-       rating, 
-       rating_sd, 
-       dummy_accuracy,
-       validation_accuracy)
+       score = rating, 
+       score_sd = rating_sd,
+       dummy_score = dummy_accuracy,
+       validation_score = validation_accuracy
+    )
   ranking_df
 }
 
-build_epoch_summary <- function(step_detail_df) {
+build_epoch_details <- function(step_detail_df) {
   epoch_summary_df <- step_detail_df %>%
-    group_by(experiment, configuration, dataset, epoch) %>%
+    group_by(study, experiment, epoch) %>%
     summarise(
       start_time = min(event_time),
       end_time = max(event_time),
-      duration_secs = lubridate::int_length(lubridate::interval(start_time, end_time)),
+      duration = lubridate::int_length(lubridate::interval(start_time, end_time)),
       births = sum(event == "birth"),
       faults = sum(event == "fault"),
       deaths = sum(event == "death"),
@@ -196,14 +209,14 @@ read_baselines <- function(baseline_path, datasets) {
 build_baseline_details <- function(baseline_df) {
   baseline_details_df <- 
     baseline_df %>%
-    mutate(baseline_accuracy = predictive_accuracy) %>%
+    mutate(baseline_score = predictive_accuracy) %>%
     group_by(dataset) %>%
     mutate(
-      baseline_rank = min_rank(baseline_accuracy),
-      baseline_percent = percent_rank(baseline_accuracy)
+      baseline_rank = min_rank(baseline_score),
+      baseline_percent = percent_rank(baseline_score)
     ) %>%
     ungroup() %>%
-    select(dataset, baseline_accuracy, baseline_rank, baseline_percent) %>%
+    select(dataset, baseline_score, baseline_rank, baseline_percent) %>%
     arrange(dataset, desc(baseline_rank))
   baseline_details_df
 }
@@ -213,30 +226,31 @@ build_baseline_summary <- function(baseline_details) {
   baseline_summary_df <- baseline_details %>%
     group_by(dataset) %>%
     summarise(
-      min_accuracy = min(baseline_accuracy),
-      max_accuracy = max(baseline_accuracy)
+      bottom_score = min(baseline_score),
+      top_score = max(baseline_score)
     )
   
   baseline_summary_df  
 }
 
-
 build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline_summary_df) {
   
   simulation_summary_df <- 
     step_detail_df %>%
-    group_by(experiment, configuration, dataset) %>%
+    group_by(study, experiment) %>%
     summarise(
+      dataset = first(dataset),
+      configuration = first(configuration),
+      status = "Complete",
       epochs = max(epoch),
       steps = max(step),
-      run_time_secs = lubridate::int_length(lubridate::interval(min(event_time), max(event_time)))
+      duration = lubridate::int_length(lubridate::interval(min(event_time), max(event_time)))
     ) %>% 
     ungroup()
   
-  simulation_summary_df$Status <- "Complete"
   simulation_summary_df <-
     simulation_summary_df %>%
-    right_join(filter(ranking_detail_df, ranking == 1), by = c("experiment", "configuration", "dataset"))
+    right_join(filter(ranking_detail_df, ranking == 1), by = c("study", "experiment"))
   
   simulation_summary_df <-
     simulation_summary_df %>%
@@ -245,51 +259,34 @@ build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline
   simulation_summary_df <- 
     simulation_summary_df %>% 
     mutate(
-      min_baseline_accuracy = min_accuracy,
-      max_baseline_accuracy = max_accuracy,
-      normal_delta = dummy_accuracy,
-      normal_scale = max_baseline_accuracy - dummy_accuracy,
-      normal_rating = (rating - normal_delta) / normal_scale,
-      normal_rating_sd = rating_sd / normal_scale,
-      normal_dummy_accuracy = (dummy_accuracy - normal_delta) / normal_scale,
-      normal_validation_accuracy = (validation_accuracy - normal_delta) / normal_scale,
-      normal_min_baseline_accuracy = (min_baseline_accuracy - normal_delta) / normal_scale,
-      normal_max_baseline_accuracy = (max_baseline_accuracy - normal_delta) / normal_scale
+      baseline_bottom_score = bottom_score,
+      baseline_top_score = top_score,
+      progress_bottom_score = dummy_score,
+      progress_top_score = baseline_top_score,
+      progress = (score - progress_bottom_score) / (progress_top_score - progress_bottom_score),
+      progress_sd = score_sd / (progress_top_score - progress_bottom_score)
     ) %>%
     select(
-      experiment, 
+      study,
+      experiment,
+      dataset,
       configuration, 
-      dataset, 
+      status,
+      duration, 
       epochs, 
       steps, 
-      run_time_secs, 
-      status = Status, 
-      rating,
-      rating_sd,
-      dummy_accuracy,
-      validation_accuracy,
-      min_baseline_accuracy,
-      max_baseline_accuracy,
-      normal_delta,
-      normal_scale,
-      normal_rating,
-      normal_rating_sd,
-      normal_dummy_accuracy,
-      normal_validation_accuracy,
-      normal_min_baseline_accuracy,
-      normal_max_baseline_accuracy
+      score,
+      score_sd,
+      dummy_score,
+      validation_score,
+      baseline_bottom_score,
+      baseline_top_score,
+      progress_bottom_score,
+      progress_top_score,
+      progress,
+      progress_sd
     )
   simulation_summary_df
-}
-
-build_normal_baseline <- function(simulation_summary_df, baseline_detail_df) {
-  simulation_summary_df %>%
-    right_join(baseline_detail_df, by = c("dataset")) %>%
-    mutate(
-      normal_baseline_accuracy = (baseline_accuracy - normal_delta) / normal_scale
-    ) %>%
-    select(experiment, configuration, dataset, baseline_accuracy, dummy_accuracy, baseline_rank, baseline_percent, normal_baseline_accuracy) %>%
-    filter(normal_baseline_accuracy >= 0)
 }
 
 build_breakdown <- function() {

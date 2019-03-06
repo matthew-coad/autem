@@ -21,7 +21,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-version = 6
+version = 7
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -114,7 +114,7 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
                 preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
-                preprocessors.Binarizer(),
+                # preprocessors.Binarizer(),
                 preprocessors.BoxCoxTransform(),
                 preprocessors.YeoJohnsonTransform()
             ], preprocessors.NoScaler()),
@@ -127,26 +127,27 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
 
             # Feature Reducers
             autem.Choice("Reducer", [
-                preprocessors.FastICA(),
-                preprocessors.FeatureAgglomeration(),
-                preprocessors.PCA(),
+                ## preprocessors.FastICA(),
+                ##preprocessors.FeatureAgglomeration(),
+                ## preprocessors.PCA(),
             ], preprocessors.NoReducer()),
 
             # Approximators
             autem.Choice("Approximator", [
-                preprocessors.RBFSampler(),
-                preprocessors.Nystroem(),
+                ## preprocessors.RBFSampler(),
+                ##preprocessors.Nystroem(),
             ], preprocessors.NoApproximator()),
 
             autem.Choice("Learner", [
-                learners.GaussianNB(),
-                learners.BernoulliNB(),
-                learners.MultinomialNB(),
-                learners.DecisionTreeClassifier(),
-                learners.KNeighborsClassifier(),
-                learners.LinearSVC(),
-                learners.LogisticRegression(),
-                learners.LinearDiscriminantAnalysis(),
+                # learners.GaussianNB(),
+                # learners.BernoulliNB(),
+                # learners.MultinomialNB(),
+                # learners.DecisionTreeClassifier(),
+                # learners.KNeighborsClassifier(),
+                # learners.LinearSVC(),
+                learners.RadialBasisSVC(),
+                # learners.LogisticRegression(),
+                # learners.LinearDiscriminantAnalysis(),
                 # learners.RandomForestClassifier(),
                 #learners.ExtraTreesClassifier(),
             ]),
