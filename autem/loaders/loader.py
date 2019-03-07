@@ -20,5 +20,11 @@ class Loader(Controller):
         """
         raise NotImplementedError()
 
+    def get_features(self, simulation):
+        """
+        Return dictionary of index of features by type
+        """
+        raise NotImplementedError()
+
     def start_simulation(self, simulation):
         simulation.resources.loader = self

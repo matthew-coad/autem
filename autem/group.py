@@ -16,6 +16,12 @@ class Group(HyperParameter):
         for parameter in parameters:
             parameter.group_name = self.name
 
+    def get_parameter(self, name):
+        params = [p for p in self.parameters if p.name == name ]
+        if len(params) != 1:
+            raise RuntimeError("Parameter not found")
+        return params[0]
+
     def outline_simulation(self, simulation, outline):
         """
         Outline what information is going to be supplied by a simulation

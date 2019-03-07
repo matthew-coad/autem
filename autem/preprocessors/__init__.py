@@ -1,6 +1,10 @@
 # Imputers
+from .preprocessor import NoImputer, ConditionalImputer, SimpleImputer, MissingIndicatorImputer
 
-from .preprocessor import NoImputer, SimpleImputer, MissingIndicatorImputer
+from .conditional_preprocessor import ConditionalPreprocessor
+
+# Encoders
+from .preprocessor import ConditionalOnehotEncoder
 
 # Engineers
 from .preprocessor import NoEngineering, PolynomialFeatures

@@ -3,6 +3,7 @@ from .. import Group, Dataset, Role, ChoicesParameter
 import sklearn.impute
 import sklearn.preprocessing
 import sklearn.decomposition
+import sklearn.compose
 import sklearn.cluster
 import sklearn.kernel_approximation
 import sklearn.feature_selection
@@ -66,11 +67,41 @@ class NoImputer(Imputer):
     def make_preprocessor(self, member):
         return None
 
+class ConditionalImputer(Imputer):
+
+    def __init__(self, parameters = None):
+        if parameters is None:
+            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
+            parameters = [config_parameter]
+        Imputer.__init__(self, "ICN", "Conditional Imputer", parameters)
+
+    def make_preprocessor(self, member):
+        simulation = member.simulation
+        loader = simulation.resources.loader
+        features = loader.get_features(simulation)
+
+        numeric_features = features['numeric']
+        nominal_features = features['nominal']
+
+        strategy = self.get_parameter("strategy").get_value(member)
+
+        # We create the preprocessing pipelines for both numeric and categorical data.
+        numeric_imputer = sklearn.impute.SimpleImputer(strategy=strategy)
+        categorical_imputer = sklearn.impute.SimpleImputer(strategy="most_frequent")
+
+        imputer = sklearn.compose.ColumnTransformer(
+            transformers=[
+                ('num', numeric_imputer, numeric_features),
+                ('cat', categorical_imputer, nominal_features)])    
+        return imputer
+
+    def configure_preprocessor(self, member, pre_processor):
+        pass
+
 class SimpleImputer(Imputer):
 
     def __init__(self, parameters = None):
         if parameters is None:
-            # config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
             config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
             parameters = [config_parameter]
         Imputer.__init__(self, "SMP", "Simple Imputer", parameters)
@@ -97,6 +128,37 @@ class MissingIndicatorImputer(Imputer):
                 ('features', sklearn.impute.SimpleImputer(strategy=strategy)),
                 ('indicators', sklearn.impute.MissingIndicator())])
         return transformer
+
+    def configure_preprocessor(self, member, pre_processor):
+        pass
+
+
+# Encoders
+
+class Encoder(Preprocesssor):
+
+    def __init__(self, name, label, parameters):
+        Preprocesssor.__init__(self, name, label, parameters)
+
+class ConditionalOnehotEncoder(Encoder):
+
+    def __init__(self):
+        Encoder.__init__(self, "EOH", "Conditional Onehot Encoder", {})
+
+    def make_preprocessor(self, member):
+        simulation = member.simulation
+        loader = simulation.resources.loader
+        features = loader.get_features(simulation)
+
+        nominal_features = features['nominal']
+
+        # We create the preprocessing pipelines for both numeric and categorical data.
+        nominal_encoder = sklearn.preprocessing.OneHotEncoder(categories='auto', sparse=True)
+        encoder = sklearn.compose.ColumnTransformer(
+            transformers=[
+                ('onehot', nominal_encoder, nominal_features)]
+        )
+        return encoder
 
     def configure_preprocessor(self, member, pre_processor):
         pass
@@ -185,7 +247,7 @@ class StandardScaler(Scaler):
         Scaler.__init__(self, "SCL", "Standard Scaler", {})
 
     def make_preprocessor(self, member):
-        return sklearn.preprocessing.StandardScaler()
+        return sklearn.preprocessing.StandardScaler(with_mean=False)
 
 class Binarizer(Scaler):
 

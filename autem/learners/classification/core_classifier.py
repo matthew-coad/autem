@@ -67,15 +67,6 @@ classifier_config_dict = {
         'p': [1, 2]
     },
 
-    'sklearn.svm.LinearSVC': {
-        'penalty': ["l1", "l2"],
-        'loss': ["hinge", "squared_hinge"],
-        'dual': [True, False],
-        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.]
-    },
-
-
     'sklearn.linear_model.LogisticRegression': {
         'penalty': ["l1", "l2"],
         'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
@@ -93,7 +84,11 @@ classifier_config_dict = {
 
 }
 
-def convert_parameters(learner_dict):
+def convert_parameters(learner_dict, override_parameters = None):
+
+    if not override_parameters is None:
+        return override_parameters
+
     def _parameter(key, values):
         return ChoicesParameter(key, key, values, None)
 
@@ -101,11 +96,8 @@ def convert_parameters(learner_dict):
     return parameters
 
 def get_parameters(config, override_parameters = None):
-    if not override_parameters is None:
-        return override_parameters
-
     learner_dict = classifier_config_dict[config]
-    parameters = convert_parameters(learner_dict)
+    parameters = convert_parameters(learner_dict, override_parameters)
     return parameters
 
 class GaussianNB(Learner):
@@ -174,21 +166,48 @@ class KNeighborsClassifier(Learner):
 
 class LinearSVC(Learner):
 
+    config_dict = {
+        'penalty': ["l1", "l2"],
+        'loss': ["hinge", "squared_hinge"],
+        'dual': [True, False],
+        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0]
+    }
+
     def __init__(self, parameters = None):
-        Learner.__init__(self, "LSV", "Linear SVC", get_parameters('sklearn.svm.LinearSVC', parameters))
+        Learner.__init__(self, "LSV", "Linear SVC", convert_parameters(self.config_dict, parameters))
 
     def make_model(self):
         return sklearn.svm.LinearSVC()
 
 class RadialBasisSVC(Learner):
 
-    config_dict = { 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000] }
+    config_dict = { 
+        'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
+        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
+        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+    }
 
     def __init__(self, parameters = None):
-        Learner.__init__(self, "RSV", "Radial Basis SVC", convert_parameters(self.config_dict))
+        Learner.__init__(self, "RSV", "Radial Basis SVC", convert_parameters(self.config_dict, parameters))
 
     def make_model(self):
-        return sklearn.svm.SVC(kernel='rbf', gamma='auto')/
+        return sklearn.svm.SVC(kernel = "rbf", gamma='auto')
+
+class PolySVC(Learner):
+
+    config_dict = { 
+        'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
+        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
+        'degree' : [2,3,4,5]
+    }
+
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "PSV", "Poly SVC", convert_parameters(self.config_dict, parameters))
+
+    def make_model(self):
+        return sklearn.svm.SVC(kernel='poly', gamma='auto')
 
 class LogisticRegression(Learner):
 

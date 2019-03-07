@@ -21,6 +21,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
+study = "encoding"
 version = 7
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
@@ -45,6 +46,7 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
             evaluators.OpenMLRater(task_id),
             evaluators.DummyClassifierAccuracy(),
             evaluators.ValidationAccuracy(),
+            BenchmarkScorer(),
 
             reporters.Path(path),
 
@@ -73,14 +75,15 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
         properties = properties)
     return simulation
 
-def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
     dataset_name = dataset.name
-    simulation_name = "%s_%s_v%d" % (experiment, baseline_name, version)
-    properties['dataset'] = dataset_name
+    simulation_name = "%s_%s_v%d" % (study, experiment, version)
+    properties['study'] = study
     properties['experiment'] = experiment
+    properties['dataset'] = dataset_name
     properties['version'] = version
     
     simulation = autem.Simulation(
@@ -99,25 +102,20 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
 
             reporters.Path(path),
 
-            # Imputers
-            preprocessors.SimpleImputer([]),
-
-            # Engineers
-            ##autem.Choice("Engineer", [
-            ##    preprocessors.PolynomialFeatures(),
-            ##], preprocessors.NoEngineering()),
+            # Pre processing
+            preprocessors.ConditionalPreprocessor(),
 
             # Scalers
-            autem.Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.MinMaxScaler(),
-                preprocessors.Normalizer(),
-                preprocessors.RobustScaler(),
-                preprocessors.StandardScaler(),
-                # preprocessors.Binarizer(),
-                preprocessors.BoxCoxTransform(),
-                preprocessors.YeoJohnsonTransform()
-            ], preprocessors.NoScaler()),
+            #autem.Choice("Scaler", [
+                #preprocessors.MaxAbsScaler(),
+                #preprocessors.MinMaxScaler(),
+                #preprocessors.Normalizer(),
+                #preprocessors.RobustScaler(),
+                #preprocessors.StandardScaler(),
+                #preprocessors.Binarizer(),
+                #preprocessors.BoxCoxTransform(),
+                #preprocessors.YeoJohnsonTransform()
+            #], preprocessors.NoScaler()),
 
             # Feature Selectors
             autem.Choice("Selector", [
@@ -127,28 +125,30 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
 
             # Feature Reducers
             autem.Choice("Reducer", [
-                ## preprocessors.FastICA(),
-                ##preprocessors.FeatureAgglomeration(),
-                ## preprocessors.PCA(),
+                preprocessors.FastICA(),
+                preprocessors.FeatureAgglomeration(),
+                preprocessors.PCA(),
             ], preprocessors.NoReducer()),
 
             # Approximators
             autem.Choice("Approximator", [
-                ## preprocessors.RBFSampler(),
-                ##preprocessors.Nystroem(),
+                preprocessors.RBFSampler(),
+                preprocessors.Nystroem(),
             ], preprocessors.NoApproximator()),
 
             autem.Choice("Learner", [
-                # learners.GaussianNB(),
-                # learners.BernoulliNB(),
-                # learners.MultinomialNB(),
-                # learners.DecisionTreeClassifier(),
-                # learners.KNeighborsClassifier(),
-                # learners.LinearSVC(),
+                learners.GaussianNB(),
+                learners.BernoulliNB(),
+                learners.MultinomialNB(),
+                learners.DecisionTreeClassifier(),
+                learners.KNeighborsClassifier(),
+                learners.LinearSVC(),
                 learners.RadialBasisSVC(),
-                # learners.LogisticRegression(),
-                # learners.LinearDiscriminantAnalysis(),
-                # learners.RandomForestClassifier(),
+                # learners.PolySVC(),
+                learners.LogisticRegression(),
+                learners.LinearDiscriminantAnalysis(),
+
+                #learners.RandomForestClassifier(),
                 #learners.ExtraTreesClassifier(),
             ]),
         ], 
@@ -156,18 +156,6 @@ def make_openml_light_classifier_simulation(baseline_name, experiment, task_id, 
         seed = seed,
         properties = properties)
     return simulation
-
-def make_openml_classifier_simulation(configuration, baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
-    if configuration == "Light":
-        return make_openml_light_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties)
-    elif configuration == "LightX":
-        return make_openml_lightx_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties)
-    elif configuration == "Tune":
-        return make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties)
-    elif configuration == "Select":
-        return make_openml_select_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties)
-    raise RuntimeError("Unknown configuration")
-
 
 def run_simulation(simulation, steps, epochs):
     print("Running %s" % simulation.name)
@@ -181,41 +169,41 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "cylinder-bands"
-    configuation = "Light"
-    experiment = "Light"
+    study = "encoding"
+    experiment = "profb"
+    baseline_name = "profb"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
     epochs = 60
     population_size = 20
-    path = simulations_path().joinpath("test").joinpath(str(experiment)).joinpath(baseline_name)
+    path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 
     utility.prepare_OpenML()
-    simulation = make_openml_classifier_simulation(configuation, baseline_name, experiment, task_id, seed, population_size, path)
+    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
     autem.ReportManager(path).update_combined_reports()
 
-def run_benchmark_simulation(configuration, baseline_name, experiment):
+def run_benchmark_simulation(baseline_name):
+    experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
     epochs = 50
     steps = 100
     population_size = 20
-    path = simulations_path().joinpath("Run_%d" % version).joinpath(str(experiment)).joinpath(baseline_name)
+    path = simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
-    simulation = make_openml_classifier_simulation(configuration, baseline_name, experiment, task_id, seed, population_size, path)
+    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
     run_simulation(simulation, steps, epochs)
     autem.ReportManager(path).update_combined_reports()
 
-def run_benchmark_simulations(configurations):
+def run_benchmark_simulations():
     baseline_names = baselines.get_baseline_names("Select")
     for baseline_name in baseline_names:
-        for configuration in configurations:
-            run_benchmark_simulation(configuration, baseline_name, configuration)
+        run_benchmark_simulation(baseline_name)
 
 def combine_reports(experiment, baseline):
     experiment_path = simulations_path().joinpath(experiment).joinpath(baseline)
@@ -226,5 +214,6 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations(["Light"])
+    # run_test_simulation()
+    run_benchmark_simulations()
     #run_test_simulation()
