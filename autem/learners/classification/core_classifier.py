@@ -90,7 +90,7 @@ def convert_parameters(learner_dict, override_parameters = None):
         return override_parameters
 
     def _parameter(key, values):
-        return ChoicesParameter(key, key, values, None)
+        return ChoicesParameter(key, key, values)
 
     parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
     return parameters

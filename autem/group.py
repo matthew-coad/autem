@@ -9,12 +9,19 @@ class Group(HyperParameter):
     """
     Defines a group of hyper parameters
     """
-    def __init__(self, name, parameters, preference = 0):
-        HyperParameter.__init__(self, name)
+    def __init__(self, group_name, parameters):
+        HyperParameter.__init__(self, group_name)
         self.parameters = parameters
-        self.preference = preference
         for parameter in parameters:
-            parameter.group_name = self.name
+            parameter.set_group_name(group_name)
+
+    def set_group_name(self, group_name):
+        raise RuntimeError("Cannot change name of a group")
+
+    def set_choice_name(self, choice_name):
+        self.choice_name = choice_name
+        for parameter in self.parameters:
+            parameter.set_choice_name(choice_name)
 
     def get_parameter(self, name):
         params = [p for p in self.parameters if p.name == name ]

@@ -4,10 +4,12 @@ from .component import Component
 
 class Parameter(Component):
 
-    def __init__(self, name, label):
+    def __init__(self, name, label, shared = False):
         self.name = name
         self.label = label
         self.group_name = None
+        self.choice_name = None
+        self.shared = shared
 
     def is_hyper_parameter(self):
         """
@@ -20,6 +22,12 @@ class Parameter(Component):
         Is this component responsible for controlling the simulation
         """
         return False
+
+    def set_group_name(self, group_name):
+        self.group_name = group_name
+
+    def set_choice_name(self, choice_name):
+        self.choice_name = choice_name
 
     def get_initial_value(self, member):
         raise NotImplementedError()
@@ -44,12 +52,20 @@ class Parameter(Component):
         return setattr(self.get_configuration(member), self.name, value)
 
     def get_record_name(self):
-        if not self.group_name:
-            raise RuntimeError("Group not selected")
-        return "%s_%s" % (self.group_name, self.name)
+        if not self.shared:
+            if not self.group_name:
+                raise RuntimeError("Group not selected")
+            record_name = "%s_%s" % (self.group_name, self.name)
+        else:
+            if not self.choice_name:
+                raise RuntimeError("Choice not selected")
+            record_name = "%s_%s" % (self.choice_name, self.name)
+        return record_name
 
     def outline_simulation(self, simulation, outline):
-        outline.append_attribute(self.get_record_name(), Dataset.Battle, [ Role.Parameter ], self.label)
+        record_name = self.get_record_name()
+        if not outline.has_attribute(record_name, Dataset.Battle):
+            outline.append_attribute(self.get_record_name(), Dataset.Battle, [ Role.Parameter ], self.label)
 
     def record_member(self, member, record):
         if self.has_configuration(member):

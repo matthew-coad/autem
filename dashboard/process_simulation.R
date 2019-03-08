@@ -113,17 +113,20 @@ read_battle <- function(path) {
 }
 
 build_step_detail <- function(battle_df) {
-  step_df <-
+  step_df7 <-
     battle_df %>%
+    filter(as.integer(as.character(version)) <= 7) %>%
     mutate(
       study = paste0("S", version),
-      configuration = paste0(experiment),
       experiment = paste0(dataset)
-    ) %>%
+    )
+  step_df8 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) >= 8)
+  step_df <- bind_rows(step_df7, step_df8) %>%
     select(
       study,
       experiment,
-      configuration, 
       dataset,
       epoch,
       step,
@@ -144,14 +147,20 @@ build_step_detail <- function(battle_df) {
 }
 
 build_ranking_detail <- function(battle_df) {
-  ranking_df <-
+  step_df7 <-
     battle_df %>%
-    filter(!is.na(ranking)) %>%
+    filter(as.integer(as.character(version)) <= 7) %>%
     mutate(
       study = paste0("S", version),
-      configuration = paste0(experiment),
       experiment = paste0(dataset)
-    ) %>%    
+    )
+  step_df8 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) >= 8)
+  
+  ranking_df <-
+    bind_rows(step_df7, step_df8) %>%
+    filter(!is.na(ranking)) %>%
     select(
        study,
        experiment,
@@ -240,7 +249,6 @@ build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline
     group_by(study, experiment) %>%
     summarise(
       dataset = first(dataset),
-      configuration = first(configuration),
       status = "Complete",
       epochs = max(epoch),
       steps = max(step),
@@ -270,7 +278,6 @@ build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline
       study,
       experiment,
       dataset,
-      configuration, 
       status,
       duration, 
       epochs, 

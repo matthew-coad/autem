@@ -29,16 +29,6 @@ def run_preprocessing():
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 
-            # Imputers
-            autem.Choice("imputer", [
-                preprocessors.SimpleImputer(),
-            ], preprocessors.NoImputer()),
-
-            # Engineers
-            autem.Choice("engineer", [
-                preprocessors.PolynomialFeatures(),
-            ], preprocessors.NoEngineering()),
-
             # Scalers
             autem.Choice("scaler", [
                 preprocessors.MaxAbsScaler(),
@@ -46,7 +36,7 @@ def run_preprocessing():
                 preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
-            ], preprocessors.NoScaler()),
+            ]),
 
             autem.Choice("learner", [
                 learners.LogisticRegression(), 

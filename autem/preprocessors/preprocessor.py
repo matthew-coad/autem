@@ -1,22 +1,6 @@
-from .. import Group, Dataset, Role, ChoicesParameter
-
-import sklearn.impute
-import sklearn.preprocessing
-import sklearn.decomposition
-import sklearn.compose
-import sklearn.cluster
-import sklearn.kernel_approximation
-import sklearn.feature_selection
-import sklearn.pipeline
+from .. import Group, Dataset, Role, ChoicesParameter, make_choice, make_choice_list
 
 import numpy as np
-
-def _convert_config(config_dict):
-    def _parameter(key, values):
-        return ChoicesParameter(key, key, values, None)
-
-    parameters = [ _parameter(k, config_dict[k]) for k in config_dict]
-    return parameters
 
 class Preprocesssor(Group):
 
@@ -35,6 +19,28 @@ class Preprocesssor(Group):
             params = dict(p for p in pairs if not p[1] is None)
             pre_processor.set_params(**params)
 
+    def read_preprocessor(self, member, pre_processor):
+        """
+        Read the configuration back from the preprocessor
+        returns a dict of parameter name value pairs
+        """
+        params = pre_processor.get_params()
+        result = {}
+        parameter_names = [ p.name for p in self.parameters ]
+        for key in parameter_names:
+            value = params[key]
+            result[key] = value
+        return result
+
+    def update_parameters(self, member, pre_processor):
+        """
+        Update the parameters so they match the configured values
+        """
+        values = self.read_preprocessor(member, pre_processor)
+        for key in values:
+            parameter = self.get_parameter(key)
+            parameter.set_value(member, values[key])
+
     def prepare_member(self, member):
         super().prepare_member(member)
 
@@ -46,390 +52,9 @@ class Preprocesssor(Group):
             return None
 
         self.configure_preprocessor(member, preprocessor)
+        self.update_parameters(member, preprocessor)
         if not hasattr(resources, "steps"):
             resources.steps = []
             
         steps = resources.steps
         steps.append((processor_name, preprocessor))
-
-# Imputers
-
-class Imputer(Preprocesssor):
-
-    def __init__(self, name, label, parameters):
-        Preprocesssor.__init__(self, name, label, parameters)
-
-class NoImputer(Imputer):
-
-    def __init__(self):
-        Imputer.__init__(self, "INO", "No Imputer", [])
-
-    def make_preprocessor(self, member):
-        return None
-
-class ConditionalImputer(Imputer):
-
-    def __init__(self, parameters = None):
-        if parameters is None:
-            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
-            parameters = [config_parameter]
-        Imputer.__init__(self, "ICN", "Conditional Imputer", parameters)
-
-    def make_preprocessor(self, member):
-        simulation = member.simulation
-        loader = simulation.resources.loader
-        features = loader.get_features(simulation)
-
-        numeric_features = features['numeric']
-        nominal_features = features['nominal']
-
-        strategy = self.get_parameter("strategy").get_value(member)
-
-        # We create the preprocessing pipelines for both numeric and categorical data.
-        numeric_imputer = sklearn.impute.SimpleImputer(strategy=strategy)
-        categorical_imputer = sklearn.impute.SimpleImputer(strategy="most_frequent")
-
-        imputer = sklearn.compose.ColumnTransformer(
-            transformers=[
-                ('num', numeric_imputer, numeric_features),
-                ('cat', categorical_imputer, nominal_features)])    
-        return imputer
-
-    def configure_preprocessor(self, member, pre_processor):
-        pass
-
-class SimpleImputer(Imputer):
-
-    def __init__(self, parameters = None):
-        if parameters is None:
-            config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
-            parameters = [config_parameter]
-        Imputer.__init__(self, "SMP", "Simple Imputer", parameters)
-
-    def make_preprocessor(self, member):
-        return sklearn.impute.SimpleImputer()
-
-class MissingIndicatorImputer(Imputer):
-
-    def __init__(self):
-        # config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median', 'most_frequent'], 'median')
-        config_parameter = ChoicesParameter('strategy', 'strategy', ['mean', 'median'], 'median')
-        Imputer.__init__(self, "MII", "Missing Indicator Imputer", [config_parameter])
-
-    def make_preprocessor(self, member):
-        return sklearn.impute.SimpleImputer()
-
-    def make_preprocessor(self, member):
-        strategy_param = [p for p in self.parameters if p.name == "strategy" ][0]
-        strategy = strategy_param.get_value(member)
-
-        transformer = sklearn.pipeline.FeatureUnion(
-            transformer_list=[
-                ('features', sklearn.impute.SimpleImputer(strategy=strategy)),
-                ('indicators', sklearn.impute.MissingIndicator())])
-        return transformer
-
-    def configure_preprocessor(self, member, pre_processor):
-        pass
-
-
-# Encoders
-
-class Encoder(Preprocesssor):
-
-    def __init__(self, name, label, parameters):
-        Preprocesssor.__init__(self, name, label, parameters)
-
-class ConditionalOnehotEncoder(Encoder):
-
-    def __init__(self):
-        Encoder.__init__(self, "EOH", "Conditional Onehot Encoder", {})
-
-    def make_preprocessor(self, member):
-        simulation = member.simulation
-        loader = simulation.resources.loader
-        features = loader.get_features(simulation)
-
-        nominal_features = features['nominal']
-
-        # We create the preprocessing pipelines for both numeric and categorical data.
-        nominal_encoder = sklearn.preprocessing.OneHotEncoder(categories='auto', sparse=True)
-        encoder = sklearn.compose.ColumnTransformer(
-            transformers=[
-                ('onehot', nominal_encoder, nominal_features)]
-        )
-        return encoder
-
-    def configure_preprocessor(self, member, pre_processor):
-        pass
-
-# Engineers
-
-class Engineer(Preprocesssor):
-
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, label, _convert_config(config))
-
-class NoEngineering(Engineer):
-
-    def __init__(self):
-        Engineer.__init__(self, "ENO", "No Engineering", {})
-
-    def make_preprocessor(self, member):
-        return None
-
-class PolynomialFeatures(Engineer):
-
-    config = {}
-
-    def __init__(self):
-        Engineer.__init__(self, "PLY", "Polynomial Features", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.PolynomialFeatures(degree=2, include_bias = False, interaction_only = False)
-
-# Scalers
-
-class Scaler(Preprocesssor):
-
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, label, _convert_config(config))
-
-class NoScaler(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "SNO", "No Scaling", {})
-
-    def make_preprocessor(self, member):
-        return None
-
-class MaxAbsScaler(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "MAS", "Max Absolute Scaler", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.MaxAbsScaler()
-
-class MinMaxScaler(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "MMS", "Min Max Scaler", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.MinMaxScaler()
-
-class Normalizer(Scaler):
-
-    config = {
-        'norm': ['l1', 'l2', 'max']
-    }
-
-    def __init__(self, config = None):
-        if config is None:
-            config = self.config
-        Scaler.__init__(self, "NOR", "Normalizer", config)
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.Normalizer()
-
-class RobustScaler(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "RBS", "Robust Scaler", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.RobustScaler()
-
-class StandardScaler(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "SCL", "Standard Scaler", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.StandardScaler(with_mean=False)
-
-class Binarizer(Scaler):
-
-    config = {
-        'threshold': np.arange(0.0, 1.01, 0.05)
-    }
-
-    def __init__(self):
-        Scaler.__init__(self, "BIN", "Binarizer", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.Binarizer()
-        
-class PowerTransformer(Scaler):
-
-    config = {
-        'method': ['yeo-johnson', 'box-cox'],
-        'standardize': [True, False]
-    }
-
-    def __init__(self):
-        Scaler.__init__(self, "PWR", "Power Transform", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.PowerTransformer()
-
-class BoxCoxTransform(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "BXC", "Box-Cox Transform", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.PowerTransformer(method = "box-cox", standardize=True)
-
-class YeoJohnsonTransform(Scaler):
-
-    def __init__(self):
-        Scaler.__init__(self, "YJH", "Yeo-Johnson Transform", {})
-
-    def make_preprocessor(self, member):
-        return sklearn.preprocessing.PowerTransformer(method = "yeo-johnson", standardize=True)
-
-# Feature Selectors
-
-class Selector(Preprocesssor):
-
-    def __init__(self, name, label, parameters):
-        Preprocesssor.__init__(self, name, label, parameters)
-
-class NoSelector(Selector):
-
-    def __init__(self):
-        Selector.__init__(self, "LNO", "No Selector", {})
-
-    def make_preprocessor(self, member):
-        return None
-
-class SelectPercentile(Selector):
-
-    def __init__(self):
-        scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'], 'f_classif')
-        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100], 10)
-        Selector.__init__(self, "LPC", "Select Percentile", [scorer_parameter, percentile_parameter])
-
-    def make_preprocessor(self, member):
-        scorer_param = [p for p in self.parameters if p.name == "scorer" ][0]
-        percentile_param = [p for p in self.parameters if p.name == "percentile" ][0]
-        scorer = scorer_param.get_value(member)
-        percentile = percentile_param.get_value(member)
-        score_func = None
-        if scorer == "f_classif":
-            score_func = sklearn.feature_selection.f_classif
-        elif scorer == "mutual_info_classif":
-            score_func = sklearn.feature_selection.mutual_info_classif
-        elif scorer == "chi2":
-            score_func = sklearn.feature_selection.chi2
-        selector = sklearn.feature_selection.SelectPercentile(score_func=score_func, percentile=percentile)
-        return selector
-
-    def configure_preprocessor(self, member, pre_processor):
-        pass
-
-class VarianceThreshold(Selector):
-
-    def __init__(self):
-        threshold_parameter = ChoicesParameter("threshold", "threshold", [0.0, 0.05, 0.1, 0.15, 0.2], None)
-        Selector.__init__(self, "LVT", "Variance Threshold", [threshold_parameter])
-
-    def make_preprocessor(self, member):
-        return sklearn.feature_selection.VarianceThreshold()
-
-# Feature Reducers
-
-class Reducer(Preprocesssor):
-
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, label, _convert_config(config))
-
-class NoReducer(Reducer):
-
-    def __init__(self):
-        Reducer.__init__(self, "RNO", "No Reducer", {})
-
-    def make_preprocessor(self, member):
-        return None
-
-class FastICA(Reducer):
-
-    config = {
-        'tol': np.arange(0.0, 1.01, 0.05)
-    }
-
-    def __init__(self):
-        Reducer.__init__(self, "FIC", "Fast ICA", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.decomposition.FastICA()
-
-class FeatureAgglomeration(Reducer):
-
-    config = {
-        'linkage': ['ward', 'complete', 'average'],
-        'affinity': ['euclidean', 'l1', 'l2', 'manhattan', 'cosine']
-    }
-
-    def __init__(self):
-        Reducer.__init__(self, "FAG", "Feature Agglomeration", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.cluster.FeatureAgglomeration()
-
-class PCA(Reducer):
-
-    config = {
-        'iterated_power': range(1, 11)
-    }
-
-    def __init__(self):
-        Reducer.__init__(self, "PCA", "PCA", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.decomposition.PCA(svd_solver = 'randomized')
-
-
-# Approximations
-
-class Approximator(Preprocesssor):
-
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, label, _convert_config(config))
-
-class NoApproximator(Approximator):
-
-    def __init__(self):
-        Approximator.__init__(self, "ANO", "No Approximator", {})
-
-    def make_preprocessor(self, member):
-        return None
-
-class RBFSampler(Approximator):
-
-    config = {
-        'gamma': np.arange(0.0, 1.01, 0.05)
-    }
-
-    def __init__(self):
-        Approximator.__init__(self, "RBF", "RBF Sampler", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.kernel_approximation.RBFSampler()
-
-class Nystroem(Approximator):
-
-    config = {
-        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
-        'gamma': np.arange(0.0, 1.01, 0.05),
-        'n_components': range(1, 11)
-    }
-
-    def __init__(self):
-        Approximator.__init__(self, "NYS", "Nystroem", self.config)
-
-    def make_preprocessor(self, member):
-        return sklearn.kernel_approximation.Nystroem()
-

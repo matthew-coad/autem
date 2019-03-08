@@ -9,13 +9,18 @@ class Choice(HyperParameter):
     Defines a set of components where only one component can be active for a member
     Groups can only act as hyper parameters
     """
-    def __init__(self, group_name = None, components = [], no_choice = None):
-        HyperParameter.__init__(self, group_name)
-        self.group_name = group_name
-        self.no_choice = no_choice
-        if no_choice:
-            components.append(no_choice)
+    def __init__(self, choice_name = None, components = []):
+        HyperParameter.__init__(self, choice_name)
         self.components = components
+        for component in components:
+            if component.is_hyper_parameter():
+                component.set_choice_name(choice_name)
+
+    def set_group_name(group_name):
+        raise RuntimeError("Cannot change group name of a choice")
+
+    def set_choice_name(choice_name):
+        raise RuntimeError("Cannot change choice name of a choice")
 
     # Outline
 
@@ -23,7 +28,7 @@ class Choice(HyperParameter):
         """
         Outline what information is going to be supplied by a simulation
         """
-        outline.append_attribute(self.group_name, Dataset.Battle, [ Role.Parameter ], self.group_name)
+        outline.append_attribute(self.name, Dataset.Battle, [ Role.Parameter ], self.name)
         for component in self.components:
             component.outline_simulation(simulation, outline)
 
@@ -31,9 +36,9 @@ class Choice(HyperParameter):
         """
         Record the state of a member
         """
-        setattr(record, self.group_name, self.get_active_component_name(member))
-        for component in self.components:
-            component.record_member(member, record)
+        setattr(record, self.name, self.get_active_component_name(member))
+        component = self.get_active_component(member)
+        component.record_member(member, record)
 
     # Active component
 
@@ -48,14 +53,14 @@ class Choice(HyperParameter):
         """
         Get the name of the component that is active for the member
         """
-        active_name = getattr(member.configuration, self.group_name)
+        active_name = getattr(member.configuration, self.name)
         return active_name
 
     def set_active_component_name(self, member, component_name):
         """
         Set the name of the component that is active for the member
         """
-        setattr(member.configuration, self.group_name, component_name)
+        setattr(member.configuration, self.name, component_name)
 
     def get_active_component(self, member):
         component_name = self.get_active_component_name(member)

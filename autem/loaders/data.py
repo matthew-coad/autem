@@ -50,3 +50,7 @@ class Data(Loader):
 
     def load_validation_data(self, simulation):
         return (simulation.resources.x_validation, simulation.resources.y_validation)
+
+    def get_features(self, simulation):
+        return simulation.resources.features
+

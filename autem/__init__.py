@@ -18,4 +18,4 @@ from .hyper_parameter import HyperParameter
 from .choice import Choice
 from .group import Group
 from .parameter import Parameter
-from .choices_parameter import ChoicesParameter
+from .choices_parameter import ChoicesParameter, make_choice, make_choice_list

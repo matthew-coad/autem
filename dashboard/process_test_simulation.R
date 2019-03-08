@@ -1,7 +1,7 @@
 source("process_simulation.R")
 
 simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_6"
-simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\Run_7"
+simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\encoding"
 baseline_path <- "D:\\Documents\\autem\\benchmark\\baselines"
 
 # Load data

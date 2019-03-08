@@ -19,11 +19,36 @@ class Learner(Group):
     def make_model(self):
         raise NotImplementedError()
 
+    def read_paramsepreprocessor(self, member, pre_processor):
+        """
+        Read the configuration back from the preprocessor
+        returns a dict of parameter name value pairs
+        """
+        params = pre_processor.get_params()
+        result = {}
+        parameter_names = [ p.name for p in self.parameters ]
+        for key in params.keys():
+            value = params[key]
+            if key in parameter_names and not value is None:
+                result[key] = value
+        return result
+
+    def update_parameters(self, member, pre_processor):
+        """
+        Update the parameters so they match the configured values
+        """
+        values = self.read_preprocessor(member, member, pre_processor)
+        for key in values:
+            parameter = self.get_parameter(key)
+            parameter.set_value(member, values[key])
+
+
     def prepare_member(self, member):
         simulation = member.simulation
         resources = member.resources
         learner_name = self.name
 
+        # Initialize the model parameters
         model = self.make_model()
         model_params = model.get_params().keys()
         learner_name = self.name
@@ -35,10 +60,17 @@ class Learner(Group):
             params['n_jobs'] = -1
         model.set_params(**params)
 
+        # Read the final model parameters 
+        final_params = model.get_params()
+        for parameter in self.parameters:
+            if parameter.name in final_params:
+                value = final_params[parameter.name]
+                parameter.set_value(member, value)
+
+        # Build the pipeline
         if not hasattr(resources, "steps"):
             resources.steps = []
         steps = resources.steps
         steps.append((learner_name, model))
         pipeline = Pipeline(steps=steps)
         resources.pipeline = pipeline
-

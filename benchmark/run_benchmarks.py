@@ -22,7 +22,7 @@ def simulations_path():
     return Path("benchmark/simulations")
 
 study = "encoding"
-version = 7
+version = 8
 
 def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -102,39 +102,39 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
 
             reporters.Path(path),
 
-            # Pre processing
-            preprocessors.ConditionalPreprocessor(),
-
             # Scalers
-            #autem.Choice("Scaler", [
-                #preprocessors.MaxAbsScaler(),
-                #preprocessors.MinMaxScaler(),
-                #preprocessors.Normalizer(),
-                #preprocessors.RobustScaler(),
-                #preprocessors.StandardScaler(),
-                #preprocessors.Binarizer(),
-                #preprocessors.BoxCoxTransform(),
-                #preprocessors.YeoJohnsonTransform()
-            #], preprocessors.NoScaler()),
+            autem.Choice("Scaler", [
+                preprocessors.MaxAbsScaler(),
+                preprocessors.MinMaxScaler(),
+                preprocessors.Normalizer(),
+                preprocessors.RobustScaler(),
+                preprocessors.StandardScaler(),
+                preprocessors.Binarizer(),
+                preprocessors.BoxCoxTransform(),
+                preprocessors.YeoJohnsonTransform()
+            ]),
 
             # Feature Selectors
             autem.Choice("Selector", [
+                preprocessors.NoSelector(),
                 preprocessors.SelectPercentile(),
                 preprocessors.VarianceThreshold()
-            ], preprocessors.NoSelector()),
+            ]),
 
             # Feature Reducers
             autem.Choice("Reducer", [
+                preprocessors.NoReducer(),
                 preprocessors.FastICA(),
                 preprocessors.FeatureAgglomeration(),
                 preprocessors.PCA(),
-            ], preprocessors.NoReducer()),
+            ]),
 
             # Approximators
             autem.Choice("Approximator", [
+                preprocessors.NoApproximator(),
                 preprocessors.RBFSampler(),
                 preprocessors.Nystroem(),
-            ], preprocessors.NoApproximator()),
+            ]),
 
             autem.Choice("Learner", [
                 learners.GaussianNB(),
@@ -143,7 +143,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
-                learners.RadialBasisSVC(),
+                # learners.RadialBasisSVC(),
                 # learners.PolySVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
@@ -170,13 +170,13 @@ def run_simulation(simulation, steps, epochs):
 
 def run_test_simulation():
     study = "encoding"
-    experiment = "profb"
-    baseline_name = "profb"
+    experiment = "diabetes"
+    baseline_name = "diabetes"
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 60
+    epochs = 2
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 
@@ -216,4 +216,3 @@ def combine_experiment_reports(experiment):
 if __name__ == '__main__':
     # run_test_simulation()
     run_benchmark_simulations()
-    #run_test_simulation()

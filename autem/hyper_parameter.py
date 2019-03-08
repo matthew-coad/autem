@@ -17,6 +17,12 @@ class HyperParameter(Component):
         """
         return False
 
+    def set_group_name(self, choice_name):
+        raise NotImplementedError()
+
+    def set_choice_name(self, choice_name):
+        raise NotImplementedError()
+
     def initialize_member(self, member):
         """
         Initialize a member
