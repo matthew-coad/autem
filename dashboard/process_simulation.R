@@ -1,5 +1,15 @@
 library(tidyverse)
 
+
+configuration_data_filename <- function(benchmark_path)
+  file.path(benchmark_path, "Configuration.xlsx")
+
+read_configuration_file <- function(benchmark_path) {
+  file_name <- configuration_data_filename(benchmark_path)
+  df <- readxl::read_excel(file_name)
+  df
+}
+
 list_battle_files <- function(path)
   list.files(path, "Battle.csv", recursive = TRUE, full.names = TRUE)
 
@@ -189,11 +199,11 @@ build_epoch_details <- function(step_detail_df) {
   epoch_summary_df
 }
 
-baseline_data_filename <- function(baseline_path, baseline_name)
-  file.path(baseline_path, baseline_name, "baseline.csv")
+baseline_data_filename <- function(benchmark_path, baseline_name)
+  file.path(benchmark_path, "baselines", baseline_name, "baseline.csv")
 
-read_baseline_file <- function(baseline_path, baseline_name) {
-  filename = baseline_data_filename(baseline_path, baseline_name)
+read_baseline_file <- function(benchmark_path, baseline_name) {
+  filename = baseline_data_filename(benchmark_path, baseline_name)
   col_types <- cols(
     `Run ID` = col_integer(),
     Flow = col_character(),
@@ -204,10 +214,10 @@ read_baseline_file <- function(baseline_path, baseline_name) {
   df
 }
 
-read_baselines <- function(baseline_path, datasets) {
+read_baselines <- function(benchmark_path, datasets) {
   
   read_dataset_baselines <- function(dataset) {
-    baseline_df <- read_baseline_file(baseline_path, dataset)
+    baseline_df <- read_baseline_file(benchmark_path, dataset)
     baseline_df$dataset <- dataset
     baseline_df
   }
@@ -236,14 +246,14 @@ build_baseline_summary <- function(baseline_details) {
   baseline_summary_df <- baseline_details %>%
     group_by(dataset) %>%
     summarise(
-      bottom_score = min(baseline_score),
-      top_score = max(baseline_score)
+      bottom_score = min(baseline_score, na.rm = TRUE),
+      top_score = max(baseline_score, na.rm = TRUE)
     )
   
   baseline_summary_df  
 }
 
-build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline_summary_df) {
+build_simulation_summary <- function(configuration_df, step_detail_df, ranking_detail_df, baseline_summary_df) {
   
   simulation_summary_df <- 
     step_detail_df %>%
@@ -265,6 +275,10 @@ build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline
     simulation_summary_df %>%
     right_join(baseline_summary_df, by = c("dataset"))
   
+  simulation_summary_df <-
+    simulation_summary_df %>%
+    right_join(configuration_df, by = c("dataset" = "Name"))
+
   simulation_summary_df <- 
     simulation_summary_df %>% 
     mutate(
@@ -280,6 +294,11 @@ build_simulation_summary <- function(step_detail_df, ranking_detail_df, baseline
       experiment,
       dataset,
       status,
+      classes = NumberOfClasses,
+      features = NumberOfFeatures,
+      instances = NumberOfInstances,
+      incomplete_instances = NumberOfInstancesWithMissingValues,
+      missing_values = NumberOfMissingValues,
       duration, 
       epochs, 
       steps, 

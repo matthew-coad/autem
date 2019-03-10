@@ -56,6 +56,49 @@ renderUI({
 
 ```
 
+Summary {data-orientation=columns}
+=====================================  
+
+Overview
+-----------------------------------------------------------------------
+
+### Summary
+
+```{r}
+
+renderUI({
+  req(simulation_summary_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  ui = shiny::tagList()
+  for (row in 1:nrow(simulation_summary_df)) {
+    get <- function(col) simulation_summary_df[row, col]
+    append_field <- function(ui, label, value)  tagAppendChildren(ui, tags$label(paste(label, ":")), tags$span(value), tags$br())
+    ui <- tagAppendChild(ui, h4(paste(get("study"), "study")))
+    ui <- tagAppendChild(ui, hr())
+    ui <- append_field(ui, "Experiment", get("experiment"))
+    ui <- append_field(ui, "Dataset", get("dataset"))
+    ui <- append_field(ui, "Classes", paste0(get("classes")))
+    ui <- append_field(ui, "Features", paste0(get("features")))
+    ui <- append_field(ui, "Instances", paste0(get("instances")))
+    ui <- append_field(ui, "Status", get("status"))
+    ui <- append_field(ui, "Duration", paste0(get("duration"), " secs"))
+    ui <- append_field(ui, "Epochs", get("epochs"))
+    ui <- append_field(ui, "Steps", get("steps"))
+    ui <- append_field(ui, "Score", get("score"))
+
+  }
+  ui
+})
+
+```
+
+
+
+"study"                 "experiment"            "dataset"               "status"                "classes"               "features"              "instances"            
+ [8] "incomplete_instances"  "missing_values"        "duration"              "epochs"                "steps"                 "score"                 "score_sd"             
+[15] "dummy_score"           "validation_score"      "baseline_bottom_score" "baseline_top_score"    "progress_bottom_score" "progress_top_score"    "progress"             
+[22] "progress_sd"
 
 Baselines {data-orientation=columns}
 =====================================  
@@ -69,16 +112,16 @@ Overview
 
 renderPlot({
   req(simulation_summary_rdf(), cancelOutput = TRUE)
-  
+
   df <- simulation_summary_rdf()
   min_y <- 0
-  max_y <- max(df$progress + df$progress_sd)
+  max_y <- max(df$progress + df$progress_sd, na.rm = TRUE)
   max_y <- if (max_y < 1) 1 else max_y
 
   df %>%
     mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
     ggplot(aes(x = experiment, color = study)) +
-    geom_point(aes(y = progress)) +
+    geom_point(aes(y = progress), na.rm = TRUE) +
     ylim(min_y, max_y) +
     ylab("Progress") +
     coord_flip()
@@ -94,16 +137,16 @@ Drilldown
 
 ```{r}
 
-renderPlot({
+renderPrint({
   req(simulation_summary_rdf(), cancelOutput = TRUE)
   
   df <- simulation_summary_rdf()
   min_x <- 0
-  max_x <- max(df$progress + df$progress_sd)
+  max_x <- max(df$progress + df$progress_sd, na.rm = TRUE)
   max_x <- if (max_x < 1) 1 else max_x
   df %>%
   ggplot(aes(x = progress, color = study)) +
-    geom_density() +
+    geom_density(na.rm = TRUE) +
     xlim(min_x, max_x) +
     xlab("Progress") +
     ylab("Density")
