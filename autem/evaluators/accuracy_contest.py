@@ -94,14 +94,10 @@ class AccuracyContest(Evaluater):
             return None
 
         t_statistic = test_result[0] # positive if 1 > 2
-        maturity = test_result[1]
-        mature = 1 if maturity <= required_p_value else 0
-
-        contestant1.maturing(maturity, mature)
-        contestant2.maturing(maturity, mature)
+        p_value = test_result[1]
 
         # Need at least the required p-value to have an outcome
-        if maturity > required_p_value:
+        if p_value > required_p_value:
             contestant1.evaluation.accuracy_contest = "Inconclusive"
             contestant2.evaluation.accuracy_contest = "Inconclusive"
             outcome.inconclusive()

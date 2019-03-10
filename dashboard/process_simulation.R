@@ -30,7 +30,6 @@ read_battle_file <- function(file_name) {
     rating = col_double(),
     rating_sd = col_double(),
     ranking = col_double(),
-    mature = col_integer(),
     famous = col_integer(),
     contests = col_integer(),
     evaluations = col_integer(),
@@ -109,7 +108,6 @@ read_battle_file <- function(file_name) {
 clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$version <- factor(df$version)
-  df$mature <- factor(df$mature)
   df$famous <- factor(df$famous)
   df$alive <- factor(df$alive)
   df$final <- factor(df$final)
@@ -145,7 +143,6 @@ build_step_detail <- function(battle_df) {
       event,
       event_time,
       fault,
-      mature,
       star = famous,
       alive,
       final,
@@ -317,7 +314,7 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
 }
 
 build_breakdown <- function() {
-  tibble::tibble(breakdown = c("event", "mature", "star",  "Learner", "Scaler", "Selector", "Reducer", "Approximator"))
+  tibble::tibble(breakdown = c("event", "star",  "Learner", "Scaler", "Selector", "Reducer", "Approximator"))
 }
 
 

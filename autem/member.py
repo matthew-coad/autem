@@ -33,8 +33,6 @@ class Member:
 
         self.evaluation = SimpleNamespace()
 
-        self.maturity = None
-        self.mature = 0
         self.contests = 0
         self.evaluations = 0
         self.standoffs = 0
@@ -108,14 +106,6 @@ class Member:
         self.event = "defeat"
         self.event_time = time.time()
         self.wonlost.append(0)
-
-    def maturing(self, maturity, mature):
-        """
-        Notify member that it is maturing
-        """
-        if self.mature == 0:
-            self.mature = mature
-        self.maturity = maturity
 
     def nominated(self, famousness, famous):
         """

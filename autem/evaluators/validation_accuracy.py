@@ -15,7 +15,7 @@ class ValidationAccuracy(Evaluater):
     def rate_member(self, member):
         """
         Evaluate the rating for a member.
-        Only mature, famous members get a rating.
+        Only famous members get a rating.
         """
 
         simulation = member.simulation

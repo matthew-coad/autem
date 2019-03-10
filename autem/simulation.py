@@ -275,7 +275,7 @@ class Simulation:
         """
         Rank all members
         """
-        inductees = [m for m in self.members if m.alive and m.mature and m.famous ]
+        inductees = [m for m in self.members if m.alive and m.famous ]
         n_inductees = len(inductees)
         progress_prefix = "Rating %s" % self.name
         print("")
@@ -469,7 +469,6 @@ class Simulation:
         outline.append_attribute("event", Dataset.Battle, [Role.Property])
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
-        outline.append_attribute("mature", Dataset.Battle, [Role.Property])
         outline.append_attribute("famous", Dataset.Battle, [Role.Property])
         outline.append_attribute("alive", Dataset.Battle, [Role.Property])
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
@@ -506,7 +505,6 @@ class Simulation:
         record.rating_sd = member.rating_sd
         record.ranking = member.ranking
 
-        record.mature = member.mature
         record.famous = member.famous
         record.alive = member.alive
         record.final = member.final
