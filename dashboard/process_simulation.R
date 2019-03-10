@@ -89,7 +89,8 @@ read_battle_file <- function(file_name) {
     Scaler_importance = col_double(),
     Reducer_importance = col_double(),
     Approximator_importance = col_double(),
-    Learner_importance = col_double()
+    Learner_importance = col_double(),
+    BIN_num__scaler__threshold = col_double()
   )
   df <- suppressWarnings(read_csv(file_name, col_types = col_types))
   df

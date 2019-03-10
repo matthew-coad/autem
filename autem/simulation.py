@@ -267,8 +267,6 @@ class Simulation:
             try:
                 with WarningInterceptor() as warnings:
                     component.rate_member(member)
-                if warnings:
-                    self.fail_member(member, warnings[0], "rate", component)
             except Exception as ex:
                 self.fail_member(member, ex, "rate", component)
                 break

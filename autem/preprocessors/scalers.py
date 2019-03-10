@@ -7,6 +7,7 @@ import sklearn.preprocessing as preprocessing
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer 
 
+import pandas as pd
 import numpy as np
 
 class Scaler(Preprocesssor):
@@ -24,8 +25,17 @@ class Scaler(Preprocesssor):
         loader = simulation.resources.loader
         features = loader.get_features(simulation)
 
-        numeric_features = features['numeric']
         categorical_features = features['nominal']
+        numeric_features = features['numeric']
+
+        x,y = loader.load_divided_data(simulation)
+
+        categories = []
+        for feature in categorical_features:
+            values = np.unique(x[:,feature])
+            values = values[~np.isnan(values)]
+            values = np.sort(values)
+            categories.append(values)
 
         # We create the preprocessing pipelines for both numeric and categorical data.
 
@@ -40,7 +50,7 @@ class Scaler(Preprocesssor):
 
         # categorical_features = [3, 4, 7, 8]
         categorical_imputer = impute.SimpleImputer(strategy="most_frequent")
-        categorical_encoder = preprocessing.OneHotEncoder(categories='auto', dtype = np.float64, handle_unknown = "error")
+        categorical_encoder = preprocessing.OneHotEncoder(categories=categories, dtype = np.float64, handle_unknown = "error")
         categorical_transformer = Pipeline(steps=[
             ('imp', categorical_imputer),
             ('enc', categorical_encoder)

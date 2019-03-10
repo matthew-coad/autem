@@ -170,13 +170,13 @@ def run_simulation(simulation, steps, epochs):
 
 def run_test_simulation():
     study = "encoding"
-    experiment = "diabetes"
-    baseline_name = "diabetes"
+    baseline_name = "profb"
+    experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 2
+    epochs = 3
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 
@@ -214,5 +214,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    # run_test_simulation()
+    #run_test_simulation()
     run_benchmark_simulations()
