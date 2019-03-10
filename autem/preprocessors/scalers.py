@@ -50,7 +50,7 @@ class Scaler(Preprocesssor):
 
         # categorical_features = [3, 4, 7, 8]
         categorical_imputer = impute.SimpleImputer(strategy="most_frequent")
-        categorical_encoder = preprocessing.OneHotEncoder(categories=categories, dtype = np.float64, handle_unknown = "error")
+        categorical_encoder = preprocessing.OneHotEncoder(categories=categories, dtype = np.float64, handle_unknown = "error", sparse=False)
         categorical_transformer = Pipeline(steps=[
             ('imp', categorical_imputer),
             ('enc', categorical_encoder)

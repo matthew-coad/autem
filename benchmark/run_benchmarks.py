@@ -148,8 +148,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
-                #learners.RandomForestClassifier(),
-                #learners.ExtraTreesClassifier(),
+                learners.RandomForestClassifier(),
+                learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,
