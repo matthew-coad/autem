@@ -47,8 +47,8 @@ class ContestSurvival(Evaluater):
 
         # Determine if the loser should be eliminated
         robustness_p = stats.binom_test(loser_victories, n=record_length, p=0.5, alternative='less')
-        fatality = robustness_p < self.p_value
-        if fatality:
+        eliminate = robustness_p < self.p_value
+        if eliminate:
             loser.eliminate()
             loser.evaluation.contest_survival = "%d|%d elimination" % (loser_victories, winner_victories)
         else:

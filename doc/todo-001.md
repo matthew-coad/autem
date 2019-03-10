@@ -73,7 +73,7 @@ Create benchmark test suite for classification problems **done**
 *Find why some benchmarks are failing.*
 
 Because some datasets cause problems/warnings for some algorithms. But in general if an algorithm has issues we don't
-care for it, so we now kill any member that has issues. Something else will pick it up.
+care for it, so we now elimiate any member that has issues. Something else will pick it up.
 
 *done*
 
@@ -91,7 +91,7 @@ Print progress reports
 
 Have a fit terminate on any warning. **done**
 
-Errors kill members immediately. **done**
+Errors elimate members immediately. **done**
 
 Have fit report errors **done**
 

@@ -182,21 +182,12 @@ class Simulation:
                 with WarningInterceptor() as warnings:
                     component.prepare_member(member)
                 if warnings:
-                    self.fail_member(member, warnings[0], "prepare", component)
+                    member.fail(warnings[0], "prepare", component_name)
             except Exception as ex:
-                self.fail_member(member, ex, "prepare", component)
+                member.fail(ex, "prepare", component_name)
                 break
-        member.started()
-
-    def fail_member(self, member, fault, operation, component):
-        member.faulted(fault, operation, component.__class__.__name__)
-        self.members.remove(member)
-        self.failures.append(member)
-
-    def kill_member(self, member):
-        member.killed()
-        self.members.remove(member)
-        self.graveyard.append(member)
+        if member.alive:
+            member.started()
 
     def evaluate_member(self, member):
         """
@@ -206,63 +197,79 @@ class Simulation:
             raise RuntimeError("Member not started")
 
         if not member.alive:
-            raise RuntimeError("Member is not alive")
+            raise RuntimeError("Member not alive")
 
         for component in self.controllers:
+            component_name = component.__class__.__name__
             try:
                 with WarningInterceptor() as warnings:
                     component.evaluate_member(member)
                 if warnings:
-                    self.fail_member(member, warnings[0], "evaluate", component)
+                    member.fail(warnings[0], "evaluate", component_name)
             except Exception as ex:
-                self.fail_member(member, ex, "evaluate", component)
+                member.fail(ex, "evaluate", component_name)
                 break
-        member.evaluated()
+        if member.alive:
+            member.evaluated()
 
     def contest_members(self, contestant1, contestant2):
-        outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
+
+        if not contestant1.alive and not contestant2.alive:
+            raise RuntimeError("Contestants not alive")
 
         if contestant1.form is contestant2.form:
-            raise RuntimeError("Two contestants have duplicate forms")
+            raise RuntimeError("Contestants have duplicate forms")
 
+        outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
         for component in self.controllers:
+            component_name = component.__class__.__name__
             try:
                 with WarningInterceptor() as warnings:
                     component.contest_members(contestant1, contestant2, outcome)
                 if warnings:
-                    self.fail_member(contestant1, warnings[0], "contest", component)
-                    self.fail_member(contestant2, warnings[0], "contest", component)
+                    contestant1.fail(warnings[0], "contest", component_name)
+                    contestant2.fail(warnings[0], "contest", component_name)
             except Exception as ex:
-                self.fail_member(contestant1, ex, "contest", component)
-                self.fail_member(contestant2, ex, "contest", component)
+                contestant1.fail(ex, "contest", component_name)
+                contestant2.fail(ex, "contest", component_name)
                 break
 
-        if outcome.is_inconclusive():
-            contestant1.stand_off()
-            contestant2.stand_off()
+        if contestant1.alive and contestant2.alive:
 
-        if outcome.is_zero_sum():
-            winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
-            winner.victory()
-            loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
-            loser.defeat()
+            if outcome.is_inconclusive():
+                contestant1.stand_off()
+                contestant2.stand_off()
 
+            if outcome.is_zero_sum():
+                winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
+                winner.victory()
+                loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
+                loser.defeat()
         return outcome
 
     def stress_members(self, contestant1, contestant2, outcome):
+
+        if not contestant1.alive or not contestant2.alive:
+            raise RuntimeError("Contestants not alive")
+
         for component in self.controllers:
             component.stress_members(contestant1, contestant2, outcome)
 
-        if contestant1.fatality == 1:
-            self.kill_member(contestant1)
-
-        if contestant2.fatality == 1:
-            self.kill_member(contestant2)
+    def bury_member(self, member):
+        """
+        Remove a member from the active pool and move them to the graveyard
+        """
+        self.members.remove(member)
+        self.graveyard.append(member)
 
     def rate_member(self, member):
         """
         Rate a member
         """
+
+        if not member.alive:
+            raise RuntimeError("Members is not alive")
+
         for component in self.controllers:
             try:
                 with WarningInterceptor() as warnings:
@@ -364,6 +371,12 @@ class Simulation:
 
         for member in self.members:
             self.reports.append(self.record_member(member))
+
+        members = self.members[:]
+        for member in members:
+            if not member.alive:
+                self.bury_member(member)
+
         self.running = True
 
     def step(self):
@@ -401,12 +414,16 @@ class Simulation:
                 raise RuntimeError("No contest component defined")
 
             # Determine the contestants fate!
-            if contest.is_conclusive():
+            if contestant1.alive and contestant2.alive and contest.is_conclusive():
                 self.stress_members(contestant1, contestant2, contest)
 
         # Repopulate!
-        newborn1 = self.repopulate(contestant1, contestant2)
-        newborn2 = self.repopulate(contestant1, contestant2)
+        newborn1 = None
+        newborn2 = None
+
+        if contestant1.alive and contestant2.alive:
+            newborn1 = self.repopulate(contestant1, contestant2)
+            newborn2 = self.repopulate(contestant1, contestant2)
 
         # Report on what happened
         self.n_steps += 1
@@ -416,6 +433,12 @@ class Simulation:
             self.reports.append(self.record_member(newborn1))
         if not newborn2 is None:
             self.reports.append(self.record_member(newborn2))
+
+        if not contestant1.alive:
+            self.bury_member(contestant1)
+
+        if not contestant2.alive:
+            self.bury_member(contestant2)
 
     def run(self, steps):
         """

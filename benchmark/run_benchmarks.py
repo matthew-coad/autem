@@ -175,7 +175,7 @@ def run_test_simulation():
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 50
+    epochs = 2
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 

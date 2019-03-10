@@ -97,6 +97,9 @@ class Member:
         self.wonlost.append(1)
 
     def defeat(self):
+        """
+        Record a defeat
+        """
         self._contested()
         self.contests += 1
         self.defeats += 1 
@@ -119,9 +122,24 @@ class Member:
 
     def eliminate(self):
         """
-        Elimintate the member from competition
+        Eliminate this member
         """
-        self.fatality = 1
+        self.event = "eliminate"
+        self.event_time = time.time()
+        self.alive = 0
+        self.final = 1
+
+    def fail(self, fault, operation, component):
+        """
+        Fault this member
+        """
+        self.event = "fail"
+        self.event_time = time.time()
+        self.fault = fault
+        self.fault_operation = operation
+        self.fault_component = component
+        self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
+        self.alive = 0
 
     def rated(self, rating, rating_sd):
         """
@@ -135,27 +153,6 @@ class Member:
         Set the members ranking in the hall of fame
         """
         self.ranking = ranking
-
-    def faulted(self, fault, operation, component):
-        """
-        Notify this member that is has a fault
-        """
-        self.event = "fault"
-        self.event_time = time.time()
-        self.fault = fault
-        self.fault_operation = operation
-        self.fault_component = component
-        self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
-        self.alive = 0
-
-    def killed(self):
-        """
-        Notify this member that is has been killed
-        """
-        self.event = "death"
-        self.event_time = time.time()
-        self.alive = 0
-        self.final = 1
 
     def finshed(self):
         """
