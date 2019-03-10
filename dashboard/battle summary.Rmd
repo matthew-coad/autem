@@ -27,7 +27,6 @@ coltype = cols(
   thrashings = col_double(),
   accuracy = col_double(),
   duration = col_double(),
-  robustness = col_double(),
   fatality = col_integer(),
   famousness = col_double(),
   famous = col_integer(),

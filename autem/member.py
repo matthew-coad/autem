@@ -40,10 +40,8 @@ class Member:
         self.defeats = 0
         self.wonlost = []
 
-        self.robustness = None
         self.fatality = 0
-        self.famousness = None
-        self.famous = 0
+        self.league = 0
 
         self.ratings = SimpleNamespace()
         self.rating = None
@@ -75,8 +73,7 @@ class Member:
         self.evaluations += 1
 
     def _contested(self):
-        self.famousness = None
-        self.robustness = None
+        pass
 
     def stand_off(self):
         """
@@ -107,24 +104,24 @@ class Member:
         self.event_time = time.time()
         self.wonlost.append(0)
 
-    def nominated(self, famousness, famous):
+    def promote(self):
         """
-        Notify member that its being checked out to determine its fame
+        Promote the member to the next league
         """
-        if self.famous == 0 and famous == 1:
-            self.event = "inducted"
-            self.event_time = time.time()
-        if self.famous == 0:
-            self.famous = famous
-        self.famousness = famousness
+        # When a member gets a promotion it wonlost record is erased
+        # From now on only contests at the higher league level will count
+        self.event = "promotion"
+        self.event_time = time.time()
+        self.league += 1
+        self.victories = 0
+        self.defeats = 0
+        self.wonlost = []
 
-    def stressed(self, robustness, fatality):
+    def eliminate(self):
         """
-        Notify member that its being stressed
+        Elimintate the member from competition
         """
-        if self.fatality == 0:
-            self.fatality = fatality
-        self.robustness = robustness
+        self.fatality = 1
 
     def rated(self, rating, rating_sd):
         """

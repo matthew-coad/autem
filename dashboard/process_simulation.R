@@ -108,7 +108,6 @@ read_battle_file <- function(file_name) {
 clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$version <- factor(df$version)
-  df$famous <- factor(df$famous)
   df$alive <- factor(df$alive)
   df$final <- factor(df$final)
   df$event_time <- lubridate::parse_date_time(df$time, orders = "amd HMS Y")
@@ -127,12 +126,18 @@ build_step_detail <- function(battle_df) {
     filter(as.integer(as.character(version)) <= 7) %>%
     mutate(
       study = paste0("S", version),
-      experiment = paste0(dataset)
-    )
+      experiment = paste0(dataset),
+      league = famous
+    ) 
   step_df8 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) >= 8)
-  step_df <- bind_rows(step_df7, step_df8) %>%
+    filter(as.integer(as.character(version)) == 8) %>%
+    mutate(league = famous)
+  step_df9 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) >= 9)
+  step_df <- bind_rows(step_df7, step_df8, step_df9) %>%
+    mutate(league = factor(league)) %>%
     select(
       study,
       experiment,
@@ -143,7 +148,7 @@ build_step_detail <- function(battle_df) {
       event,
       event_time,
       fault,
-      star = famous,
+      league,
       alive,
       final,
       evaluations,
@@ -314,7 +319,7 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
 }
 
 build_breakdown <- function() {
-  tibble::tibble(breakdown = c("event", "star",  "Learner", "Scaler", "Selector", "Reducer", "Approximator"))
+  tibble::tibble(breakdown = c("league",  "Learner", "Scaler", "Selector", "Reducer", "Approximator"))
 }
 
 

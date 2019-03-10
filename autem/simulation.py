@@ -275,7 +275,7 @@ class Simulation:
         """
         Rank all members
         """
-        inductees = [m for m in self.members if m.alive and m.famous ]
+        inductees = [m for m in self.members if m.alive and m.league ]
         n_inductees = len(inductees)
         progress_prefix = "Rating %s" % self.name
         print("")
@@ -308,12 +308,18 @@ class Simulation:
         contestant1_index = random_state.choice(len(candidates))
         contestant1 = candidates[contestant1_index]
 
-        minimum_fame = 1 if contestant1.famous == 0 else 0
+        maximum_league = max(c.league for c in candidates)
+        minimum_league = contestant1.league
         candidates2 = []
         while not candidates2:
-            candidates2 = [ c for c in candidates if c.id != contestant1.id and c.famous >= minimum_fame ]
-            minimum_fame -= 1
-        contestant2_index = random_state.choice(len(candidates2))
+            if minimum_league < 0:
+                raise RuntimeError("Could not find competitor as expected")
+            candidates2 = [ c for c in candidates if c.id != contestant1.id and c.league >= minimum_league ]
+            minimum_league -= 1
+        # contestant2_weights = [ c.league + 1 for c in candidates2]
+        contestant2_weights = [ 1 for c in candidates2]
+        contestant2_p = [ w / sum(contestant2_weights) for w in contestant2_weights]
+        contestant2_index = random_state.choice(len(candidates2), p = contestant2_p)
         contestant2 = candidates2[contestant2_index]
         return (contestant1, contestant2)
 
@@ -505,7 +511,7 @@ class Simulation:
         record.rating_sd = member.rating_sd
         record.ranking = member.ranking
 
-        record.famous = member.famous
+        record.league = member.league
         record.alive = member.alive
         record.final = member.final
 

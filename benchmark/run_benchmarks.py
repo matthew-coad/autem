@@ -169,13 +169,13 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "diabetes"
+    baseline_name = "vehicle"
     experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 3
+    epochs = 50
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 

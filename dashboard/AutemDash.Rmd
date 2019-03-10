@@ -86,6 +86,9 @@ renderUI({
     ui <- append_field(ui, "Epochs", get("epochs"))
     ui <- append_field(ui, "Steps", get("steps"))
     ui <- append_field(ui, "Score", get("score"))
+    ui <- append_field(ui, "Top Baseline", get("baseline_top_score"))
+    ui <- append_field(ui, "Bottom Baseline", get("baseline_bottom_score"))
+    ui <- append_field(ui, "Progress Baseline", get("progress"))
 
   }
   ui
