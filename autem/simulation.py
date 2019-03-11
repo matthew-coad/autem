@@ -198,6 +198,8 @@ class Simulation:
             component_name = component.__class__.__name__
             try:
                 component.evaluate_member(member)
+                if not member.alive:
+                    break
             except Exception as ex:
                 member.fail(ex, "evaluate", component_name)
                 break
@@ -235,13 +237,13 @@ class Simulation:
                 loser.defeat()
         return outcome
 
-    def stress_members(self, contestant1, contestant2, outcome):
+    def judge_members(self, contestant1, contestant2, outcome):
 
         if not contestant1.alive or not contestant2.alive:
             raise RuntimeError("Contestants not alive")
 
         for component in self.controllers:
-            component.stress_members(contestant1, contestant2, outcome)
+            component.judge_members(contestant1, contestant2, outcome)
 
     def bury_member(self, member):
         """
@@ -262,7 +264,7 @@ class Simulation:
             try:
                 component.rate_member(member)
             except Exception as ex:
-                self.fail_member(member, ex, "rate", component)
+                member.fail(ex, "rate", component_name)
                 break
 
     def rank_members(self):
@@ -400,7 +402,7 @@ class Simulation:
 
             # Determine the contestants fate!
             if contestant1.alive and contestant2.alive and contest.is_conclusive():
-                self.stress_members(contestant1, contestant2, contest)
+                self.judge_members(contestant1, contestant2, contest)
 
         # Repopulate!
         newborn1 = None
@@ -410,6 +412,12 @@ class Simulation:
             newborn1 = self.repopulate(contestant1, contestant2)
             newborn2 = self.repopulate(contestant1, contestant2)
 
+        if not contestant1.alive:
+            self.bury_member(contestant1)
+
+        if not contestant2.alive:
+            self.bury_member(contestant2)
+
         # Report on what happened
         self.n_steps += 1
         self.reports.append(self.record_member(contestant1))
@@ -418,12 +426,6 @@ class Simulation:
             self.reports.append(self.record_member(newborn1))
         if not newborn2 is None:
             self.reports.append(self.record_member(newborn2))
-
-        if not contestant1.alive:
-            self.bury_member(contestant1)
-
-        if not contestant2.alive:
-            self.bury_member(contestant2)
 
     def run(self, steps):
         """
@@ -488,7 +490,10 @@ class Simulation:
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
-        outline.append_attribute("evaluations", Dataset.Battle, [Role.Property])
+
+        outline.append_attribute("victories", Dataset.Battle, [Role.Property])
+        outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
+        outline.append_attribute("eliminations", Dataset.Battle, [Role.Property])
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
@@ -523,7 +528,9 @@ class Simulation:
         record.alive = member.alive
         record.final = member.final
 
-        record.evaluations = member.evaluations
+        record.victories = member.victories
+        record.defeats = member.defeats
+        record.eliminations = member.eliminations
 
         for component in self.components:
             component.record_member(member, record)

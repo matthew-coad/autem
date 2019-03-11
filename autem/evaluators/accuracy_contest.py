@@ -1,4 +1,4 @@
-from .. import Dataset, Role
+from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
 
 import numpy as np
@@ -27,17 +27,17 @@ class AccuracyContest(Evaluater):
 
         evaluation = member.evaluation
 
-        if not hasattr(evaluation, "scores"):
-            member.evaluation.scores = {}
+        if not hasattr(evaluation, "league_scores"):
+            member.evaluation.league_scores = {}
+            member.evaluation.scores = []
             member.evaluation.durations = []
 
-        if member.league in evaluation.scores:
+        if member.league in evaluation.league_scores:
             return None
 
         simulation = member.simulation
         resources = member.resources
         random_state = simulation.random_state
-        n_jobs = simulation.n_jobs
 
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
@@ -46,15 +46,22 @@ class AccuracyContest(Evaluater):
 
         start = time.time()
         pipeline = resources.pipeline
-        with warnings.catch_warnings():
-            warnings.filterwarnings('error')
-            try:
-                scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=5, error_score='raise')
-            except Warning as ex:
-                raise ex
-        evaluation.scores[member.league] = scores
-        league_scores = [ evaluation.scores[league] for league in evaluation.scores ]
-        evaluation.score = np.concatenate(league_scores).mean()
+
+        for league in range(0, member.league+1):
+            if not league in evaluation.league_scores:
+                with WarningInterceptor() as messages:
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings('error')
+                        try:
+                            league_scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=5, error_score='raise')
+                        except Warning as ex:
+                            raise ex
+                    if messages:
+                        raise messages[0]
+                evaluation.league_scores[member.league] = league_scores
+                scores = np.concatenate([ evaluation.league_scores[league] for league in evaluation.league_scores ])
+                evaluation.scores = scores.tolist()
+                evaluation.score = scores.mean()
 
         end = time.time()
         duration = end - start
@@ -73,13 +80,7 @@ class AccuracyContest(Evaluater):
         contestant1_score = contestant1.evaluation.score
         contestant2_score = contestant2.evaluation.score
 
-        if contestant1_score == contestant2_score:
-            contestant1.evaluation.accuracy_contest = "Inconclusive"
-            contestant2.evaluation.accuracy_contest = "Inconclusive"
-            outcome.inconclusive()
-            return None
-
-        if contestant1_score > contestant2_score:
+        if contestant1_score >= contestant2_score:
             victor = 1
         else:
             victor = 2

@@ -39,7 +39,7 @@ class Controller(Component):
         """
         pass
 
-    def stress_members(self, member1, member2, outcome):
+    def judge_members(self, member1, member2, outcome):
         """
         Determine the fate of the members
         """

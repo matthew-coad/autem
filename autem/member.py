@@ -38,9 +38,8 @@ class Member:
         self.standoffs = 0
         self.victories = 0
         self.defeats = 0
+        self.eliminations = 0
         self.wonlost = []
-
-        self.fatality = 0
         self.league = 0
 
         self.ratings = SimpleNamespace()
@@ -74,14 +73,10 @@ class Member:
         self.event_time = time.time()
         self.evaluations += 1
 
-    def _contested(self):
-        pass
-
     def stand_off(self):
         """
         Record a stand off
         """
-        self._contested()
         self.contests += 1
         self.standoffs += 1
         self.event = "standoff"
@@ -93,7 +88,6 @@ class Member:
         """
         self.event = "victory"
         self.event_time = time.time()
-        self._contested()
         self.contests += 1
         self.victories += 1
         self.wonlost.append(1)
@@ -104,12 +98,11 @@ class Member:
         """
         self.event = "defeat"
         self.event_time = time.time()
-        self._contested()
         self.contests += 1
         self.defeats += 1 
         self.wonlost.append(0)
 
-    def promote(self):
+    def promote(self, league = None):
         """
         Promote the member to the next league
         """
@@ -117,9 +110,14 @@ class Member:
         # From now on only contests at the higher league level will count
         self.event = "promotion"
         self.event_time = time.time()
-        self.league += 1
+        if league is None:
+            self.league += 1
+        else:
+            self.league = league
         self.victories = 0
         self.defeats = 0
+        self.eliminations = 0
+        self.contests = 0
         self.wonlost = []
 
     def eliminate(self):
@@ -130,6 +128,14 @@ class Member:
         self.event_time = time.time()
         self.alive = 0
         self.final = 1
+
+    def eliminator(self):
+        """
+        Notify member that they eliminated another member
+        """
+        self.event = "eliminator"
+        self.event_time = time.time()
+        self.eliminations += 1
 
     def fail(self, fault, operation, component):
         """

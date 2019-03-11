@@ -126,7 +126,7 @@ class PreferImportantChoices(Evaluater):
         if contestant1.evaluation.irrelevants > 0 or contestant2.evaluation.irrelevants > 0:
             contest.unconventional()
 
-    def stress_members(self, contestant1, contestant2, contest):
+    def judge_members(self, contestant1, contestant2, contest):
 
         if contestant1.evaluation.irrelevants:
             contestant1.stressed(0, 1)

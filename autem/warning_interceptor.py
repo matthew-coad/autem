@@ -16,8 +16,6 @@ class WarningInterceptor:
 
     def __enter__(self):
         global _current_interceptor
-        warnings.resetwarnings()
-        warnings.simplefilter("error", RuntimeWarning)
         _current_interceptor = self
         self.messages = []
         return self.messages
@@ -25,7 +23,6 @@ class WarningInterceptor:
     def __exit__(self, type, value, traceback):
         global _current_interceptor
         _current_interceptor = None
-        warnings.resetwarnings()
         return False
 
     def intercept_message(self, message):
@@ -36,12 +33,6 @@ class WarningInterceptor:
         return False
 
     def warn(self, message, category, stacklevel, source):
-        if isinstance(message, Warning):
-            text = str(message)
-            category = message.__class__
-        else:
-            text = message
-            message = category(message)
         intercept = self.intercept_message(message)
         if intercept:
             self.messages.append(message)

@@ -40,6 +40,7 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
+            evaluators.QuickVerifier(),
             evaluators.AccuracyContest(),
             evaluators.ContestSurvival(),
             evaluators.CrossValidationRater(),
@@ -92,6 +93,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
+            evaluators.QuickVerifier(),
             evaluators.AccuracyContest(),
             evaluators.ContestSurvival(),
             evaluators.CrossValidationRater(),
@@ -170,7 +172,7 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "diabetes"
+    baseline_name = "Amazon_employee_access"
     experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]

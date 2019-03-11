@@ -29,7 +29,7 @@ class CrossValidationRater(Evaluater):
 
         x,y = loader.load_training_data(simulation)
         pipeline = member.resources.pipeline
-        scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv)
+        scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
 
         rating = scores.mean()
         rating_sd = scores.std()
