@@ -148,13 +148,14 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
-                learners.RandomForestClassifier(),
-                learners.ExtraTreesClassifier(),
+                # learners.RandomForestClassifier(),
+                #learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,
         seed = seed,
-        properties = properties)
+        properties = properties,
+        n_jobs=6)
     return simulation
 
 def run_simulation(simulation, steps, epochs):
@@ -169,13 +170,13 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "vehicle"
+    baseline_name = "diabetes"
     experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
     seed = 1
     steps = 100
-    epochs = 2
+    epochs = 50
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(baseline_name)
 

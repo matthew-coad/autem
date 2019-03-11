@@ -70,6 +70,8 @@ class Member:
         self.starts += 1
 
     def evaluated(self):
+        self.event = "evaluated"
+        self.event_time = time.time()
         self.evaluations += 1
 
     def _contested(self):
@@ -89,22 +91,22 @@ class Member:
         """
         Record a victory
         """
+        self.event = "victory"
+        self.event_time = time.time()
         self._contested()
         self.contests += 1
         self.victories += 1
-        self.event = "victory"
-        self.event_time = time.time()
         self.wonlost.append(1)
 
     def defeat(self):
         """
         Record a defeat
         """
+        self.event = "defeat"
+        self.event_time = time.time()
         self._contested()
         self.contests += 1
         self.defeats += 1 
-        self.event = "defeat"
-        self.event_time = time.time()
         self.wonlost.append(0)
 
     def promote(self):

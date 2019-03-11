@@ -9,7 +9,6 @@ from .ranking import Ranking
 from types import SimpleNamespace
 from .feedback import printProgressBar
 from .choice import Choice
-from .warning_interceptor import WarningInterceptor
 
 import numpy
 import time
@@ -17,7 +16,7 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, transmutation_rate = 0.5, fame_priority = 2, top_priority = 4, properties = {}):
+    def __init__(self, name, components, seed = 1234, population_size = 10, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
@@ -38,9 +37,8 @@ class Simulation:
         self.n_steps = 0
         self.epoch = None
         self.running = False
-        self.transmutation_rate = transmutation_rate
-        self.fame_priority = fame_priority
-        self.top_priority = top_priority
+        self.n_jobs = n_jobs
+        self.transmutation_rate = 0.5
 
     def generate_id(self):
         id = self.next_id
@@ -179,10 +177,7 @@ class Simulation:
 
         for component in self.hyper_parameters:
             try:
-                with WarningInterceptor() as warnings:
-                    component.prepare_member(member)
-                if warnings:
-                    member.fail(warnings[0], "prepare", component_name)
+                component.prepare_member(member)
             except Exception as ex:
                 member.fail(ex, "prepare", component_name)
                 break
@@ -202,10 +197,7 @@ class Simulation:
         for component in self.controllers:
             component_name = component.__class__.__name__
             try:
-                with WarningInterceptor() as warnings:
-                    component.evaluate_member(member)
-                if warnings:
-                    member.fail(warnings[0], "evaluate", component_name)
+                component.evaluate_member(member)
             except Exception as ex:
                 member.fail(ex, "evaluate", component_name)
                 break
@@ -224,11 +216,7 @@ class Simulation:
         for component in self.controllers:
             component_name = component.__class__.__name__
             try:
-                with WarningInterceptor() as warnings:
-                    component.contest_members(contestant1, contestant2, outcome)
-                if warnings:
-                    contestant1.fail(warnings[0], "contest", component_name)
-                    contestant2.fail(warnings[0], "contest", component_name)
+                component.contest_members(contestant1, contestant2, outcome)
             except Exception as ex:
                 contestant1.fail(ex, "contest", component_name)
                 contestant2.fail(ex, "contest", component_name)
@@ -272,8 +260,7 @@ class Simulation:
 
         for component in self.controllers:
             try:
-                with WarningInterceptor() as warnings:
-                    component.rate_member(member)
+                component.rate_member(member)
             except Exception as ex:
                 self.fail_member(member, ex, "rate", component)
                 break
@@ -399,11 +386,9 @@ class Simulation:
         # Pick 2 members
         contestant1, contestant2 = self.choose_competitors()
 
-        # Have a round of evaluation
-        if contestant1.evaluations < contestant2.evaluations:
-            self.evaluate_member(contestant1)
-        else:
-            self.evaluate_member(contestant2)
+        # Make sure their evaluations are up to date
+        self.evaluate_member(contestant1)
+        self.evaluate_member(contestant2)
 
         # Have them contest.
         if contestant1.alive and contestant2.alive:

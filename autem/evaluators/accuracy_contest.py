@@ -8,6 +8,7 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 
 import time
+import warnings
 
 class AccuracyContest(Evaluater):
     """
@@ -24,87 +25,61 @@ class AccuracyContest(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
+        evaluation = member.evaluation
+
+        if not hasattr(evaluation, "scores"):
+            member.evaluation.scores = {}
+            member.evaluation.durations = []
+
+        if member.league in evaluation.scores:
+            return None
+
         simulation = member.simulation
         resources = member.resources
-        evaluation = member.evaluation
         random_state = simulation.random_state
+        n_jobs = simulation.n_jobs
 
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
-        start = time.time()
-
         x,y = loader.load_training_data(simulation)
-        test_size = 0.2
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
+        start = time.time()
         pipeline = resources.pipeline
-        pipeline.fit(x_train, y_train)
-        y_pred = pipeline.predict(x_test)
-
-        accuracy = scorer.score(y_test, y_pred)
-        if not hasattr(evaluation, "accuracies"):
-            evaluation.accuracies = []
-
-        evaluation.accuracies.append(accuracy)
-        evaluation.accuracy = np.array(evaluation.accuracies).mean()
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error')
+            try:
+                scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=5, error_score='raise')
+            except Warning as ex:
+                raise ex
+        evaluation.scores[member.league] = scores
+        league_scores = [ evaluation.scores[league] for league in evaluation.scores ]
+        evaluation.score = np.concatenate(league_scores).mean()
 
         end = time.time()
         duration = end - start
 
-        if not hasattr(evaluation, "durations"):
-            evaluation.durations = []
-
-        evaluation.duration = duration
         evaluation.durations.append(duration)
+        evaluation.duration = duration
 
     def contest_members(self, contestant1, contestant2, outcome):
 
-        required_p_value = self.p_value
         contestant1.evaluation.accuracy_contest = None
         contestant2.evaluation.accuracy_contest = None
 
         if outcome.is_conclusive():
             return None
 
-        if hasattr(contestant1.evaluation, "accuracies"):
-            contestant1_accuracies = np.array(contestant1.evaluation.accuracies)
-            contestant1_accuracy = contestant1.evaluation.accuracy
-        else:
-            contestant1_accuracies = []
-            contestant1_accuracy = None
+        contestant1_score = contestant1.evaluation.score
+        contestant2_score = contestant2.evaluation.score
 
-        if hasattr(contestant2.evaluation, "accuracies"):
-            contestant2_accuracies = np.array(contestant2.evaluation.accuracies)
-            contestant2_accuracy = contestant2.evaluation.accuracy
-        else:
-            contestant2_accuracies = []
-            contestant2_accuracy = None
-
-        # Must have at least 5 scores each to make a comparison
-        if len(contestant1_accuracies) < 5 or len(contestant2_accuracies) < 5:
-            outcome.inconclusive()
-            return None
-
-        # Run the t-test
-        try:
-            test_result = stats.ttest_ind(contestant1_accuracies, contestant2_accuracies)
-        except:
-            outcome.inconclusive()
-            return None
-
-        t_statistic = test_result[0] # positive if 1 > 2
-        p_value = test_result[1]
-
-        # Need at least the required p-value to have an outcome
-        if p_value > required_p_value:
+        if contestant1_score == contestant2_score:
             contestant1.evaluation.accuracy_contest = "Inconclusive"
             contestant2.evaluation.accuracy_contest = "Inconclusive"
             outcome.inconclusive()
             return None
 
-        # Determine the victor
-        if t_statistic > 0:
+        if contestant1_score > contestant2_score:
             victor = 1
         else:
             victor = 2
@@ -119,8 +94,8 @@ class AccuracyContest(Evaluater):
         super().record_member(member, record)
 
         evaluation = member.evaluation
-        if hasattr(evaluation, "accuracy"):
-            record.accuracy = evaluation.accuracy
+        if hasattr(evaluation, "score"):
+            record.accuracy = evaluation.score
         else:
             record.accuracy = None
 

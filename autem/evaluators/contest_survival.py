@@ -10,7 +10,7 @@ class ContestSurvival(Evaluater):
     Compares the losers defeats against that of the general population. If its significanly more then its adios muchachos.
     """
 
-    def __init__(self, p_value = 0.1):
+    def __init__(self, p_value = 0.05):
         """
         P value used to determine if the survival history is significanly different from the general populations
         """
@@ -39,9 +39,9 @@ class ContestSurvival(Evaluater):
 
             if promote:
                 winner.promote()
-                winner.evaluation.contest_survival = "%d|%d promotion" % (winner_victories, loser_victories)
+                winner.evaluation.contest_survival = "%d|%d promote" % (winner_victories, record_length)
             else:
-                winner.evaluation.contest_survival = "%d|%d win" % (winner_victories, loser_victories)
+                winner.evaluation.contest_survival = "%d|%d remain" % (winner_victories, record_length)
         else:
             winner.evaluation.contest_survival = "mismatch win"
 
@@ -50,9 +50,9 @@ class ContestSurvival(Evaluater):
         eliminate = robustness_p < self.p_value
         if eliminate:
             loser.eliminate()
-            loser.evaluation.contest_survival = "%d|%d elimination" % (loser_victories, winner_victories)
+            loser.evaluation.contest_survival = "%d|%d eliminate" % (loser_victories, record_length)
         else:
-            loser.evaluation.contest_survival = "%d|%d loss" % (loser_victories, winner_victories)
+            loser.evaluation.contest_survival = "%d|%d survive" % (loser_victories, record_length)
 
     def record_member(self, member, record):
         if hasattr(member.evaluation, "contest_survival"):
