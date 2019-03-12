@@ -144,8 +144,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
-                learners.RadialBasisSVC(),
-                learners.PolySVC(),
+                #learners.RadialBasisSVC(),
+                #learners.PolySVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
@@ -171,11 +171,11 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "cylinder-bands"
+    baseline_name = "balance-scale"
     experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
-    seed = 1
+    seed = 2
     steps = 100
     epochs = 50
     population_size = 20
@@ -215,5 +215,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_test_simulation()
-    #run_benchmark_simulations()
+    # run_test_simulation()
+    run_benchmark_simulations()

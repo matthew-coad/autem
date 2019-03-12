@@ -46,8 +46,8 @@ class ContestSurvival(Evaluater):
             winner.evaluation.contest_survival = "%d|%d upset " % (loser.league, winner.league)
             winner.promote()
         elif winner.league == loser.league:
-            # If the winner is in the same league and its persistently eliminating members then promote it
-            power_p = stats.binom_test(winner.eliminations, n=winner.eliminations, p=0.5, alternative='greater')
+            # If the winner is in the same league and its persistently winning members then promote it
+            power_p = stats.binom_test(winner_victories, n=max_contests, p=0.5, alternative='greater')
             powerful = power_p < self.p_value
             maxed = winner.league == top_league
             promote = powerful and not maxed

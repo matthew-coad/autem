@@ -262,6 +262,7 @@ class Simulation:
             raise RuntimeError("Members is not alive")
 
         for component in self.controllers:
+            component_name = component.__class__.__name__
             try:
                 component.rate_member(member)
             except Exception as ex:
@@ -305,15 +306,16 @@ class Simulation:
         contestant1_index = random_state.choice(len(candidates))
         contestant1 = candidates[contestant1_index]
 
-        maximum_league = max(c.league for c in candidates)
-        minimum_league = contestant1.league
-        candidates2 = []
-        while not candidates2:
-            if minimum_league < 0:
-                raise RuntimeError("Could not find competitor as expected")
-            candidates2 = [ c for c in candidates if c.id != contestant1.id and c.league >= minimum_league ]
-            minimum_league -= 1
+        #maximum_league = max(c.league for c in candidates)
+        #minimum_league = contestant1.league
+        #candidates2 = []
+        #while not candidates2:
+        #    if minimum_league < 0:
+        #        raise RuntimeError("Could not find competitor as expected")
+        #    candidates2 = [ c for c in candidates if c.id != contestant1.id and c.league >= minimum_league ]
+        #    minimum_league -= 1
         # contestant2_weights = [ c.league + 1 for c in candidates2]
+        candidates2 = [ c for c in candidates if c.id != contestant1.id ]
         contestant2_weights = [ 1 for c in candidates2]
         contestant2_p = [ w / sum(contestant2_weights) for w in contestant2_weights]
         contestant2_index = random_state.choice(len(candidates2), p = contestant2_p)

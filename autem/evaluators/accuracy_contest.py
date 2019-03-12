@@ -71,6 +71,7 @@ class AccuracyContest(Evaluater):
 
     def contest_members(self, contestant1, contestant2, outcome):
 
+        simulation = contestant1.simulation
         contestant1.evaluation.accuracy_contest = None
         contestant2.evaluation.accuracy_contest = None
 
@@ -79,27 +80,31 @@ class AccuracyContest(Evaluater):
 
         contestant1_score = contestant1.evaluation.score
         contestant2_score = contestant2.evaluation.score
+        top_league = simulation.top_league
 
-        if contestant1_score == contestant2_score:
-            # Scores are identical
-            # We can get stuck where all members converge to this score
-            # Kill one of the members outright. Prefer the highest league member to survive
-            # Otherwise random
-            if contestant1.league >= contestant2.league:
-                eliminate = 2
-            else:
-                eliminate = 1
-            eliminated = contestant1 if eliminate == 1 else contestant2
-            contestant1.evaluation.accuracy_contest = "Identical"
-            contestant2.evaluation.accuracy_contest = "Identical"
-            eliminated.fail("Scored identifical", "evaluate", "accuracy_contest")
+        if contestant1_score == contestant2_score and contestant1.league == contestant2.league and contestant1.league == top_league:
+            # Accuracies are identical
+            # Simulation can get stuck here
+            # Kill one member at random
+            contestant1.fail("Top score identical", "evaluate", "accuracy_contest")
+            contestant1.evaluation.accuracy_contest = "Top score identical"
+            contestant1.evaluation.accuracy_contest = "Top score identical"
             outcome.unconventional()
             return None
-
-        if contestant1_score >= contestant2_score:
+        elif contestant1_score == contestant2_score and contestant1.league < contestant2.league:
             victor = 1
-        else:
+        elif contestant1_score == contestant2_score and contestant2.league < contestant2.league:
             victor = 2
+        elif contestant1_score == contestant2_score and contestant1.id < contestant2.id:
+            victor = 1
+        elif contestant1_score == contestant2_score and contestant1.id > contestant2.id:
+            victor = 2
+        elif contestant1_score > contestant2_score:
+            victor = 1
+        elif contestant1_score < contestant2_score:
+            victor = 2
+        else:
+            raise RuntimeError("Victory condition not found")
 
         winner = contestant1 if victor == 1 else contestant2
         loser = contestant2 if victor == 1 else contestant1
@@ -115,7 +120,8 @@ class AccuracyContest(Evaluater):
         loser_score = loser.evaluation.score
         loser_durations = loser.evaluation.durations
         loser_duration = np.mean(loser_durations)
-        duration_reversal = loser_score > winner_score - winner_std and loser_duration < winner_duration
+        # duration_reversal = loser_score > winner_score - winner_std and loser_duration < winner_duration
+        duration_reversal = False
 
         if duration_reversal:
             victor = 2 if victor == 1 else 1
