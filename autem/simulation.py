@@ -16,13 +16,14 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 6, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
         self.population_size = population_size
+        self.top_league = 6
         self.outline = None
         self.resources = SimpleNamespace()
         self.hyper_parameters = None

@@ -1,0 +1,151 @@
+---
+title: "Validation Development"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(memoise)
+
+reactive <- function(.x) {
+  x <- function() .x
+  memoise(x)
+}
+
+```
+
+# Load data
+
+```{r load, include=FALSE}
+
+# Load data
+step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
+epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
+simulation_summary_rdf <- reactive({ read_rds("data\\simulation_summary.RDS") })
+dataset_summary_rdf <- reactive({ read_rds("data\\dataset_summary.RDS") })
+baseline_detail_rdf <- reactive({ read_rds("data\\baseline_detail.RDS") })
+baseline_summary_rdf <- reactive({ read_rds("data\\baseline_summary.RDS") })
+breakdown_rdf <- reactive({ read_rds("data\\breakdown.RDS") })
+
+all_value = "__all__"
+
+experiment_rlist <- reactive({ sort(unique(simulation_summary_rdf()$experiment)) })
+breakdown_rlist <- reactive({ breakdown_rdf()$breakdown })
+
+filtered_data <- function(.data, .experiment) {
+  if (.experiment == all_value)
+    .data
+  else
+    filter(.data, experiment == .experiment)
+}
+
+# Formatters
+minutes_format <- scales::unit_format(unit = "min", accuracy = 3)
+accuracy_format <- scales::number_format(accuracy = .01)
+
+```
+
+Overview
+-----------------------------------------------------------------------
+
+### Details
+
+```{r}
+
+  simulation_summary_df <- simulation_summary_rdf() %>% filter(!is.na(validation_score))
+
+  output_df <-
+    simulation_summary_df %>%
+    mutate(
+      validation_distance = (score - validation_score) / score_sd
+    ) %>%
+    filter(!is.na(validation_distance)) %>%
+    mutate(
+      experiment = forcats::fct_reorder(experiment, desc(abs(validation_distance)))
+    ) %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score,
+      validation_distance
+    )
+
+  output_df %>%
+    ggplot(aes(x = experiment, color = study)) +
+    geom_point(aes(y = validation_distance)) +
+    geom_hline(aes(yintercept = 0), linetype = 'solid') +
+    geom_hline(aes(yintercept = -1), linetype = 'dotdash') +
+    geom_hline(aes(yintercept = 1), linetype = 'dotdash') +
+    geom_hline(aes(yintercept = -2), linetype = 'dotted') +
+    geom_hline(aes(yintercept = 2), linetype = 'dotted') +
+    coord_flip()
+
+```
+
+### Validation Density
+
+```{r}
+
+  simulation_summary_df <- simulation_summary_rdf() %>% filter(!is.na(validation_score))
+
+  output_df <-
+    simulation_summary_df %>%
+    mutate(
+      validation_distance = (score - validation_score) / score_sd
+    ) %>%
+    filter(!is.na(validation_distance)) %>%
+    mutate(
+      experiment = forcats::fct_reorder(experiment, desc(abs(validation_distance)))
+    ) %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score,
+      validation_distance
+    )
+
+  output_df %>%
+    ggplot(aes(x = validation_distance, color = study)) +
+    geom_density()
+
+```
+
+### Selected Validation
+
+```{r}
+
+  experiment <- "diabetes"
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(experiment)
+
+  output_df <-
+    simulation_summary_df %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score
+    )
+  
+  #x_min <- output_df %>% pull(min_score) %>% min()
+  #x_max <- output_df %>% pull(max_score) %>% min()
+
+  output_df %>%
+    ggplot(aes(x = study)) +
+    geom_errorbar(aes(ymin = score-score_sd, ymax=score+score_sd), width = .3, color = "black") +
+    geom_errorbar(aes(ymin = score-score_sd * 2, ymax=score+score_sd* 2), width = .15, color = "black", linetype = 'dotted') +
+    geom_point(aes(y = score, color = "score"), size = 3) +
+    geom_point(aes(y = validation_score, color = "validation"), size = 3) +
+    coord_flip() +
+    xlab("Study") +
+    ylab("Score")
+
+```

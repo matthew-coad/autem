@@ -20,6 +20,7 @@ library(tidyverse)
 step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
 epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
 simulation_summary_rdf <- reactive({ read_rds("data\\simulation_summary.RDS") })
+dataset_summary_rdf <- reactive({ read_rds("data\\dataset_summary.RDS") })
 baseline_detail_rdf <- reactive({ read_rds("data\\baseline_detail.RDS") })
 baseline_summary_rdf <- reactive({ read_rds("data\\baseline_summary.RDS") })
 breakdown_rdf <- reactive({ read_rds("data\\breakdown.RDS") })
@@ -56,47 +57,108 @@ renderUI({
 
 ```
 
-Summary {data-orientation=columns}
+Overview {data-orientation=columns}
 =====================================  
 
 Overview
 -----------------------------------------------------------------------
 
-### Summary
+### All
 
 ```{r}
 
-renderUI({
-  req(simulation_summary_rdf(), input$experiment, cancelOutput = TRUE)
+DT::renderDataTable({
   
-  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
-  ui = shiny::tagList()
-  for (row in 1:nrow(simulation_summary_df)) {
-    get <- function(col) simulation_summary_df[row, col]
-    append_field <- function(ui, label, value)  tagAppendChildren(ui, tags$label(paste(label, ":")), tags$span(value), tags$br())
-    ui <- tagAppendChild(ui, h4(paste(get("study"), "study")))
-    ui <- tagAppendChild(ui, hr())
-    ui <- append_field(ui, "Experiment", get("experiment"))
-    ui <- append_field(ui, "Dataset", get("dataset"))
-    ui <- append_field(ui, "Classes", paste0(get("classes")))
-    ui <- append_field(ui, "Features", paste0(get("features")))
-    ui <- append_field(ui, "Instances", paste0(get("instances")))
-    ui <- append_field(ui, "Status", get("status"))
-    ui <- append_field(ui, "Duration", paste0(get("duration"), " secs"))
-    ui <- append_field(ui, "Epochs", get("epochs"))
-    ui <- append_field(ui, "Steps", get("steps"))
-    ui <- append_field(ui, "Score", get("score"))
-    ui <- append_field(ui, "Top Baseline", get("baseline_top_score"))
-    ui <- append_field(ui, "Bottom Baseline", get("baseline_bottom_score"))
-    ui <- append_field(ui, "Progress Baseline", get("progress"))
-
-  }
-  ui
+  req(simulation_summary_rdf(), cancelOutput = TRUE)
+  
+  simulation_summary_df <- simulation_summary_rdf()
+  
+  output_df <- 
+    simulation_summary_df %>%
+    mutate(
+      score = readr::parse_number(format(score, digits = 3)),
+      progress_top_score = readr::parse_number(format(progress_top_score, digits = 3)),
+      progress = readr::parse_number(format(progress, digits = 3))
+    ) %>%
+    select(
+      Experiment = experiment,
+      Study = study,
+      Status = status,
+      Steps = steps,
+      `Duration (s)` = duration,
+      Score = score,
+      `Target Score` = progress_top_score,
+      Progress = progress
+    )
+  
+  DT::datatable(output_df)
+  
 })
 
 ```
 
+Summary {data-orientation=columns}
+=====================================  
 
+### Status
+
+```{r}
+
+DT::renderDataTable({
+  req(simulation_summary_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  
+  output_df <- 
+    simulation_summary_df %>%
+    mutate(
+      score = readr::parse_number(format(score, digits = 3)),
+      progress_top_score = readr::parse_number(format(progress_top_score, digits = 3)),
+      progress = readr::parse_number(format(progress, digits = 3))
+    ) %>%
+    select(
+      Experiment = experiment,
+      Study = study,
+      Status = status,
+      Steps = steps,
+      `Duration (s)` = duration,
+      Score = score,
+      `Target Score` = progress_top_score,
+      Progress = progress
+    )
+  
+  DT::datatable(output_df, options = list(bPaginate = FALSE, bFilter = FALSE))
+
+})
+
+```
+
+### Data
+
+```{r}
+
+DT::renderDataTable({
+  req(dataset_summary_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  experiment = input$experiment
+  
+  dataset_summary_df <- dataset_summary_rdf() %>% filter(dataset == experiment)
+  output_df <- 
+    dataset_summary_df %>%
+    select(
+      Dataset = dataset,
+      Classes = classes,
+      Features = features,
+      Instances = instances,
+      Incomplete = incomplete,
+      Missing = missing
+    )
+  
+  DT::datatable(output_df, options = list(bPaginate = FALSE, bFilter = FALSE))
+
+})
+
+```
 
 "study"                 "experiment"            "dataset"               "status"                "classes"               "features"              "instances"            
  [8] "incomplete_instances"  "missing_values"        "duration"              "epochs"                "steps"                 "score"                 "score_sd"             
@@ -116,18 +178,15 @@ Overview
 renderPlot({
   req(simulation_summary_rdf(), cancelOutput = TRUE)
 
-  df <- simulation_summary_rdf()
-  min_y <- 0
-  max_y <- max(df$progress + df$progress_sd, na.rm = TRUE)
-  max_y <- if (max_y < 1) 1 else max_y
+  df <- simulation_summary_rdf() %>% filter(!is.na(progress))
 
-  df %>%
+  p <- df %>%
     mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
     ggplot(aes(x = experiment, color = study)) +
-    geom_point(aes(y = progress), na.rm = TRUE) +
-    ylim(min_y, max_y) +
+    geom_point(aes(y = progress)) +
     ylab("Progress") +
     coord_flip()
+  p
 
 })
 
@@ -140,19 +199,16 @@ Drilldown
 
 ```{r}
 
-renderPrint({
+renderPlot({
   req(simulation_summary_rdf(), cancelOutput = TRUE)
   
-  df <- simulation_summary_rdf()
-  min_x <- 0
-  max_x <- max(df$progress + df$progress_sd, na.rm = TRUE)
-  max_x <- if (max_x < 1) 1 else max_x
-  df %>%
-  ggplot(aes(x = progress, color = study)) +
-    geom_density(na.rm = TRUE) +
-    xlim(min_x, max_x) +
+  df <- simulation_summary_rdf() %>% filter(!is.na(progress))
+  p <- df %>%
+    ggplot(aes(x = progress, color = study)) +
+    geom_density() +
     xlab("Progress") +
     ylab("Density")
+  p
 
 })
 
@@ -165,17 +221,15 @@ renderPrint({
 renderPlot({
   req(simulation_summary_rdf(), baseline_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  experiment = input$experiment
+  
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(experiment)
   simulation_summary_df <-
     simulation_summary_df %>%
     mutate(validation_progress = (validation_score - progress_bottom_score) / (progress_top_score - progress_bottom_score))
   
   baseline_detail_df <- baseline_detail_rdf() %>% filter(dataset == simulation_summary_df$dataset)
   
-  min_x <- 0
-  max_x <- max(simulation_summary_df$progress + simulation_summary_df$progress_sd, simulation_summary_df$validation_progress)
-  max_x <- if (max_x < 1) 1 else max_x
-
   baseline_progress_df <-
     simulation_summary_df %>%
     right_join(baseline_detail_df, by = c("dataset")) %>%
@@ -184,27 +238,152 @@ renderPlot({
     ) %>%
     select(study, experiment, baseline_score, baseline_rank, baseline_percent, baseline_progress) %>%
     filter(baseline_progress >= 0)
-
-  score <- simulation_summary_df$score
-  simulation_summary_df$baseline_percent <- baseline_progress_df %>% filter(baseline_score <= score) %>% pull(baseline_percent) %>% max()
-    
+  
+  simulation_summary_progress <-
+    simulation_summary_df %>%
+    full_join(baseline_progress_df, by = c("study", "experiment")) %>%
+    filter(baseline_score <= score) %>%
+    group_by(study, experiment) %>%
+    summarise(baseline_rank = max(baseline_rank), baseline_percent = max(baseline_percent))
+  
+  simulation_summary_df <- 
+    simulation_summary_df %>%
+    full_join(simulation_summary_progress, by = c("study", "experiment"))
+  
   baseline_progress_df %>%
-    ggplot() +
-    geom_count(aes(x = baseline_percent, y = baseline_progress), color = "DarkGrey") +
-    geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study, shape ="score"), size = 3) +
-    geom_rug(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study), sides="trbl") +
-    geom_errorbar(data = simulation_summary_df, aes(x = baseline_percent, ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.05, na.rm = TRUE) +
-    geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = validation_progress, color = study, shape ="validation"), size = 3) +
-    geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-    geom_hline(aes(yintercept = 0.0), linetype = 'dotted') +
-    xlim(0.0, 1.0) +
-    xlab("Baseline rank") +
-    ylim(min_x, max_x) +
-    ylab("Progress")
+      ggplot() +
+      geom_count(aes(x = baseline_percent, y = baseline_progress), color = "DarkGrey") +
+      geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study, shape ="score"), size = 3) +
+      geom_rug(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study), sides="trbl") +
+      geom_errorbar(data = simulation_summary_df, aes(x = baseline_percent, ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.05, na.rm = TRUE) +
+      geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = validation_progress, color = study, shape ="validation"), size = 3) +
+      geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+      geom_hline(aes(yintercept = 0.0), linetype = 'dotted') +
+      xlim(0.0, 1.0) +
+      xlab("Baseline rank") +
+      ylab("Progress")
 })
 
 ```
 
+Validation {data-orientation=columns}
+=====================================  
+
+Long
+-----------------------------------------------------------------------
+
+### All Details
+
+```{r}
+
+renderPlot({
+  req(simulation_summary_rdf(), cancelOutput = TRUE)
+
+  simulation_summary_df <- simulation_summary_rdf() %>% filter(!is.na(validation_score))
+
+  output_df <-
+    simulation_summary_df %>%
+    mutate(
+      validation_distance = (validation_score - score) / score_sd
+    ) %>%
+    filter(!is.na(validation_distance)) %>%
+    mutate(
+      experiment = forcats::fct_reorder(experiment, abs(validation_distance))
+    ) %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score,
+      validation_distance
+    )
+
+  output_df %>%
+    ggplot(aes(x = experiment, color = study)) +
+    geom_point(aes(y = validation_distance)) +
+    geom_hline(aes(yintercept = 0), linetype = 'solid') +
+    geom_hline(aes(yintercept = -1), linetype = 'dotdash') +
+    geom_hline(aes(yintercept = 1), linetype = 'dotdash') +
+    geom_hline(aes(yintercept = -2), linetype = 'dotted') +
+    geom_hline(aes(yintercept = 2), linetype = 'dotted') +
+    coord_flip()
+  
+})
+
+```
+
+Compact
+-----------------------------------------------------------------------
+
+### Validation Density
+
+```{r}
+renderPlot({
+  req(simulation_summary_rdf(), cancelOutput = TRUE)
+
+  simulation_summary_df <- simulation_summary_rdf() %>% filter(!is.na(validation_score))
+
+  output_df <-
+    simulation_summary_df %>%
+    mutate(
+      validation_distance = (validation_score - score) / score_sd
+    ) %>%
+    filter(!is.na(validation_distance)) %>%
+    mutate(
+      experiment = forcats::fct_reorder(experiment, desc(abs(validation_distance)))
+    ) %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score,
+      validation_distance
+    )
+
+  output_df %>%
+    ggplot(aes(x = validation_distance, color = study)) +
+    geom_density()
+})
+
+```
+
+### Selected Validation
+
+```{r}
+
+renderPlot({
+  req(simulation_summary_rdf(), input$experiment, cancelOutput = TRUE)
+
+  experiment <- input$experiment
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(experiment)
+
+  output_df <-
+    simulation_summary_df %>%
+    select(
+      study,
+      experiment,
+      dataset,
+      score,
+      score_sd,
+      validation_score
+    )
+  
+  output_df %>%
+    ggplot(aes(x = study)) +
+    geom_errorbar(aes(ymin = score-score_sd, ymax=score+score_sd), width = .3, color = "black") +
+    geom_errorbar(aes(ymin = score-score_sd * 2, ymax=score+score_sd* 2), width = .15, color = "black", linetype = 'dotted') +
+    geom_point(aes(y = score, color = "score"), size = 3) +
+    geom_point(aes(y = validation_score, color = "validation"), size = 3) +
+    coord_flip() +
+    xlab("Study") +
+    ylab("Score")
+
+})
+```
 
 Scores {data-orientation=rows}
 =====================================

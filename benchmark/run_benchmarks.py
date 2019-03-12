@@ -93,7 +93,6 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            evaluators.QuickVerifier(),
             evaluators.AccuracyContest(),
             evaluators.ContestSurvival(),
             evaluators.CrossValidationRater(),
@@ -145,13 +144,13 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
-                # learners.RadialBasisSVC(),
-                # learners.PolySVC(),
+                learners.RadialBasisSVC(),
+                learners.PolySVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
                 # learners.RandomForestClassifier(),
-                #learners.ExtraTreesClassifier(),
+                # learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,
@@ -172,7 +171,7 @@ def run_simulation(simulation, steps, epochs):
             break
 
 def run_test_simulation():
-    baseline_name = "Amazon_employee_access"
+    baseline_name = "cylinder-bands"
     experiment = baseline_name
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]

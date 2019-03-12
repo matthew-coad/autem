@@ -80,6 +80,22 @@ class AccuracyContest(Evaluater):
         contestant1_score = contestant1.evaluation.score
         contestant2_score = contestant2.evaluation.score
 
+        if contestant1_score == contestant2_score:
+            # Scores are identical
+            # We can get stuck where all members converge to this score
+            # Kill one of the members outright. Prefer the highest league member to survive
+            # Otherwise random
+            if contestant1.league >= contestant2.league:
+                eliminate = 2
+            else:
+                eliminate = 1
+            eliminated = contestant1 if eliminate == 1 else contestant2
+            contestant1.evaluation.accuracy_contest = "Identical"
+            contestant2.evaluation.accuracy_contest = "Identical"
+            eliminated.fail("Scored identifical", "evaluate", "accuracy_contest")
+            outcome.unconventional()
+            return None
+
         if contestant1_score >= contestant2_score:
             victor = 1
         else:
@@ -87,8 +103,31 @@ class AccuracyContest(Evaluater):
 
         winner = contestant1 if victor == 1 else contestant2
         loser = contestant2 if victor == 1 else contestant1
-        winner.evaluation.accuracy_contest = "Win"
-        loser.evaluation.accuracy_contest = "Loss"
+
+        # If the losers score is within one standard deviation of the winners score
+        # but it has a shorter run-time then have it win instead
+
+        winner_scores = winner.evaluation.scores
+        winner_std = np.std(winner_scores)
+        winner_score = winner.evaluation.score
+        winner_durations = winner.evaluation.durations
+        winner_duration = np.mean(winner_durations)
+        loser_score = loser.evaluation.score
+        loser_durations = loser.evaluation.durations
+        loser_duration = np.mean(loser_durations)
+        duration_reversal = loser_score > winner_score - winner_std and loser_duration < winner_duration
+
+        if duration_reversal:
+            victor = 2 if victor == 1 else 1
+
+            winner = contestant1 if victor == 1 else contestant2
+            loser = contestant2 if victor == 1 else contestant1
+
+            winner.evaluation.accuracy_contest = "Duration Win"
+            loser.evaluation.accuracy_contest = "Duration Loss"
+        else:
+            winner.evaluation.accuracy_contest = "Win"
+            loser.evaluation.accuracy_contest = "Loss"
         outcome.decisive(victor)
 
     def record_member(self, member, record):

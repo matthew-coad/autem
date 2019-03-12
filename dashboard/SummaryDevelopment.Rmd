@@ -1,5 +1,5 @@
 ---
-title: "Baseline Developement"
+title: "Status Development"
 output: html_notebook
 ---
 
@@ -19,12 +19,11 @@ reactive <- function(.x) {
 
 ```{r load, include=FALSE}
 
-
-
 # Load data
 step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
 epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
 simulation_summary_rdf <- reactive({ read_rds("data\\simulation_summary.RDS") })
+dataset_summary_rdf <- reactive({ read_rds("data\\dataset_summary.RDS") })
 baseline_detail_rdf <- reactive({ read_rds("data\\baseline_detail.RDS") })
 baseline_summary_rdf <- reactive({ read_rds("data\\baseline_summary.RDS") })
 breakdown_rdf <- reactive({ read_rds("data\\breakdown.RDS") })
@@ -47,60 +46,51 @@ accuracy_format <- scales::number_format(accuracy = .01)
 
 ```
 
-Baselines
-=====================================  
-
-### All progress
+# Print Summary
 
 ```{r}
 
-  df <- simulation_summary_rdf() %>% filter(!is.na(progress))
-  min_y <- 0
-  max_y <- max(df$progress + df$progress_sd)
-  max_y <- if (max_y < 1) 1 else max_y
+simulation_summary_df <- simulation_summary_rdf()
 
-  df %>%
-    mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
-    ggplot(aes(x = experiment, color = study)) +
-    geom_point(aes(y = progress)) +
-    ylim(min_y, max_y) +
-    ylab("Progress") +
-    coord_flip()
+output_df <- 
+  simulation_summary_df %>%
+  mutate(
+    score = readr::parse_number(format(score, digits = 3)),
+    progress_top_score = readr::parse_number(format(progress_top_score, digits = 3)),
+    progress = readr::parse_number(format(progress, digits = 3))
+  ) %>%
+  select(
+    Experiment = experiment,
+    Study = study,
+    Status = status,
+    Steps = steps,
+    `Duration (s)` = duration,
+    Score = score,
+    `Target Score` = progress_top_score,
+    Progress = progress
+  )
+
+DT::datatable(output_df)
+
 
 ```
 
-### Progress Density
+# Data Set Summary
 
 ```{r}
 
-  df <- simulation_summary_rdf() %>% filter(!is.na(progress))
-  min_x <- 0
-  max_x <- max(df$progress + df$progress_sd)
-  max_x <- if (max_x < 1) 1 else max_x
-  df %>%
-    ggplot(aes(x = progress, color = study)) +
-    geom_density() +
-    xlim(min_x, max_x) +
-    xlab("Progress") +
-    ylab("Density")
+dataset_summary_df <- dataset_summary_rdf()
+output_df <- 
+  dataset_summary_df %>%
+  select(
+    Dataset = dataset,
+    Classes = classes,
+    Features = features,
+    Instances = instances,
+    Incomplete = incomplete,
+    Missing = missing
+  )
 
-
-```
-
-```{r}
-
-
-
-```
-
-  
-  
-
-
-  
-    
-  
-
-```
+DT::datatable(output_df)
 
 ```

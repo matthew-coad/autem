@@ -123,20 +123,42 @@ read_battle <- function(path) {
 build_step_detail <- function(battle_df) {
   step_df7 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) <= 7) %>%
-    mutate(
-      study = paste0("S", version),
-      experiment = paste0(dataset),
-      league = famous
-    ) 
+    filter(as.integer(as.character(version)) <= 7)
+  if (nrow(step_df7) > 0)
+    step_df7 <-
+      step_df7 %>%
+      mutate(
+        study = paste0("S", version),
+        experiment = paste0(dataset),
+        league = famous
+      ) 
+
   step_df8 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) == 8) %>%
-    mutate(league = famous)
+    filter(as.integer(as.character(version)) == 8)
+  if (nrow(step_df8) > 0)  
+    step_df8 <- 
+      step_df8 %>%
+      mutate(league = famous)
+  
   step_df9 <-
     battle_df %>%
     filter(as.integer(as.character(version)) >= 9)
-  step_df <- bind_rows(step_df7, step_df8, step_df9) %>%
+  
+  bind_df <- function(step_df, df) {
+    if (nrow(df) == 0)
+      return (step_df)
+    if (is.null(step_df)) {
+      return (df)
+    }
+    bind_rows(step_df, df)
+  }
+  step_df <- NULL
+  step_df <- bind_df(step_df, step_df7)
+  step_df <- bind_df(step_df, step_df8)
+  step_df <- bind_df(step_df, step_df9)
+  step_df <-
+    step_df %>%
     mutate(league = factor(league)) %>%
     select(
       study,
@@ -151,7 +173,6 @@ build_step_detail <- function(battle_df) {
       league,
       alive,
       final,
-      evaluations,
       score = accuracy,
       duration,
       Scaler:LGR_dual
@@ -286,7 +307,7 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
     mutate(
       baseline_bottom_score = bottom_score,
       baseline_top_score = top_score,
-      progress_bottom_score = dummy_score,
+      progress_bottom_score = bottom_score,
       progress_top_score = baseline_top_score,
       progress = (score - progress_bottom_score) / (progress_top_score - progress_bottom_score),
       progress_sd = score_sd / (progress_top_score - progress_bottom_score)
@@ -296,11 +317,6 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       experiment,
       dataset,
       status,
-      classes = NumberOfClasses,
-      features = NumberOfFeatures,
-      instances = NumberOfInstances,
-      incomplete_instances = NumberOfInstancesWithMissingValues,
-      missing_values = NumberOfMissingValues,
       duration, 
       epochs, 
       steps, 
@@ -315,7 +331,29 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       progress,
       progress_sd
     )
+  
+  simulation_summary_df <- 
+    simulation_summary_df %>%
+    mutate(
+      study = if_else(!is.na(study), study, "None"),
+      experiment = if_else(!is.na(experiment), experiment, dataset),
+      status = if_else(!is.na(status), status, "Missing")
+    )
   simulation_summary_df
+}
+
+build_dataset_summary <- function(configuration_df) {
+  output_df <- 
+    configuration_df %>%
+    select(
+      dataset = Name,
+      classes = NumberOfClasses,
+      features = NumberOfFeatures,
+      instances = NumberOfInstances,
+      incomplete = NumberOfInstancesWithMissingValues,
+      missing = NumberOfMissingValues
+    )
+  output_df
 }
 
 build_breakdown <- function() {
