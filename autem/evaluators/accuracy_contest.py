@@ -10,6 +10,9 @@ from sklearn.pipeline import Pipeline
 import time
 import warnings
 
+import logging
+import io
+
 class AccuracyContest(Evaluater):
     """
     Determines fitness by comparing mean model scores but only
@@ -22,52 +25,60 @@ class AccuracyContest(Evaluater):
         """
         self.p_value = p_value
 
-    def evaluate_member(self, member):
-        super().evaluate_member(member)
-
-        evaluation = member.evaluation
-
-        if not hasattr(evaluation, "league_scores"):
-            member.evaluation.league_scores = {}
-            member.evaluation.scores = []
-            member.evaluation.durations = []
-
-        if member.league in evaluation.league_scores:
-            return None
+    def evaluate_league_scores(self, member, league):
 
         simulation = member.simulation
         resources = member.resources
-        random_state = simulation.random_state
-
+        evaluation = member.evaluation
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
+        random_state = simulation.random_state
 
         x,y = loader.load_training_data(simulation)
 
         start = time.time()
         pipeline = resources.pipeline
 
-        for league in range(0, member.league+1):
-            if not league in evaluation.league_scores:
-                with WarningInterceptor() as messages:
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings('error')
-                        try:
-                            league_scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=5, error_score='raise')
-                        except Warning as ex:
-                            raise ex
-                    if messages:
-                        raise messages[0]
-                evaluation.league_scores[member.league] = league_scores
-                scores = np.concatenate([ evaluation.league_scores[league] for league in evaluation.league_scores ])
-                evaluation.scores = scores.tolist()
-                evaluation.score = scores.mean()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                league_scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=5, error_score='raise')
+            except Exception as ex:
+                member.fail(ex, "evaluate_league_scores", "AccuracyContest")
+                return None
+
+        evaluation.league_scores[member.league] = league_scores
+        scores = np.concatenate([ evaluation.league_scores[l] for l in evaluation.league_scores ])
+        evaluation.scores = scores.tolist()
+
+        evaluation.score = np.mean(scores)
+        evaluation.score_std = scores.std()
 
         end = time.time()
         duration = end - start
-
         evaluation.durations.append(duration)
-        evaluation.duration = duration
+        evaluation.duration = np.mean(evaluation.durations)
+        evaluation.duration_std = np.std(evaluation.durations)
+
+    def evaluate_member(self, member):
+        super().evaluate_member(member)
+
+        evaluation = member.evaluation
+
+        if not hasattr(evaluation, "league_scores"):
+            evaluation.league_scores = {}
+            evaluation.scores = []
+            evaluation.score = None
+            evaluation.score_std = None
+
+            evaluation.durations = []
+            evaluation.duration = None
+            evaluation.duration_std = None
+
+        if member.league in evaluation.league_scores:
+            return None
+
+        self.evaluate_league_scores(member, member.league)
 
     def contest_members(self, contestant1, contestant2, outcome):
 
@@ -113,27 +124,24 @@ class AccuracyContest(Evaluater):
         # but it has a shorter run-time then have it win instead
 
         winner_scores = winner.evaluation.scores
-        winner_std = np.std(winner_scores)
+        winner_std = winner.evaluation.score_std
         winner_score = winner.evaluation.score
-        winner_durations = winner.evaluation.durations
-        winner_duration = np.mean(winner_durations)
+        winner_duration = winner.evaluation.duration
+
         loser_score = loser.evaluation.score
-        loser_durations = loser.evaluation.durations
-        loser_duration = np.mean(loser_durations)
-        # duration_reversal = loser_score > winner_score - winner_std and loser_duration < winner_duration
-        duration_reversal = False
+        loser_duration = loser.evaluation.duration
 
-        if duration_reversal:
-            victor = 2 if victor == 1 else 1
+        if loser_duration > winner_duration * 3 and loser_score < winner_score - winner_std * 3:
+            # The loser has an excessive run time and has a substantially poorer performance
+            # Kill it outright as its unlikely to be a good solution and will substantially increase the runtime
+            winner.evaluation.accuracy_contest = "Duration short"
+            loser.evaluation.accuracy_contest = "Duration long"
+            loser.fail("Duration long", "contest_members", "accuracy_contest")
+            outcome.unconventional()
+            return None
 
-            winner = contestant1 if victor == 1 else contestant2
-            loser = contestant2 if victor == 1 else contestant1
-
-            winner.evaluation.accuracy_contest = "Duration Win"
-            loser.evaluation.accuracy_contest = "Duration Loss"
-        else:
-            winner.evaluation.accuracy_contest = "Win"
-            loser.evaluation.accuracy_contest = "Loss"
+        winner.evaluation.accuracy_contest = "Win"
+        loser.evaluation.accuracy_contest = "Loss"
         outcome.decisive(victor)
 
     def record_member(self, member, record):
@@ -144,6 +152,11 @@ class AccuracyContest(Evaluater):
             record.accuracy = evaluation.score
         else:
             record.accuracy = None
+
+        if hasattr(evaluation, "score_std"):
+            record.score_std = evaluation.score_std
+        else:
+            record.score_std = None
 
         evaluation = member.evaluation
         if hasattr(evaluation, "duration"):

@@ -42,7 +42,7 @@ def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, s
 
             evaluators.QuickVerifier(),
             evaluators.AccuracyContest(),
-            evaluators.ContestSurvival(),
+            evaluators.ContestJudge(),
             evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
             evaluators.DummyClassifierAccuracy(),
@@ -94,7 +94,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             scorers.Accuracy(),
 
             evaluators.AccuracyContest(),
-            evaluators.ContestSurvival(),
+            evaluators.ContestJudge(),
             evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
             evaluators.DummyClassifierAccuracy(),
@@ -215,5 +215,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    # run_test_simulation()
-    run_benchmark_simulations()
+    run_test_simulation()
+    # run_benchmark_simulations()

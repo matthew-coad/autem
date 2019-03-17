@@ -1,0 +1,89 @@
+---
+title: "Presenting the Autem 100"
+author: "Matthew Coad"
+date: "14 March 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Presenting - The Autem 100
+
+## Introduction
+
+It was well over-two years ago that I had a dramatic encounter with Machine Intelligence. My partners, friends and relatives had banded together to buy me a drone. It was a DJI Mavic-Pro. Receiving it was a complete surprise. Immediately we went down the park to give it a fly.
+
+Everyone I knew had chipped in money to cover the one and a half grand price tag of this little machine. It was something that seriously meant something. But after 30 seconds of flying it I handed the controls to my girl-friend and said "do you want a go"?
+
+She said "Are you sure?"
+
+The answer was yes. Because in those 30 seconds I had a direct encounter with something radically new. A robot basically. And really, you didn't fly it. It flew itself. You just told it where to go. And directly viserally feeling that I was comfortable handing the controls over.
+
+Since them I've spent considerable time and effort learning about the underlying technologies of that machine intelligence with a specific focus on those that would be useful to buisiness. Those that could be readily adapted to my career as a software developer. At the end of last year I then went out to get a job in this new space. Should be a doddle right?
+
+The response was a big-flat zip. I knew that I do some amazing stuff with this technology but really with no-ones word but my own, with out some credentials from a paid gig I couldn't really get the time of day from anyone.
+
+So in an attempt to get past this chicken and egg problem I came up with the Autem 100 project.
+
+### Which is what exactly?
+
+One computer program. One configuration. 100 predictive models for 100 different datasets. Maybe not a top-level professional model  but one "good enough" for many practical purposes. Fully automated machine learning, AutoML for short and there are a handful of research groups working on this problem. And me in my bedroom of course. No clusters. No super-computers. Just me and my laptop.
+
+This is not a click-bait article where I tease you along to "The reveal" so I'll tell you where I'm at. Currently its working and getting an accuracy of about 97% as good as the top predictive models.
+
+So instead of hiring a data scientist for 200K a year, you can use my program, let it run for a few hours, maybe a day, and get an answer 97% as good. Some qualifications of course, and that will take a bit of explaining.
+
+So read on! Okay maybe I am being a bit click-baity. I'm trying to get a job after all.
+
+## How does it work?
+
+For a given predictive modelling problem you can in-principle just try out every possible algorithm and just see which one gives you the best accuracy. Since its easy to describe its easy to write a program that does just this.
+
+However their are several problems with this. The obvious one is that there a vast number of algorithms to try and even for small datasets you get a program that will not finish executing before the heat-death of the universe.
+
+The other is "over-fitting". If you try lots and lots of different solutions, even if you use the appropiate safe-guards, its pretty certain you'll find an algorithm that happens to work really well on the data you happen to have. And when you try it on some new data, which is the point, its not so good. And whats worse you wont know its not working until it all goes horribly wrong.
+
+My solution is a variation on whats known as a "Evolutionary algorithm". It tries lots of possible models, initially choosen at random. Then it creates "child"" models to try by randomly picking settings from two of models that worked well. Then we repeat the process with the children. Its inspired by evolution. The shuffled settings are like the DNA that parents pass onto their children.
+
+The "survival of the fittest" selection of accurate models leads to models that work pretty well, even if in every other regard all the settings were chosen at random. And just like life there is a lot of chaos, but you can get a good answer before the heat death of the universe. Within 15 minutes for some of the smaller datasets!
+
+Whats more it turns out that chaos seems to be important in solving that over-fitting problem.
+
+
+
+worked best. And then we keep repeating
+
+that the algorithm 
+
+It then finds the solutions that work-well and finds new possibilities by shuffling
+
+, and then works out. It tries each one and finds the ones that work well. Then it randomly swaps
+
+
+
+
+Their is a name for this
+
+
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

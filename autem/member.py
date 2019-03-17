@@ -166,8 +166,6 @@ class Member:
         """
         Notify that this member it is finished with, because the simulation has finished
         """
-        if self.alive == 0:
-            raise RuntimeError("Member not alive")
         self.event = "final"
         self.event_time = time.time()
         self.alive = 0

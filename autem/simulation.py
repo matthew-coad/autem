@@ -196,13 +196,8 @@ class Simulation:
             raise RuntimeError("Member not alive")
 
         for component in self.controllers:
-            component_name = component.__class__.__name__
-            try:
-                component.evaluate_member(member)
-                if not member.alive:
-                    break
-            except Exception as ex:
-                member.fail(ex, "evaluate", component_name)
+            component.evaluate_member(member)
+            if not member.alive:
                 break
         if member.alive:
             member.evaluated()

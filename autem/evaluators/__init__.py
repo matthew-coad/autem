@@ -4,7 +4,7 @@ from .accuracy_contest import AccuracyContest
 from .quick_verifier import QuickVerifier
 
 # from .duration_contest import DurationContest
-from .contest_survival import ContestSurvival
+from .contest_judge import ContestJudge
 
 from .cross_val_rater import CrossValidationRater
 from .openML_rater import OpenMLRater

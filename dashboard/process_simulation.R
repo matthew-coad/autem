@@ -199,7 +199,13 @@ build_ranking_detail <- function(battle_df) {
        study,
        experiment,
        ranking,
-       score = rating, 
+       # score = rating,
+       # Rating is based on entire dataset. In order to validate we need
+       # it to based purely on the training dataset
+       # Temporarily base it on accuracy with the sd coming from rating.
+       # Accuracy is now evaluated using cross validation
+       # and its probably okay to use that.
+       score = accuracy, 
        score_sd = rating_sd,
        dummy_score = dummy_accuracy,
        validation_score = validation_accuracy
