@@ -22,7 +22,7 @@ def run_preprocessing():
             scorers.Accuracy(),
             
             evaluators.AccuracyContest(),
-            evaluators.ContestSurvival(),
+            evaluators.ContestJudge(),
             evaluators.CrossValidationRater(),
             evaluators.DummyClassifierAccuracy(),
             evaluators.ValidationAccuracy(),

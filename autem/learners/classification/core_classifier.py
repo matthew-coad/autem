@@ -215,7 +215,7 @@ class LogisticRegression(Learner):
         Learner.__init__(self, "LGR", "Logistic Regression", get_parameters('sklearn.linear_model.LogisticRegression', parameters))
 
     def make_model(self):
-        return sklearn.linear_model.LogisticRegression(solver = 'newton-cg', multi_class = 'ovr')
+        return sklearn.linear_model.LogisticRegression(solver = 'saga', multi_class = 'ovr')
 
 class LinearDiscriminantAnalysis(Learner):
 

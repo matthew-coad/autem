@@ -177,11 +177,10 @@ class Simulation:
             raise RuntimeError("Member already started")
 
         for component in self.hyper_parameters:
-            try:
-                component.prepare_member(member)
-            except Exception as ex:
-                member.fail(ex, "prepare", component_name)
+            component.prepare_member(member)
+            if not member.alive:
                 break
+
         if member.alive:
             member.started()
 
@@ -212,13 +211,7 @@ class Simulation:
 
         outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
         for component in self.controllers:
-            component_name = component.__class__.__name__
-            try:
-                component.contest_members(contestant1, contestant2, outcome)
-            except Exception as ex:
-                contestant1.fail(ex, "contest", component_name)
-                contestant2.fail(ex, "contest", component_name)
-                break
+            component.contest_members(contestant1, contestant2, outcome)
 
         if contestant1.alive and contestant2.alive:
 
@@ -257,12 +250,7 @@ class Simulation:
             raise RuntimeError("Members is not alive")
 
         for component in self.controllers:
-            component_name = component.__class__.__name__
-            try:
-                component.rate_member(member)
-            except Exception as ex:
-                member.fail(ex, "rate", component_name)
-                break
+            component.rate_member(member)
 
     def rank_members(self):
         """
