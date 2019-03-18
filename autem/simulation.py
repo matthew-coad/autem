@@ -62,6 +62,30 @@ class Simulation:
         form.incarnate()
         member.incarnated(form, form.reincarnations)
         self.members.append(member)
+        if not member.initial_mutation_index is None:
+            del self.initial_mutations[member.initial_mutation_index]
+
+    def initial_mutate_member(self, member):
+        """
+        Make an initial mutation to a member
+        """
+        if not member.initial_mutation_index is None:
+            raise RuntimeError("Initial mutation already set")
+
+        initial_mutations = self.initial_mutations
+        if not initial_mutations:
+            return False
+
+        random_state = self.random_state
+        components = self.hyper_parameters
+        mutation_index = random_state.randint(0, len(initial_mutations))
+        member.initial_mutation_index = mutation_index
+        mutation = initial_mutations[mutation_index]
+        group_name = mutation["group_name"]
+        choice_name = mutation["choice_name"]
+        choice = [ c for c in components if c.name == group_name ][0]
+        choice.force_member(member, choice_name)
+        return True
 
     def mutate_member(self, member, transmute):
         """
@@ -71,17 +95,6 @@ class Simulation:
         random_state = self.random_state
         components = self.hyper_parameters
         n_components = len(components)
-        initial_mutations = self.initial_mutations
-
-        if initial_mutations:
-            mutation_index = random_state.randint(0, len(initial_mutations))
-            mutation = initial_mutations[mutation_index]
-            del initial_mutations[mutation_index]
-            group_name = mutation["group_name"]
-            choice_name = mutation["choice_name"]
-            choice = [ c for c in components if c.name == group_name ][0]
-            choice.force_member(member, choice_name)
-            return True
 
         # Work out the component probabilities based on their importance
         # total_p = sum((c.importance for c in components))
@@ -132,12 +145,18 @@ class Simulation:
                 form = self.forms[form_key]
                 if form.incarnations == 0 and form.reincarnations < max_reincarnations:
                     return True
-            self.mutate_member(member, transmute)
-            transmute = False
+            mutated = False
+            if attempts == 0:
+                mutated = self.initial_mutate_member(member)
+                if not mutated:
+                    mutated = self.mutate_member(member, transmute)
+            else:
+                mutated = self.mutate_member(member, False)
+            if not mutated:
+                return False
 
             attempts += 1
             if attempts > max_attempts:
-                # If after 100 tries indicate that we failed
                 return False
 
     def make_initial_mutations(self):

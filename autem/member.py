@@ -15,6 +15,7 @@ class Member:
         self.id = simulation.generate_id()
         self.configuration = SimpleNamespace()
         self.form = None
+        self.initial_mutation_index = None
 
         self.event = "initialized"
         self.event_time = None
