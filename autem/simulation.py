@@ -16,7 +16,7 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 3, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 3, max_reincarnations = 3, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
@@ -24,6 +24,7 @@ class Simulation:
         self.next_id = 1
         self.population_size = population_size
         self.top_league = top_league
+        self.max_reincarnations = max_reincarnations
         self.outline = None
         self.resources = SimpleNamespace()
         self.hyper_parameters = None
@@ -50,7 +51,7 @@ class Simulation:
         """
         Incarnate the selected member
         """
-        if not member.form is None:
+        if member.alive:
             raise RuntimeError("Member has already been incarnated")
         form_key = repr(member.configuration)
         if form_key in self.forms:
@@ -58,8 +59,8 @@ class Simulation:
         else:
             form = Form(self.generate_id(), form_key)
             self.forms[form_key] = form
-        form.count += 1
-        member.incarnated(form, form.count)
+        form.incarnate()
+        member.incarnated(form, form.reincarnations)
         self.members.append(member)
 
     def mutate_member(self, member, transmute):
@@ -118,6 +119,8 @@ class Simulation:
         attempts = 0
         max_attempts = 100
         random_state = self.random_state
+        max_reincarnations = self.max_reincarnations
+
         # Sometimes transmute the first mutation attept
         transmute = random_state.random_sample() <= self.transmutation_rate
         while True:
@@ -125,6 +128,9 @@ class Simulation:
             if member.fault is None:
                 form_key = repr(member.configuration)
                 if not form_key in self.forms:
+                    return True
+                form = self.forms[form_key]
+                if form.incarnations == 0 and form.reincarnations < max_reincarnations:
                     return True
             self.mutate_member(member, transmute)
             transmute = False
@@ -229,6 +235,7 @@ class Simulation:
         """
         self.members.remove(member)
         self.graveyard.append(member)
+        member.form.disembody()
 
     def rate_member(self, member):
         """
