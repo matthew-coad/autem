@@ -22,6 +22,8 @@ class ContestJudge(Evaluater):
         simulation = contestant1.simulation
 
         max_contests = min(len(contestant1.wonlost), len(contestant2.wonlost))
+        if max_contests == 0:
+            return None
 
         loser = contestant2 if outcome.victor == 1 else contestant1
         loser_wonlost = loser.wonlost[-max_contests:]

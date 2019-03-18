@@ -5,6 +5,7 @@ import numpy as np
 from scipy import stats
 
 from sklearn.model_selection import cross_val_score
+import warnings
 
 class CrossValidationRater(Evaluater):
     """
@@ -29,7 +30,14 @@ class CrossValidationRater(Evaluater):
 
         x,y = loader.load_training_data(simulation)
         pipeline = member.resources.pipeline
-        scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
+            except Exception as ex:
+                member.fail(ex, "rate_member", "CrossValidationRater")
+                return None
 
         rating = scores.mean()
         rating_sd = scores.std()

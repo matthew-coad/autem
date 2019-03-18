@@ -6,6 +6,9 @@ from scipy import stats
 
 from sklearn.model_selection import cross_val_score
 
+import warnings
+
+
 class ValidationAccuracy(Evaluater):
     """
     Performs final validation by fitting the pipeline to the entire training data set
@@ -26,10 +29,16 @@ class ValidationAccuracy(Evaluater):
         x_validation, y_validation = loader.load_validation_data(simulation)
 
         pipeline = member.resources.pipeline
-        pipeline.fit(x, y)
-        y_pred = pipeline.predict(x_validation)
-        validation_accuracy = scorer.score(y_validation, y_pred)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                pipeline.fit(x, y)
+                y_pred = pipeline.predict(x_validation)
+            except Exception as ex:
+                member.fail(ex, "rate_member", "ValidationAccuracy")
+                return None
 
+        validation_accuracy = scorer.score(y_validation, y_pred)
         member.ratings.validation_accuracy = validation_accuracy
 
     def record_member(self, member, record):

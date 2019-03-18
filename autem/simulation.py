@@ -16,14 +16,14 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 6, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 3, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
         self.population_size = population_size
-        self.top_league = 6
+        self.top_league = top_league
         self.outline = None
         self.resources = SimpleNamespace()
         self.hyper_parameters = None
@@ -282,7 +282,7 @@ class Simulation:
 
     def choose_competitors(self):
         # Choose one contestant at random
-        candidates = self.members
+        candidates = [ m for m in self.members if m.alive ]
         if len(candidates) < 2:
             raise RuntimeError("Need at least 2 members to choose from")
         random_state = self.random_state

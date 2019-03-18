@@ -4,7 +4,7 @@ from .evaluator import Evaluater
 import numpy as np
 from scipy import stats
 
-from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split, cross_val_predict
 from sklearn.pipeline import Pipeline
 
 import time
@@ -97,7 +97,7 @@ class AccuracyContest(Evaluater):
             # Accuracies are identical
             # Simulation can get stuck here
             # Kill one member at random
-            contestant1.fail("Top score identical", "evaluate", "accuracy_contest")
+            #contestant1.fail("Top score identical", "evaluate", "accuracy_contest")
             contestant1.evaluation.accuracy_contest = "Top score identical"
             contestant1.evaluation.accuracy_contest = "Top score identical"
             outcome.unconventional()
