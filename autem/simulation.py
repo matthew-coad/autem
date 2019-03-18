@@ -16,7 +16,7 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 3, max_reincarnations = 3, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 4, max_reincarnations = 3, initial_component_repeats = 3, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
@@ -41,6 +41,7 @@ class Simulation:
         self.running = False
         self.n_jobs = n_jobs
         self.transmutation_rate = 0.5
+        self.initial_component_repeats = initial_component_repeats
 
     def generate_id(self):
         id = self.next_id
@@ -165,7 +166,7 @@ class Simulation:
         The initial mutation list ensures that every component choice gets selected a minimum number of times
         """
         mutations = []
-        for repeat in range(2):
+        for repeat in range(self.initial_component_repeats):
             for component in self.hyper_parameters:
                 if isinstance(component, Choice):
                     choice_names = component.get_component_names()
