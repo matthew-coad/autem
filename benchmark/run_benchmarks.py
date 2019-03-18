@@ -217,5 +217,5 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    #run_test_simulation()
-    run_benchmark_simulations()
+    run_test_simulation()
+    # run_benchmark_simulations()

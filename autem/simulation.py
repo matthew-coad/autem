@@ -101,28 +101,38 @@ class Simulation:
                 return True
         return False
 
+    def prepare_member(self, member):
+        """
+        Perform once off member preparation
+        """
+        member.prepare()
+        for component in self.hyper_parameters:
+            component.prepare_member(member)
+            if not member.fault is None:
+                break
+
     def specialize_member(self, member):
         """
         Make sure that the member has a new unique form
         """
         attempts = 0
         max_attempts = 100
-        searching = True
         random_state = self.random_state
         # Sometimes transmute the first mutation attept
         transmute = random_state.random_sample() <= self.transmutation_rate
-        while searching:
+        while True:
+            self.prepare_member(member)
+            if member.fault is None:
+                form_key = repr(member.configuration)
+                if not form_key in self.forms:
+                    return True
+            self.mutate_member(member, transmute)
+            transmute = False
+
             attempts += 1
             if attempts > max_attempts:
                 # If after 100 tries indicate that we failed
                 return False
-            form_key = repr(member.configuration)
-            if form_key in self.forms:
-                self.mutate_member(member, transmute)
-                transmute = False
-            else:
-                searching = False
-        return True
 
     def make_initial_mutations(self):
         """
@@ -166,31 +176,10 @@ class Simulation:
         else:
             return None
 
-    def prepare_member(self, member):
-        """
-        Perform once off member preparation
-        """
-        if not member.alive:
-            raise RuntimeError("Member is not alive")
-
-        if member.starts:
-            raise RuntimeError("Member already started")
-
-        for component in self.hyper_parameters:
-            component.prepare_member(member)
-            if not member.alive:
-                break
-
-        if member.alive:
-            member.started()
-
     def evaluate_member(self, member):
         """
         Perform a round of member evaluation
         """
-        if not member.started:
-            raise RuntimeError("Member not started")
-
         if not member.alive:
             raise RuntimeError("Member not alive")
 

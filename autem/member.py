@@ -16,20 +16,19 @@ class Member:
         self.configuration = SimpleNamespace()
         self.form = None
 
+        self.event = "initialized"
+        self.event_time = None
+
         self.alive = 0
         self.incarnation = 0
         self.final = 0
 
-        self.event = "initialized"
-        self.event_time = None
+        self.resources = None
 
         self.fault = None
         self.fault_operation = None
         self.fault_component = None
         self.fault_message = None
-
-        self.resources = SimpleNamespace()
-        self.starts = 0
 
         self.evaluation = SimpleNamespace()
 
@@ -48,6 +47,16 @@ class Member:
 
         self.ranking = None
 
+    def prepare(self):
+        """
+        Prepare this member for incarnation
+        """
+        self.resources = SimpleNamespace()
+        self.fault = None
+        self.fault_operation = None
+        self.fault_component = None
+        self.fault_message = None
+
     def incarnated(self, form, incarnation):
         """
         Notify this member that it has incarnated
@@ -59,14 +68,6 @@ class Member:
         self.alive = 1
         self.event = "birth"
         self.event_time = time.time()
-
-    def started(self):
-        """
-        Notify this member that it has been started
-        """
-        if self.starts:
-            raise RuntimeError("Member already started")
-        self.starts += 1
 
     def evaluated(self):
         self.event = "evaluated"
