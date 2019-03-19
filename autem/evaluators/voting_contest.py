@@ -23,42 +23,6 @@ class VotingContest(Evaluater):
         """
         self.p_value = p_value
 
-    def evaluate_member(self, member):
-        """
-        Evaluate the cross validated predictions for the given member
-        provided it is at the maximum league level
-        """
-        simulation = member.simulation
-        resources = member.resources
-        evaluation = member.evaluation
-        loader = simulation.resources.loader
-        estimator = resources.pipeline
-
-        top_league = simulation.top_league
-        if member.league < top_league:
-            return None
-
-        if hasattr(evaluation, "predictions"):
-            return None
-
-        x,y = loader.load_training_data(simulation)
-
-        start = time.time()
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            try:
-                predictions = cross_val_predict(estimator, x, y, cv=5)
-            except Exception as ex:
-                member.fail(ex, "evaluate_predictions", "DiversityContest")
-                return None
-
-        end = time.time()
-        duration = end - start
-
-        evaluation.predictions = predictions
-        evaluation.prediction_duration = duration
-
     def calculate_voting_predictions(self, members):
         """
         Calculate the voting predictions for a list of members
