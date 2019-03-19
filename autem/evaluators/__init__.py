@@ -2,7 +2,7 @@ from .evaluator import Evaluater
 
 from .accuracy_contest import AccuracyContest
 from .voting_contest import VotingContest
-from .diversity_contest import DiversityContest
+from .diverse_contest import DiverseContest
 from .quick_verifier import QuickVerifier
 
 # from .duration_contest import DurationContest

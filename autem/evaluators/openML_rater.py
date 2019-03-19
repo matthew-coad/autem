@@ -5,6 +5,7 @@ import openml
 
 import numpy as np
 from scipy import stats
+import warnings
 
 class OpenMLRater(Evaluater):
     """

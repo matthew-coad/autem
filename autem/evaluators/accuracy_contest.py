@@ -93,20 +93,7 @@ class AccuracyContest(Evaluater):
         contestant2_score = contestant2.evaluation.score
         top_league = simulation.top_league
 
-        if contestant1_score == contestant2_score and contestant1.league == contestant2.league and contestant1.league == top_league:
-            # Accuracies are identical
-            # Simulation can get stuck here
-            # Kill one member at random
-            #contestant1.fail("Top score identical", "evaluate", "accuracy_contest")
-            contestant1.evaluation.accuracy_contest = "Top score identical"
-            contestant1.evaluation.accuracy_contest = "Top score identical"
-            outcome.unconventional()
-            return None
-        elif contestant1_score == contestant2_score and contestant1.league < contestant2.league:
-            victor = 1
-        elif contestant1_score == contestant2_score and contestant2.league < contestant2.league:
-            victor = 2
-        elif contestant1_score == contestant2_score and contestant1.id < contestant2.id:
+        if contestant1_score == contestant2_score and contestant1.id < contestant2.id:
             victor = 1
         elif contestant1_score == contestant2_score and contestant1.id > contestant2.id:
             victor = 2
