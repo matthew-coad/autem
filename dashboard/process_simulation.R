@@ -38,6 +38,7 @@ read_battle_file <- function(file_name) {
     defeats = col_integer(),
     data = col_character(),
     accuracy = col_double(),
+    score = col_double(),
     top_accuracy = col_double(),
     top_1p_accuracy = col_double(),
     top_5p_accuracy = col_double(),
@@ -134,7 +135,8 @@ build_step_detail <- function(battle_df) {
       mutate(
         study = paste0("S", version),
         experiment = paste0(dataset),
-        league = famous
+        league = famous,
+        score = accuracy
       ) 
 
   step_df8 <-
@@ -143,11 +145,25 @@ build_step_detail <- function(battle_df) {
   if (nrow(step_df8) > 0)  
     step_df8 <- 
       step_df8 %>%
-      mutate(league = famous)
+      mutate(
+        league = famous,
+        score = accuracy
+      )
   
   step_df9 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) >= 9)
+    filter(as.integer(as.character(version)) == 9)
+  if (nrow(step_df9) > 0)  
+    step_df9 <- 
+    step_df9 %>%
+    mutate(
+      score = accuracy
+    )
+  
+  step_df10 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) >= 10)
+  
   
   bind_df <- function(step_df, df) {
     if (nrow(df) == 0)
@@ -161,6 +177,7 @@ build_step_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df7)
   step_df <- bind_df(step_df, step_df8)
   step_df <- bind_df(step_df, step_df9)
+  step_df <- bind_df(step_df, step_df10)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
@@ -177,7 +194,7 @@ build_step_detail <- function(battle_df) {
       league,
       alive,
       final,
-      score = accuracy,
+      score,
       duration,
       Scaler:LGR_dual
     )
@@ -187,17 +204,43 @@ build_step_detail <- function(battle_df) {
 build_ranking_detail <- function(battle_df) {
   step_df7 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) <= 7) %>%
-    mutate(
-      study = paste0("S", version),
-      experiment = paste0(dataset)
-    )
+    filter(as.integer(as.character(version)) <= 7)
+  if (nrow(step_df7) > 0)
+    step_df7 <- step_df7 %>%
+      mutate(
+        study = paste0("S", version),
+        experiment = paste0(dataset),
+        score = accuracy
+      )
+  
   step_df8 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) >= 8)
+    filter(as.integer(as.character(version)) >= 8 && as.integer(as.character(version)) <= 9)
+  if (nrow(step_df8) > 0)
+    step_df8 <- step_df8 %>%
+      mutate(
+        score = accuracy
+      )
   
+  step_df10 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) >= 10)
+
+  bind_df <- function(step_df, df) {
+    if (nrow(df) == 0)
+      return (step_df)
+    if (is.null(step_df)) {
+      return (df)
+    }
+    bind_rows(step_df, df)
+  }
+  step_df <- NULL
+  step_df <- bind_df(step_df, step_df7)
+  step_df <- bind_df(step_df, step_df8)
+  step_df <- bind_df(step_df, step_df10)
+
   ranking_df <-
-    bind_rows(step_df7, step_df8) %>%
+    step_df %>%
     filter(!is.na(ranking)) %>%
     select(
        study,
@@ -209,7 +252,7 @@ build_ranking_detail <- function(battle_df) {
        # Temporarily base it on accuracy with the sd coming from rating.
        # Accuracy is now evaluated using cross validation
        # and its probably okay to use that.
-       score = accuracy, 
+       score, 
        score_sd = rating_sd,
        dummy_score = dummy_accuracy,
        validation_score = validation_accuracy

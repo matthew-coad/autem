@@ -1,5 +1,7 @@
 from .evaluator import Evaluater
 
+from .score_evaluator import ScoreEvaluator
+
 from .accuracy_contest import AccuracyContest
 from .voting_contest import VotingContest
 from .diverse_contest import DiverseContest

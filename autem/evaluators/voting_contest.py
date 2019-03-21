@@ -23,15 +23,15 @@ class VotingContest(Evaluater):
         """
         self.p_value = p_value
 
-    def calculate_voting_predictions(self, members):
+    def calculate_voting_predictions(self, members, league):
         """
         Calculate the voting predictions for a list of members
         """
-        votes = np.array([ m.evaluation.predictions for m in members ])
+        votes = np.array([ m.evaluation.league_predictions[league].astype(int) for m in members ])
         predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=0, arr=votes)
         return predictions
 
-    def calculate_score_boost(self, member, base_members):
+    def calculate_score_boost(self, member, base_members, league):
         """
         Calculate the boost that a member gives to the hard voting prediction of a set of stacked members
         """
@@ -40,11 +40,11 @@ class VotingContest(Evaluater):
         loader = simulation.resources.loader
 
         x,y = loader.load_training_data(simulation)
-        base_predictions = self.calculate_voting_predictions(base_members)
+        base_predictions = self.calculate_voting_predictions(base_members, league)
         base_score = scorer.score(y, base_predictions)
 
         combined_members = base_members + [ member ]
-        combined_predictions = self.calculate_voting_predictions(combined_members)
+        combined_predictions = self.calculate_voting_predictions(combined_members, league)
         combined_score = scorer.score(y, combined_predictions)
 
         score_boost = combined_score - base_score
@@ -60,19 +60,16 @@ class VotingContest(Evaluater):
         simulation = contestant1.simulation
 
         top_league = simulation.top_league
-        if contestant1.league < top_league or contestant2.league < top_league:
+        if not top_league in contestant1.evaluation.league_predictions or not top_league in contestant2.evaluation.league_predictions:
             return None
 
-        if not hasattr(contestant1.evaluation, "predictions") or not hasattr(contestant2.evaluation, "predictions"):
-            return None
-
-        base_members = [ m for m in simulation.members if m.league == top_league and m.id != contestant1.id and m.id != contestant2.id and hasattr(m.evaluation, "predictions")]
+        base_members = [ m for m in simulation.members if m.league == top_league and m.id != contestant1.id and m.id != contestant2.id and top_league in m.evaluation.league_predictions]
         if not base_members:
             return None
 
-        contestant1_boost = self.calculate_score_boost(contestant1, base_members)
+        contestant1_boost = self.calculate_score_boost(contestant1, base_members, top_league)
         contestant1.evaluation.voting_boost = contestant1_boost
-        contestant2_boost = self.calculate_score_boost(contestant2, base_members)
+        contestant2_boost = self.calculate_score_boost(contestant2, base_members, top_league)
         contestant2.evaluation.voting_boost = contestant2_boost
 
         if contestant1_boost > contestant2_boost:

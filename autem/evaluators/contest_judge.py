@@ -37,7 +37,6 @@ class ContestJudge(Evaluater):
         eliminate = robustness_p < self.p_value
         if eliminate:
             loser.eliminate()
-            winner.eliminator()
             loser.evaluation.contest_survival = "%d|%d eliminate" % (loser_victories, max_contests)
         else:
             loser.evaluation.contest_survival = "%d|%d survive" % (loser_victories, max_contests)

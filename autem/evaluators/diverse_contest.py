@@ -22,37 +22,6 @@ class DiverseContest(Evaluater):
         """
         self.max_score = max_score
 
-    def evaluate_member(self, member):
-        """
-        Evaluate the cross validated predictions for the given member
-        """
-        simulation = member.simulation
-        resources = member.resources
-        evaluation = member.evaluation
-        loader = simulation.resources.loader
-        estimator = resources.pipeline
-
-        if hasattr(evaluation, "predictions"):
-            return None
-
-        x,y = loader.load_training_data(simulation)
-
-        start = time.time()
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            try:
-                predictions = cross_val_predict(estimator, x, y, cv=5)
-            except Exception as ex:
-                member.fail(ex, "evaluate_predictions", "DiverseContest")
-                return None
-
-        end = time.time()
-        duration = end - start
-
-        evaluation.predictions = predictions
-        evaluation.prediction_duration = duration
-
     def contest_members(self, contestant1, contestant2, outcome):
 
         contestant1.evaluation.inter_score = None
@@ -67,7 +36,12 @@ class DiverseContest(Evaluater):
         if max_league == 0:
             return None
 
-        inter_score = scorer.score(contestant1.evaluation.predictions, contestant2.evaluation.predictions)
+        if not max_league in contestant1.evaluation.league_predictions or not max_league in contestant2.evaluation.league_predictions:
+            return None
+
+        contestant1_predictions = contestant1.evaluation.league_predictions[max_league]
+        contestant2_predictions = contestant2.evaluation.league_predictions[max_league]
+        inter_score = scorer.score(contestant1_predictions, contestant2_predictions)
         contestant1.evaluation.inter_score = inter_score
         contestant2.evaluation.inter_score = inter_score
         if inter_score < self.max_score:

@@ -18,7 +18,6 @@ class Member:
         self.initial_mutation_index = None
 
         self.event = "initialized"
-        self.event_time = None
 
         self.alive = 0
         self.incarnation = 0
@@ -32,13 +31,13 @@ class Member:
         self.fault_message = None
 
         self.evaluation = SimpleNamespace()
+        self.evaluations = 0
+        self.evaluation_time = None
+        self.evaluation_duration = None
 
         self.contests = 0
-        self.evaluations = 0
-        self.standoffs = 0
         self.victories = 0
         self.defeats = 0
-        self.eliminations = 0
         self.wonlost = []
         self.league = 0
 
@@ -68,28 +67,20 @@ class Member:
         self.incarnation = incarnation
         self.alive = 1
         self.event = "birth"
-        self.event_time = time.time()
 
-    def evaluated(self):
-        self.event = "evaluated"
-        self.event_time = time.time()
+    def evaluating(self):
+        self.event = "evaluate"
+        self.evaluation_time = time.time()
         self.evaluations += 1
 
-    def stand_off(self):
-        """
-        Record a stand off
-        """
-        self.contests += 1
-        self.standoffs += 1
-        self.event = "standoff"
-        self.event_time = time.time()
+    def evaluated(self, duration):
+        self.evaluation_duration = duration
 
     def victory(self):
         """
         Record a victory
         """
         self.event = "victory"
-        self.event_time = time.time()
         self.contests += 1
         self.victories += 1
         self.wonlost.append(1)
@@ -99,7 +90,6 @@ class Member:
         Record a defeat
         """
         self.event = "defeat"
-        self.event_time = time.time()
         self.contests += 1
         self.defeats += 1 
         self.wonlost.append(0)
@@ -111,7 +101,6 @@ class Member:
         # When a member gets a promotion it wonlost record is erased
         # From now on only contests at the higher league level will count
         self.event = "promotion"
-        self.event_time = time.time()
         if league is None:
             self.league += 1
         else:
@@ -126,25 +115,15 @@ class Member:
         """
         Eliminate this member
         """
-        self.event = "eliminate"
-        self.event_time = time.time()
+        self.event = "death"
         self.alive = 0
         self.final = 1
-
-    def eliminator(self):
-        """
-        Notify member that they eliminated another member
-        """
-        self.event = "eliminator"
-        self.event_time = time.time()
-        self.eliminations += 1
 
     def fail(self, fault, operation, component):
         """
         Fault this member
         """
         self.event = "fail"
-        self.event_time = time.time()
         self.fault = fault
         self.fault_operation = operation
         self.fault_component = component
@@ -169,6 +148,5 @@ class Member:
         Notify that this member it is finished with, because the simulation has finished
         """
         self.event = "final"
-        self.event_time = time.time()
         self.alive = 0
         self.final = 1

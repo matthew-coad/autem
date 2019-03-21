@@ -21,60 +21,8 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-study = "voting"
-version = 9
-
-def make_openml_tune_classifier_simulation(baseline_name, experiment, task_id, seed, population_size, path, properties = {}):
-    task = openml.tasks.get_task(task_id)
-    data_id = task.dataset_id
-    dataset = openml.datasets.get_dataset(data_id)
-    dataset_name = dataset.name
-    simulation_name = "%s_%s_v%d" % (experiment, baseline_name, version)
-    properties['dataset'] = dataset_name
-    properties['experiment'] = experiment
-    properties['version'] = version
-    
-    simulation = autem.Simulation(
-        simulation_name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-
-            evaluators.QuickVerifier(),
-            evaluators.AccuracyContest(),
-            evaluators.ContestJudge(),
-            evaluators.CrossValidationRater(),
-            evaluators.OpenMLRater(task_id),
-            evaluators.DummyClassifierAccuracy(),
-            evaluators.ValidationAccuracy(),
-            BenchmarkScorer(),
-
-            reporters.Path(path),
-
-            # Imputers
-            preprocessors.SimpleImputer([]),
-
-            # Scalers
-            preprocessors.Normalizer({}),
-            preprocessors.StandardScaler(),
-
-            autem.Choice("Learner", [
-                learners.GaussianNB(),
-                learners.BernoulliNB(),
-                learners.MultinomialNB(),
-                learners.DecisionTreeClassifier(),
-                learners.KNeighborsClassifier(),
-                learners.LinearSVC(),
-                learners.LogisticRegression(),
-                learners.LinearDiscriminantAnalysis(),
-                learners.RandomForestClassifier(),
-                learners.ExtraTreesClassifier(),
-            ]),
-        ], 
-        population_size = population_size,
-        seed = seed,
-        properties = properties)
-    return simulation
+study = "quick"
+version = 10
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -84,7 +32,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
     simulation_name = "%s_%s_v%d" % (study, experiment, version)
     properties['study'] = study
     properties['experiment'] = experiment
-    properties['dataset'] = dataset_name
+    properties['dataset'] = dataset_name        
     properties['version'] = version
     
     simulation = autem.Simulation(
@@ -93,11 +41,13 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
+            evaluators.ScoreEvaluator(),
             evaluators.AccuracyContest(),
             evaluators.DiverseContest(0.99),
             evaluators.VotingContest(),
             evaluators.SurvivalJudge(),
             evaluators.PromotionJudge(),
+
             evaluators.CrossValidationRater(),
             evaluators.OpenMLRater(task_id),
             evaluators.DummyClassifierAccuracy(),
@@ -180,7 +130,7 @@ def run_test_simulation(seed = None):
     task_id = configuration["task_id"]
     seed = seed if not seed is None else 2
     steps = 100
-    epochs = 50
+    epochs = 40
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(experiment)
 
@@ -218,10 +168,10 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    run_benchmark_simulations()
+    # run_benchmark_simulations()
     # run_test_simulation()
-    # run_test_simulation(seed = 1)
-    # run_test_simulation(seed = 2)
-    # run_test_simulation(seed = 3)
-    # run_test_simulation(seed = 4)
-    # run_test_simulation(seed = 5)
+    run_test_simulation(seed = 1)
+    run_test_simulation(seed = 2)
+    run_test_simulation(seed = 3)
+    run_test_simulation(seed = 4)
+    run_test_simulation(seed = 5)

@@ -31,7 +31,6 @@ class Simulation:
         self.controllers = None
         self.initial_mutations = []
         self.members = []
-        self.graveyard = []
         self.failures = []
         self.forms = {}
         self.ranking = None
@@ -209,12 +208,15 @@ class Simulation:
         if not member.alive:
             raise RuntimeError("Member not alive")
 
+        member.evaluating()
+        start_time = time.time()
         for component in self.controllers:
             component.evaluate_member(member)
             if not member.alive:
                 break
-        if member.alive:
-            member.evaluated()
+        end_time = time.time()
+        duration = end_time - start_time
+        member.evaluated(duration)
 
     def contest_members(self, contestant1, contestant2):
 
@@ -229,10 +231,6 @@ class Simulation:
             component.contest_members(contestant1, contestant2, outcome)
 
         if contestant1.alive and contestant2.alive:
-
-            if outcome.is_inconclusive():
-                contestant1.stand_off()
-                contestant2.stand_off()
 
             if outcome.is_zero_sum():
                 winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
@@ -251,10 +249,9 @@ class Simulation:
 
     def bury_member(self, member):
         """
-        Remove a member from the active pool and move them to the graveyard
+        Remove a member from the active pool
         """
         self.members.remove(member)
-        self.graveyard.append(member)
         member.form.disembody()
 
     def rate_member(self, member):
@@ -492,10 +489,8 @@ class Simulation:
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
-
         outline.append_attribute("victories", Dataset.Battle, [Role.Property])
         outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
-        outline.append_attribute("eliminations", Dataset.Battle, [Role.Property])
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
@@ -518,8 +513,9 @@ class Simulation:
         record.member_id = member_id
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
+        record.time = time.ctime(member.evaluation_time)
         record.event = member.event
-        record.time = time.ctime(member.event_time)
+        record.duration = member.evaluation_duration
         record.fault = member.fault_message
 
         record.rating = member.rating
@@ -532,7 +528,6 @@ class Simulation:
 
         record.victories = member.victories
         record.defeats = member.defeats
-        record.eliminations = member.eliminations
 
         for component in self.components:
             component.record_member(member, record)
