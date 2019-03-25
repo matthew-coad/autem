@@ -1,0 +1,154 @@
+---
+title: "Component Exploration"
+output: html_notebook
+---
+
+# Exploration of how to visualize the performance of components.
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(memoise)
+
+```
+
+
+
+```{r}
+
+step_detail_df <- read_rds("data\\step_detail.RDS")
+epoch_detail_df <- read_rds("data\\epoch_detail.RDS")
+simulation_summary_df <- read_rds("data\\simulation_summary.RDS")
+dataset_summary_df <- read_rds("data\\dataset_summary.RDS")
+baseline_detail_df <- read_rds("data\\baseline_detail.RDS")
+baseline_summary_df <- read_rds("data\\baseline_summary.RDS")
+breakdown_df <- read_rds("data\\breakdown.RDS")
+
+experiment_list <- sort(unique(simulation_summary_df$experiment))
+breakdown_list <- breakdown_df$breakdown
+choices_list <- c("Learner", "Scaler", "Selector", "Reducer", "Approximator")
+
+.choice1 <- "Learner"
+.choice2 <- "Scaler"
+.experiment <- "credit-g"
+
+```
+
+## Component usage counts
+
+```{r}
+
+component_summary <- function(.choice) { 
+  step_detail_df %>% 
+    filter(experiment == .experiment) %>%
+    group_by_at(c("study", "experiment", .choice)) %>% 
+    summarise(n = length(unique(form_id))) %>%
+    mutate(choice = choice) %>%
+    select(study, experiment, choice, component = !! .choice, n)
+}
+
+choices_summary_df <-  
+  purrr::map_dfr(choices_list,  choice_summary) %>%
+  mutate(choice = factor(choice))
+
+choices_summary_df %>%
+  ggplot() +
+  geom_col(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = n, fill = choice)) + 
+  coord_flip() +
+  xlab("Component") +
+  facet_wrap(~ study)
+
+```
+
+## Component scores 
+
+```{r}
+
+choice_scores <- function(choice) { 
+  step_detail_df %>% 
+    filter(alive == 0, !is.na(score)) %>%
+    mutate(choice = choice) %>%
+    select(study, experiment, choice, component = !! choice, score)
+}
+
+choices_score_df <-  
+  purrr::map_dfr(choices_list,  choice_scores) %>%
+  mutate(choice = factor(choice))
+
+choices_score_df %>%
+  filter(experiment == "diabetes") %>%
+  ggplot() +
+  geom_point(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = score, color = choice)) + 
+  coord_flip() +
+  xlab("Component") +
+  facet_wrap(~ study)
+
+```
+
+# Form summary
+
+```{r}
+
+step_detail_df %>% 
+  filter(study == "short", experiment == "irish") %>%
+  filter(alive == 0, !is.na(score)) %>%
+  group_by(study, experiment, form_id) %>% 
+
+```
+
+# Component combinations
+
+Select two dimensions. Display combinations. Heat map or count
+
+```{r}
+
+choice_cross_summary <- function(choice1, choice2) { 
+  step_detail_df %>% 
+    filter(alive == 0, !is.na(score)) %>%
+    group_by_at(c("study", "experiment", choice1, choice2)) %>% 
+    summarise(n = n(), score_mean = mean(score), score_max = max(score), score_min = min(score), score_sd = sd(score)) %>%
+    select(study, experiment, !! choice1, !! choice2, n, score_mean, score_sd)
+}
+
+choices_cross_df <- choice_cross_summary(.choice1, .choice2) %>% filter(experiment == .experiment)
+
+choices_cross_df %>%
+  
+  ggplot() +
+  geom_tile(aes(x = !! sym(choice1), y = !! sym(choice2), fill = score_mean), colour = "white") +  
+  geom_point(aes(x = !! sym(choice1), y = !! sym(choice2), size = n), colour = "orange") +  
+  scale_size_continuous(trans = "log2") +
+  facet_wrap(~ study)
+
+
+```
+
+# Score grid
+
+Select two dimensions. Display combinations. Heat map or count
+
+```{r}
+
+choice2_detail <- function(choice1, choice2) { 
+  step_detail_df %>% 
+    filter(alive == 0, !is.na(score)) %>%
+    mutate(choice1 = choice1, choice2 = choice2) %>%
+    select(study, experiment, choice, component1 = !! choice1, component2 = !! choice2, score)
+  
+}
+
+.choice1 <- "Learner"
+.choice2 <- "Scaler"
+.experiment <- "diabetes"
+choice2_detail_df <- choice2_detail(.choice1, .choice2) %>% filter(experiment == .experiment)
+
+choice2_detail_df %>%
+  ggplot() +
+  geom_boxplot(aes(x = component1, y = score)) +  
+  facet_wrap(component2 ~ study) +
+  coord_flip()
+
+
+```
+

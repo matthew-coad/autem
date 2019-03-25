@@ -51,7 +51,8 @@ Sidebar {.sidebar}
 renderUI({
   tagList(
     selectInput("experiment", "Experiment:", experiment_rlist()),
-    selectInput("breakdown", "Breakdown:", breakdown_rlist())
+    selectInput("breakdown", "Breakdown 1:", breakdown_rlist()),
+    selectInput("breakdown2", "Breakdown 2:", breakdown_rlist())
   )
 })
 
@@ -432,3 +433,144 @@ renderPlot({
 })
 
 ```
+
+Components {data-orientation=rows}
+=====================================
+
+Top
+-----------------------------------------------------------------------
+
+### Counts
+
+```{r}
+
+renderPlot({
+  req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  choices_list <- breakdown_rlist()
+  
+  build_component_summary <- function(.choice) { 
+    step_detail_df %>% 
+      filter(alive == 0) %>%
+      group_by_at(c("study", "experiment", .choice)) %>% 
+      summarise(n = n()) %>%
+      mutate(choice = .choice) %>%
+      select(study, experiment, choice, component = !! .choice, n)
+  }
+  
+  choices_summary_df <-  
+    purrr::map_dfr(choices_list,  build_component_summary) %>%
+    mutate(choice = factor(choice))
+  
+  choices_summary_df %>%
+    ggplot() +
+    geom_col(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = n, fill = choice)) + 
+    coord_flip() +
+    xlab("Component") +
+    facet_wrap(~ study)
+})
+```
+
+### Scores 
+
+```{r}
+
+renderPlot({
+  req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  choices_list <- breakdown_rlist()
+  
+  build_choice_scores <- function(choice) { 
+    step_detail_df %>% 
+      filter(alive == 0, !is.na(score)) %>%
+      mutate(choice = choice) %>%
+      select(study, experiment, choice, component = !! choice, score)
+  }
+  
+  choices_score_df <-  
+    purrr::map_dfr(choices_list,  build_choice_scores) %>%
+    mutate(choice = factor(choice))
+  
+  choices_score_df %>%
+    ggplot() +
+    geom_point(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = score, color = choice)) +
+    coord_flip() +
+    xlab("Component") +
+    facet_wrap(~ study)
+
+})
+
+```
+
+Bottom
+-----------------------------------------------------------------------
+
+### Duration
+
+```{r}
+renderPlot({
+  req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  choices_list <- breakdown_rlist()
+  
+  build_choice_durations <- function(choice) { 
+    step_detail_df %>% 
+      filter(alive == 0, !is.na(score)) %>%
+      mutate(choice = choice) %>%
+      select(study, experiment, choice, component = !! choice, duration)
+  }
+  
+  durations_score_df <-  
+    purrr::map_dfr(choices_list,  build_choice_durations) %>%
+    mutate(choice = factor(choice))
+  
+  durations_score_df %>%
+    ggplot() +
+    geom_point(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = duration, color = choice)) + 
+    coord_flip() +
+    xlab("Component") +
+    facet_wrap(~ study)
+
+})
+
+```
+
+### Place
+
+Components X {data-orientation=rows}
+=====================================
+
+### Score grid
+
+```{r}
+
+renderPlot({
+  req(breakdown_rlist(), step_detail_rdf(), input$experiment, input$breakdown, input$breakdown2, cancelOutput = TRUE)
+  
+  .choice1 <- input$breakdown
+  .choice2 <- input$breakdown2
+
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+
+  choice2_detail_df <-
+    step_detail_df %>% 
+    filter(alive == 0, !is.na(score)) %>%
+    mutate(
+      component1 = !! sym(.choice1), 
+      component2 = !! sym(.choice2)
+    ) %>%
+    select(study, experiment, component1, component2, score)
+  
+  choice2_detail_df %>%
+    ggplot() +
+    geom_point(aes(x = component2, y = score)) +  
+    facet_wrap(component1 ~ study) +
+    coord_flip()
+
+})
+
+```
+

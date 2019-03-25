@@ -188,6 +188,7 @@ build_step_detail <- function(battle_df) {
       epoch,
       step,
       member_id,
+      form_id,
       event,
       event_time,
       fault,
@@ -412,7 +413,7 @@ build_dataset_summary <- function(configuration_df) {
 }
 
 build_breakdown <- function() {
-  tibble::tibble(breakdown = c("league",  "Learner", "Scaler", "Selector", "Reducer", "Approximator"))
+  tibble::tibble(breakdown = c("Learner", "Scaler", "Selector", "Reducer", "Approximator"))
 }
 
 

@@ -81,6 +81,8 @@ their is no chance to try out other components.
 Add a "Major muation" feature that allows large scale changes as a feature of muation. We will then
 set a frequency by which major mutation is attempted.
 
+*complete* helped a bit.
+
 This will slow down local searching but its now pretty efficient.
 
 # Datasets
@@ -90,6 +92,8 @@ This will slow down local searching but its now pretty efficient.
 Profb has worst accuracy
 
 Evaluate why?
+
+*local minima* *Don't fully exploring solution space*
 
 Dummy value is quite high. The best is not much better.
 
