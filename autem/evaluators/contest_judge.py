@@ -32,12 +32,12 @@ class ContestJudge(Evaluater):
         winner_wonlost = winner.wonlost[-max_contests:]
         winner_victories = sum(winner_wonlost)
 
-        # Determine if the loser should be eliminated
+        # Determine if the loser should be killed
         robustness_p = stats.binom_test(loser_victories, n=max_contests, p=0.5, alternative='less')
-        eliminate = robustness_p < self.p_value
-        if eliminate:
-            loser.eliminate()
-            loser.evaluation.contest_survival = "%d|%d eliminate" % (loser_victories, max_contests)
+        kill = robustness_p < self.p_value
+        if kill:
+            loser.kill()
+            loser.evaluation.contest_survival = "%d|%d die" % (loser_victories, max_contests)
         else:
             loser.evaluation.contest_survival = "%d|%d survive" % (loser_victories, max_contests)
 

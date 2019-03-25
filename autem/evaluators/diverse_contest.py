@@ -48,25 +48,25 @@ class DiverseContest(Evaluater):
             return None
 
         # The contestants make identical predictions
-        # Eliminate one
+        # kill one
         if contestant1.evaluation.score > contestant2.evaluation.score:
             contestant1.evaluation.diverse_contest = "Survive score"
-            contestant2.evaluation.diverse_contest = "Eliminate score"
+            contestant2.evaluation.diverse_contest = "kill score"
             contestant2.fail("Identical", "contest_members", "DiverseContest")
         elif contestant1.evaluation.score < contestant2.evaluation.score:
-            contestant1.evaluation.diverse_contest = "Eliminate score"
+            contestant1.evaluation.diverse_contest = "kill score"
             contestant2.evaluation.diverse_contest = "Survive score"
             contestant1.fail("Identical", "contest_members", "DiverseContest")
         elif contestant1.league < contestant2.league:
-            contestant1.evaluation.diverse_contest = "Eliminate league"
+            contestant1.evaluation.diverse_contest = "kill league"
             contestant2.evaluation.diverse_contest = "Survive league"
             contestant1.fail("Identical", "contest_members", "DiverseContest")
         elif contestant1.id < contestant2.id:
             contestant1.evaluation.diverse_contest = "Survive id"
-            contestant2.evaluation.diverse_contest = "Eliminate id"
+            contestant2.evaluation.diverse_contest = "kill id"
             contestant2.fail("Identical", "contest_members", "DiverseContest")
         elif contestant1.id > contestant2.id:
-            contestant1.evaluation.diverse_contest = "Eliminate id"
+            contestant1.evaluation.diverse_contest = "Kill id"
             contestant2.evaluation.diverse_contest = "Survive id"
             contestant1.fail("Identical", "contest_members", "DiverseContest")
         else:

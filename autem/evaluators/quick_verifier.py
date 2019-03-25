@@ -13,7 +13,7 @@ import warnings
 class QuickVerifier(Evaluater):
     """
     Quick check that verifies if the score is anywhere near the ball-park.
-    Does a single fit and the score is not within two-standard deviations of the top league then eliminate it
+    Does a single fit and the score is not within two-standard deviations of the top league then kill it
     """
 
     def __init__(self, max_sd = 2.5):

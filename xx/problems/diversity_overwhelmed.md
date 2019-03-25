@@ -16,7 +16,7 @@ The KNN learner is not an equal footing with the other learners. All other algor
 
 ### Idea - Duplicate eliminating. 
 
-Eliminate/Mutate members that are identical. However eventually we expect to be able to search a very large
+Kill/Mutate members that are identical. However eventually we expect to be able to search a very large
 problem space so Identical/Close members might not be such a problem.
 
 Would like to naturally focus search on rich exploration space.
