@@ -31,6 +31,7 @@ class Simulation:
         self.controllers = None
         self.initial_mutations = []
         self.members = []
+        self.graveyard = []
         self.failures = []
         self.forms = {}
         self.ranking = None
@@ -251,6 +252,7 @@ class Simulation:
         """
         Remove a member from the active pool
         """
+        self.graveyard.append(member)
         self.members.remove(member)
         member.form.disembody()
 
