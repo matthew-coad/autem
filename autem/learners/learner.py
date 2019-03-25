@@ -57,7 +57,7 @@ class Learner(Group):
             pairs = [(p.name, p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
         if 'n_jobs' in model_params:
-            params['n_jobs'] = -1
+            params['n_jobs'] = simulation.n_jobs
         model.set_params(**params)
 
         # Read the final model parameters 

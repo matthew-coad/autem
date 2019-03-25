@@ -204,6 +204,7 @@ build_step_detail <- function(battle_df) {
 build_ranking_detail <- function(battle_df) {
   step_df7 <-
     battle_df %>%
+    filter(!is.na(ranking)) %>%
     filter(as.integer(as.character(version)) <= 7)
   if (nrow(step_df7) > 0)
     step_df7 <- step_df7 %>%
@@ -215,7 +216,8 @@ build_ranking_detail <- function(battle_df) {
   
   step_df8 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) >= 8 && as.integer(as.character(version)) <= 9)
+    filter(!is.na(ranking)) %>%
+    filter(as.integer(as.character(version)) >= 8 & as.integer(as.character(version)) <= 9)
   if (nrow(step_df8) > 0)
     step_df8 <- step_df8 %>%
       mutate(
@@ -224,6 +226,7 @@ build_ranking_detail <- function(battle_df) {
   
   step_df10 <-
     battle_df %>%
+    filter(!is.na(ranking)) %>%
     filter(as.integer(as.character(version)) >= 10)
 
   bind_df <- function(step_df, df) {
@@ -241,7 +244,6 @@ build_ranking_detail <- function(battle_df) {
 
   ranking_df <-
     step_df %>%
-    filter(!is.na(ranking)) %>%
     select(
        study,
        experiment,

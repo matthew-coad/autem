@@ -21,7 +21,7 @@ from pathlib import Path
 def simulations_path():
     return Path("benchmark/simulations")
 
-study = "quick"
+study = "short"
 version = 10
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
@@ -130,7 +130,7 @@ def run_test_simulation(seed = None):
     task_id = configuration["task_id"]
     seed = seed if not seed is None else 2
     steps = 100
-    epochs = 40
+    epochs = 4                                                b0
     population_size = 20
     path = simulations_path().joinpath("test").joinpath(study).joinpath(experiment)
 
@@ -144,7 +144,7 @@ def run_benchmark_simulation(baseline_name):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 50
+    epochs = 20
     steps = 100
     population_size = 20
     path = simulations_path().joinpath(study).joinpath(experiment)
@@ -168,10 +168,10 @@ def combine_experiment_reports(experiment):
     autem.ReportManager(experiment_path).update_combined_reports()
 
 if __name__ == '__main__':
-    # run_benchmark_simulations()
+    run_benchmark_simulations()
     # run_test_simulation()
-    run_test_simulation(seed = 1)
-    run_test_simulation(seed = 2)
-    run_test_simulation(seed = 3)
-    run_test_simulation(seed = 4)
-    run_test_simulation(seed = 5)
+    # run_test_simulation(seed = 1)
+    # run_test_simulation(seed = 2)
+    # run_test_simulation(seed = 3)
+    # run_test_simulation(seed = 4)
+    # run_test_simulation(seed = 5)

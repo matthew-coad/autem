@@ -52,9 +52,6 @@ class AccuracyContest(Evaluater):
         winner = contestant1 if victor == 1 else contestant2
         loser = contestant2 if victor == 1 else contestant1
 
-        # If the losers score is within one standard deviation of the winners score
-        # but it has a shorter run-time then have it win instead
-
         winner_scores = winner.evaluation.scores
         winner_std = winner.evaluation.score_std
         winner_score = winner.evaluation.score
@@ -70,6 +67,13 @@ class AccuracyContest(Evaluater):
             loser.evaluation.accuracy_contest = "Duration long"
             loser.fail("Duration long", "contest_members", "accuracy_contest")
             outcome.unconventional()
+            return None
+
+        if winner.league == 0 and loser.league > 0:
+            winner.evaluation.accuracy_contest = "Upset Win"
+            winner.promote()
+            loser.evaluation.accuracy_contest = "Upset Loss"
+            outcome.decisive(victor)
             return None
 
         winner.evaluation.accuracy_contest = "Win"
