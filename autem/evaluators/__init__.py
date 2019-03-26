@@ -1,6 +1,7 @@
 from .evaluator import Evaluater
 
 from .score_evaluator import ScoreEvaluator
+from .choice_predicted_score_evaluator import ChoicePredictedScoreEvaluator
 
 from .accuracy_contest import AccuracyContest
 from .voting_contest import VotingContest

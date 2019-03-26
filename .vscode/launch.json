@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Python: Current File (Integrated Terminal)",
             "type": "python",
@@ -12,6 +13,15 @@
             "program": "${file}",
             "console": "integratedTerminal"
         },
+
+        {
+            "name": "Python: Benchmark Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/benchmark/run_test_benchmark.py",
+            "console": "integratedTerminal"
+        },
+
         {
             "name": "Python: Attach",
             "type": "python",

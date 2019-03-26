@@ -1,7 +1,7 @@
 source("process_simulation.R")
 
-simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\short"
-# mulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\test"
+# simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\short"
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\test"
 #simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\short"
 #simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\quick"
 #simulations_path3 <- "D:\\Documents\\autem\\benchmark\\simulations\\encoding"

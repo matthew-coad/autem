@@ -98,11 +98,7 @@ class Simulation:
         n_components = len(components)
 
         # Work out the component probabilities based on their importance
-        # total_p = sum((c.importance for c in components))
-        # component_p = [c.importance / total_p for c in components]
-
         # Try each component in a random order until a component claims to have mutated the state
-        # component_indexes = random_state.choice(n_components, size=n_components, replace=False, p=component_p)
         component_indexes = random_state.choice(n_components, size=n_components, replace=False)
         for component_index in component_indexes:
             component = components[component_index]

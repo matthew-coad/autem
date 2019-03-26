@@ -1,0 +1,50 @@
+# Gaussian processes
+
+Use gaussian processes to find search space to explore.
+
+Option 1. Finding unexplored space. Areas of search space with high unknowns are target for exploration
+Option 2. Zooming in. Exploring areas with high performance. Currently the task of the evol algorithm.
+
+## Exploration
+
+Need to be able to visualize hyper-parameter space.
+
+Components.
+
+**done**
+
+Which components have been tested.
+2 dimensional cross cutting of components with a heat map.
+Component performance. Variation. Ultimately unknowwns.
+
+**done**
+
+## Expected component score model
+
+Add component that construct a GP model every epoch. Determines score and score sd for component combinations. Set initial asssessments  so totally unknown
+combos come up as the highest score + score_sd. Record score + score_sd.
+
+### Add graveyard
+
+Copy finished components to a simulation graveyard
+
+**done**
+
+### Faulty members are final
+
+Mark failed members as final
+
+### Build score model on new epochs
+
+**done**
+
+### Evaluate expected scores
+
+**done**
+
+## Visualize expected scores
+
+**done**
+
+
+

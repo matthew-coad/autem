@@ -48,6 +48,8 @@ read_battle_file <- function(file_name) {
     dummy_accuracy = col_double(),
     voting_score = col_double(),
     top_voting_score = col_double(),
+    choice_predicted_score = col_double(),
+    choice_predicted_score_std = col_double(),
     voting_boost  = col_double(),
     voting_duration = col_double(),
     Imputer = col_character(),
@@ -195,7 +197,10 @@ build_step_detail <- function(battle_df) {
       league,
       alive,
       final,
+      choice_predicted_score,
+      choice_predicted_score_std,
       score,
+      score_std,
       duration,
       Scaler:LGR_dual
     )

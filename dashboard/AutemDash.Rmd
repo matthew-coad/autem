@@ -169,7 +169,7 @@ DT::renderDataTable({
 Baselines {data-orientation=columns}
 =====================================  
 
-Overview
+Left
 -----------------------------------------------------------------------
 
 ### All progress
@@ -193,7 +193,7 @@ renderPlot({
 
 ```
 
-Drilldown
+Right
 -----------------------------------------------------------------------
 
 ### Progress Density
@@ -397,17 +397,33 @@ Step score
 renderPlot({
   req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(score))
+  step_detail_df <- 
+    step_detail_rdf() %>% 
+    filtered_data(input$experiment) %>%
+    mutate(
+      predicted_score = choice_predicted_score,
+      predicted_score_std = choice_predicted_score_std
+    )
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)  
+  
   step_detail_df %>%
-    ggplot(aes(x = step, y = score)) +
-    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
+    ggplot(aes(x = step)) +
+    geom_point(aes(y = predicted_score, color = !!as.symbol(input$breakdown)), 
+               na.rm = TRUE, alpha = .2, shape=16, size = 2) +
+    geom_segment(
+      aes(
+        x = step, y = predicted_score + predicted_score_std, xend = step, yend = predicted_score -predicted_score_std
+      ),
+      na.rm = TRUE, alpha = .3, size = 1, color = "Grey") +
+    geom_point(size = 1, aes(y = score, color = !!as.symbol(input$breakdown)), na.rm = TRUE) +
     geom_hline(data = simulation_summary_df, aes(yintercept = baseline_top_score), linetype = 'dotted') +
     geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_top_score, label = accuracy_format(baseline_top_score))) +
     geom_hline(data = simulation_summary_df, aes(yintercept = dummy_score), linetype = 'dotted') +
     geom_label(data = simulation_summary_df, aes(x = 0, y = dummy_score, label = accuracy_format(dummy_score))) +
-    facet_wrap(~ study)
+    facet_wrap(~ study) +
+    coord_cartesian(ylim = c(0, 1))
 })
 
 ```
@@ -447,12 +463,13 @@ Top
 renderPlot({
   req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(final == 1)
   choices_list <- breakdown_rlist()
+  
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
   
   build_component_summary <- function(.choice) { 
     step_detail_df %>% 
-      filter(alive == 0) %>%
       group_by_at(c("study", "experiment", .choice)) %>% 
       summarise(n = n()) %>%
       mutate(choice = .choice) %>%
@@ -479,23 +496,31 @@ renderPlot({
 renderPlot({
   req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(final == 1)
   choices_list <- breakdown_rlist()
+  
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
   
   build_choice_scores <- function(choice) { 
     step_detail_df %>% 
-      filter(alive == 0, !is.na(score)) %>%
-      mutate(choice = choice) %>%
-      select(study, experiment, choice, component = !! choice, score)
+      mutate(
+        choice = choice,
+        predicted_score = choice_predicted_score
+      ) %>%
+      select(study, experiment, choice, component = !! choice, score, predicted_score)
   }
   
   choices_score_df <-  
     purrr::map_dfr(choices_list,  build_choice_scores) %>%
-    mutate(choice = factor(choice))
-  
+    mutate(
+      choice = factor(choice),
+      component = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE)
+    )
+
   choices_score_df %>%
     ggplot() +
-    geom_point(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = score, color = choice)) +
+    geom_point(aes(x = component, y = score, color = choice, shape = "Score")) +
+    geom_point(aes(x = component, y = predicted_score, color = choice, shape = "Predicted")) +
     coord_flip() +
     xlab("Component") +
     facet_wrap(~ study)
@@ -513,23 +538,29 @@ Bottom
 renderPlot({
   req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(final == 1)
   choices_list <- breakdown_rlist()
   
-  build_choice_durations <- function(choice) { 
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
+  
+  build_choice_durations <- function(.choice) { 
     step_detail_df %>% 
-      filter(alive == 0, !is.na(score)) %>%
-      mutate(choice = choice) %>%
-      select(study, experiment, choice, component = !! choice, duration)
+      mutate(
+        choice = .choice
+      ) %>%
+      select(study, experiment, choice, component = !! .choice, duration)
   }
   
   durations_score_df <-  
     purrr::map_dfr(choices_list,  build_choice_durations) %>%
-    mutate(choice = factor(choice))
+    mutate(
+      choice = factor(choice),
+      component = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE)
+  )
   
   durations_score_df %>%
     ggplot() +
-    geom_point(aes(x = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE), y = duration, color = choice)) + 
+    geom_point(aes(x = component, y = duration, color = choice)) + 
     coord_flip() +
     xlab("Component") +
     facet_wrap(~ study)
@@ -543,6 +574,9 @@ renderPlot({
 Components X {data-orientation=rows}
 =====================================
 
+Bottom
+-----------------------------------------------------------------------
+
 ### Score grid
 
 ```{r}
@@ -553,24 +587,28 @@ renderPlot({
   .choice1 <- input$breakdown
   .choice2 <- input$breakdown2
 
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment)
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(final == 1)
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
 
   choice2_detail_df <-
     step_detail_df %>% 
-    filter(alive == 0, !is.na(score)) %>%
     mutate(
-      component1 = !! sym(.choice1), 
-      component2 = !! sym(.choice2)
+      component1 = !! sym(.choice1),
+      component2 = !! sym(.choice2),
+      predicted_score = choice_predicted_score,
+      predicted_score_std = choice_predicted_score_std
     ) %>%
-    select(study, experiment, component1, component2, score)
-  
+    select(study, experiment, component1, component2, score, score_std, predicted_score, predicted_score_std)
+
   choice2_detail_df %>%
     ggplot() +
-    geom_point(aes(x = component2, y = score)) +  
+    geom_point(aes(x = component2, y = score, color = "Score"), na.rm = TRUE) +
+    geom_point(aes(x = component2, y = predicted_score, color = "Predicted"), na.rm = TRUE) +
     facet_wrap(component1 ~ study) +
     coord_flip()
 
 })
 
 ```
+
 
