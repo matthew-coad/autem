@@ -19,7 +19,7 @@ class Learner(Group):
     def make_model(self):
         raise NotImplementedError()
 
-    def read_paramsepreprocessor(self, member, pre_processor):
+    def read_params(self, member, pre_processor):
         """
         Read the configuration back from the preprocessor
         returns a dict of parameter name value pairs
@@ -37,7 +37,7 @@ class Learner(Group):
         """
         Update the parameters so they match the configured values
         """
-        values = self.read_preprocessor(member, member, pre_processor)
+        values = self.read_params(member, member, pre_processor)
         for key in values:
             parameter = self.get_parameter(key)
             parameter.set_value(member, values[key])

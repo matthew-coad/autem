@@ -1,19 +1,14 @@
 source("process_simulation.R")
 
-# simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\short"
-simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\test"
-#simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\short"
-#simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\quick"
-#simulations_path3 <- "D:\\Documents\\autem\\benchmark\\simulations\\encoding"
-#simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\leagues"
+simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\gp_comp"
+# simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\quick"
 benchmark_path <- "D:\\Documents\\autem\\benchmark"
 
 # Load data
 print("Loading battle")
 
-# battle_df <- clean_battle(bind_rows(read_battle(simulations_path1), read_battle(simulations_path2), read_battle(simulations_path3)))
-# battle_df <- clean_battle(bind_rows(read_battle(simulations_path1), read_battle(simulations_path2)))
 battle_df <- clean_battle(read_battle(simulations_path1))
+# battle_df <- clean_battle(bind_rows(read_battle(simulations_path1), read_battle(simulations_path2)))
 datasets <- unique(battle_df$dataset)
 baseline_df <- read_baselines(benchmark_path, datasets)
 configuration_df <- read_configuration_file(benchmark_path)

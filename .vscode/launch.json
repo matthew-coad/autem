@@ -23,6 +23,14 @@
         },
 
         {
+            "name": "Python: gp_comp Benchmark",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/benchmark/run_gp_comp_benchmark.py",
+            "console": "integratedTerminal"
+        },
+
+        {
             "name": "Python: Attach",
             "type": "python",
             "request": "attach",

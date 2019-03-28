@@ -7,22 +7,23 @@ import autem.learners.classification as learners
 import autem.loaders as loaders
 import autem.reporters as reporters
 import autem.evaluators as evaluators
+import autem.makers as makers
 
 import openml
 
 import benchmark.utility as utility
 import benchmark.baselines as baselines
 
+import time
+import datetime
+
 from pathlib import Path
 
 def get_simulations_path():
     return Path("benchmark/simulations")
 
-def get_study():
-    return "short"
-
 def get_version():
-    return 10
+    return 11
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -43,6 +44,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             scorers.Accuracy(),
 
             evaluators.ChoicePredictedScoreEvaluator(),
+            makers.TopChoiceMaker(),
+
             evaluators.ScoreEvaluator(),
             evaluators.AccuracyContest(),
             evaluators.DiverseContest(0.99),
@@ -69,6 +72,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 preprocessors.BoxCoxTransform(),
                 preprocessors.YeoJohnsonTransform()
             ]),
+
 
             # Feature Selectors
             autem.Choice("Selector", [
@@ -99,13 +103,13 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
-                #learners.RadialBasisSVC(),
-                #learners.PolySVC(),
+                learners.RadialBasisSVC(),
+                learners.PolySVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
-                # learners.RandomForestClassifier(),
-                # learners.ExtraTreesClassifier(),
+                learners.RandomForestClassifier(),
+                learners.ExtraTreesClassifier(),
             ]),
         ], 
         population_size = population_size,
@@ -114,36 +118,47 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
         n_jobs=6)
     return simulation
 
-def run_simulation(simulation, steps, epochs):
-    print("Running %s" % simulation.name)
+def simulation_finished(simulation, start_time, epochs, max_time):
+    duration = time.time() - start_time
+    return not simulation.running or simulation.epoch == epochs or (max_time is not None and duration >= max_time)
+
+def run_simulation(simulation, steps, epochs, max_time = None):
+    print("-----------------------------------------------------")
+    start_time = time.time()
+    today = datetime.datetime.now()
+    print("Running %s - Started %s" % (simulation.name, today.strftime("%x %X")))
     simulation.start()
-    for index in range(epochs):
+
+    finished = False
+    while not finished:
         simulation.run(steps)
-        if index == epochs - 1 or not simulation.running:
+        finished = simulation_finished(simulation, start_time, epochs, max_time)
+        if finished:
             simulation.finish()
         simulation.report()
-        if not simulation.running:
-            break
+    duration = time.time() - start_time
+    print("%s finished - Duration %s" % (simulation.name, duration))
 
-def run_benchmark_simulation(baseline_name):
+def run_benchmark_simulation(study, baseline_name):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 20
+    epochs = 50
     steps = 100
+    max_time = 1 * 60 * 60
     population_size = 20
     path = get_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
     simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
-    run_simulation(simulation, steps, epochs)
+    run_simulation(simulation, steps, epochs, max_time)
     autem.ReportManager(path).update_combined_reports()
 
-def run_benchmark_simulations(baselines):
-    baseline_names = baselines.get_baseline_names(baselines)
+def run_benchmark_simulations(study):
+    baseline_names = baselines.get_baseline_names(study)
     for baseline_name in baseline_names:
-        run_benchmark_simulation(baseline_name)
+        run_benchmark_simulation(study, baseline_name)
 
 def combine_reports(experiment, baseline):
     experiment_path = simulations_path().joinpath(experiment).joinpath(baseline)

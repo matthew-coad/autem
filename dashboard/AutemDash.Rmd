@@ -400,6 +400,7 @@ renderPlot({
   step_detail_df <- 
     step_detail_rdf() %>% 
     filtered_data(input$experiment) %>%
+    filter(final == 1) %>%
     mutate(
       predicted_score = choice_predicted_score,
       predicted_score_std = choice_predicted_score_std
@@ -410,13 +411,7 @@ renderPlot({
   
   step_detail_df %>%
     ggplot(aes(x = step)) +
-    geom_point(aes(y = predicted_score, color = !!as.symbol(input$breakdown)), 
-               na.rm = TRUE, alpha = .2, shape=16, size = 2) +
-    geom_segment(
-      aes(
-        x = step, y = predicted_score + predicted_score_std, xend = step, yend = predicted_score -predicted_score_std
-      ),
-      na.rm = TRUE, alpha = .3, size = 1, color = "Grey") +
+    geom_point(size = 3, aes(y = predicted_score), shape=1, color = "Grey", na.rm = TRUE) +
     geom_point(size = 1, aes(y = score, color = !!as.symbol(input$breakdown)), na.rm = TRUE) +
     geom_hline(data = simulation_summary_df, aes(yintercept = baseline_top_score), linetype = 'dotted') +
     geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_top_score, label = accuracy_format(baseline_top_score))) +
@@ -439,7 +434,10 @@ Step duration
 renderPlot({
   req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(duration))
+  step_detail_df <- 
+    step_detail_rdf() %>% 
+    filtered_data(input$experiment) %>% 
+    filter(!is.na(duration))
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
   step_detail_df %>%
@@ -519,8 +517,8 @@ renderPlot({
 
   choices_score_df %>%
     ggplot() +
-    geom_point(aes(x = component, y = score, color = choice, shape = "Score")) +
-    geom_point(aes(x = component, y = predicted_score, color = choice, shape = "Predicted")) +
+    geom_point(aes(x = component, y = predicted_score), size = 3, shape=1, color = "Grey", na.rm = TRUE) +
+    geom_point(aes(x = component, y = score, color = choice), size = 1, na.rm = TRUE) +
     coord_flip() +
     xlab("Component") +
     facet_wrap(~ study)
@@ -538,7 +536,7 @@ Bottom
 renderPlot({
   req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
   
-  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(final == 1)
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(duration))
   choices_list <- breakdown_rlist()
   
   req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
@@ -602,8 +600,8 @@ renderPlot({
 
   choice2_detail_df %>%
     ggplot() +
-    geom_point(aes(x = component2, y = score, color = "Score"), na.rm = TRUE) +
-    geom_point(aes(x = component2, y = predicted_score, color = "Predicted"), na.rm = TRUE) +
+    geom_point(aes(x = component2, y = predicted_score), size = 3, shape=1, color = "Grey", na.rm = TRUE) +
+    geom_point(aes(x = component2, y = score), size = 1, na.rm = TRUE) +
     facet_wrap(component1 ~ study) +
     coord_flip()
 

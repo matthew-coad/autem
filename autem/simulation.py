@@ -8,6 +8,7 @@ from .form import Form
 from .ranking import Ranking
 from types import SimpleNamespace
 from .feedback import printProgressBar
+from .maker import Maker
 from .choice import Choice
 
 import numpy
@@ -66,28 +67,6 @@ class Simulation:
         if not member.initial_mutation_index is None:
             del self.initial_mutations[member.initial_mutation_index]
 
-    def initial_mutate_member(self, member):
-        """
-        Make an initial mutation to a member
-        """
-        if not member.initial_mutation_index is None:
-            raise RuntimeError("Initial mutation already set")
-
-        initial_mutations = self.initial_mutations
-        if not initial_mutations:
-            return False
-
-        random_state = self.random_state
-        components = self.hyper_parameters
-        mutation_index = random_state.randint(0, len(initial_mutations))
-        member.initial_mutation_index = mutation_index
-        mutation = initial_mutations[mutation_index]
-        group_name = mutation["group_name"]
-        choice_name = mutation["choice_name"]
-        choice = [ c for c in components if c.name == group_name ][0]
-        choice.force_member(member, choice_name)
-        return True
-
     def mutate_member(self, member, transmute):
         """
         Mutate a member, making a guaranteed modification to its configuration
@@ -97,7 +76,6 @@ class Simulation:
         components = self.hyper_parameters
         n_components = len(components)
 
-        # Work out the component probabilities based on their importance
         # Try each component in a random order until a component claims to have mutated the state
         component_indexes = random_state.choice(n_components, size=n_components, replace=False)
         for component_index in component_indexes:
@@ -144,9 +122,7 @@ class Simulation:
                     return True
             mutated = False
             if attempts == 0:
-                mutated = self.initial_mutate_member(member)
-                if not mutated:
-                    mutated = self.mutate_member(member, transmute)
+                mutated = self.mutate_member(member, transmute)
             else:
                 mutated = self.mutate_member(member, False)
             if not mutated:
@@ -156,27 +132,23 @@ class Simulation:
             if attempts > max_attempts:
                 return False
 
-    def make_initial_mutations(self):
-        """
-        Make initial member muations list
-        The initial mutation list ensures that every component choice gets selected a minimum number of times
-        """
-        mutations = []
-        for repeat in range(self.initial_component_repeats):
-            for component in self.hyper_parameters:
-                if isinstance(component, Choice):
-                    choice_names = component.get_component_names()
-                    for choice_name in choice_names:
-                        mutations.append( { "repeat": repeat, "group_name": component.name, "choice_name": choice_name } )
-        self.initial_mutations = mutations
-
     def make_member(self):
         """
         Make a new member
         """
-        member = Member(self)
-        for component in self.hyper_parameters:
-            component.initialize_member(member)
+
+        # Find all makers
+        makers = [ c for c in self.components if isinstance(c, Maker)]
+
+        # Invoke members in order till one makes the member
+        for maker in makers:
+            member = maker.make_member(self)
+            if member:
+                break
+        if not member:
+            return None
+
+        # Ensure the member is specialized
         specialized = self.specialize_member(member)
         if specialized:
             self.incarnate_member(member)
@@ -322,15 +294,16 @@ class Simulation:
         force_repopulate = self.running and self.population_size > current_population * 2
         if not repopulate:
             return None
+
+        random_state = self.random_state
+        can_cross = parent1.alive and parent2.alive
+        cross = can_cross and random_state.randint(0,2) == 0
+        
         newborn = None
-        if parent1.alive and parent2.alive:
+        if cross:
             newborn = self.crossover_member(parent1, parent2)
-        elif force_repopulate:
-            newborn = self.make_member()
         else:
-            newborn = None
-        if not newborn is None:
-            self.prepare_member(newborn)
+            newborn = self.make_member()
         return newborn
 
     def start(self):
@@ -345,10 +318,9 @@ class Simulation:
         for component in self.controllers:
             component.start_simulation(self)
 
-        self.make_initial_mutations()
-
         for index in range(self.population_size):
             self.make_member()
+
         if len(self.members) < 2:
             raise RuntimeError("Require at least 2 members to start")
 

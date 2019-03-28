@@ -15,6 +15,7 @@ from .outline import Outline
 from .component import Component
 from .controller import Controller
 from .hyper_parameter import HyperParameter
+from .maker import Maker
 from .choice import Choice
 from .group import Group
 from .parameter import Parameter

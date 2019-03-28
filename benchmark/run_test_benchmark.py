@@ -7,6 +7,9 @@ import benchmark.baselines as baselines
 import benchmark.benchmarks as benchmark
 import benchmark.utility as utility
 
+def get_test_study():
+    return "gp_comp"
+
 def get_test_baseline_name():
     return "balance-scale"
 
@@ -18,10 +21,10 @@ def run_test_simulation(baseline_name = None, seed = None):
     experiment = baseline_name if seed is None else "%s_%d" % (baseline_name, seed)
     configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = configuration["task_id"]
-    study = benchmark.get_study()
+    study = get_test_study()
     seed = seed if not seed is None else 2
     steps = 100
-    epochs = 30
+    epochs = 40
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
@@ -32,3 +35,6 @@ def run_test_simulation(baseline_name = None, seed = None):
 
 if __name__ == '__main__':
     run_test_simulation()
+    #run_test_simulation(seed = 3)
+    #run_test_simulation(seed = 4)
+    #run_test_simulation(seed = 5)

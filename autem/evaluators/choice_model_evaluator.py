@@ -16,9 +16,9 @@ from sklearn.preprocessing import OneHotEncoder
 import warnings
 import time
 
-class ChoicePredictedScoreEvaluator(Evaluater):
+class ChoiceModelEvaluator(Evaluater):
     """
-    Component that determines the expected score for a member
+    Component that evaluates the choice model
     """
 
     def __init__(self):
@@ -97,7 +97,7 @@ class ChoicePredictedScoreEvaluator(Evaluater):
 
         return pipeline
 
-    def evaluate_model(self, simulation):
+    def start_epoch(self, simulation):
 
         # Build the model
         model = self.build_model(simulation)
@@ -107,44 +107,6 @@ class ChoicePredictedScoreEvaluator(Evaluater):
         for member in simulation.members:
             member.evaluation.choice_predicted_score = None
             member.evaluation.choice_predicted_score_std = None
-
-    def build_predicted_score(self, member):
-        """
-        Evaluate the expected score for a member
-        """
-
-        # Get the model
-        simulation = member.simulation
-        model = simulation.resources.component_score_model
-        if model is None:
-            return (None, None)
-
-        # Build the choices into a dataframe
-        choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
-        choice_values = dict([ (c.name, [c.get_active_component_name(member)]) for c in choices])
-        x = pd.DataFrame(choice_values)
-
-        # And do the prediction
-        pred_y, pred_y_std = model.predict(x, return_std=True)
-        return (pred_y[0], pred_y_std[0])
-
-    def evaluate_member(self, member):
-
-        evaluation = member.evaluation
-
-        if hasattr(evaluation, "choice_predicted_score") and not evaluation.choice_predicted_score is None:
-            return None
-
-        # Force default values
-        evaluation.choice_predicted_score = None
-        evaluation.choice_predicted_score_sd = None
-
-        choice_predicted_score, choice_predicted_score_std = self.build_predicted_score(member)
-        evaluation.choice_predicted_score = choice_predicted_score
-        evaluation.choice_predicted_score_std = choice_predicted_score_std
-
-    def start_epoch(self, simulation):
-        self.evaluate_model(simulation)
 
     def record_member(self, member, record):
         super().record_member(member, record)

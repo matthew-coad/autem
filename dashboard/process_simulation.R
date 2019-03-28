@@ -52,6 +52,7 @@ read_battle_file <- function(file_name) {
     choice_predicted_score_std = col_double(),
     voting_boost  = col_double(),
     voting_duration = col_double(),
+    inter_score = col_double(),
     Imputer = col_character(),
     SMP_strategy = col_character(),
     Engineer = col_character(),
@@ -99,6 +100,9 @@ read_battle_file <- function(file_name) {
     EXT_max_features = col_character(),
     EXT_min_samples_split = col_character(),
     EXT_min_samples_leaf = col_character(),
+    PSV_C = col_double(),
+    PSV_tol = col_double(),
+    PSV_degree = col_double(),
     irrelevants = col_double(),
     Imputer_importance = col_double(),
     Engineer_importance = col_double(),
@@ -164,9 +168,19 @@ build_step_detail <- function(battle_df) {
   
   step_df10 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) >= 10)
+    filter(as.integer(as.character(version)) == 10)
+  if (nrow(step_df10) > 0)  
+    step_df10 <- 
+    step_df10 %>%
+    mutate(
+      choice_predicted_score = NA,
+      choice_predicted_score_std = NA
+    )
   
-  
+  step_df11 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 11)
+
   bind_df <- function(step_df, df) {
     if (nrow(df) == 0)
       return (step_df)
@@ -180,6 +194,7 @@ build_step_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df8)
   step_df <- bind_df(step_df, step_df9)
   step_df <- bind_df(step_df, step_df10)
+  step_df <- bind_df(step_df, step_df11)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
