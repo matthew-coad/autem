@@ -7,6 +7,8 @@ import benchmark.baselines as baselines
 import benchmark.benchmarks as benchmark
 import benchmark.utility as utility
 
+import os
+
 def get_test_study():
     return "gp_comp"
 
@@ -24,7 +26,7 @@ def run_test_simulation(baseline_name = None, seed = None):
     study = get_test_study()
     seed = seed if not seed is None else 2
     steps = 100
-    epochs = 40
+    epochs = 1
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
@@ -35,6 +37,7 @@ def run_test_simulation(baseline_name = None, seed = None):
 
 if __name__ == '__main__':
     run_test_simulation()
+    os.system("shutdown /s /t 1")
     #run_test_simulation(seed = 3)
     #run_test_simulation(seed = 4)
     #run_test_simulation(seed = 5)
