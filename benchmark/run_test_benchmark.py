@@ -25,8 +25,8 @@ def run_test_simulation(baseline_name = None, seed = None):
     task_id = configuration["task_id"]
     study = get_test_study()
     seed = seed if not seed is None else 2
-    steps = 100
-    epochs = 1
+    epochs = 25
+    steps = 200
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
@@ -37,7 +37,7 @@ def run_test_simulation(baseline_name = None, seed = None):
 
 if __name__ == '__main__':
     run_test_simulation()
-    os.system("shutdown /s /t 1")
+    #os.system("shutdown /s /t 1")
     #run_test_simulation(seed = 3)
     #run_test_simulation(seed = 4)
     #run_test_simulation(seed = 5)

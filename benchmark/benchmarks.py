@@ -50,12 +50,11 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             evaluators.AccuracyContest(),
             evaluators.DiverseContest(0.99),
             evaluators.VotingContest(),
+            evaluators.QuickVerifier(),
             evaluators.SurvivalJudge(),
             evaluators.PromotionJudge(),
 
             evaluators.CrossValidationRater(),
-            evaluators.OpenMLRater(task_id),
-            evaluators.DummyClassifierAccuracy(),
             evaluators.ValidationAccuracy(),
             baselines.BaselineStats(baseline_name),
 

@@ -34,14 +34,11 @@ class OpenMLRater(Evaluater):
         task = simulation.resources.task 
         pipeline = member.resources.pipeline
 
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            try:
-                run = openml.runs.run_model_on_task(task, pipeline)
-            except Exception as ex:
-                member.fail(ex, "rate_member", "OpenMLRater")
-                return None
+        try:
+            run = openml.runs.run_model_on_task(task, pipeline)
+        except Exception as ex:
+            member.fail(ex, "rate_member", "OpenMLRater")
+            return None
             
         predictive_accuracy = run.fold_evaluations['predictive_accuracy']
         scores = np.array([score for rep, folds in predictive_accuracy.items() for fold, score in folds.items()])

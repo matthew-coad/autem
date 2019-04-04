@@ -23,6 +23,6 @@ def load_iris():
     names = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'class']
     df = read_csv(filename, names=names)
     array = df.values
-    x = array[:,0:4]
     y = array[:,4]
-    return (x,y)
+    numeric_x = array[:,0:4]
+    return (y, numeric_x)

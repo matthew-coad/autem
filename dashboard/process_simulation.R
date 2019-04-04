@@ -110,7 +110,10 @@ read_battle_file <- function(file_name) {
     Reducer_importance = col_double(),
     Approximator_importance = col_double(),
     Learner_importance = col_double(),
-    BIN_num__scaler__threshold = col_double()
+    BIN_num__scaler__threshold = col_double(),
+    RSV_C = col_double(),
+    RSV_tol = col_double()
+    
   )
   df <- suppressWarnings(read_csv(file_name, col_types = col_types))
   df
@@ -132,30 +135,6 @@ read_battle <- function(path) {
 }
 
 build_step_detail <- function(battle_df) {
-  step_df7 <-
-    battle_df %>%
-    filter(as.integer(as.character(version)) <= 7)
-  if (nrow(step_df7) > 0)
-    step_df7 <-
-      step_df7 %>%
-      mutate(
-        study = paste0("S", version),
-        experiment = paste0(dataset),
-        league = famous,
-        score = accuracy
-      ) 
-
-  step_df8 <-
-    battle_df %>%
-    filter(as.integer(as.character(version)) == 8)
-  if (nrow(step_df8) > 0)  
-    step_df8 <- 
-      step_df8 %>%
-      mutate(
-        league = famous,
-        score = accuracy
-      )
-  
   step_df9 <-
     battle_df %>%
     filter(as.integer(as.character(version)) == 9)
@@ -171,15 +150,22 @@ build_step_detail <- function(battle_df) {
     filter(as.integer(as.character(version)) == 10)
   if (nrow(step_df10) > 0)  
     step_df10 <- 
-    step_df10 %>%
-    mutate(
-      choice_predicted_score = NA,
-      choice_predicted_score_std = NA
-    )
+      step_df10 %>%
+      mutate(
+        choice_predicted_score = NA,
+        choice_predicted_score_std = NA
+      )
   
   step_df11 <-
     battle_df %>%
     filter(as.integer(as.character(version)) == 11)
+  if (nrow(step_df11) > 0) {
+    step_df11 <- 
+      step_df11 %>%
+      mutate(
+        duration = score_duration
+      )
+  }
 
   bind_df <- function(step_df, df) {
     if (nrow(df) == 0)
@@ -190,8 +176,6 @@ build_step_detail <- function(battle_df) {
     bind_rows(step_df, df)
   }
   step_df <- NULL
-  step_df <- bind_df(step_df, step_df7)
-  step_df <- bind_df(step_df, step_df8)
   step_df <- bind_df(step_df, step_df9)
   step_df <- bind_df(step_df, step_df10)
   step_df <- bind_df(step_df, step_df11)
@@ -209,6 +193,7 @@ build_step_detail <- function(battle_df) {
       event,
       event_time,
       fault,
+      ranking,
       league,
       alive,
       final,

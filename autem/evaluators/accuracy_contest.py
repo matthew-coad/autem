@@ -60,14 +60,14 @@ class AccuracyContest(Evaluater):
         loser_score = loser.evaluation.score
         loser_duration = loser.evaluation.score_duration
 
-        if not winner_std is None and loser_duration > winner_duration * 3 and loser_score < winner_score - winner_std * 3:
-            # The loser has an excessive run time and has a substantially poorer performance
-            # Kill it outright as its unlikely to be a good solution and will substantially increase the runtime
-            winner.evaluation.accuracy_contest = "Duration short"
-            loser.evaluation.accuracy_contest = "Duration long"
-            loser.fail("Duration long", "contest_members", "accuracy_contest")
-            outcome.unconventional()
-            return None
+        #if not winner_std is None and loser_duration > winner_duration * 3 and loser_score < winner_score - winner_std * 3:
+        #    # The loser has an excessive run time and has a substantially poorer performance
+        #    # Kill it outright as its unlikely to be a good solution and will substantially increase the runtime
+        #    winner.evaluation.accuracy_contest = "Duration short"
+        #    loser.evaluation.accuracy_contest = "Duration long"
+        #    loser.fail("Duration long", "contest_members", "accuracy_contest")
+        #    outcome.unconventional()
+        #    return None
 
         if winner.league == 0 and loser.league > 0:
             winner.evaluation.accuracy_contest = "Upset Win"

@@ -2,6 +2,7 @@ if __name__ == '__main__':
     import context
 
 import autem
+import autem.makers as makers
 import autem.scorers as scorers
 import autem.learners.classification as learners
 import autem.loaders as loaders
@@ -14,18 +15,20 @@ from tests.config import simulations_path
 
 def run_preprocessing():
 
-    x,y = load_iris()
+    y,numeric_x = load_iris()
     simulation = autem.Simulation(
         "preprocessing", 
         [
-            loaders.Data("iris", x,y),
+            loaders.Data("iris",y,numeric_x=numeric_x),
             scorers.Accuracy(),
+
+            makers.RandomMaker(),
             
+            evaluators.ScoreEvaluator(),
             evaluators.AccuracyContest(),
-            evaluators.ContestJudge(),
+            evaluators.SurvivalJudge(),
+            evaluators.PromotionJudge(),
             evaluators.CrossValidationRater(),
-            evaluators.DummyClassifierAccuracy(),
-            evaluators.ValidationAccuracy(),
             
             reporters.Path(simulations_path().joinpath("preprocessing")),
 

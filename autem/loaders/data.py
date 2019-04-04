@@ -8,11 +8,35 @@ import pandas as pd
 
 class Data(Loader):
     
-    def __init__(self, data_name, x, y, validation_size = 0.2):
+    def __init__(self, data_name, y, numeric_x = None, nominal_x = None, validation_size = 0.2):
         self.data_name = data_name
-        self.x = x
         self.y = y
+        self.numeric_x = numeric_x
+        self.nominal_x = nominal_x
         self.validation_size = validation_size
+
+        x = None
+        numeric_cols = 0
+        nominal_cols = 0
+        if not self.numeric_x is None:
+            numeric_cols = self.numeric_x.shape[1]
+            x = self.numeric_x
+        
+        if not self.nominal_x is None:
+            nominal_cols = self.nominal_x.shape[1]
+            if x is None:
+                x = self.nominal_x
+            else:
+                x = pd.concat([x, self.nominal_x], axis=1)
+
+        features = {
+            "numeric": range(numeric_cols),
+            "nominal": range(numeric_cols, numeric_cols + nominal_cols),
+            "date": [],
+            "string": []
+        }
+        self.x = x
+        self.features = features
 
     def outline_simulation(self, simulation, outline):
         super().outline_simulation(simulation, outline)
@@ -25,8 +49,8 @@ class Data(Loader):
 
         random_state = simulation.random_state
         validation_size = self.validation_size
-        x = self.x
         y = self.y
+        x = self.x
 
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
@@ -52,5 +76,5 @@ class Data(Loader):
         return (simulation.resources.x_validation, simulation.resources.y_validation)
 
     def get_features(self, simulation):
-        return simulation.resources.features
+        return self.features
 

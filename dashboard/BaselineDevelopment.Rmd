@@ -20,7 +20,6 @@ reactive <- function(.x) {
 ```{r load, include=FALSE}
 
 
-
 # Load data
 step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
 epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })

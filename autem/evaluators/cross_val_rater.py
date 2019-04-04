@@ -31,13 +31,11 @@ class CrossValidationRater(Evaluater):
         x,y = loader.load_training_data(simulation)
         pipeline = member.resources.pipeline
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
-            try:
-                scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
-            except Exception as ex:
-                member.fail(ex, "rate_member", "CrossValidationRater")
-                return None
+        try:
+            scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
+        except Exception as ex:
+            member.fail(ex, "rate_member", "CrossValidationRater")
+            return None
 
         rating = scores.mean()
         rating_sd = scores.std()

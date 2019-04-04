@@ -6,7 +6,7 @@ from scipy import stats
 
 from sklearn.model_selection import cross_val_score, train_test_split, cross_val_predict
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold
+from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold, RepeatedKFold
 
 import warnings
 import time
@@ -29,6 +29,7 @@ class ScoreEvaluator(Evaluater):
 
         x,y = loader.load_training_data(simulation)
         folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=top_league, random_state=random_state)
+        # folds = RepeatedKFold(n_splits=self.n_splits, n_repeats=top_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
         simulation.resources.i_leagues = i_leagues
 
@@ -45,9 +46,9 @@ class ScoreEvaluator(Evaluater):
             evaluation.score = None
             evaluation.score_std = None
 
-            evaluation.durations = []
-            evaluation.duration = None
-            evaluation.duration_std = None
+            evaluation.score_durations = []
+            evaluation.score_duration = None
+            evaluation.score_duration_std = None
 
     def build_scores(self, member, repeat, start, stop):
 
@@ -79,7 +80,7 @@ class ScoreEvaluator(Evaluater):
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
-                    member.fail(ex, "evaluate_quick_score", "ScoreEvaluator")
+                    member.fail(ex, "score_evaluator", "ScoreEvaluator")
                     return (None, None, None)
             end_time = time.time()
             duration = end_time - start_time

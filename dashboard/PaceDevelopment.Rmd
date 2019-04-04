@@ -1,0 +1,209 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Pace Development
+
+Some algorithms take an inordinate amount of time to evaluate. It may be more effective to select faster algorithms. Pace is an attempts to trade off predictive accuracy for performance in the short term in the hope that we can find better solutions in the long term simply because we can explore more of the space.
+
+## Load data
+
+```{r load, include=FALSE}
+library(tidyverse)
+library(memoise)
+
+reactive <- function(.x) {
+  x <- function() .x
+  memoise(x)
+}
+
+# Load data
+step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
+epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
+simulation_summary_rdf <- reactive({ read_rds("data\\simulation_summary.RDS") })
+baseline_detail_rdf <- reactive({ read_rds("data\\baseline_detail.RDS") })
+baseline_summary_rdf <- reactive({ read_rds("data\\baseline_summary.RDS") })
+breakdown_rdf <- reactive({ read_rds("data\\breakdown.RDS") })
+
+print("Loaded")
+
+```
+
+## Epoch Details
+
+**Column names**
+
+```{r}
+
+print(names(epoch_detail_rdf()))
+
+```
+
+**Table**
+
+```{r}
+
+print(epoch_detail_rdf())
+
+```
+
+## View Step Detail
+
+**Columns**
+
+```{r}
+
+print(names(step_detail_rdf()))
+
+```
+
+**Table**
+
+```{r}
+
+print(step_detail_rdf())
+
+```
+
+## Summary
+
+```{r}
+
+print(simulation_summary_rdf())
+
+```
+
+
+## Pace Evaluation data
+
+Pace is the result of trying to predict what the final score will be. Given details like epoch, duration, mean score of top league members, score.
+
+**show events**
+
+```{r}
+
+unique(step_detail_rdf()$event)
+
+```
+
+**Step score**
+
+```{r}
+
+source_study <- "gp_comp"
+
+step_score_df <- step_detail_rdf() %>%
+  filter(study == source_study, !event %in% c("birth", "fail"), !is.na(score)) %>%
+  group_by(study, experiment, member_id) %>%
+  filter(step == min(step)) %>%
+  ungroup() %>%
+  select(study, experiment, epoch, step, member_id, league, introduction_score = score, duration)
+
+print(step_score_df)
+  
+
+```
+
+## Epoch details
+
+```{r}
+
+min_league = 4
+
+epoch_score_df <- step_detail_rdf() %>%
+  mutate(league = as.integer(as.character(league))) %>%
+  filter(study == source_study, !event %in% c("birth", "fail"), !is.na(score)) %>%
+  select(study, experiment, epoch, step, member_id, league, score, duration) %>%
+  group_by(study, experiment, epoch, member_id) %>%
+  filter(step == max(step)) %>%
+  ungroup() %>%
+  filter(league >= min_league) %>%
+  group_by(study, experiment, epoch) %>%
+  summarise(epoch_score = mean(score), epoch_score_sd = sd(score), epoch_duration = mean(duration), epoch_duration_sd = sd(duration))
+print(epoch_score_df)
+
+
+```
+
+## Final Score
+
+```{r}
+
+final_score_df <- simulation_summary_rdf() %>%
+  filter(study == source_study, status == 'Complete') %>%
+  mutate(final_score = score) %>%
+  select(study, experiment, final_score)
+print(final_score_df)
+
+
+```
+
+## Rank Score
+
+```{r}
+
+rank_score_df <- step_detail_rdf() %>%
+  filter(study == source_study, !is.na(ranking)) %>%
+  select(study, experiment, ranking, member_id, ranking_score = score)
+print(rank_score_df)
+
+
+```
+
+## Join it all together
+
+```{r}
+
+pace_df <- step_score_df %>%
+  inner_join(epoch_score_df, by = c("study", "experiment", "epoch")) %>%
+  left_join(rank_score_df, by = c("study", "experiment", "member_id")) %>%
+  mutate(
+    standard_score = introduction_score / epoch_score,
+    standard_duration = duration / epoch_duration,
+    ranked = !is.na(ranking)
+  ) %>%
+  select(
+    study, experiment, epoch, step, member_id,
+    duration, introduction_score, standard_score, duration, standard_duration, ranking, ranking_score, everything()
+    )
+
+print(pace_df %>% select(epoch, standard_score, standard_duration, ranked) )
+
+
+```
+
+## Relate standard score to standard duration
+
+```{r}
+
+pace_df %>%
+  filter(ranked) %>%
+  ggplot(aes(standard_score, standard_duration, color = ranked)) + 
+  geom_point() + 
+  geom_vline(xintercept = 1) +
+  geom_hline(yintercept = 3)
+
+
+```
+
+Scores with high standard duration are less unlikely to be part of the final solution.
+
+## Standard Score
+
+
+
+```{r}
+
+pace_df %>%
+  filter(ranked, standard_duration < 5) %>%
+  ggplot() + geom_histogram(aes(x = standard_duration, fill = ranked), binwidth = 0.25)
+
+pace_df %>%
+  filter(standard_duration < 5) %>%
+  ggplot() + geom_histogram(aes(x = standard_duration, fill = ranked), binwidth = 0.25)
+
+
+```
+
+Very few members with a standard duration of 5 or greater
