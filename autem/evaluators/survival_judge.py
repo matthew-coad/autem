@@ -30,7 +30,7 @@ class SurvivalJudge(Evaluater):
         robustness_p = stats.binom_test(victories, n=max_contests, p=0.5, alternative='less')
         kill = robustness_p < self.p_value
         if kill:
-            member.kill()
+            member.kill("Unfit")
             member.evaluation.survival = "%d|%d die" % (victories, max_contests)
         else:
             member.evaluation.survival = "%d|%d" % (victories, max_contests)

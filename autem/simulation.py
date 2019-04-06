@@ -486,7 +486,6 @@ class Simulation:
         record.time = time.ctime(member.evaluation_time)
         record.event = member.event
         record.duration = member.evaluation_duration
-        record.fault = member.fault_message
 
         record.rating = member.rating
         record.rating_sd = member.rating_sd
@@ -494,6 +493,7 @@ class Simulation:
 
         record.league = member.league
         record.alive = member.alive
+        record.reason = member.kill_reason
         record.final = member.final
 
         record.victories = member.victories

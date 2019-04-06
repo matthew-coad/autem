@@ -29,3 +29,17 @@ Refine quick verifer reporting to better provide context for various columns
 
 Add a component code "QV" to all columns.
 Add specific columns the report evaluations and rule outcomes.
+
+**Done**
+
+No issues.
+
+## Provide reason for killing members
+
+Move toward reserving fail for when runtime errors occur.
+
+Report reason/component when killing.
+
+**done** 
+
+Fault has been moved and is now reported as "reason" after alive. Reason being reason why they are no longer alive.

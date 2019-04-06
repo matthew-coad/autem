@@ -36,7 +36,7 @@ class ContestJudge(Evaluater):
         robustness_p = stats.binom_test(loser_victories, n=max_contests, p=0.5, alternative='less')
         kill = robustness_p < self.p_value
         if kill:
-            loser.kill()
+            loser.kill("Unfit")
             loser.evaluation.contest_survival = "%d|%d die" % (loser_victories, max_contests)
         else:
             loser.evaluation.contest_survival = "%d|%d survive" % (loser_victories, max_contests)

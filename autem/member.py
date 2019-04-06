@@ -20,6 +20,7 @@ class Member:
         self.event = "initialized"
 
         self.alive = 0
+        self.kill_reason = None
         self.incarnation = 0
         self.final = 0
 
@@ -111,12 +112,13 @@ class Member:
         self.contests = 0
         self.wonlost = []
 
-    def kill(self):
+    def kill(self, reason):
         """
         Kill this member
         """
         self.event = "death"
         self.alive = 0
+        self.kill_reason = reason
         self.final = 1
 
     def fail(self, fault, operation, component):
@@ -129,6 +131,7 @@ class Member:
         self.fault_component = component
         self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
         self.alive = 0
+        self.kill_reason = str(fault)
         self.final = 1
 
     def rated(self, rating, rating_sd):

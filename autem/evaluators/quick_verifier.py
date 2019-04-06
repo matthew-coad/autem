@@ -40,7 +40,7 @@ class QuickVerifier(Evaluater):
         evaluation.long_duration = standard_duration > self.max_duration
 
         if evaluation.long_duration:
-            member.kill()
+            member.kill("Slow")
             return None
 
     def evaluate_member(self, member):
