@@ -23,7 +23,9 @@ Worsens:
 
 Rule needs refinement
 
-## Refine quick verifer reporting
+## Report under QV
+
+Refine quick verifer reporting to better provide context for various columns
 
 Add a component code "QV" to all columns.
 Add specific columns the report evaluations and rule outcomes.

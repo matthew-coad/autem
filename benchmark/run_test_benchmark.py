@@ -25,7 +25,7 @@ def run_test_simulation(baseline_name = None, seed = None):
     task_id = configuration["task_id"]
     study = get_test_study()
     seed = seed if not seed is None else 2
-    epochs = 25
+    epochs = 3
     steps = 200
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
