@@ -28,11 +28,13 @@ class DurationEvaluator(Evaluater):
         for candidate in candidates:
             base_durations.append(candidate.evaluation.score_duration)
 
-        base_duration = np.mean(base_durations)
         duration = evaluation.score_duration
+        duration_std = evaluation.score_duration_std
+        base_duration = np.mean(base_durations)
+        base_duration_std = np.std(base_durations)
         standard_duration = duration / base_duration
 
-        evaluation.duration_evaluation = DurationEvaluation(duration, base_duration, standard_duration)
+        evaluation.duration_evaluation = DurationEvaluation(duration, duration_std, base_duration, base_duration_std, standard_duration)
 
     def record_member(self, member, record):
         super().record_member(member, record)
@@ -42,9 +44,13 @@ class DurationEvaluator(Evaluater):
 
         if duration_evaluation:
             record.DE_duration = duration_evaluation.duration
+            record.DE_duration_std = duration_evaluation.duration_std
             record.DE_base_duration = duration_evaluation.base_duration
+            record.DE_base_duration_std = duration_evaluation.base_duration_std
             record.DE_standard_duration = duration_evaluation.standard_duration
         else:
             record.DE_duration = None
+            record.DE_duration_std = None
             record.DE_base_duration = None
+            record.DE_base_duration_std = None
             record.DE_standard_duration = None

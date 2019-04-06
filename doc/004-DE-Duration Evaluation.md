@@ -22,4 +22,10 @@ Remove score duration column. Fix up reporting.
 
 Rename duration column to event_duration to match DA concepts
 
+**done**
+
 ## Report on duration std
+
+Report on duration and base durations standard deviations
+
+**done**
