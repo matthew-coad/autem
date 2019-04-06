@@ -13,7 +13,7 @@ def get_test_study():
     return "DE"
 
 def get_test_baseline_name():
-    return "balance-scale"
+    return 'banknote-authentication'
 
 def get_test_simulations_path():
     return benchmark.get_simulations_path().joinpath("test")
@@ -25,7 +25,7 @@ def run_test_simulation(baseline_name = None, seed = None):
     task_id = configuration["task_id"]
     study = get_test_study()
     seed = seed if not seed is None else 2
-    epochs = 3
+    epochs = 25
     steps = 200
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)

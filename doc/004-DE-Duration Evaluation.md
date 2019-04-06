@@ -45,4 +45,9 @@ Component scores have been moved to their own page.
 
 banknote_authentication is a good test target because it runs fast.
 
+## Can't find good targets
+
+Don't seem to have enough assessments to identify a problematic dataset.
+Move onto Poor Scorers 1 assessment study. We'll keep the monitoring code on
+to see if we can detect targets for a future study.
 
