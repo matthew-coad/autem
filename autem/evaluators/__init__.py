@@ -3,11 +3,12 @@ from .evaluator import Evaluater
 from .score_evaluator import ScoreEvaluator
 from .choice_predicted_score_evaluator import ChoicePredictedScoreEvaluator
 from .choice_model_evaluator import ChoiceModelEvaluator
+from .duration_evaluation import DurationEvaluation
+from .duration_evaluator import DurationEvaluator
 
 from .accuracy_contest import AccuracyContest
 from .voting_contest import VotingContest
 from .diverse_contest import DiverseContest
-from .quick_verifier import QuickVerifier
 
 # from .duration_contest import DurationContest
 from .contest_judge import ContestJudge

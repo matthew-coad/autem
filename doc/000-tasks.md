@@ -403,7 +403,7 @@ Calculate dummy score for comparison
 Report range from dummy score to top 5% score
 
 
-## v1 Assessment
+## v1 Evaluation
 
 
 Component elimination might help by dropping out invalid areas of investigation and giving

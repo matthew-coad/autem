@@ -10,7 +10,7 @@ import benchmark.utility as utility
 import os
 
 def get_test_study():
-    return "gp_comp"
+    return "DE"
 
 def get_test_baseline_name():
     return "balance-scale"
