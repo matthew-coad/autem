@@ -43,3 +43,9 @@ Report reason/component when killing.
 **done** 
 
 Fault has been moved and is now reported as "reason" after alive. Reason being reason why they are no longer alive.
+
+## Conclusion
+
+Quick Verifier improves things but is too heavy handed.
+Create PE - Performance Evaluator study which studies a "Performance Evaluator" and specific
+performance rules.
