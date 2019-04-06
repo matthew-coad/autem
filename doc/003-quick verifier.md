@@ -2,9 +2,11 @@
 
 Some datasets don't complete because they have excessively long run times. Study a component that eliminated members to improve run times
 
-## Add QuickVerifier evaluator that is responsible for this issue. 
+## Introduce Quick Verifier
 
-done. No issues
+Add QuickVerifier component to evaluations that is responsible for this issue. 
+
+Done. No issues
 
 ## Kill all members with a runtime greater than 3 times the mean of league members
 
