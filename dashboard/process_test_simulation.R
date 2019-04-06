@@ -1,16 +1,24 @@
 source("process_simulation.R")
 
-simulations_path1 <- "D:\\Documents\\autem\\benchmark\\simulations\\gp_comp"
-simulations_path2 <- "D:\\Documents\\autem\\benchmark\\simulations\\quick_verifier"
-#simulations_path3 <- "D:\\Documents\\autem\\benchmark\\simulations\\leagues"
+simulation_paths = c(
+  "D:\\Documents\\autem\\benchmark\\simulations\\test\\DE"
+)
+
 benchmark_path <- "D:\\Documents\\autem\\benchmark"
 
 # Load data
 print("Loading battle")
 
-#battle_df <- clean_battle(read_battle(simulations_path1))
-battle_df <- clean_battle(bind_rows(read_battle(simulations_path1), read_battle(simulations_path2)))
-# battle_df <- clean_battle(bind_rows(read_battle(simulations_path1), read_battle(simulations_path2), read_battle(simulations_path3)))
+battle_df <- NULL
+for (simulation_path in simulation_paths) {
+  if (is.null(battle_df))
+    battle_df <- read_battle(simulation_path)
+  else
+    battle_df <- bind_rows(read_battle(simulation_path))
+}
+
+battle_df <- clean_battle(battle_df)
+
 datasets <- unique(battle_df$dataset)
 baseline_df <- read_baselines(benchmark_path, datasets)
 configuration_df <- read_configuration_file(benchmark_path)
@@ -37,3 +45,5 @@ write_rds(dataset_summary_df, "data\\dataset_summary.RDS")
 write_rds(baseline_detail_df, "data\\baseline_detail.RDS")
 write_rds(baseline_summary_df, "data\\baseline_summary.RDS")
 write_rds(breakdown_df, "data\\breakdown.RDS")
+
+print("Finished")

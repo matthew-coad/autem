@@ -203,8 +203,3 @@ class ScoreEvaluator(Evaluater):
             record.score_std = evaluation.score_std
         else:
             record.score_std = None
-
-        if hasattr(evaluation, "score_duration"):
-            record.score_duration = evaluation.score_duration
-        else:
-            record.score_duration = None

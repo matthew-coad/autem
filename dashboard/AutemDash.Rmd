@@ -418,8 +418,8 @@ renderPlot({
     geom_point(size = 1, aes(y = score, color = !!as.symbol(input$breakdown)), na.rm = TRUE) +
     geom_hline(data = simulation_summary_df, aes(yintercept = baseline_top_score), linetype = 'dotted') +
     geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_top_score, label = accuracy_format(baseline_top_score))) +
-    geom_hline(data = simulation_summary_df, aes(yintercept = dummy_score), linetype = 'dotted') +
-    geom_label(data = simulation_summary_df, aes(x = 0, y = dummy_score, label = accuracy_format(dummy_score))) +
+    geom_hline(data = simulation_summary_df, aes(yintercept = baseline_bottom_score), linetype = 'dotted') +
+    geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_bottom_score, label = accuracy_format(baseline_bottom_score))) +
     facet_wrap(~ study) +
     coord_cartesian(ylim = c(0, 1))
 })

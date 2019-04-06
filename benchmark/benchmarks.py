@@ -23,7 +23,7 @@ def get_simulations_path():
     return Path("benchmark/simulations")
 
 def get_version():
-    return 11
+    return 12
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)

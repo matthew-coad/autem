@@ -45,7 +45,6 @@ read_battle_file <- function(file_name) {
     top_10p_accuracy = col_double(),
     top_25p_accuracy = col_double(),
     validation_accuracy = col_double(),
-    dummy_accuracy = col_double(),
     voting_score = col_double(),
     top_voting_score = col_double(),
     choice_predicted_score = col_double(),
@@ -143,7 +142,8 @@ build_step_detail <- function(battle_df) {
     step_df9 <- 
     step_df9 %>%
     mutate(
-      score = accuracy
+      score = accuracy,
+      reason = fault
     )
   
   step_df10 <-
@@ -154,7 +154,8 @@ build_step_detail <- function(battle_df) {
       step_df10 %>%
       mutate(
         choice_predicted_score = NA,
-        choice_predicted_score_std = NA
+        choice_predicted_score_std = NA,
+        reason = fault
       )
   
   step_df11 <-
@@ -164,7 +165,19 @@ build_step_detail <- function(battle_df) {
     step_df11 <- 
       step_df11 %>%
       mutate(
-        duration = score_duration
+        duration = score_duration,
+        reason = fault
+      )
+  }
+  
+  step_df12 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 12)
+  if (nrow(step_df12) > 0) {
+    step_df12 <- 
+      step_df12 %>%
+      mutate(
+        duration = DE_duration
       )
   }
 
@@ -180,6 +193,7 @@ build_step_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df9)
   step_df <- bind_df(step_df, step_df10)
   step_df <- bind_df(step_df, step_df11)
+  step_df <- bind_df(step_df, step_df12)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
@@ -193,10 +207,10 @@ build_step_detail <- function(battle_df) {
       form_id,
       event,
       event_time,
-      fault,
       ranking,
       league,
       alive,
+      reason,
       final,
       choice_predicted_score,
       choice_predicted_score_std,
@@ -263,7 +277,6 @@ build_ranking_detail <- function(battle_df) {
        # and its probably okay to use that.
        score, 
        score_sd = rating_sd,
-       dummy_score = dummy_accuracy,
        validation_score = validation_accuracy
     )
   ranking_df
@@ -384,7 +397,6 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       steps, 
       score,
       score_sd,
-      dummy_score,
       validation_score,
       baseline_bottom_score,
       baseline_top_score,

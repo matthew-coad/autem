@@ -14,4 +14,8 @@ Replaces purpose of score_duration. Also names ambiguous with duration report co
 
 ## Remove score_duration report
 
+Remove score duration column. Fix up reporting.
+
+
+
 ## Rename duration in report to event_duration
