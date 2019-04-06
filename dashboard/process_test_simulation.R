@@ -1,6 +1,7 @@
 source("process_simulation.R")
 
 simulation_paths = c(
+  "D:\\Documents\\autem\\benchmark\\simulations\\gp_comp",
   "D:\\Documents\\autem\\benchmark\\simulations\\quick_verifier",
   "D:\\Documents\\autem\\benchmark\\simulations\\test\\DE"
 )

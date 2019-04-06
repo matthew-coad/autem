@@ -38,3 +38,11 @@ Add panes to view standard durations on the duration and component screens
 
 Component scores have been moved to their own page.
 
+## Find datasets with long runtimes for some components
+
++ electricty - Polynomial SVM, Radial SVM
++ banknote_authentication - LSV/RSV can have really long run times.
+
+banknote_authentication is a good test target because it runs fast.
+
+

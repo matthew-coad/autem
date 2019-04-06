@@ -59,6 +59,7 @@ read_battle_file <- function(file_name) {
     DE_base_duration_std = col_double(),
     DE_standard_duration = col_double(),
     quick_verification = col_character(), # Obsolete
+    dummy_accuracy = col_double(), # Obsolete
     Imputer = col_character(),
     SMP_strategy = col_character(),
     Engineer = col_character(),
