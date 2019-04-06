@@ -53,6 +53,7 @@ read_battle_file <- function(file_name) {
     voting_boost  = col_double(),
     voting_duration = col_double(),
     inter_score = col_double(),
+    quick_verification = col_character(),
     Imputer = col_character(),
     SMP_strategy = col_character(),
     Engineer = col_character(),

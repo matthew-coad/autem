@@ -23,10 +23,10 @@
         },
 
         {
-            "name": "Python: gp_comp Benchmark",
+            "name": "Python: quick_verifier Benchmark",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/benchmark/run_gp_comp_benchmark.py",
+            "program": "${workspaceFolder}/benchmark/run_quick_verifier_benchmark.py",
             "console": "integratedTerminal"
         },
 

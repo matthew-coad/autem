@@ -15,7 +15,7 @@ library(tidyverse)
 ```
 
 ```{r load, include=FALSE}
-
+ 
 # Load data
 step_detail_rdf <- reactive({ read_rds("data\\step_detail.RDS") })
 epoch_detail_rdf <- reactive({ read_rds("data\\epoch_detail.RDS") })
@@ -400,11 +400,14 @@ renderPlot({
   step_detail_df <- 
     step_detail_rdf() %>% 
     filtered_data(input$experiment) %>%
-    filter(final == 1) %>%
+    filter(!is.na(score)) %>%
+    group_by(member_id, league) %>%
+    filter(step == min(step)) %>%
     mutate(
       predicted_score = choice_predicted_score,
       predicted_score_std = choice_predicted_score_std
-    )
+    ) %>%
+    ungroup()
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
   req(nrow(step_detail_df) > 0, cancelOutput = TRUE)  
