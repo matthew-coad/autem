@@ -25,6 +25,7 @@ read_battle_file <- function(file_name) {
     form_id = col_integer(),
     incarnation = col_integer(),
     event = col_character(),
+    event_duration = col_double(),
     time = col_character(),
     fault = col_character(),
     rating = col_double(),
@@ -52,7 +53,12 @@ read_battle_file <- function(file_name) {
     voting_boost  = col_double(),
     voting_duration = col_double(),
     inter_score = col_double(),
-    quick_verification = col_character(),
+    DE_duration = col_double(),
+    DE_duration_std = col_double(),
+    DE_base_duration = col_double(),
+    DE_base_duration_std = col_double(),
+    DE_standard_duration = col_double(),
+    quick_verification = col_character(), # Obsolete
     Imputer = col_character(),
     SMP_strategy = col_character(),
     Engineer = col_character(),
@@ -143,6 +149,8 @@ build_step_detail <- function(battle_df) {
     step_df9 %>%
     mutate(
       score = accuracy,
+      duration = NA,
+      standard_duration = NA,
       reason = fault
     )
   
@@ -155,6 +163,8 @@ build_step_detail <- function(battle_df) {
       mutate(
         choice_predicted_score = NA,
         choice_predicted_score_std = NA,
+        duration = NA,
+        standard_duration = NA,
         reason = fault
       )
   
@@ -166,6 +176,7 @@ build_step_detail <- function(battle_df) {
       step_df11 %>%
       mutate(
         duration = score_duration,
+        standard_duration = NA,
         reason = fault
       )
   }
@@ -177,7 +188,8 @@ build_step_detail <- function(battle_df) {
     step_df12 <- 
       step_df12 %>%
       mutate(
-        duration = DE_duration
+        duration = DE_duration,
+        standard_duration = DE_standard_duration
       )
   }
 
@@ -217,6 +229,7 @@ build_step_detail <- function(battle_df) {
       score,
       score_std,
       duration,
+      standard_duration,
       Scaler:LGR_dual
     )
   step_df

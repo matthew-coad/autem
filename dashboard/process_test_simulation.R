@@ -1,6 +1,7 @@
 source("process_simulation.R")
 
 simulation_paths = c(
+  "D:\\Documents\\autem\\benchmark\\simulations\\quick_verifier",
   "D:\\Documents\\autem\\benchmark\\simulations\\test\\DE"
 )
 
@@ -14,7 +15,7 @@ for (simulation_path in simulation_paths) {
   if (is.null(battle_df))
     battle_df <- read_battle(simulation_path)
   else
-    battle_df <- bind_rows(read_battle(simulation_path))
+    battle_df <- bind_rows(battle_df, read_battle(simulation_path))
 }
 
 battle_df <- clean_battle(battle_df)

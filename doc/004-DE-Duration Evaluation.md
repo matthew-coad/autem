@@ -29,3 +29,12 @@ Rename duration column to event_duration to match DA concepts
 Report on duration and base durations standard deviations
 
 **done**
+
+## View standard durations
+
+Add panes to view standard durations on the duration and component screens
+
+**done**
+
+Component scores have been moved to their own page.
+

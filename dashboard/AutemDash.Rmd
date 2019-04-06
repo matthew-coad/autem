@@ -426,32 +426,7 @@ renderPlot({
 
 ```
 
-Durations {data-orientation=rows}
-=====================================
-
-Step duration
------------------------------------------------------------------------
-
-```{r}
-
-renderPlot({
-  req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
-  
-  step_detail_df <- 
-    step_detail_rdf() %>% 
-    filtered_data(input$experiment) %>% 
-    filter(!is.na(duration))
-  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
-  
-  step_detail_df %>%
-    ggplot(aes(x = step, y = duration)) +
-    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
-    facet_wrap(~ study)
-})
-
-```
-
-Components {data-orientation=rows}
+Scores 2 {data-orientation=rows}
 =====================================
 
 Top
@@ -533,6 +508,67 @@ renderPlot({
 Bottom
 -----------------------------------------------------------------------
 
+### Placeholder 1
+
+### Placeholder 2 
+
+Durations {data-orientation=rows}
+=====================================
+
+Top
+-----------------------------------------------------------------------
+
+### Duration
+
+```{r}
+
+renderPlot({
+  req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
+  
+  step_detail_df <- 
+    step_detail_rdf() %>% 
+    filtered_data(input$experiment) %>% 
+    filter(!is.na(duration))
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  
+  step_detail_df %>%
+    ggplot(aes(x = step, y = duration)) +
+    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
+    facet_wrap(~ study)
+})
+
+```
+
+Bottom
+-----------------------------------------------------------------------
+
+### Standard Duration
+
+```{r}
+
+renderPlot({
+  req(step_detail_rdf(), simulation_summary_rdf(), input$experiment, input$breakdown, cancelOutput = TRUE)
+  
+  step_detail_df <- 
+    step_detail_rdf() %>% 
+    filtered_data(input$experiment) %>% 
+    filter(!is.na(duration))
+  simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
+  
+  step_detail_df %>%
+    ggplot(aes(x = step, y = standard_duration)) +
+    geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
+    facet_wrap(~ study)
+})
+
+```
+
+Duration 2 {data-orientation=rows}
+=====================================
+
+Top
+-----------------------------------------------------------------------
+
 ### Duration
 
 ```{r}
@@ -570,7 +606,43 @@ renderPlot({
 
 ```
 
-### Place
+### Standard Duration
+
+```{r}
+renderPlot({
+  req(breakdown_rlist(), step_detail_rdf(), input$experiment, cancelOutput = TRUE)
+  
+  step_detail_df <- step_detail_rdf() %>% filtered_data(input$experiment) %>% filter(!is.na(duration))
+  choices_list <- breakdown_rlist()
+  
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)
+  
+  build_choice_durations <- function(.choice) { 
+    step_detail_df %>% 
+      mutate(
+        choice = .choice
+      ) %>%
+      select(study, experiment, choice, component = !! .choice, standard_duration)
+  }
+  
+  durations_score_df <-  
+    purrr::map_dfr(choices_list,  build_choice_durations) %>%
+    mutate(
+      choice = factor(choice),
+      component = forcats::fct_reorder(component, choice, .fun = unique, .desc = TRUE)
+  )
+  
+  durations_score_df %>%
+    ggplot() +
+    geom_point(aes(x = component, y = standard_duration, color = choice)) + 
+    coord_flip() +
+    xlab("Component") +
+    facet_wrap(~ study)
+
+})
+
+```
+
 
 Components X {data-orientation=rows}
 =====================================
