@@ -485,7 +485,7 @@ class Simulation:
         record.incarnation = member.incarnation
         record.time = time.ctime(member.evaluation_time)
         record.event = member.event
-        record.duration = member.evaluation_duration
+        record.event_duration = member.evaluation_duration
 
         record.rating = member.rating
         record.rating_sd = member.rating_sd

@@ -16,6 +16,10 @@ Replaces purpose of score_duration. Also names ambiguous with duration report co
 
 Remove score duration column. Fix up reporting.
 
-
+**done**
 
 ## Rename duration in report to event_duration
+
+Rename duration column to event_duration to match DA concepts
+
+## Report on duration std
