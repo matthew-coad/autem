@@ -1,4 +1,4 @@
-#  Quick Verifier - QV
+#  QV - Quick Verifier 
 
 Some datasets don't complete because they have excessively long run times. Study a component that eliminated members to improve run times
 
