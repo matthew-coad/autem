@@ -19,6 +19,9 @@ import datetime
 
 from pathlib import Path
 
+def get_study():
+    return "PP1"
+
 def get_simulations_path():
     return Path("benchmark/simulations")
 
@@ -154,7 +157,8 @@ def run_benchmark_simulation(study, baseline_name):
     run_simulation(simulation, steps, epochs, max_time)
     autem.ReportManager(path).update_combined_reports()
 
-def run_benchmark_simulations(study):
+def run_benchmark_simulations(study = None):
+    study = study if study else get_study()
     baseline_names = baselines.get_baseline_names(study)
     for baseline_name in baseline_names:
         run_benchmark_simulation(study, baseline_name)
