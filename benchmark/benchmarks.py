@@ -150,7 +150,7 @@ def run_benchmark_simulation(study, baseline_name):
     seed = 1
     epochs = 25
     steps = 200
-    max_time = 60 * 60
+    max_time = 2 * 60 * 60
     population_size = 20
     path = get_simulations_path().joinpath(study).joinpath(experiment)
 

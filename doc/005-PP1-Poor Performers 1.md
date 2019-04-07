@@ -68,3 +68,19 @@ Confidence intervals are currently available as rating_sd
 
 Action - Show on Scores/Learning Curve panel as grey background **done**
 
+## Collect poor/problematic performance data
+
+Action - Run poor performers with enhanced diagnostics. **done**
+
+## PP1 Conclusion
+
+With the enhanced dev
+
+The worst performers are often very unstable with wide variances on their cross-validations.
+
+Proposal - Score members based on score standard deviation. Very easy to check.
+
+Proposal - Still issues with members being stuck in local minima. Try species.
+
+Action - Start SC - Stability Contest experiment.
+

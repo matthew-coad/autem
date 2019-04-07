@@ -188,8 +188,10 @@ renderPlot({
     ggplot(aes(x = experiment, color = study)) +
     geom_errorbar(aes(ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.5, na.rm = TRUE) +
     geom_point(aes(y = progress)) +
+    geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+    geom_hline(aes(yintercept = 0.95), linetype = 'dotted') +
     ylab("Progress") +
-    coord_flip(ylim = c(0.8, 1.1))
+    coord_flip(ylim = c(0.4, 1.1))
 
 
   p
