@@ -77,7 +77,7 @@ DT::renderDataTable({
   output_df <- 
     simulation_summary_df %>%
     mutate(
-      score = readr::parse_number(format(score, digits = 3)),
+      rating = readr::parse_number(format(rating, digits = 3)),
       progress_top_score = readr::parse_number(format(progress_top_score, digits = 3)),
       progress = readr::parse_number(format(progress, digits = 3))
     ) %>%
@@ -87,8 +87,8 @@ DT::renderDataTable({
       Status = status,
       Steps = steps,
       `Duration (s)` = duration,
-      Score = score,
-      `Target Score` = progress_top_score,
+      Rating = rating,
+      `Target Rating` = progress_top_score,
       Progress = progress
     )
   
@@ -113,7 +113,7 @@ DT::renderDataTable({
   output_df <- 
     simulation_summary_df %>%
     mutate(
-      score = readr::parse_number(format(score, digits = 3)),
+      rating = readr::parse_number(format(rating, digits = 3)),
       progress_top_score = readr::parse_number(format(progress_top_score, digits = 3)),
       progress = readr::parse_number(format(progress, digits = 3))
     ) %>%
@@ -123,8 +123,8 @@ DT::renderDataTable({
       Status = status,
       Steps = steps,
       `Duration (s)` = duration,
-      Score = score,
-      `Target Score` = progress_top_score,
+      Rating = rating,
+      `Target Rating` = progress_top_score,
       Progress = progress
     )
   
@@ -245,7 +245,7 @@ renderPlot({
   simulation_summary_progress <-
     simulation_summary_df %>%
     full_join(baseline_progress_df, by = c("study", "experiment")) %>%
-    filter(baseline_score <= score) %>%
+    filter(baseline_score <= rating) %>%
     group_by(study, experiment) %>%
     summarise(baseline_rank = max(baseline_rank), baseline_percent = max(baseline_percent))
   
@@ -287,7 +287,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - score) / score_sd
+      validation_distance = (validation_score - rating) / rating_sd
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -297,8 +297,8 @@ renderPlot({
       study,
       experiment,
       dataset,
-      score,
-      score_sd,
+      rating,
+      rating_sd,
       validation_score,
       validation_distance
     )
@@ -331,7 +331,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - score) / score_sd
+      validation_distance = (validation_score - rating) / rating_sd
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -341,8 +341,8 @@ renderPlot({
       study,
       experiment,
       dataset,
-      score,
-      score_sd,
+      rating,
+      rating_sd,
       validation_score,
       validation_distance
     )
@@ -370,16 +370,16 @@ renderPlot({
       study,
       experiment,
       dataset,
-      score,
-      score_sd,
+      rating,
+      rating_sd,
       validation_score
     )
   
   output_df %>%
     ggplot(aes(x = study)) +
-    geom_errorbar(aes(ymin = score-score_sd, ymax=score+score_sd), width = .3, color = "black") +
-    geom_errorbar(aes(ymin = score-score_sd * 2, ymax=score+score_sd* 2), width = .15, color = "black", linetype = 'dotted') +
-    geom_point(aes(y = score, color = "score"), size = 3) +
+    geom_errorbar(aes(ymin = rating-rating_sd, ymax=rating+rating_sd), width = .3, color = "black") +
+    geom_errorbar(aes(ymin = rating-rating_sd * 2, ymax=rating+rating_sd* 2), width = .15, color = "black", linetype = 'dotted') +
+    geom_point(aes(y = rating, color = "score"), size = 3) +
     geom_point(aes(y = validation_score, color = "validation"), size = 3) +
     coord_flip() +
     xlab("Study") +

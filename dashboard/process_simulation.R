@@ -289,14 +289,8 @@ build_ranking_detail <- function(battle_df) {
        study,
        experiment,
        ranking,
-       # score = rating,
-       # Rating is based on entire dataset. In order to validate we need
-       # it to based purely on the training dataset
-       # Temporarily base it on accuracy with the sd coming from rating.
-       # Accuracy is now evaluated using cross validation
-       # and its probably okay to use that.
-       score, 
-       score_sd = score_std,
+       rating, 
+       rating_sd,
        validation_score = VE_score
     )
   ranking_df
@@ -404,8 +398,8 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       baseline_top_score = top_score,
       progress_bottom_score = bottom_score,
       progress_top_score = baseline_top_score,
-      progress = (score - progress_bottom_score) / (progress_top_score - progress_bottom_score),
-      progress_sd = score_sd / (progress_top_score - progress_bottom_score)
+      progress = (rating - progress_bottom_score) / (progress_top_score - progress_bottom_score),
+      progress_sd = rating_sd / (progress_top_score - progress_bottom_score)
     ) %>%
     select(
       study,
@@ -415,8 +409,8 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       duration, 
       epochs, 
       steps, 
-      score,
-      score_sd,
+      rating,
+      rating_sd,
       validation_score,
       baseline_bottom_score,
       baseline_top_score,

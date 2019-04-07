@@ -28,7 +28,7 @@ class CrossValidationRater(Evaluater):
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
-        x,y = loader.load_training_data(simulation)
+        x,y = loader.load_divided_data(simulation)
         pipeline = member.resources.pipeline
 
         try:
@@ -39,8 +39,5 @@ class CrossValidationRater(Evaluater):
 
         rating = scores.mean()
         rating_sd = scores.std()
-
-        member.ratings.predictive_accuracy = rating
-        member.ratings.predictive_accuracy_sd = rating_sd
 
         member.rated(rating, rating_sd)

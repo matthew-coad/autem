@@ -46,7 +46,4 @@ class OpenMLRater(Evaluater):
         rating = scores.mean()
         rating_sd = scores.std()
 
-        member.ratings.predictive_accuracy = rating
-        member.ratings.predictive_accuracy_sd = rating_sd
-
         member.rated(rating, rating_sd)

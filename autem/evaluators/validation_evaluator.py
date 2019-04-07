@@ -16,9 +16,7 @@ class ValidationEvaluator(Evaluater):
     Validation evaluation component
     """
 
-    def evaluate_member(self, member):
-        super().evaluate_member(member)
-
+    def validate_member(self, member):
         simulation = member.simulation
         evaluation = member.evaluation
         if hasattr(evaluation, "validation_evaluation"):
@@ -47,7 +45,17 @@ class ValidationEvaluator(Evaluater):
         score = scorer.score(y_validation, y_pred)
 
         validation_evaluation = ValidationEvaluation(score)
-        evaluation.validation_evaluation = validation_evaluation
+        evaluation.validation_evaluation = validation_evaluation        
+
+    def evaluate_member(self, member):
+        super().evaluate_member(member)
+
+        self.validate_member(member)
+
+    def rate_member(self, member):
+        super().rate_member(member)
+
+        self.validate_member(member)
 
     def record_member(self, member, record):
         super().record_member(member, record)

@@ -54,5 +54,12 @@ Fit validation data at league 0, add to report and show in on score chart.
 
 Move predicted scores to another panel on scores
 
+Analysis - Realize that final ratings are based on test data and are not comparable to baselines.
 
+Action - Rate using cross validation on the entire training set
 
+## Match baseline rating
+
+Make sure that the final rating matches the baseline rating by using cross validation on the entire dataset.
+
+Action - Currently the rating is used to select the final ranking.
