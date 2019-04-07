@@ -182,13 +182,16 @@ renderPlot({
   df <- simulation_summary_rdf() %>% 
     filter(!is.na(progress)) %>%
     mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
-    select(experiment, study, progress)
+    select(experiment, study, progress, progress_sd)
 
   p <- df %>%
     ggplot(aes(x = experiment, color = study)) +
+    geom_errorbar(aes(ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.5, na.rm = TRUE) +
     geom_point(aes(y = progress)) +
     ylab("Progress") +
-    coord_flip()
+    coord_flip(ylim = c(0.8, 1.1))
+
+
   p
 
 })
@@ -272,7 +275,7 @@ renderPlot({
 Validation {data-orientation=columns}
 =====================================  
 
-Long
+Left
 -----------------------------------------------------------------------
 
 ### All Details
@@ -287,7 +290,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - rating) / rating_sd
+      validation_distance = (validation_score - score) / score_sd
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -331,7 +334,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - rating) / rating_sd
+      validation_distance = (validation_score - score) / score_sd
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -409,15 +412,23 @@ renderPlot({
     filter(step == min(step)) %>%
     ungroup()
   
+  # define the model
+  score_model <- loess(score ~ step, data = step_detail_df)
+  validation_model <- loess(validation_score ~ step, data = step_detail_df)
+  step_detail_df$score_smooth <- predict(score_model)
+  step_detail_df$validation_score_smooth <- predict(validation_model)
+
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
   req(nrow(step_detail_df) > 0, cancelOutput = TRUE)  
-  
+
   step_detail_df %>%
     ggplot() +
-    geom_point(aes(x = step, y = score, color = !!as.symbol(input$breakdown)), na.rm = TRUE) +
-    geom_smooth(aes(x = step, y = score, linetype = "Training"), na.rm = TRUE, method = "loess", se = FALSE) +
-    geom_smooth(aes(x = step, y = validation_score, linetype = "Validation"), na.rm = TRUE, method = "loess", se = FALSE) +
+    geom_ribbon(aes(x = step, ymin=score_smooth-score_std, ymax=score_smooth+score_std), fill = "LightGrey", na.rm = TRUE) +
+    geom_line(aes(x = step, y = score_smooth, linetype = "Training"), na.rm = TRUE) +
+    geom_smooth(aes(x = step, y = validation_score_smooth, linetype = "Validation"), na.rm = TRUE, method = "loess", se = FALSE) +
+    geom_point(aes(x = step, y = score, color = !!as.symbol(input$breakdown), shape = "Training"), na.rm = TRUE) +
+    geom_point(aes(x = step, y = validation_score, color = !!as.symbol(input$breakdown), shape = "Validation"), na.rm = TRUE) +
     geom_hline(data = simulation_summary_df, aes(yintercept = baseline_top_score), linetype = 'dotted') +
     geom_label(data = simulation_summary_df, aes(x = 0, y = baseline_top_score, label = accuracy_format(baseline_top_score))) +
     geom_hline(data = simulation_summary_df, aes(yintercept = baseline_bottom_score), linetype = 'dotted') +

@@ -252,7 +252,8 @@ build_ranking_detail <- function(battle_df) {
       mutate(
         study = paste0("S", version),
         experiment = paste0(dataset),
-        score = accuracy
+        score = accuracy,
+        score_std = NA
       )
   
   step_df8 <-
@@ -262,7 +263,8 @@ build_ranking_detail <- function(battle_df) {
   if (nrow(step_df8) > 0)
     step_df8 <- step_df8 %>%
       mutate(
-        score = accuracy
+        score = accuracy,
+        score_std = NA
       )
   
   step_df10 <-
@@ -291,6 +293,8 @@ build_ranking_detail <- function(battle_df) {
        ranking,
        rating, 
        rating_sd,
+       score,
+       score_sd = score_std,
        validation_score = VE_score
     )
   ranking_df
@@ -399,6 +403,7 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       progress_bottom_score = bottom_score,
       progress_top_score = baseline_top_score,
       progress = (rating - progress_bottom_score) / (progress_top_score - progress_bottom_score),
+      progress = ifelse(progress > 1.0, 1.0, progress),
       progress_sd = rating_sd / (progress_top_score - progress_bottom_score)
     ) %>%
     select(
@@ -411,6 +416,8 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       steps, 
       rating,
       rating_sd,
+      score,
+      score_sd,
       validation_score,
       baseline_bottom_score,
       baseline_top_score,

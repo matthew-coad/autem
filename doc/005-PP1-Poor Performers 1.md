@@ -34,7 +34,7 @@ Gets long runtimes on SVM learners. Gets cut-off early due to run-time restricti
 
 Action - Run with duration evaluation. Evaluate problematic learners for a specific rule.
 
-Action - Show valiation score on learning curves to provide more analysis feedback
+Action - Show validation score on learning curves to provide more analysis feedback **done**
 
 ## Replicate cylinder-bands
 
@@ -44,9 +44,9 @@ Lets see if we can replicate the accuracy locally.
 
 Analysis - The variance on this problem is rather massive. The openlm is likely overfit.
 
-Action - Provide more feedback on variance in the problem. Show score ranges in dashboard
+Action - Provide more feedback on variance in the problem. Show learning confidence in dashboard. **done**
 
-Action - Show learning curves to improve analysis
+Action - Show learning curves to improve analysis **done**
 
 ## Show learning curves
 
@@ -56,10 +56,15 @@ Move predicted scores to another panel on scores
 
 Analysis - Realize that final ratings are based on test data and are not comparable to baselines.
 
-Action - Rate using cross validation on the entire training set
+Action - Rate using cross validation on the entire training set **done**
 
 ## Match baseline rating
 
-Make sure that the final rating matches the baseline rating by using cross validation on the entire dataset.
+Action - Make sure that the final rating matches the baseline rating by using cross validation on the entire dataset. **done**
 
-Action - Currently the rating is used to select the final ranking.
+## Show learning confidence
+
+Confidence intervals are currently available as rating_sd
+
+Action - Show on Scores/Learning Curve panel as grey background **done**
+

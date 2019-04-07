@@ -16,13 +16,13 @@ class ValidationEvaluator(Evaluater):
     Validation evaluation component
     """
 
-    def validate_member(self, member):
+    def validate_member(self, member, required_league):
         simulation = member.simulation
         evaluation = member.evaluation
         if hasattr(evaluation, "validation_evaluation"):
             return None
 
-        if member.league < simulation.top_league:
+        if member.league < required_league:
             return None
 
         simulation = member.simulation
@@ -50,12 +50,13 @@ class ValidationEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        self.validate_member(member)
+        simulation = member.simulation
+        self.validate_member(member, simulation.top_league)
 
     def rate_member(self, member):
         super().rate_member(member)
 
-        self.validate_member(member)
+        self.validate_member(member, 1)
 
     def record_member(self, member, record):
         super().record_member(member, record)
