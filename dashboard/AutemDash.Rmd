@@ -179,10 +179,12 @@ Left
 renderPlot({
   req(simulation_summary_rdf(), cancelOutput = TRUE)
 
-  df <- simulation_summary_rdf() %>% filter(!is.na(progress))
+  df <- simulation_summary_rdf() %>% 
+    filter(!is.na(progress)) %>%
+    mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
+    select(experiment, study, progress)
 
   p <- df %>%
-    mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
     ggplot(aes(x = experiment, color = study)) +
     geom_point(aes(y = progress)) +
     ylab("Progress") +
