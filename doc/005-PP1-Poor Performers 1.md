@@ -42,9 +42,17 @@ Currently being beaten by a pretty simply support vector machine.
 
 Lets see if we can replicate the accuracy locally.
 
-Analysis - The variance on this problem is rather massive.
+Analysis - The variance on this problem is rather massive. The openlm is likely overfit.
 
 Action - Provide more feedback on variance in the problem. Show score ranges in dashboard
+
+Action - Show learning curves to improve analysis
+
+## Show learning curves
+
+Fit validation data at league 0, add to report and show in on score chart.
+
+Move predicted scores to another panel on scores
 
 
 

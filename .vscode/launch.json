@@ -23,10 +23,10 @@
         },
 
         {
-            "name": "Python: quick_verifier Benchmark",
+            "name": "Python: Benchmark",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/benchmark/run_quick_verifier_benchmark.py",
+            "program": "${workspaceFolder}/benchmark/run_benchmark.py",
             "console": "integratedTerminal"
         },
 

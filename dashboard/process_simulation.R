@@ -58,6 +58,7 @@ read_battle_file <- function(file_name) {
     DE_base_duration = col_double(),
     DE_base_duration_std = col_double(),
     DE_standard_duration = col_double(),
+    VE_score = col_double(),
     quick_verification = col_character(), # Obsolete
     dummy_accuracy = col_double(), # Obsolete
     Imputer = col_character(),
@@ -152,7 +153,8 @@ build_step_detail <- function(battle_df) {
       score = accuracy,
       duration = NA,
       standard_duration = NA,
-      reason = fault
+      reason = fault,
+      validation_score = NA
     )
   
   step_df10 <-
@@ -166,7 +168,8 @@ build_step_detail <- function(battle_df) {
         choice_predicted_score_std = NA,
         duration = NA,
         standard_duration = NA,
-        reason = fault
+        reason = fault,
+        validation_score = NA
       )
   
   step_df11 <-
@@ -178,7 +181,8 @@ build_step_detail <- function(battle_df) {
       mutate(
         duration = score_duration,
         standard_duration = NA,
-        reason = fault
+        reason = fault,
+        validation_score = NA
       )
   }
   
@@ -190,7 +194,8 @@ build_step_detail <- function(battle_df) {
       step_df12 %>%
       mutate(
         duration = DE_duration,
-        standard_duration = DE_standard_duration
+        standard_duration = DE_standard_duration,
+        validation_score = VE_score
       )
   }
 
@@ -229,6 +234,7 @@ build_step_detail <- function(battle_df) {
       choice_predicted_score_std,
       score,
       score_std,
+      validation_score,
       duration,
       standard_duration,
       Scaler:LGR_dual
@@ -290,8 +296,8 @@ build_ranking_detail <- function(battle_df) {
        # Accuracy is now evaluated using cross validation
        # and its probably okay to use that.
        score, 
-       score_sd = rating_sd,
-       validation_score = validation_accuracy
+       score_sd = score_std,
+       validation_score = VE_score
     )
   ranking_df
 }

@@ -25,6 +25,7 @@ def run_preprocessing():
             makers.RandomMaker(),
             
             evaluators.ScoreEvaluator(),
+            evaluators.ValidationEvaluator(),
             evaluators.AccuracyContest(),
             evaluators.SurvivalJudge(),
             evaluators.PromotionJudge(),
