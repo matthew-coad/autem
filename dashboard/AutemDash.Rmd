@@ -182,11 +182,11 @@ renderPlot({
   df <- simulation_summary_rdf() %>% 
     filter(!is.na(progress)) %>%
     mutate(experiment = forcats::fct_reorder(experiment, desc(progress))) %>%
-    select(experiment, study, progress, progress_sd)
+    select(experiment, study, progress, progress_std)
 
   p <- df %>%
     ggplot(aes(x = experiment, color = study)) +
-    geom_errorbar(aes(ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.5, na.rm = TRUE) +
+    geom_errorbar(aes(ymin = progress-progress_std, ymax=progress+progress_std), width = 0.5, na.rm = TRUE) +
     geom_point(aes(y = progress)) +
     geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
     geom_hline(aes(yintercept = 0.95), linetype = 'dotted') +
@@ -263,7 +263,7 @@ renderPlot({
       geom_count(aes(x = baseline_percent, y = baseline_progress), color = "DarkGrey") +
       geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study, shape ="score"), size = 3) +
       geom_rug(data = simulation_summary_df, aes(x = baseline_percent, y = progress, color = study), sides="trbl") +
-      geom_errorbar(data = simulation_summary_df, aes(x = baseline_percent, ymin = progress-progress_sd, ymax=progress+progress_sd), width = 0.05, na.rm = TRUE) +
+      geom_errorbar(data = simulation_summary_df, aes(x = baseline_percent, ymin = progress-progress_std, ymax=progress+progress_std), width = 0.05, na.rm = TRUE) +
       geom_point(data = simulation_summary_df, aes(x = baseline_percent, y = validation_progress, color = study, shape ="validation"), size = 3) +
       geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
       geom_hline(aes(yintercept = 0.0), linetype = 'dotted') +
@@ -292,7 +292,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - score) / score_sd
+      validation_distance = (validation_score - score) / score_std
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -303,7 +303,7 @@ renderPlot({
       experiment,
       dataset,
       rating,
-      rating_sd,
+      rating_std,
       validation_score,
       validation_distance
     )
@@ -336,7 +336,7 @@ renderPlot({
   output_df <-
     simulation_summary_df %>%
     mutate(
-      validation_distance = (validation_score - score) / score_sd
+      validation_distance = (validation_score - score) / score_std
     ) %>%
     filter(!is.na(validation_distance)) %>%
     mutate(
@@ -347,7 +347,7 @@ renderPlot({
       experiment,
       dataset,
       rating,
-      rating_sd,
+      rating_std,
       validation_score,
       validation_distance
     )
@@ -376,14 +376,14 @@ renderPlot({
       experiment,
       dataset,
       rating,
-      rating_sd,
+      rating_std,
       validation_score
     )
   
   output_df %>%
     ggplot(aes(x = study)) +
-    geom_errorbar(aes(ymin = rating-rating_sd, ymax=rating+rating_sd), width = .3, color = "black") +
-    geom_errorbar(aes(ymin = rating-rating_sd * 2, ymax=rating+rating_sd* 2), width = .15, color = "black", linetype = 'dotted') +
+    geom_errorbar(aes(ymin = rating-rating_std, ymax=rating+rating_std), width = .3, color = "black") +
+    geom_errorbar(aes(ymin = rating-rating_std * 2, ymax=rating+rating_std* 2), width = .15, color = "black", linetype = 'dotted') +
     geom_point(aes(y = rating, color = "score"), size = 3) +
     geom_point(aes(y = validation_score, color = "validation"), size = 3) +
     coord_flip() +
@@ -454,12 +454,12 @@ renderPlot({
   step_detail_df <- 
     step_detail_rdf() %>% 
     filtered_data(input$experiment) %>%
-    filter(!is.na(score), !is.na(choice_predicted_score)) %>%
+    filter(!is.na(score), !is.na(choice_score)) %>%
     group_by(member_id, league) %>%
     filter(step == min(step)) %>%
     mutate(
-      predicted_score = choice_predicted_score,
-      predicted_score_std = choice_predicted_score_std
+      predicted_score = choice_score,
+      predicted_score_std = choice_score_std
     ) %>%
     ungroup()
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
@@ -537,7 +537,7 @@ renderPlot({
     step_detail_df %>% 
       mutate(
         choice = choice,
-        predicted_score = choice_predicted_score
+        predicted_score = choice_score
       ) %>%
       select(study, experiment, choice, component = !! choice, score, predicted_score)
   }
@@ -587,6 +587,8 @@ renderPlot({
     filter(!is.na(duration))
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)    
+  
   step_detail_df %>%
     ggplot(aes(x = step, y = duration)) +
     geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
@@ -598,7 +600,7 @@ renderPlot({
 Bottom
 -----------------------------------------------------------------------
 
-### Standard Duration
+### Relative Duration
 
 ```{r}
 
@@ -611,8 +613,10 @@ renderPlot({
     filter(!is.na(duration))
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)
   
+  req(nrow(step_detail_df) > 0, cancelOutput = TRUE)    
+  
   step_detail_df %>%
-    ggplot(aes(x = step, y = standard_duration)) +
+    ggplot(aes(x = step, y = relative_duration)) +
     geom_point(size = 0.5, aes(color = !!as.symbol(input$breakdown))) +
     facet_wrap(~ study)
 })
@@ -724,8 +728,8 @@ renderPlot({
     mutate(
       component1 = !! sym(.choice1),
       component2 = !! sym(.choice2),
-      predicted_score = choice_predicted_score,
-      predicted_score_std = choice_predicted_score_std
+      predicted_score = choice_score,
+      predicted_score_std = choice_score_std
     ) %>%
     select(study, experiment, component1, component2, score, score_std, predicted_score, predicted_score_std)
 

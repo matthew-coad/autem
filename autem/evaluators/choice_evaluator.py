@@ -1,5 +1,7 @@
 from .. import Dataset, Role, WarningInterceptor, Choice
 from .evaluator import Evaluater
+from .score_evaluation import ScoreEvaluation
+from .choice_evaluation import ChoiceEvaluation
 
 import numpy as np
 import pandas as pd
@@ -16,13 +18,25 @@ from sklearn.preprocessing import OneHotEncoder
 import warnings
 import time
 
-class ChoicePredictedScoreEvaluator(Evaluater):
+class ChoiceEvaluator(Evaluater):
     """
-    Component that determines the expected score for a member
+    Component that performs evaluations related to choices
     """
 
     def __init__(self):
         pass
+
+    def get_score_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "score_evaluation"):
+            evaluation.score_evaluation = ScoreEvaluation()
+        return evaluation.score_evaluation
+
+    def get_choice_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "choice_evaluation"):
+            evaluation.choice_evaluation = ChoiceEvaluation()
+        return evaluation.choice_evaluation
 
     def build_member_score_df(self, simulation):
         """
@@ -32,7 +46,7 @@ class ChoicePredictedScoreEvaluator(Evaluater):
         # Collect all members including ones from the graveyard which have scores
         # Not concerned whether they failed or not or whether they were reincarnated
         # Just get as much information as we have
-        all_members = [ m for m in simulation.members + simulation.graveyard if hasattr(m.evaluation, "scores") ]
+        all_members = [ m for m in simulation.members + simulation.graveyard if self.get_score_evaluation(m).scores ]
 
         if not all_members:
             return None
@@ -52,7 +66,7 @@ class ChoicePredictedScoreEvaluator(Evaluater):
         choice_df = pd.DataFrame(member_choices)
 
         # Build a frame containing all fit scores for each member
-        scores = [(m.id, s) for m in all_members for s in m.evaluation.scores ]
+        scores = [(m.id, s) for m in all_members for s in self.get_score_evaluation(m).scores ]
         score_df = pd.DataFrame(scores, columns=['member_id', 'score'])
 
         # Join the frames together
@@ -105,8 +119,7 @@ class ChoicePredictedScoreEvaluator(Evaluater):
 
         # Reset the expected score for all members
         for member in simulation.members:
-            member.evaluation.choice_predicted_score = None
-            member.evaluation.choice_predicted_score_std = None
+            member.choice_evaluation = ChoiceEvaluation()
 
     def build_predicted_score(self, member):
         """
@@ -130,18 +143,13 @@ class ChoicePredictedScoreEvaluator(Evaluater):
 
     def evaluate_member(self, member):
 
-        evaluation = member.evaluation
-
-        if hasattr(evaluation, "choice_predicted_score") and not evaluation.choice_predicted_score is None:
+        choice_evaluation = self.get_choice_evaluation(member)
+        if not choice_evaluation.choice_predicted_score is None:
             return None
 
-        # Force default values
-        evaluation.choice_predicted_score = None
-        evaluation.choice_predicted_score_sd = None
-
         choice_predicted_score, choice_predicted_score_std = self.build_predicted_score(member)
-        evaluation.choice_predicted_score = choice_predicted_score
-        evaluation.choice_predicted_score_std = choice_predicted_score_std
+        choice_evaluation.choice_predicted_score = choice_predicted_score
+        choice_evaluation.choice_predicted_score_std = choice_predicted_score_std
 
     def start_epoch(self, simulation):
         self.evaluate_model(simulation)
@@ -149,9 +157,6 @@ class ChoicePredictedScoreEvaluator(Evaluater):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        evaluation = member.evaluation
-        if hasattr(evaluation, "choice_predicted_score"):
-            record.choice_predicted_score = evaluation.choice_predicted_score
-            record.choice_predicted_score_std = evaluation.choice_predicted_score_std
-        else:
-            record.choice_predicted_score = None
+        choice_evaluation = self.get_choice_evaluation(member)
+        record.CE_score = choice_evaluation.choice_predicted_score
+        record.CE_score_std = choice_evaluation.choice_predicted_score_std

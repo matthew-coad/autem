@@ -53,11 +53,14 @@ read_battle_file <- function(file_name) {
     voting_boost  = col_double(),
     voting_duration = col_double(),
     inter_score = col_double(),
+    CE_score = col_double(),	
+    CE_score_std = col_double(),
+    SE_score = col_double(),
+    SE_score_std = col_double(),
+    DE_duration = col_double(),
     DE_duration = col_double(),
     DE_duration_std = col_double(),
-    DE_base_duration = col_double(),
-    DE_base_duration_std = col_double(),
-    DE_standard_duration = col_double(),
+    DE_relative_duration = col_double(),
     VE_score = col_double(),
     quick_verification = col_character(), # Obsolete
     dummy_accuracy = col_double(), # Obsolete
@@ -143,34 +146,35 @@ read_battle <- function(path) {
 }
 
 build_step_detail <- function(battle_df) {
-  step_df9 <-
-    battle_df %>%
-    filter(as.integer(as.character(version)) == 9)
-  if (nrow(step_df9) > 0)  
-    step_df9 <- 
-    step_df9 %>%
-    mutate(
-      score = accuracy,
-      duration = NA,
-      standard_duration = NA,
-      reason = fault,
-      validation_score = NA
-    )
   
-  step_df10 <-
-    battle_df %>%
-    filter(as.integer(as.character(version)) == 10)
-  if (nrow(step_df10) > 0)  
-    step_df10 <- 
-      step_df10 %>%
-      mutate(
-        choice_predicted_score = NA,
-        choice_predicted_score_std = NA,
-        duration = NA,
-        standard_duration = NA,
-        reason = fault,
-        validation_score = NA
-      )
+  # step_df9 <-
+  #   battle_df %>%
+  #   filter(as.integer(as.character(version)) == 9)
+  # if (nrow(step_df9) > 0)  
+  #   step_df9 <- 
+  #   step_df9 %>%
+  #   mutate(
+  #     score = accuracy,
+  #     duration = NA,
+  #     standard_duration = NA,
+  #     reason = fault,
+  #     validation_score = NA
+  #   )
+  
+  # step_df10 <-
+  #   battle_df %>%
+  #   filter(as.integer(as.character(version)) == 10)
+  # if (nrow(step_df10) > 0)  
+  #   step_df10 <- 
+  #     step_df10 %>%
+  #     mutate(
+  #       choice_predicted_score = NA,
+  #       choice_predicted_score_std = NA,
+  #       duration = NA,
+  #       standard_duration = NA,
+  #       reason = fault,
+  #       validation_score = NA
+  #     )
   
   step_df11 <-
     battle_df %>%
@@ -179,8 +183,10 @@ build_step_detail <- function(battle_df) {
     step_df11 <- 
       step_df11 %>%
       mutate(
+        choice_score = choice_predicted_score,
+        choice_score_std = NA,
         duration = score_duration,
-        standard_duration = NA,
+        relative_duration = NA,
         reason = fault,
         validation_score = NA
       )
@@ -193,11 +199,31 @@ build_step_detail <- function(battle_df) {
     step_df12 <- 
       step_df12 %>%
       mutate(
+        choice_score = choice_predicted_score,
+        choice_score_std = choice_predicted_score_std,
         duration = DE_duration,
-        standard_duration = DE_standard_duration,
+        relative_duration = DE_relative_duration,
         validation_score = VE_score
       )
   }
+  
+  step_df13 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 13)
+  if (nrow(step_df13) > 0) {
+    step_df13 <- 
+      step_df13 %>%
+      mutate(
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
+      )
+  }
+
 
   bind_df <- function(step_df, df) {
     if (nrow(df) == 0)
@@ -208,10 +234,11 @@ build_step_detail <- function(battle_df) {
     bind_rows(step_df, df)
   }
   step_df <- NULL
-  step_df <- bind_df(step_df, step_df9)
-  step_df <- bind_df(step_df, step_df10)
+  #step_df <- bind_df(step_df, step_df9)
+  #step_df <- bind_df(step_df, step_df10)
   step_df <- bind_df(step_df, step_df11)
   step_df <- bind_df(step_df, step_df12)
+  step_df <- bind_df(step_df, step_df13)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
@@ -230,60 +257,68 @@ build_step_detail <- function(battle_df) {
       alive,
       reason,
       final,
-      choice_predicted_score,
-      choice_predicted_score_std,
+      choice_score,
+      choice_score_std,
       score,
       score_std,
       validation_score,
       duration,
-      standard_duration,
-      Scaler:LGR_dual
+      relative_duration,
+      Learner, 
+      Scaler, 
+      Selector, 
+      Reducer, 
+      Approximator
     )
   step_df
 }
 
 build_ranking_detail <- function(battle_df) {
-  step_df7 <-
+
+  raw_step_df10 <-
     battle_df %>%
     filter(!is.na(ranking)) %>%
-    filter(as.integer(as.character(version)) <= 7)
-  if (nrow(step_df7) > 0)
-    step_df7 <- step_df7 %>%
+    filter(as.integer(as.character(version)) < 13)
+  if (nrow(raw_step_df10) > 0) {
+    step_df10 <- 
+      raw_step_df10 %>%
       mutate(
-        study = paste0("S", version),
-        experiment = paste0(dataset),
-        score = accuracy,
-        score_std = NA
+        validation_score = NA
       )
-  
-  step_df8 <-
+  } else {
+    step_df10 <- NULL
+  }
+
+  raw_step_df13 <-
     battle_df %>%
-    filter(!is.na(ranking)) %>%
-    filter(as.integer(as.character(version)) >= 8 & as.integer(as.character(version)) <= 9)
-  if (nrow(step_df8) > 0)
-    step_df8 <- step_df8 %>%
+    filter(as.integer(as.character(version)) == 13)
+  if (nrow(raw_step_df13) > 0) {
+    step_df13 <- 
+      raw_step_df13 %>%
       mutate(
-        score = accuracy,
-        score_std = NA
+        rating_std = rating_sd,
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
       )
-  
-  step_df10 <-
-    battle_df %>%
-    filter(!is.na(ranking)) %>%
-    filter(as.integer(as.character(version)) >= 10)
+  } else {
+    step_df13 <- NULL
+  }
 
   bind_df <- function(step_df, df) {
-    if (nrow(df) == 0)
+    if (is.null(df))
       return (step_df)
-    if (is.null(step_df)) {
+    if (is.null(step_df))
       return (df)
-    }
     bind_rows(step_df, df)
   }
   step_df <- NULL
-  step_df <- bind_df(step_df, step_df7)
-  step_df <- bind_df(step_df, step_df8)
   step_df <- bind_df(step_df, step_df10)
+  step_df <- bind_df(step_df, step_df13)
 
   ranking_df <-
     step_df %>%
@@ -292,9 +327,9 @@ build_ranking_detail <- function(battle_df) {
        experiment,
        ranking,
        rating, 
-       rating_sd,
+       rating_std,
        score,
-       score_sd = score_std,
+       score_std,
        validation_score = VE_score
     )
   ranking_df
@@ -404,7 +439,7 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       progress_top_score = baseline_top_score,
       progress = (rating - progress_bottom_score) / (progress_top_score - progress_bottom_score),
       progress = ifelse(progress > 1.0, 1.0, progress),
-      progress_sd = rating_sd / (progress_top_score - progress_bottom_score)
+      progress_std = rating_std / (progress_top_score - progress_bottom_score)
     ) %>%
     select(
       study,
@@ -415,16 +450,16 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
       epochs, 
       steps, 
       rating,
-      rating_sd,
+      rating_std,
       score,
-      score_sd,
+      score_std,
       validation_score,
       baseline_bottom_score,
       baseline_top_score,
       progress_bottom_score,
       progress_top_score,
       progress,
-      progress_sd
+      progress_std
     )
   
   simulation_summary_df <- 

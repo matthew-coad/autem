@@ -23,11 +23,17 @@ class VotingContest(Evaluater):
         """
         self.p_value = p_value
 
+    def get_score_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "score_evaluation"):
+            evaluation.score_evaluation = ScoreEvaluation()
+        return evaluation.score_evaluation
+
     def calculate_voting_predictions(self, members, league):
         """
         Calculate the voting predictions for a list of members
         """
-        votes = np.array([ m.evaluation.league_predictions[league].astype(int) for m in members ])
+        votes = np.array([ self.get_score_evaluation(m).league_predictions[league].astype(int) for m in members ])
         predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=0, arr=votes)
         return predictions
 
@@ -60,10 +66,10 @@ class VotingContest(Evaluater):
         simulation = contestant1.simulation
 
         top_league = simulation.top_league
-        if not top_league in contestant1.evaluation.league_predictions or not top_league in contestant2.evaluation.league_predictions:
+        if not top_league in self.get_score_evaluation(contestant1).league_predictions or not top_league in self.get_score_evaluation(contestant2).league_predictions:
             return None
 
-        base_members = [ m for m in simulation.members if m.league == top_league and m.id != contestant1.id and m.id != contestant2.id and top_league in m.evaluation.league_predictions]
+        base_members = [ m for m in simulation.members if m.league == top_league and m.id != contestant1.id and m.id != contestant2.id and top_league in self.get_score_evaluation(m).league_predictions]
         if not base_members:
             return None
 

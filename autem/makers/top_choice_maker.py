@@ -1,4 +1,5 @@
 from .. import Maker, Member, Controller, Choice
+from ..evaluators.choice_evaluation import ChoiceEvaluation
 
 import pandas as pd
 import numpy as np
@@ -7,6 +8,12 @@ class TopChoiceMaker(Maker, Controller):
     """
     Maker that prioritises the top choices using the choice model
     """
+
+    def get_choice_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "choice_evaluation"):
+            evaluation.choice_evaluation = ChoiceEvaluation()
+        return evaluation.choice_evaluation
 
     def make_grid(self, simulation):
         """
