@@ -10,7 +10,7 @@ import benchmark.utility as utility
 import os
 
 def get_test_study():
-    return "STC"
+    return benchmark.get_study()
 
 def get_test_baseline_name():
     return 'balance-scale'
@@ -40,7 +40,6 @@ def run_test_simulation(baseline_name = None, seed = None):
 
 if __name__ == '__main__':
     run_test_simulation()
-    #os.system("shutdown /s /t 1")
     #run_test_simulation(seed = 3)
     #run_test_simulation(seed = 4)
     #run_test_simulation(seed = 5)

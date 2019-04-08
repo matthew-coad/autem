@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "STC"
+    return "SS"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
