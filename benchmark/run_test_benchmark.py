@@ -16,7 +16,7 @@ def get_test_baseline_name():
     return 'balance-scale'
 
 def get_test_epochs():
-    return 25
+    return 5
 
 def get_test_simulations_path():
     return benchmark.get_simulations_path().joinpath("test")

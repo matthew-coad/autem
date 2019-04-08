@@ -28,7 +28,7 @@ class DiverseContest(Evaluater):
             evaluation.score_evaluation = ScoreEvaluation()
         return evaluation.score_evaluation
 
-    def contest_members(self, contestant1, contestant2, outcome):
+    def contest_members(self, contestant1, contestant2):
 
         contestant1.evaluation.inter_score = None
         contestant2.evaluation.inter_score = None

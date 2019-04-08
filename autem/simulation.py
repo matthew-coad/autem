@@ -1,5 +1,4 @@
 from .member import Member
-from .outcome import OutcomeType, Outcome
 from .record import Record
 from .dataset import Dataset
 from .role import Role
@@ -195,26 +194,16 @@ class Simulation:
         if contestant1.form is contestant2.form:
             raise RuntimeError("Contestants have duplicate forms")
 
-        outcome = Outcome(self.n_steps, contestant1.id, contestant2.id)
         for component in self.controllers:
-            component.contest_members(contestant1, contestant2, outcome)
+            component.contest_members(contestant1, contestant2)
 
-        if contestant1.alive and contestant2.alive:
-
-            if outcome.is_zero_sum():
-                winner = contestant1 if outcome.victor_id() == contestant1.id else contestant2
-                winner.victory()
-                loser = contestant1 if outcome.loser_id() == contestant1.id else contestant2
-                loser.defeat()
-        return outcome
-
-    def judge_members(self, contestant1, contestant2, outcome):
+    def judge_members(self, contestant1, contestant2):
 
         if not contestant1.alive or not contestant2.alive:
             raise RuntimeError("Contestants not alive")
 
         for component in self.controllers:
-            component.judge_members(contestant1, contestant2, outcome)
+            component.judge_members(contestant1, contestant2)
 
     def bury_member(self, member):
         """
@@ -363,15 +352,11 @@ class Simulation:
 
         # Have them contest.
         if contestant1.alive and contestant2.alive:
-            contest = self.contest_members(contestant1, contestant2)
+            self.contest_members(contestant1, contestant2)
 
-            # If there was no contest then something is wrong
-            if contest.is_uncontested():
-                raise RuntimeError("No contest component defined")
-
-            # Determine the contestants fate!
-            if contestant1.alive and contestant2.alive and contest.is_conclusive():
-                self.judge_members(contestant1, contestant2, contest)
+        # Determine the contestants fate!
+        if contestant1.alive and contestant2.alive:
+            self.judge_members(contestant1, contestant2)
 
         # Repopulate!
         newborn1 = None

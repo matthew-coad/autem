@@ -20,7 +20,7 @@ class StabilityContest(Evaluater):
     Seeks to improve model stability by having contests on score variation
     """
 
-    def contest_members(self, contestant1, contestant2, outcome):
+    def contest_members(self, contestant1, contestant2):
 
         simulation = contestant1.simulation
 

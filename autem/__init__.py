@@ -6,7 +6,6 @@ from .simulation_info import SimulationInfo
 
 from .member import Member
 from .simulation import Simulation 
-from .outcome import OutcomeType, Outcome
 from .dataset import Dataset
 from .role import Role
 from .attribute import Attribute

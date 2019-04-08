@@ -41,7 +41,7 @@ class PromotionJudge(Evaluater):
         else:
             member.evaluation.promotion = "%d|%d" % (victories, max_contests)
 
-    def judge_members(self, contestant1, contestant2, outcome):
+    def judge_members(self, contestant1, contestant2):
         self.judge_member(contestant1)
         self.judge_member(contestant2)
 

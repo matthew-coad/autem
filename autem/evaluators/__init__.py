@@ -12,12 +12,11 @@ from .duration_evaluator import DurationEvaluator
 from .validation_evaluation import ValidationEvaluation
 from .validation_evaluator import ValidationEvaluator
 
-from .accuracy_contest import AccuracyContest
+from .score_contest import ScoreContest
 from .voting_contest import VotingContest
 from .diverse_contest import DiverseContest
 from .stability_contest import StabilityContest
 
-from .contest_judge import ContestJudge
 from .survival_judge import SurvivalJudge
 from .promotion_judge import PromotionJudge
 

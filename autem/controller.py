@@ -33,13 +33,13 @@ class Controller(Component):
         """
         pass
 
-    def contest_members(self, member1, member2, outcome):
+    def contest_members(self, member1, member2):
         """
-        Run a contest between two members to determine who is better
+        Run a contest between two members
         """
         pass
 
-    def judge_members(self, member1, member2, outcome):
+    def judge_members(self, member1, member2):
         """
         Determine the fate of the members
         """

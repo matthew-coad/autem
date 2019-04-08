@@ -56,7 +56,7 @@ class VotingContest(Evaluater):
         score_boost = combined_score - base_score
         return score_boost
 
-    def contest_members(self, contestant1, contestant2, outcome):
+    def contest_members(self, contestant1, contestant2):
 
         contestant1.evaluation.voting_boost = None
         contestant1.evaluation.voting_contest = None

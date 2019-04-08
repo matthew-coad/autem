@@ -1,5 +1,4 @@
 from .component import Component
-from .outcome import OutcomeType
 
 import time
 
