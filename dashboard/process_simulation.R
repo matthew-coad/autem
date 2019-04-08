@@ -202,7 +202,7 @@ build_step_detail <- function(battle_df) {
         choice_score = choice_predicted_score,
         choice_score_std = choice_predicted_score_std,
         duration = DE_duration,
-        relative_duration = DE_relative_duration,
+        relative_duration = DE_standard_duration,
         validation_score = VE_score
       )
   }
