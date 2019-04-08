@@ -1,5 +1,6 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
+from .score_evaluation import ScoreEvaluation
 
 import numpy as np
 from scipy import stats
@@ -19,6 +20,12 @@ class ScoreEvaluator(Evaluater):
     def __init__(self):
         self.n_splits = 5
 
+    def get_score_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "score_evaluation"):
+            evaluation.score_evaluation = ScoreEvaluation()
+        return evaluation.score_evaluation
+
     def evaluate_folds(self, simulation):
         """
         Evaluate folds for the simulation
@@ -33,26 +40,8 @@ class ScoreEvaluator(Evaluater):
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
         simulation.resources.i_leagues = i_leagues
 
-    def prepare_scores(self, member):
-
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "league_scores"):
-            evaluation.quick_score = None
-            evaluation.quick_duration = None
-            evaluation.league_scores = {}
-            evaluation.league_durations = {}
-            evaluation.league_predictions = {}
-            evaluation.scores = []
-            evaluation.score = None
-            evaluation.score_std = None
-
-            evaluation.score_durations = []
-            evaluation.score_duration = None
-            evaluation.score_duration_std = None
-
     def build_scores(self, member, repeat, start, stop):
 
-        evaluation = member.evaluation
         simulation = member.simulation
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
@@ -94,10 +83,6 @@ class ScoreEvaluator(Evaluater):
         """
         Evaluate a quick score based on a single fit using the first entry in quick_fold
         """
-        evaluation = member.evaluation
-        evaluation.quick_score = None
-        evaluation.quick_duration = None
-
         scores, durations, predictions = self.build_scores(member, 0, 0, 1)
         if scores is None:
             return False
@@ -105,17 +90,18 @@ class ScoreEvaluator(Evaluater):
         quick_score = scores[0]
         quick_duration = durations[0]
 
-        evaluation.quick_score = quick_score
-        evaluation.quick_duration = quick_duration
-        evaluation.quick_predictions = predictions
+        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation.quick_score = quick_score
+        score_evaluation.quick_duration = quick_duration
+        score_evaluation.quick_predictions = predictions
 
-        evaluation.scores = [ quick_score ]
-        evaluation.score = quick_score
-        evaluation.score_std = None
+        score_evaluation.scores = [ quick_score ]
+        score_evaluation.score = quick_score
+        score_evaluation.score_std = None
 
-        evaluation.score_durations =  [ quick_duration ]
-        evaluation.score_duration = quick_duration
-        evaluation.score_duration_std = None
+        score_evaluation.score_durations =  [ quick_duration ]
+        score_evaluation.score_duration = quick_duration
+        score_evaluation.score_duration_std = None
 
         return True
 
@@ -123,42 +109,41 @@ class ScoreEvaluator(Evaluater):
         """
         Evaluate league 1 score by finishing of the quick score
         """
-        evaluation = member.evaluation
-
         scores, durations, predictions = self.build_scores(member, 0, 1, self.n_splits)
         if scores is None:
             return False
 
-        evaluation.league_scores[1] = [ evaluation.quick_score ] + scores
-        evaluation.league_durations[1] = [ evaluation.quick_duration ] + durations
-        quick_predictions = evaluation.quick_predictions
+        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation.league_scores[1] = [ score_evaluation.quick_score ] + scores
+        score_evaluation.league_durations[1] = [ score_evaluation.quick_duration ] + durations
+        quick_predictions = score_evaluation.quick_predictions
         league_predictions = np.where(np.isnan(predictions), quick_predictions, predictions)
-        evaluation.league_predictions[1] = league_predictions
+        score_evaluation.league_predictions[1] = league_predictions
         return True
 
     def evaluate_league_scores(self, member, league):
-        evaluation = member.evaluation
         scores, durations, predictions = self.build_scores(member, 0, 0, self.n_splits)
         if scores is None:
             return False
 
-        evaluation.league_scores[league] = scores
-        evaluation.league_durations[league] = durations
-        evaluation.league_predictions[league] = predictions
+        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation.league_scores[league] = scores
+        score_evaluation.league_durations[league] = durations
+        score_evaluation.league_predictions[league] = predictions
         return True
 
     def evaluate_scores(self, member):
-        evaluation = member.evaluation
+        score_evaluation = self.get_score_evaluation(member)
 
-        scores = np.concatenate([ evaluation.league_scores[l] for l in evaluation.league_scores ])
-        evaluation.scores = scores.tolist()
-        evaluation.score = np.mean(scores)
-        evaluation.score_std = np.std(scores)
+        scores = np.concatenate([ score_evaluation.league_scores[l] for l in score_evaluation.league_scores ])
+        score_evaluation.scores = scores.tolist()
+        score_evaluation.score = np.mean(scores)
+        score_evaluation.score_std = np.std(scores)
 
-        durations = np.concatenate([ evaluation.league_durations[l] for l in evaluation.league_durations ])
-        evaluation.score_durations = durations.tolist()
-        evaluation.score_duration = np.mean(durations)
-        evaluation.score_duration_std = np.std(durations)
+        durations = np.concatenate([ score_evaluation.league_durations[l] for l in score_evaluation.league_durations ])
+        score_evaluation.score_durations = durations.tolist()
+        score_evaluation.score_duration = np.mean(durations)
+        score_evaluation.score_duration_std = np.std(durations)
 
     def start_simulation(self, simulation):
         self.evaluate_folds(simulation)
@@ -166,20 +151,18 @@ class ScoreEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        self.prepare_scores(member)
-
-        evaluation = member.evaluation
-        if member.league == 0 and evaluation.quick_score is None:
+        score_evaluation = self.get_score_evaluation(member)
+        if member.league == 0 and score_evaluation.quick_score is None:
             self.evaluate_quick_score(member)
             return None
 
         # At league level 1 add on the complete scores
         evaluated = False
-        if member.league == 1 and not 1 in evaluation.league_scores:
+        if member.league == 1 and not 1 in score_evaluation.league_scores:
             evaluated = self.evaluate_league_1(member)
 
         # High league levels
-        if member.league > 1 and not member.league in evaluation.league_scores:
+        if member.league > 1 and not member.league in score_evaluation.league_scores:
             evaluated = self.evaluate_league_scores(member, member.league)
 
         if evaluated:
@@ -188,18 +171,6 @@ class ScoreEvaluator(Evaluater):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        evaluation = member.evaluation
-        if hasattr(evaluation, "scores"):
-            record.fits = len(evaluation.scores)
-        else:
-            record.fits = None
-
-        if hasattr(evaluation, "score"):
-            record.score = evaluation.score
-        else:
-            record.score = None
-
-        if hasattr(evaluation, "score_std"):
-            record.score_std = evaluation.score_std
-        else:
-            record.score_std = None
+        score_evaluation = self.get_score_evaluation(member)
+        record.SE_score = score_evaluation.score
+        record.SE_score_std = score_evaluation.score_std

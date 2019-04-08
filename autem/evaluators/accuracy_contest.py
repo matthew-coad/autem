@@ -1,5 +1,6 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
+from .score_evaluation import ScoreEvaluation
 
 import numpy as np
 from scipy import stats
@@ -25,6 +26,12 @@ class AccuracyContest(Evaluater):
         """
         self.p_value = p_value
 
+    def get_score_evaluation(self, member):
+        evaluation = member.evaluation
+        if not hasattr(evaluation, "score_evaluation"):
+            evaluation.score_evaluation = ScoreEvaluation()
+        return evaluation.score_evaluation
+
     def contest_members(self, contestant1, contestant2, outcome):
 
         simulation = contestant1.simulation
@@ -34,8 +41,8 @@ class AccuracyContest(Evaluater):
         if outcome.is_conclusive():
             return None
 
-        contestant1_score = contestant1.evaluation.score
-        contestant2_score = contestant2.evaluation.score
+        contestant1_score = self.get_score_evaluation(contestant1).score
+        contestant2_score = self.get_score_evaluation(contestant2).score
         top_league = simulation.top_league
 
         if contestant1_score == contestant2_score and contestant1.id < contestant2.id:
@@ -52,13 +59,8 @@ class AccuracyContest(Evaluater):
         winner = contestant1 if victor == 1 else contestant2
         loser = contestant2 if victor == 1 else contestant1
 
-        winner_scores = winner.evaluation.scores
-        winner_std = winner.evaluation.score_std
-        winner_score = winner.evaluation.score
-        winner_duration = winner.evaluation.score_duration
-
-        loser_score = loser.evaluation.score
-        loser_duration = loser.evaluation.score_duration
+        winner_score_evaluation = self.get_score_evaluation(winner)
+        loser_score_evaluation = self.get_score_evaluation(loser)
 
         #if not winner_std is None and loser_duration > winner_duration * 3 and loser_score < winner_score - winner_std * 3:
         #    # The loser has an excessive run time and has a substantially poorer performance
