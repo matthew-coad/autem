@@ -18,9 +18,13 @@ will be free to mark contest outcomes on members directly may contradict each ot
 
 Action - Switch to SS study **done**
 
-## SS - Remove outcomes.
+## SS-Remove outcomes.
 
 Ideas like conclusive/decisive single outcome per iteration didn't really pan out. Drop it all as needlessly complicated.
 
 Action - Remove the outcome object, components can set outcomes directly on members. **done**
+
+## SS-Judge independantly
+
+Judge members independantly. Their is no real relationship between contestants at this time. **done**
 

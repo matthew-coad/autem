@@ -197,13 +197,13 @@ class Simulation:
         for component in self.controllers:
             component.contest_members(contestant1, contestant2)
 
-    def judge_members(self, contestant1, contestant2):
+    def judge_member(self, member):
 
-        if not contestant1.alive or not contestant2.alive:
-            raise RuntimeError("Contestants not alive")
+        if not member.alive:
+            raise RuntimeError("Member not alive")
 
         for component in self.controllers:
-            component.judge_members(contestant1, contestant2)
+            component.judge_member(member)
 
     def bury_member(self, member):
         """
@@ -347,16 +347,20 @@ class Simulation:
         contestant1, contestant2 = self.choose_competitors()
 
         # Make sure their evaluations are up to date
-        self.evaluate_member(contestant1)
-        self.evaluate_member(contestant2)
+        if contestant1.alive:
+            self.evaluate_member(contestant1)
+        if contestant2.alive:
+            self.evaluate_member(contestant2)
 
         # Have them contest.
         if contestant1.alive and contestant2.alive:
             self.contest_members(contestant1, contestant2)
 
         # Determine the contestants fate!
-        if contestant1.alive and contestant2.alive:
-            self.judge_members(contestant1, contestant2)
+        if contestant1.alive:
+            self.judge_member(contestant1)
+        if contestant2.alive:
+            self.judge_member(contestant2)
 
         # Repopulate!
         newborn1 = None

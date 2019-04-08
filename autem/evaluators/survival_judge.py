@@ -35,10 +35,6 @@ class SurvivalJudge(Evaluater):
         else:
             member.evaluation.survival = "%d|%d" % (victories, max_contests)
 
-    def judge_members(self, contestant1, contestant2):
-        self.judge_member(contestant1)
-        self.judge_member(contestant2)
-
     def record_member(self, member, record):
         if hasattr(member.evaluation, "survival"):
             record.survival = member.evaluation.survival

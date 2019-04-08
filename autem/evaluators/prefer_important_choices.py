@@ -126,12 +126,10 @@ class PreferImportantChoices(Evaluater):
         if contestant1.evaluation.irrelevants > 0 or contestant2.evaluation.irrelevants > 0:
             contest.unconventional()
 
-    def judge_members(self, contestant1, contestant2, contest):
+    def judge_member(self, member):
 
-        if contestant1.evaluation.irrelevants:
+        if member.evaluation.irrelevants:
             contestant1.stressed(0, 1)
-        if contestant2.evaluation.irrelevants:
-            contestant2.stressed(0, 1)
 
     def record_member(self, member, record):
         simulation = member.simulation

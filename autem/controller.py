@@ -39,9 +39,9 @@ class Controller(Component):
         """
         pass
 
-    def judge_members(self, member1, member2):
+    def judge_member(self, member):
         """
-        Determine the fate of the members
+        Determine the fate of a member
         """
         pass
 
