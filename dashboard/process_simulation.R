@@ -278,7 +278,7 @@ build_ranking_detail <- function(battle_df) {
   raw_step_df10 <-
     battle_df %>%
     filter(!is.na(ranking)) %>%
-    filter(as.integer(as.character(version)) < 13)
+    filter(as.integer(as.character(version)) < 12)
   if (nrow(raw_step_df10) > 0) {
     step_df10 <- 
       raw_step_df10 %>%
@@ -288,6 +288,25 @@ build_ranking_detail <- function(battle_df) {
   } else {
     step_df10 <- NULL
   }
+  
+  raw_step_df12 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 12)
+  if (nrow(raw_step_df12) > 0) {
+    step_df12 <- 
+      raw_step_df12 %>%
+      mutate(
+        rating_std = rating_sd,
+        choice_score = choice_predicted_score,
+        choice_score_std = choice_predicted_score_std,
+        duration = DE_duration,
+        relative_duration = DE_standard_duration,
+        validation_score = VE_score
+      )
+  } else {
+    step_df12 <- NULL
+  }
+  
 
   raw_step_df13 <-
     battle_df %>%
@@ -318,6 +337,7 @@ build_ranking_detail <- function(battle_df) {
   }
   step_df <- NULL
   step_df <- bind_df(step_df, step_df10)
+  step_df <- bind_df(step_df, step_df12)
   step_df <- bind_df(step_df, step_df13)
 
   ranking_df <-

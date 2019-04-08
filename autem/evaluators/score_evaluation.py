@@ -15,3 +15,13 @@ class ScoreEvaluation:
         self.score_durations = []
         self.score_duration = None
         self.score_duration_std = None
+
+def get_score_evaluation(member):
+    """
+     Get score evaluation for a member
+    """
+    evaluation = member.evaluation
+    if not hasattr(evaluation, "score_evaluation"):
+        evaluation.score_evaluation = ScoreEvaluation()
+    return evaluation.score_evaluation
+

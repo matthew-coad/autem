@@ -16,4 +16,4 @@ Port choice score prediction component to use evaluation objects. **done**
 
 ## Introduce Stability Contest
 
-Add stability contest component. 
+Add stability contest component. **done**
