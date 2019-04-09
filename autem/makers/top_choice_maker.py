@@ -93,19 +93,13 @@ class TopChoiceMaker(Maker, Controller):
         grid_index = grid_pred.index(max(grid_pred))
         return self.make_grid_member(simulation, grid_index)
 
-    def make_random_member(self, simulation):
-        random_state = simulation.random_state
-        grid = simulation.resources.initialization_grid
-        grid_index = random_state.randint(0, len(grid))
-        return self.make_grid_member(simulation, grid_index)
-
     def make_member(self, simulation):
         grid = simulation.resources.initialization_grid
         grid_pred = simulation.resources.initialization_grid_pred
-        if not grid:
+        if grid is None or grid_pred is None:
             return None
-        if not grid_pred is None:
-            member = self.make_top_member(simulation)
-        else:
-            member = self.make_random_member(simulation)
+        member = self.make_top_member(simulation)
+        specialized = simulation.specialize_member(member)
+        if not specialized:
+            member = None
         return member

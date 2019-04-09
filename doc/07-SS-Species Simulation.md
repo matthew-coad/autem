@@ -5,14 +5,11 @@ this local minima problem but they aren't really solving anything.
 
 This is not a unique problem to Autem.
 
-The proposed solution is to allow "species" where each species is devoted to a specific area of the solution space. Members of the same species 
-can be identified by how accuractely they predict each other. Two members with similar predictions can be considered to be the same species.
+The proposed solution is to allow "species" where each species is devoted to a specific area of the solution space.
 
-Species will tend to breed with each other and compete with each other. Species will be permitted to enter into evolutionary dead-ends. In these cases
-the problem will be explored by other species.
+Species are allowed to evolve until the solution hits a maxima. Then that species is buried, top members are inducted into a hall of fame and the next species are started.
 
-This study will continue the trend of components being a set of interacting forces without a hard work-flow. Outcome will finally get dropped. Components
-will be free to mark contest outcomes on members directly may contradict each other.
+Cross accuracy can be used to force new species to explore different areas of the solution space.
 
 ## Switch to SS study.
 
@@ -28,3 +25,8 @@ Action - Remove the outcome object, components can set outcomes directly on memb
 
 Judge members independantly. Their is no real relationship between contestants at this time. **done**
 
+## Componentize member making
+
+Move all making functionality into components. The cross-over component elects to cross-over etc.
+
+## Remove obsolete initial mutations

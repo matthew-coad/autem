@@ -48,23 +48,17 @@ class Simulation:
         self.next_id += 1
         return id
 
-    def incarnate_member(self, member):
+    def list_members(self, alive = None):
         """
-        Incarnate the selected member
+        List members
         """
-        if member.alive:
-            raise RuntimeError("Member has already been incarnated")
-        form_key = repr(member.configuration)
-        if form_key in self.forms:
-            form = self.forms[form_key]
-        else:
-            form = Form(self.generate_id(), form_key)
-            self.forms[form_key] = form
-        form.incarnate()
-        member.incarnated(form, form.reincarnations)
-        self.members.append(member)
-        if not member.initial_mutation_index is None:
-            del self.initial_mutations[member.initial_mutation_index]
+        def include_member(member):
+            alive_passed = alive is None or member.alive == alive
+            return alive_passed
+
+        candidates = self.members
+        members = [ m for m in candidates if include_member(m) ]
+        return members
 
     def mutate_member(self, member, transmute):
         """
@@ -88,16 +82,6 @@ class Simulation:
                     raise RuntimeError("Configuration was not mutated as requested")
                 return True
         return False
-
-    def prepare_member(self, member):
-        """
-        Perform once off member preparation
-        """
-        member.prepare()
-        for component in self.hyper_parameters:
-            component.prepare_member(member)
-            if not member.fault is None:
-                break
 
     def specialize_member(self, member):
         """
@@ -131,6 +115,34 @@ class Simulation:
             if attempts > max_attempts:
                 return False
 
+    def prepare_member(self, member):
+        """
+        Perform once off member preparation
+        """
+        member.prepare()
+        for component in self.hyper_parameters:
+            component.prepare_member(member)
+            if not member.fault is None:
+                break
+
+    def incarnate_member(self, member):
+        """
+        Incarnate the selected member
+        """
+        if member.alive:
+            raise RuntimeError("Member has already been incarnated")
+        form_key = repr(member.configuration)
+        if form_key in self.forms:
+            form = self.forms[form_key]
+        else:
+            form = Form(self.generate_id(), form_key)
+            self.forms[form_key] = form
+        form.incarnate()
+        member.incarnated(form, form.reincarnations)
+        self.members.append(member)
+        if not member.initial_mutation_index is None:
+            del self.initial_mutations[member.initial_mutation_index]
+
     def make_member(self):
         """
         Make a new member
@@ -138,36 +150,17 @@ class Simulation:
 
         # Find all makers
         makers = [ c for c in self.components if isinstance(c, Maker)]
+        maker_indexes = self.random_state.choice(len(makers), size = len(makers), replace=False)
 
-        # Invoke members in order till one makes the member
-        for maker in makers:
-            member = maker.make_member(self)
+        # Invoke members in random order till one makes the member
+        for maker_index in maker_indexes:
+            member = makers[maker_index].make_member(self)
             if member:
                 break
         if not member:
-            return None
-
-        # Ensure the member is specialized
-        specialized = self.specialize_member(member)
-        if specialized:
-            self.incarnate_member(member)
-            return member
-        else:
-            return None
-
-    def crossover_member(self, parent1, parent2):
-        """
-        Cross over 2 members
-        """
-        member = Member(self)
-        for component in self.hyper_parameters:
-            component.crossover_member(member, parent1, parent2)
-        specialized = self.specialize_member(member)
-        if specialized:
-            self.incarnate_member(member)
-            return member
-        else:
-            return None
+            raise RuntimeError("Member not created")
+        self.incarnate_member(member)
+        return member
 
     def evaluate_member(self, member):
         """
@@ -284,15 +277,7 @@ class Simulation:
         if not repopulate:
             return None
 
-        random_state = self.random_state
-        can_cross = parent1.alive and parent2.alive
-        cross = can_cross and random_state.randint(0,2) == 0
-        
-        newborn = None
-        if cross:
-            newborn = self.crossover_member(parent1, parent2)
-        else:
-            newborn = self.make_member()
+        newborn = self.make_member()
         return newborn
 
     def start(self):

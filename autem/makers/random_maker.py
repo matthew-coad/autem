@@ -9,4 +9,7 @@ class RandomMaker(Maker):
         member = Member(simulation)
         for component in simulation.hyper_parameters:
             component.initialize_member(member)
+        specialized = simulation.specialize_member(member)
+        if not specialized:
+            member = None
         return member

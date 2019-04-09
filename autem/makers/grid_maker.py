@@ -45,4 +45,8 @@ class GridMaker(Maker, Controller):
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
-        return member
+        specialized = simulation.specialize_member(member)
+        if specialized:
+            return member
+        else:
+            return None

@@ -47,7 +47,9 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             scorers.Accuracy(),
 
             evaluators.ChoiceEvaluator(),
+            makers.RandomMaker(),
             makers.TopChoiceMaker(),
+            makers.CrossoverMaker(),
 
             evaluators.ScoreEvaluator(),
             evaluators.DurationEvaluator(),

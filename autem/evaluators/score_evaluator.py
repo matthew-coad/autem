@@ -36,7 +36,6 @@ class ScoreEvaluator(Evaluater):
 
         x,y = loader.load_training_data(simulation)
         folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=top_league, random_state=random_state)
-        # folds = RepeatedKFold(n_splits=self.n_splits, n_repeats=top_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
         simulation.resources.i_leagues = i_leagues
 
