@@ -16,7 +16,7 @@ import time
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 4, max_reincarnations = 3, initial_component_repeats = 3, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 4, max_reincarnations = 3, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
@@ -29,7 +29,6 @@ class Simulation:
         self.resources = SimpleNamespace()
         self.hyper_parameters = None
         self.controllers = None
-        self.initial_mutations = []
         self.members = []
         self.graveyard = []
         self.failures = []
@@ -41,7 +40,6 @@ class Simulation:
         self.running = False
         self.n_jobs = n_jobs
         self.transmutation_rate = 0.5
-        self.initial_component_repeats = initial_component_repeats
 
     def generate_id(self):
         id = self.next_id
@@ -140,8 +138,6 @@ class Simulation:
         form.incarnate()
         member.incarnated(form, form.reincarnations)
         self.members.append(member)
-        if not member.initial_mutation_index is None:
-            del self.initial_mutations[member.initial_mutation_index]
 
     def make_member(self):
         """

@@ -25,8 +25,10 @@ Action - Remove the outcome object, components can set outcomes directly on memb
 
 Judge members independantly. Their is no real relationship between contestants at this time. **done**
 
-## Componentize member making
+## SS-Componentize member making
 
-Move all making functionality into components. The cross-over component elects to cross-over etc.
+Move all making functionality into components. The cross-over component elects to cross-over etc. **done**
 
-## Remove obsolete initial mutations
+## SS-Remove obsolete initial mutations
+
+**done**
