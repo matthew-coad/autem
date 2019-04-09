@@ -39,4 +39,10 @@ Action - Change victory tracking to a total score per epoch. **done**
 
 Drop off Diversity and Voting support as they will probably become obsolete.
 
-## SS-Remove obsolete eliminations from members
+## SS-Judgements at start of round
+
+Ruin judgements after every round which is closer to the prior design. **done**
+
+## SS-All events have a reason
+
+

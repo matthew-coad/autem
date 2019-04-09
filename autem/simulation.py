@@ -263,8 +263,14 @@ class Simulation:
         self.round += 1
         random_state = self.random_state
 
+        # Judge all living members
+        members = self.list_members(alive = True)
+        for member in members:
+            self.judge_member(member)
+
         # Repopulate
-        make_count = self.population_size - len(self.list_members(alive = True))
+        members = self.list_members(alive = True)
+        make_count = self.population_size - len(members)
         for make_index in range(make_count):
             self.make_member()
 
@@ -278,14 +284,15 @@ class Simulation:
         # Ensure all members evaluated
         for member_index in range(len(members)):
             self.evaluate_member(members[member_index])
-            if self.round == 1:
-                printProgressBar(member_index, len(members), prefix = "Evaluating %s epoch %s:" % (self.name, self.epoch), length = 50)
+            printProgressBar(member_index + (self.round - 1) * self.population_size, self.rounds * self.population_size, prefix = "Evaluating %s epoch %s:" % (self.name, self.epoch), length = 50)
 
         # Contest members randomly
-        evaluated_members = self.list_members(alive = True)
-        member_indexes = random_state.choice(len(evaluated_members), size = len(evaluated_members), replace = False)
-        for member_index in range(0, len(evaluated_members)-1, 2):
-            self.contest_members(evaluated_members[member_indexes[member_index]], evaluated_members[member_indexes[member_index+1]])
+        members = self.list_members(alive = True)
+        member_indexes = random_state.choice(len(members), size = len(members), replace = False)
+        for member_index in range(0, len(members)-1, 2):
+            self.contest_members(members[member_indexes[member_index]], members[member_indexes[member_index+1]])
+
+        report_members = self.list_members()
 
         # Bury dead members
         dead_members = self.list_members(alive = False)
@@ -293,10 +300,10 @@ class Simulation:
             self.bury_member(member)
 
         # Report on what happened
-        for member in members:
+        for member in report_members:
             self.reports.append(self.record_member(member))
 
-        printProgressBar(self.round, self.rounds, prefix = "Contesting %s epoch %s:" % (self.name, self.epoch), length = 50)
+        printProgressBar(self.round * self.population_size, self.rounds * self.population_size, prefix = "Contesting %s epoch %s:" % (self.name, self.epoch), length = 50)
 
     def run_epoch(self, rounds):
         """
@@ -304,8 +311,6 @@ class Simulation:
         """
         self.epoch += 1
         self.round = 0
-
-        printProgressBar(0, self.rounds, prefix = "Running %s epoch %s:" % (self.name, self.epoch), length = 50)            
 
         for component in self.controllers:
             component.start_epoch(self)
@@ -318,20 +323,6 @@ class Simulation:
             self.run_round()
             if not self.running:
                 break
-
-        # Judge all living members
-        members = self.list_members(alive = True)
-        for member in members:
-            self.judge_member(member)
-
-        # Bury dead members
-        dead_members = self.list_members(alive = False)
-        for member in dead_members:
-            self.bury_member(member)
-
-        # And perform final reporting
-        for member in members:
-            self.reports.append(self.record_member(member))
 
     def finish(self):
         """
