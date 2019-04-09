@@ -29,13 +29,13 @@ def run_test_simulation(baseline_name = None, seed = None):
     study = get_test_study()
     seed = seed if not seed is None else 2
     epochs = get_test_epochs()
-    steps = 200
+    rounds = 20
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
     simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
-    benchmark.run_simulation(simulation, steps, epochs)
+    simulation.run(rounds, epochs)
     autem.ReportManager(path).update_combined_reports()
 
 if __name__ == '__main__':

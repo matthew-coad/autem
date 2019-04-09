@@ -16,7 +16,7 @@ class Path(Reporter):
         """
         Report on the progress of a simulation
         """
-        report_id = simulation.n_steps
+        report_id = simulation.epoch
         battle_frame = self.get_battle_frame(simulation)
         simulation_info = self.get_simulation_info(simulation)
         if not battle_frame is None:

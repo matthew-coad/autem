@@ -32,3 +32,11 @@ Move all making functionality into components. The cross-over component elects t
 ## SS-Remove obsolete initial mutations
 
 **done**
+
+## SS-Track victories/defeats per step
+
+Action - Change victory tracking to a total score per epoch. **done**
+
+Drop off Diversity and Voting support as they will probably become obsolete.
+
+## SS-Remove obsolete eliminations from members

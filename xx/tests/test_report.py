@@ -18,7 +18,7 @@ class ReportMemory(reporters.Reporter):
         """
         Report on the progress of a simulation
         """
-        steps = simulation.n_steps
+        step = simulation.step
         records = simulation.reports
         frame = utility.get_report_frame(records)
         self.step = steps

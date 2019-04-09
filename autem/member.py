@@ -14,7 +14,6 @@ class Member:
         self.id = simulation.generate_id()
         self.configuration = SimpleNamespace()
         self.form = None
-        self.initial_mutation_index = None
 
         self.event = "initialized"
 
@@ -34,11 +33,12 @@ class Member:
         self.evaluations = 0
         self.evaluation_time = None
         self.evaluation_duration = None
+        self.round = None
 
-        self.contests = 0
-        self.victories = 0
-        self.defeats = 0
-        self.wonlost = []
+        self.epoch = None
+        self.contests = {} # Map of contests per epoch
+        self.wonlost = {}  # Map of wonlost record per epoch
+
         self.league = 0
 
         self.ratings = SimpleNamespace()
@@ -68,48 +68,45 @@ class Member:
         self.alive = 1
         self.event = "birth"
 
-    def evaluating(self):
-        self.event = "evaluate"
+    def prepare_epoch(self, epoch):
+        self.event = None
+        self.epoch = epoch
+        self.contests[self.epoch] = 0
+        self.wonlost[self.epoch] = []
+        self.round = None
+
+    def prepare_evaluation(self, round):
         self.evaluation_time = time.time()
-        self.evaluations += 1
+        self.round = round
 
     def evaluated(self, duration):
         self.evaluation_duration = duration
+        self.evaluations += 1
 
     def victory(self):
         """
-        Record a victory
+        Record a victory at a given step
         """
-        self.event = "victory"
-        self.contests += 1
-        self.victories += 1
-        self.wonlost.append(1)
+        self.contests[self.epoch] += 1
+        self.wonlost[self.epoch].append(1)
 
     def defeat(self):
         """
-        Record a defeat
+        Record a defeat at a given epoch
         """
-        self.event = "defeat"
-        self.contests += 1
-        self.defeats += 1 
-        self.wonlost.append(0)
+        self.contests[self.epoch] += 1
+        self.wonlost[self.epoch].append(0)
 
     def promote(self, league = None):
         """
         Promote the member to the next league
         """
-        # When a member gets a promotion it wonlost record is erased
-        # From now on only contests at the higher league level will count
+        # When a member gets a promotion its wonlost record is erased
         self.event = "promotion"
         if league is None:
             self.league += 1
         else:
             self.league = league
-        self.victories = 0
-        self.defeats = 0
-        self.eliminations = 0
-        self.contests = 0
-        self.wonlost = []
 
     def kill(self, reason):
         """

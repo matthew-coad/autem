@@ -49,9 +49,8 @@ class ScoreContest(Evaluater):
 
         if winner.league == 0 and loser.league > 0:
             winner.evaluation.accuracy_contest = "Upset Win"
-            winner.promote()
             loser.evaluation.accuracy_contest = "Upset Loss"
-            loser.defeat()
+            winner.promote()
 
     def record_member(self, member, record):
         super().record_member(member, record)

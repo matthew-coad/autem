@@ -57,8 +57,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
 
             evaluators.ScoreContest(),
             evaluators.StabilityContest(),
-            evaluators.DiverseContest(0.99),
-            evaluators.VotingContest(),
+            # evaluators.DiverseContest(0.99),
+            # evaluators.VotingContest(),
             
             evaluators.SurvivalJudge(),
             evaluators.PromotionJudge(),
@@ -125,41 +125,20 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
         n_jobs=6)
     return simulation
 
-def simulation_finished(simulation, start_time, epochs, max_time):
-    duration = time.time() - start_time
-    return not simulation.running or simulation.epoch == epochs or (max_time is not None and duration >= max_time)
-
-def run_simulation(simulation, steps, epochs, max_time = None):
-    print("-----------------------------------------------------")
-    start_time = time.time()
-    today = datetime.datetime.now()
-    print("Running %s - Started %s" % (simulation.name, today.strftime("%x %X")))
-    simulation.start()
-
-    finished = False
-    while not finished:
-        simulation.run(steps)
-        finished = simulation_finished(simulation, start_time, epochs, max_time)
-        if finished:
-            simulation.finish()
-        simulation.report()
-    duration = time.time() - start_time
-    print("%s finished - Duration %s" % (simulation.name, duration))
-
 def run_benchmark_simulation(study, baseline_name):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
     epochs = 25
-    steps = 200
+    rounds = 20
     max_time = 2 * 60 * 60
     population_size = 20
     path = get_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
     simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
-    run_simulation(simulation, steps, epochs, max_time)
+    simulation.run_simulation(rounds, epochs, max_time)
     autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulations(study = None):

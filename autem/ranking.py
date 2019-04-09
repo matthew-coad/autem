@@ -8,8 +8,7 @@ class RankingType(Enum):
 
 class Ranking(SimpleNamespace):
 
-    def __init__(self, step):
-        self.step = step
+    def __init__(self):
         self.type = RankingType.NoContest
         self.members = []
 

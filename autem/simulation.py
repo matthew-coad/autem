@@ -12,6 +12,7 @@ from .choice import Choice
 
 import numpy
 import time
+import datetime
 
 class Simulation:
 
@@ -20,26 +21,32 @@ class Simulation:
         self.name = name
         self.components = components
         self.properties = properties
-        self.random_state = numpy.random.RandomState(seed)
-        self.next_id = 1
         self.population_size = population_size
         self.top_league = top_league
         self.max_reincarnations = max_reincarnations
+        self.n_jobs = n_jobs
+        self.transmutation_rate = 0.5
+
         self.outline = None
         self.resources = SimpleNamespace()
         self.hyper_parameters = None
         self.controllers = None
+
+        self.epochs = None
+        self.rounds = None
+
+        self.random_state = numpy.random.RandomState(seed)
+        self.next_id = 1
+        self.epoch = None
+        self.round = None
+        self.step = None
+        self.running = False
+
         self.members = []
         self.graveyard = []
-        self.failures = []
         self.forms = {}
         self.ranking = None
         self.reports = []
-        self.n_steps = 0
-        self.epoch = None
-        self.running = False
-        self.n_jobs = n_jobs
-        self.transmutation_rate = 0.5
 
     def generate_id(self):
         id = self.next_id
@@ -123,22 +130,6 @@ class Simulation:
             if not member.fault is None:
                 break
 
-    def incarnate_member(self, member):
-        """
-        Incarnate the selected member
-        """
-        if member.alive:
-            raise RuntimeError("Member has already been incarnated")
-        form_key = repr(member.configuration)
-        if form_key in self.forms:
-            form = self.forms[form_key]
-        else:
-            form = Form(self.generate_id(), form_key)
-            self.forms[form_key] = form
-        form.incarnate()
-        member.incarnated(form, form.reincarnations)
-        self.members.append(member)
-
     def make_member(self):
         """
         Make a new member
@@ -155,7 +146,16 @@ class Simulation:
                 break
         if not member:
             raise RuntimeError("Member not created")
-        self.incarnate_member(member)
+        form_key = repr(member.configuration)
+        if form_key in self.forms:
+            form = self.forms[form_key]
+        else:
+            form = Form(self.generate_id(), form_key)
+            self.forms[form_key] = form
+        form.incarnate()
+        member.incarnated(form, form.reincarnations)
+        member.prepare_epoch(self.epoch)
+        self.members.append(member)
         return member
 
     def evaluate_member(self, member):
@@ -165,7 +165,7 @@ class Simulation:
         if not member.alive:
             raise RuntimeError("Member not alive")
 
-        member.evaluating()
+        member.prepare_evaluation(self.round)
         start_time = time.time()
         for component in self.controllers:
             component.evaluate_member(member)
@@ -228,7 +228,7 @@ class Simulation:
             printProgressBar(n_inductees, n_inductees, prefix = progress_prefix, length = 50)
 
         candidates = [m for m in inductees if not m.rating is None]
-        ranking = Ranking(self.n_steps)
+        ranking = Ranking()
         if not candidates:
             ranking.inconclusive()
         else:
@@ -241,146 +241,97 @@ class Simulation:
             rank -= 1
         self.ranking = ranking
 
-    def choose_competitors(self):
-        # Choose one contestant at random
-        candidates = [ m for m in self.members if m.alive ]
-        if len(candidates) < 2:
-            raise RuntimeError("Need at least 2 members to choose from")
-        random_state = self.random_state
-        contestant1_index = random_state.choice(len(candidates))
-        contestant1 = candidates[contestant1_index]
-
-        #maximum_league = max(c.league for c in candidates)
-        #minimum_league = contestant1.league
-        #candidates2 = []
-        #while not candidates2:
-        #    if minimum_league < 0:
-        #        raise RuntimeError("Could not find competitor as expected")
-        #    candidates2 = [ c for c in candidates if c.id != contestant1.id and c.league >= minimum_league ]
-        #    minimum_league -= 1
-        # contestant2_weights = [ c.league + 1 for c in candidates2]
-        candidates2 = [ c for c in candidates if c.id != contestant1.id ]
-        contestant2_weights = [ 1 for c in candidates2]
-        contestant2_p = [ w / sum(contestant2_weights) for w in contestant2_weights]
-        contestant2_index = random_state.choice(len(candidates2), p = contestant2_p)
-        contestant2 = candidates2[contestant2_index]
-        return (contestant1, contestant2)
-
-    def repopulate(self, parent1, parent2):
-        current_population = len(self.members)
-        repopulate = self.running and self.population_size > current_population
-        force_repopulate = self.running and self.population_size > current_population * 2
-        if not repopulate:
-            return None
-
-        newborn = self.make_member()
-        return newborn
-
     def start(self):
         """
         Perform simulation startup
         """
         self.epoch = 0
+        self.round = 0
+        self.step = 0
         self.hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
         self.controllers = [c for c in self.components if c.is_controller() ]
 
         self.outline_simulation()
         for component in self.controllers:
             component.start_simulation(self)
-
-        for index in range(self.population_size):
-            self.make_member()
-
-        if len(self.members) < 2:
-            raise RuntimeError("Require at least 2 members to start")
-
-        for member in self.members:
-            self.prepare_member(member)
-
-        for member in self.members:
-            self.reports.append(self.record_member(member))
-
-        members = self.members[:]
-        for member in members:
-            if not member.alive:
-                self.bury_member(member)
-
         self.running = True
 
-    def step(self):
+    def run_round(self):
         """
-        Run a step of the simulation
+        Run a round of the simulation
         """
-
-        if not self.running:
-            raise RuntimeError("Simulation is not running")
-
+        self.round += 1
         random_state = self.random_state
-        candidates = self.members
+
+        # Repopulate
+        make_count = self.population_size - len(self.list_members(alive = True))
+        for make_index in range(make_count):
+            self.make_member()
 
         # If we run out of search space the population can crash.
         # Make sure we don't get into an infinite loop.
-        if len(candidates) < 2:
+        members = self.list_members(alive = True)
+        if len(members) < 2:
             self.stop()
             return None
 
-        # Pick 2 members
-        contestant1, contestant2 = self.choose_competitors()
+        # Ensure all members evaluated
+        for member_index in range(len(members)):
+            self.evaluate_member(members[member_index])
+            if self.round == 1:
+                printProgressBar(member_index, len(members), prefix = "Evaluating %s epoch %s:" % (self.name, self.epoch), length = 50)
 
-        # Make sure their evaluations are up to date
-        if contestant1.alive:
-            self.evaluate_member(contestant1)
-        if contestant2.alive:
-            self.evaluate_member(contestant2)
+        # Contest members randomly
+        evaluated_members = self.list_members(alive = True)
+        member_indexes = random_state.choice(len(evaluated_members), size = len(evaluated_members), replace = False)
+        for member_index in range(0, len(evaluated_members)-1, 2):
+            self.contest_members(evaluated_members[member_indexes[member_index]], evaluated_members[member_indexes[member_index+1]])
 
-        # Have them contest.
-        if contestant1.alive and contestant2.alive:
-            self.contest_members(contestant1, contestant2)
-
-        # Determine the contestants fate!
-        if contestant1.alive:
-            self.judge_member(contestant1)
-        if contestant2.alive:
-            self.judge_member(contestant2)
-
-        # Repopulate!
-        newborn1 = None
-        newborn2 = None
-
-        if contestant1.alive and contestant2.alive:
-            newborn1 = self.repopulate(contestant1, contestant2)
-            newborn2 = self.repopulate(contestant1, contestant2)
-
-        if not contestant1.alive:
-            self.bury_member(contestant1)
-
-        if not contestant2.alive:
-            self.bury_member(contestant2)
+        # Bury dead members
+        dead_members = self.list_members(alive = False)
+        for member in dead_members:
+            self.bury_member(member)
 
         # Report on what happened
-        self.n_steps += 1
-        self.reports.append(self.record_member(contestant1))
-        self.reports.append(self.record_member(contestant2))
-        if not newborn1 is None:
-            self.reports.append(self.record_member(newborn1))
-        if not newborn2 is None:
-            self.reports.append(self.record_member(newborn2))
+        for member in members:
+            self.reports.append(self.record_member(member))
 
-    def run(self, steps):
+        printProgressBar(self.round, self.rounds, prefix = "Contesting %s epoch %s:" % (self.name, self.epoch), length = 50)
+
+    def run_epoch(self, rounds):
         """
         Run an epoch
         """
-        name = "Running %s %s:" % (self.name, self.n_steps + steps)
         self.epoch += 1
-        print("")
+        self.round = 0
+
+        printProgressBar(0, self.rounds, prefix = "Running %s epoch %s:" % (self.name, self.epoch), length = 50)            
+
         for component in self.controllers:
             component.start_epoch(self)
-        for step in range(steps):
+
+        members = self.list_members(alive = True)
+        for member in members:
+            member.prepare_epoch(self.epoch)
+
+        for round in range(rounds):
+            self.run_round()
             if not self.running:
                 break
-            self.step()
-            printProgressBar(step, steps, prefix = name, length = 50)
-        printProgressBar(steps, steps, prefix = name, length = 50)            
+
+        # Judge all living members
+        members = self.list_members(alive = True)
+        for member in members:
+            self.judge_member(member)
+
+        # Bury dead members
+        dead_members = self.list_members(alive = False)
+        for member in dead_members:
+            self.bury_member(member)
+
+        # And perform final reporting
+        for member in members:
+            self.reports.append(self.record_member(member))
 
     def finish(self):
         """
@@ -408,6 +359,30 @@ class Simulation:
         """
         self.running = False
 
+    def _simulation_finished(self, start_time, epochs, max_time):
+        duration = time.time() - start_time
+        return not self.running or self.epoch == epochs or (max_time is not None and duration >= max_time)
+
+    def run(self, rounds, epochs, max_time = None):
+        print("-----------------------------------------------------")
+        start_time = time.time()
+        today = datetime.datetime.now()
+
+        self.epochs = epochs
+        self.rounds = rounds
+        print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
+        self.start()
+
+        finished = False
+        while not finished:
+            self.run_epoch(rounds)
+            finished = self._simulation_finished(start_time, epochs, max_time)
+            if finished:
+                self.finish()
+            self.report()
+        duration = time.time() - start_time
+        print("%s finished - Duration %s" % (self.name, duration))
+
     def outline_simulation(self):
         """
         Collect the simulation outline
@@ -417,6 +392,7 @@ class Simulation:
         for property_key in self.properties.keys():
             outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
         outline.append_attribute("epoch", Dataset.Battle, [Role.ID])
+        outline.append_attribute("round", Dataset.Battle, [Role.ID])
         outline.append_attribute("step", Dataset.Battle, [Role.ID])
         outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
         outline.append_attribute("form_id", Dataset.Battle, [Role.ID])
@@ -429,8 +405,6 @@ class Simulation:
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
-        outline.append_attribute("victories", Dataset.Battle, [Role.Property])
-        outline.append_attribute("defeats", Dataset.Battle, [Role.Property])
         for component in self.components:
             component.outline_simulation(self, outline)
         self.outline = outline
@@ -441,19 +415,21 @@ class Simulation:
         """
         member_id = member.id
         epoch = self.epoch
-        step = self.n_steps
-        record = Record()
+        round = self.round
+        step = self.step
 
+        record = Record()
         record.simulation = self.name
         for property_key in self.properties.keys():
             setattr(record, property_key, self.properties[property_key])
 
         record.epoch = epoch
+        record.round = round
         record.step = step
         record.member_id = member_id
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
-        record.time = time.ctime(member.evaluation_time)
+        record.event_time = time.ctime(member.evaluation_time)
         record.event = member.event
         record.event_duration = member.evaluation_duration
 
@@ -465,9 +441,6 @@ class Simulation:
         record.alive = member.alive
         record.reason = member.kill_reason
         record.final = member.final
-
-        record.victories = member.victories
-        record.defeats = member.defeats
 
         for component in self.components:
             component.record_member(member, record)

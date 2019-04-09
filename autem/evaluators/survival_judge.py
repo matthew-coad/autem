@@ -15,25 +15,28 @@ class SurvivalJudge(Evaluater):
         """
         self.p_value = p_value
 
+    def start_epoch(self, simulation):
+        members = simulation.list_members()
+        for member in members:
+            member.evaluation.survival = None
+
     def judge_member(self, member):
 
         member.evaluation.survival = None
         simulation = member.simulation
-        all_contests = [ m.contests for m in simulation.members ]
-        max_contests = min(member.contests, int(np.mean(all_contests)))
-        if max_contests == 0:
-            return None
+        epoch = simulation.epoch
 
-        wonlost = member.wonlost[-max_contests:]
+        wonlost = member.wonlost[epoch]
+        contests = len(wonlost)
         victories = sum(wonlost)
 
-        robustness_p = stats.binom_test(victories, n=max_contests, p=0.5, alternative='less')
+        robustness_p = stats.binom_test(victories, n=contests, p=0.5, alternative='less')
         kill = robustness_p < self.p_value
         if kill:
             member.kill("Unfit")
-            member.evaluation.survival = "%d|%d die" % (victories, max_contests)
+            member.evaluation.survival = "%d|%d die" % (victories, contests)
         else:
-            member.evaluation.survival = "%d|%d" % (victories, max_contests)
+            member.evaluation.survival = "%d|%d" % (victories, contests)
 
     def record_member(self, member, record):
         if hasattr(member.evaluation, "survival"):
