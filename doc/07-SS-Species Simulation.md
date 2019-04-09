@@ -45,4 +45,18 @@ Ruin judgements after every round which is closer to the prior design. **done**
 
 ## SS-All events have a reason
 
+Make sure all events have a reason. Report reason after event **done**
+
+## SS-Drop alive
+
+Drop alive from report. Rely on final to report on final components
+
+## SS-Report on scores
+
+Add a scored flag which indicates that a score was created this round.
+
+## SS-Restore Step
+
+Restore the step field.
+
 

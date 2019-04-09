@@ -39,7 +39,7 @@ class PromotionJudge(Evaluater):
 
         if promote:
             member.evaluation.promotion = "%d|%d promote" % (victories, contests)
-            member.promote()
+            member.promote("Powerful")
         elif promote and maxed:
             member.evaluation.promotion = "%d|%d maxed" % (victories, contests)
         else:

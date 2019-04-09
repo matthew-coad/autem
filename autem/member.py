@@ -15,10 +15,10 @@ class Member:
         self.configuration = SimpleNamespace()
         self.form = None
 
-        self.event = "initialized"
+        self.event = None
+        self.event_reason = None
 
         self.alive = 0
-        self.kill_reason = None
         self.incarnation = 0
         self.final = 0
 
@@ -70,14 +70,17 @@ class Member:
 
     def prepare_epoch(self, epoch):
         self.event = None
+        self.event_reason = None
         self.epoch = epoch
         self.contests[self.epoch] = 0
         self.wonlost[self.epoch] = []
         self.round = None
 
-    def prepare_evaluation(self, round):
-        self.evaluation_time = time.time()
+    def prepare_round(self, round):
+        self.event = None
+        self.event_reason = None
         self.round = round
+        self.evaluation_time = time.time()
 
     def evaluated(self, duration):
         self.evaluation_duration = duration
@@ -97,12 +100,13 @@ class Member:
         self.contests[self.epoch] += 1
         self.wonlost[self.epoch].append(0)
 
-    def promote(self, league = None):
+    def promote(self, reason, league = None):
         """
         Promote the member to the next league
         """
         # When a member gets a promotion its wonlost record is erased
         self.event = "promotion"
+        self.event_reason = reason
         if league is None:
             self.league += 1
         else:
@@ -113,8 +117,8 @@ class Member:
         Kill this member
         """
         self.event = "death"
+        self.event_reason = reason
         self.alive = 0
-        self.kill_reason = reason
         self.final = 1
 
     def fail(self, fault, operation, component):
@@ -122,12 +126,12 @@ class Member:
         Inform this member that it has failed for some reason
         """
         self.event = "fail"
+        self.event_reason = str(fault)
         self.fault = fault
         self.fault_operation = operation
         self.fault_component = component
         self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
         self.alive = 0
-        self.kill_reason = str(fault)
         self.final = 1
 
     def rated(self, rating, rating_sd):
@@ -143,10 +147,11 @@ class Member:
         """
         self.ranking = ranking
 
-    def finshed(self):
+    def finshed(self, reason):
         """
         Notify that this member it is finished with, because the simulation has finished
         """
         self.event = "final"
+        self.event_reason = reason
         self.alive = 0
         self.final = 1

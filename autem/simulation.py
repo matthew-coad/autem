@@ -155,6 +155,7 @@ class Simulation:
         form.incarnate()
         member.incarnated(form, form.reincarnations)
         member.prepare_epoch(self.epoch)
+        member.prepare_round(self.round)
         self.members.append(member)
         return member
 
@@ -165,7 +166,6 @@ class Simulation:
         if not member.alive:
             raise RuntimeError("Member not alive")
 
-        member.prepare_evaluation(self.round)
         start_time = time.time()
         for component in self.controllers:
             component.evaluate_member(member)
@@ -263,6 +263,11 @@ class Simulation:
         self.round += 1
         random_state = self.random_state
 
+        # Prepare for the next round
+        members = self.list_members(alive = True)
+        for member in members:
+            member.prepare_round(self.round)
+
         # Judge all living members
         members = self.list_members(alive = True)
         for member in members:
@@ -324,7 +329,7 @@ class Simulation:
             if not self.running:
                 break
 
-    def finish(self):
+    def finish(self, reason):
         """
         Perform final simulation processing
         """
@@ -338,7 +343,7 @@ class Simulation:
 
         # Tell everyone we are done
         for member in members:
-            member.finshed()
+            member.finshed(reason)
 
         # final report on ranked members
         for member in self.ranking.members:
@@ -369,7 +374,7 @@ class Simulation:
             self.run_epoch(rounds)
             finished = self._simulation_finished(start_time, epochs, max_time)
             if finished:
-                self.finish()
+                self.finish("finished")
             self.report()
         duration = time.time() - start_time
         print("%s finished - Duration %s" % (self.name, duration))
@@ -422,7 +427,7 @@ class Simulation:
         record.incarnation = member.incarnation
         record.event_time = time.ctime(member.evaluation_time)
         record.event = member.event
-        record.event_duration = member.evaluation_duration
+        record.event_reason = member.event_reason
 
         record.rating = member.rating
         record.rating_sd = member.rating_sd
@@ -430,7 +435,6 @@ class Simulation:
 
         record.league = member.league
         record.alive = member.alive
-        record.reason = member.kill_reason
         record.final = member.final
 
         for component in self.components:
