@@ -59,13 +59,6 @@ class Data(Loader):
         simulation.resources.y_train = y_train
         simulation.resources.y_validation = y_validation
 
-    def record_member(self, member, record):
-        """
-        Record the state of a member
-        """
-        super().record_member(member, record)
-        record.data = self.data_name
-
     def load_divided_data(self, simulation):
         return (self.x, self.y)
 

@@ -94,6 +94,10 @@ Change judgement outcome when judgement is failed/dead becomes the event that ca
 
 Restore step function so it is a count of the number of rounds in a simulation. **done**
 
+## SS-Remove data column from report
+
+The data column is superfluous so remove it.
+
 ## SS-Terminate Epoch when it Jams
 
 ## SS-Terminate Epoch when it stops evolving
