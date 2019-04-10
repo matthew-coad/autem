@@ -68,7 +68,8 @@ class TopChoiceMaker(Maker, Controller):
         simulation.resources.initialization_grid = grid
         simulation.resources.initialization_grid_pred = None
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
+        simulation = epoch.simulation
         self.evaluate_grid_predicted_scores(simulation)
 
     def make_grid_member(self, simulation, grid_index):

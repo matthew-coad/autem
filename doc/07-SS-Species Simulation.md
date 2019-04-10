@@ -121,23 +121,22 @@ Justification - Need dashboard function to inspect new workflow.
 Action - Evaluate a rating+rank for all surving members at an end of a epoch.
 Justification - To run species we  need to detect that the simulation has converged on a solution. The proposal is to use the fact that the score hasn't
 improved in a given epoch. To determine the epoch score we need the rankings.
+Outcome - Complete
 
 **done**
 
-## SS-Detect simulation converged
+## SS-Stop simulation if score hasn't improved
 
-Action - Detect th
+Action - If a member is the top ranked for more than one epoch, assume that the simulation has converged and stop.
+Justification - To run species we  need to detect that the simulation has converged on a solution. The proposal is to use the fact that the score hasn't
+improved in a given epoch.
+Outcome - Complete. Now have epochs and epoch progress judges that can determine
+if an epoch progressed the simulation. Currently the EpochProgressJudge uses scores.
 
-## SS-Terminate Epoch when it stops evolving
-
-## SS-Terminate Epoch after a set period of rounds
-
-## SS-Report on scores
-
-Add a scored flag which indicates that a score was created this round.
+**done**
 
 ## SS-Restore Step
 
 Restore the step field.
 
-
+**done**

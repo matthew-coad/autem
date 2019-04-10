@@ -58,10 +58,11 @@ class PreferImportantChoices(Evaluater):
         df = simulation.resources.choice_importance_data.append(dict(columns), ignore_index=True)
         simulation.resources.choice_importance_data = df
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
         """
         At the start of the epoch fit a to determine component choice importance
         """
+        simulation = epoch.simulation
         if not hasattr(simulation.resources, "choice_importance_data"):
             return None
 

@@ -17,7 +17,8 @@ class ContestJudge(Evaluater):
         """
         self.p_value = p_value
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
+        simulation = epoch.simulation
         members = simulation.list_members()
         for member in members:
             member.evaluation.survival = None
@@ -28,13 +29,13 @@ class ContestJudge(Evaluater):
         member.evaluation.contest_judgement = judgement
 
         simulation = member.simulation
-        epoch = simulation.epoch
+        epoch_id = simulation.epoch.id
 
         if not member.alive:
             judgement.outcome = member.event
             return None
 
-        wonlost = member.wonlost[epoch]
+        wonlost = member.wonlost[epoch_id]
         contests = len(wonlost)
         victories = sum(wonlost)
 

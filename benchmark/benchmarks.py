@@ -28,7 +28,7 @@ def get_simulations_path():
 def get_version():
     return 14
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
@@ -60,6 +60,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             # evaluators.StabilityContest(),
 
             evaluators.ContestJudge(),
+            evaluators.EpochProgressJudge(),
            
             evaluators.CrossValidationRater(),
 
@@ -116,7 +117,6 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.ExtraTreesClassifier(),
             ]),
         ], 
-        population_size = population_size,
         seed = seed,
         properties = properties,
         n_jobs=6)
@@ -128,14 +128,12 @@ def run_benchmark_simulation(study, baseline_name):
     task_id = baseline_configuration["task_id"]
     seed = 1
     epochs = 10
-    rounds = 20
     max_time = 2 * 60 * 60
-    population_size = 20
     path = get_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
-    simulation.run(rounds, epochs, max_time)
+    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path)
+    simulation.run(epochs, max_time)
     autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulations(study = None):

@@ -24,3 +24,5 @@ from .cross_val_rater import CrossValidationRater
 from .openML_rater import OpenMLRater
 
 from .dummy_classifier_accuracy import DummyClassifierAccuracy
+
+from .epoch_progress_judge import EpochProgressJudge

@@ -15,19 +15,20 @@ class PromotionJudge(Evaluater):
         """
         self.p_value = p_value
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
         """
         Start a simulation epoch
         """
+        simulation = epoch.simulation
         members = simulation.list_members()
         for member in members:
             member.evaluation.promotion = None
 
     def judge_member(self, member):
         simulation = member.simulation
-        epoch = simulation.epoch
+        epoch_id = simulation.epoch.id
 
-        wonlost = member.wonlost[epoch]
+        wonlost = member.wonlost[epoch_id]
         contests = len(wonlost)
         victories = sum(wonlost)
 
@@ -35,7 +36,7 @@ class PromotionJudge(Evaluater):
         #power_p = stats.binom_test(victories, n=contests, p=0.5, alternative='greater')
         #powerful = power_p < self.p_value
         maxed = member.league == top_league
-        final_round = simulation.round == simulation.rounds
+        final_round = simulation.round == simulation.round_size
         majority = victories * 2 > contests and stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
 
         if final_round and majority and not maxed:

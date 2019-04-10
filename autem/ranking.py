@@ -22,6 +22,12 @@ class Ranking(SimpleNamespace):
         self.type = RankingType.Conclusive
         self.members = members
 
+    def top_member(self):
+        if not self.members:
+            return None
+        member = next((m for m in self.members if m.ranking == 1), None)
+        return member
+
     def is_uncontested(self):
         return self.type == RankingType.NoContest
 

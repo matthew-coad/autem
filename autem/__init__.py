@@ -5,6 +5,7 @@ from .report_manager import ReportManager
 from .simulation_info import SimulationInfo
 
 from .member import Member
+from .epoch import Epoch
 from .simulation import Simulation 
 from .dataset import Dataset
 from .role import Role

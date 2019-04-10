@@ -15,7 +15,8 @@ class SurvivalJudge(Evaluater):
         """
         self.p_value = p_value
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
+        simulation = epoch.simulation
         members = simulation.list_members()
         for member in members:
             member.evaluation.survival = None
@@ -24,13 +25,13 @@ class SurvivalJudge(Evaluater):
 
         member.evaluation.survival = None
         simulation = member.simulation
-        epoch = simulation.epoch
+        epoch_id = simulation.epoch.id
 
-        wonlost = member.wonlost[epoch]
+        wonlost = member.wonlost[epoch_id]
         contests = len(wonlost)
         victories = sum(wonlost)
 
-        final_round = simulation.round == simulation.rounds
+        final_round = simulation.round == simulation.round_size
         meaningful = stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
         minority = victories * 2 < contests 
 

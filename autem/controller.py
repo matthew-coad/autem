@@ -21,7 +21,7 @@ class Controller(Component):
         """
         pass
 
-    def start_epoch(self, simulation):
+    def start_epoch(self, epoch):
         """
         Start a simulation epoch
         """
@@ -49,6 +49,12 @@ class Controller(Component):
         """
         Evaluate the rating for a member.
         Only famous members get a rating.
+        """
+        pass
+
+    def judge_epoch(self, epoch):
+        """
+        Judge the current epoch
         """
         pass
 

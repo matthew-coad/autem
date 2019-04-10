@@ -34,7 +34,8 @@ class Member:
         self.evaluation_time = None
         self.evaluation_duration = None
 
-        self.epoch = None
+        self.epoch_id = None
+        self.incarnation_epoch_id = None
         self.round = None
         self.step = None
         self.contests = {} # Map of contests per epoch
@@ -58,12 +59,12 @@ class Member:
         self.fault_component = None
         self.fault_message = None
 
-    def prepare_epoch(self, epoch):
+    def prepare_epoch(self, epoch_id):
         self.event = None
         self.event_reason = None
-        self.epoch = epoch
-        self.contests[self.epoch] = 0
-        self.wonlost[self.epoch] = []
+        self.epoch_id = epoch_id
+        self.contests[self.epoch_id] = 0
+        self.wonlost[self.epoch_id] = []
         self.round = None
         self.rating = None
         self.rating_sd = None
@@ -84,6 +85,7 @@ class Member:
             raise RuntimeError("Member already incarnated")
         self.form = form
         self.incarnation = incarnation
+        self.incarnation_epoch_id = self.epoch_id
         self.alive = 1
         self.event = "birth"
         self.event_reason = reason
@@ -96,15 +98,15 @@ class Member:
         """
         Record a victory at a given step
         """
-        self.contests[self.epoch] += 1
-        self.wonlost[self.epoch].append(1)
+        self.contests[self.epoch_id] += 1
+        self.wonlost[self.epoch_id].append(1)
 
     def defeat(self):
         """
         Record a defeat at a given epoch
         """
-        self.contests[self.epoch] += 1
-        self.wonlost[self.epoch].append(0)
+        self.contests[self.epoch_id] += 1
+        self.wonlost[self.epoch_id].append(0)
 
     def promote(self, reason, league = None):
         """
@@ -117,8 +119,8 @@ class Member:
             self.league += 1
         else:
             self.league = league
-        self.contests[self.epoch] = 0
-        self.wonlost[self.epoch] = []
+        self.contests[self.epoch_id] = 0
+        self.wonlost[self.epoch_id] = []
 
     def kill(self, reason):
         """

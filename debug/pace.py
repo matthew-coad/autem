@@ -118,9 +118,9 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
         n_jobs=6)
     return simulation
 
-def simulation_finished(simulation, start_time, epochs, max_time):
+def simulation_finished(simulation, start_time, max_epochs, max_time):
     duration = time.time() - start_time
-    return not simulation.running or simulation.epoch == epochs or (max_time is not None and duration >= max_time)
+    return not simulation.running or simulation.epoch.id == max_epochs or (max_time is not None and duration >= max_time)
 
 def run_simulation(simulation, steps, epochs, max_time = None):
     print("-----------------------------------------------------")

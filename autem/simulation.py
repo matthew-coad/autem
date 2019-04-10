@@ -1,4 +1,5 @@
 from .member import Member
+from .epoch import Epoch
 from .record import Record
 from .dataset import Dataset
 from .role import Role
@@ -17,11 +18,12 @@ import datetime
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, top_league = 4, max_reincarnations = 3, properties = {}, n_jobs = -1):
+    def __init__(self, name, components, seed = 1234, population_size = 10, round_size = 20, top_league = 4, max_reincarnations = 3, properties = {}, n_jobs = -1):
         self.name = name
         self.components = components
         self.properties = properties
         self.population_size = population_size
+        self.round_size = round_size
         self.top_league = top_league
         self.max_reincarnations = max_reincarnations
         self.n_jobs = n_jobs
@@ -32,20 +34,17 @@ class Simulation:
         self.hyper_parameters = None
         self.controllers = None
 
-        self.epochs = None
-        self.rounds = None
-
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
-        self.epoch = None
         self.round = None
         self.step = None
         self.running = False
 
         self.members = []
+        self.epoch = None
+        self.epochs = {}
         self.graveyard = []
         self.forms = {}
-        self.ranking = None
         self.reports = []
 
     def generate_id(self):
@@ -156,7 +155,7 @@ class Simulation:
             form = Form(self.generate_id(), form_key)
             self.forms[form_key] = form
         form.incarnate()
-        member.prepare_epoch(self.epoch)
+        member.prepare_epoch(self.epoch.id)
         member.prepare_round(self.round, self.step)
         member.incarnated(form, form.reincarnations, reason)
         self.members.append(member)
@@ -190,7 +189,6 @@ class Simulation:
             component.contest_members(contestant1, contestant2)
 
     def judge_member(self, member):
-
         for component in self.controllers:
             component.judge_member(member)
 
@@ -206,7 +204,6 @@ class Simulation:
         """
         Rate a member
         """
-
         if not member.alive:
             raise RuntimeError("Members is not alive")
 
@@ -219,7 +216,7 @@ class Simulation:
         """
         inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
-        progress_prefix = "Rating %s epoch %s:" % (self.name, self.epoch)
+        progress_prefix = "Rating %s epoch %s:" % (self.name, self.epoch.id)
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):
@@ -239,18 +236,26 @@ class Simulation:
         for candidate in candidates:
             candidate.ranked(rank)
             rank -= 1
-        self.ranking = ranking
+
+        self.epoch.ranked(ranking)
+        return ranking
+
+    def judge_epoch(self, epoch):
+        """
+        Judge the simulations current epoch
+        """
+        for component in self.controllers:
+            component.judge_epoch(epoch)
 
     def start(self):
         """
         Perform simulation startup
         """
-        self.epoch = 0
+        self.epoch = None
         self.round = 0
         self.step = 0
         self.hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
         self.controllers = [c for c in self.components if c.is_controller() ]
-
         self.outline_simulation()
         for component in self.controllers:
             component.start_simulation(self)
@@ -263,6 +268,8 @@ class Simulation:
         self.round += 1
         self.step += 1
         random_state = self.random_state
+
+        operation_name = "Evaluating %s epoch %s:" % (self.name, self.epoch.id)
 
         # Prepare for the next round
         members = self.list_members(alive = True)
@@ -289,7 +296,7 @@ class Simulation:
         # Ensure all members evaluated
         for member_index in range(len(members)):
             self.evaluate_member(members[member_index])
-            printProgressBar(member_index + (self.round - 1) * self.population_size, self.rounds * self.population_size, prefix = "Evaluating %s epoch %s:" % (self.name, self.epoch), length = 50)
+            printProgressBar(member_index + (self.round - 1) * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
 
         # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
@@ -307,34 +314,43 @@ class Simulation:
         for member in self.list_members(alive = False):
             self.bury_member(member)
 
+        printProgressBar(self.round * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
+
         # Perform ranking on final round
-        if self.round == self.rounds:
+        if self.round == self.round_size:
             self.rank_members()
 
         # Report on what happened
         for member in report_members:
             self.reports.append(self.record_member(member))
 
-        printProgressBar(self.round * self.population_size, self.rounds * self.population_size, prefix = "Contesting %s epoch %s:" % (self.name, self.epoch), length = 50)
-
-    def run_epoch(self, rounds):
+    def run_epoch(self):
         """
         Run an epoch
         """
-        self.epoch += 1
+        epoch_id = self.epoch.id + 1 if self.epoch else 1
+        epoch = Epoch(self, epoch_id)
+        self.epoch = epoch
+        self.epochs[epoch_id] = epoch
+        epoch.prepare()
+
         self.round = 0
 
         for component in self.controllers:
-            component.start_epoch(self)
+            component.start_epoch(epoch)
 
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_epoch(self.epoch)
+            member.prepare_epoch(self.epoch.id)
 
-        for round in range(rounds):
+        for round in range(self.round_size):
             self.run_round()
             if not self.running:
                 break
+
+        self.judge_epoch(epoch)
+        epoch.finished()
+        return epoch
 
     def finish(self, reason):
         """
@@ -355,29 +371,41 @@ class Simulation:
         """
         self.running = False
 
-    def _simulation_finished(self, start_time, epochs, max_time):
+    def _simulation_finished(self, epoch, start_time, max_epochs, max_time):
         duration = time.time() - start_time
-        return not self.running or self.epoch == epochs or (max_time is not None and duration >= max_time)
 
-    def run(self, rounds, epochs, max_time = None):
+        if not self.running:
+            return (True, "Aborted")
+
+        if not epoch.progressed:
+            return (True, "No progress")
+
+        if epoch.id == max_epochs:
+            return (True, "Max epochs")
+
+        if max_time is not None and duration >= max_time:
+            return (True, "Max time")
+        
+        return (False, None)
+
+    def run(self, max_epochs, max_time = None):
         print("-----------------------------------------------------")
         start_time = time.time()
         today = datetime.datetime.now()
 
-        self.epochs = epochs
-        self.rounds = rounds
         print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
         self.start()
 
         finished = False
         while not finished:
-            self.run_epoch(rounds)
-            finished = self._simulation_finished(start_time, epochs, max_time)
+            epoch = self.run_epoch()
+            progress = epoch.progressed
+            finished, reason = self._simulation_finished(epoch, start_time, max_epochs, max_time)
             if finished:
-                self.finish("finished")
+                self.finish(reason)
             self.report()
         duration = time.time() - start_time
-        print("%s finished - Duration %s" % (self.name, duration))
+        print("%s - %s - Duration %s" % (self.name, reason, duration))
 
     def outline_simulation(self):
         """
@@ -396,9 +424,11 @@ class Simulation:
         outline.append_attribute("event", Dataset.Battle, [Role.Property])
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
+        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
+        outline.append_attribute("incarnation_epoch", Dataset.Battle, [ Role.Property ])
+
         outline.append_attribute("league", Dataset.Battle, [Role.Property])
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
-        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
         for component in self.components:
             component.outline_simulation(self, outline)
@@ -409,7 +439,7 @@ class Simulation:
         Generate a record on a member
         """
         member_id = member.id
-        epoch = self.epoch
+        epoch_id = self.epoch.id
         round = self.round
         step = self.step
 
@@ -418,12 +448,13 @@ class Simulation:
         for property_key in self.properties.keys():
             setattr(record, property_key, self.properties[property_key])
 
-        record.epoch = member.epoch
+        record.epoch = member.epoch_id
         record.round = member.round
         record.step = member.step
         record.member_id = member_id
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation
+        record.incarnation_epoch = member.incarnation_epoch_id
         record.event_time = time.ctime(member.evaluation_time)
         record.event = member.event
         record.event_reason = member.event_reason

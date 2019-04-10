@@ -20,7 +20,7 @@ class PropertiesPath(Reporter):
         """
         Report on the progress of a simulation
         """
-        report_id = simulation.epoch
+        report_id = simulation.epoch.id
         battle_frame = self.get_battle_frame(simulation)
         ranking_frame = self.get_ranking_frame(simulation)
         simulation_info = self.get_simulation_info(simulation)
