@@ -188,9 +188,6 @@ class Simulation:
 
     def judge_member(self, member):
 
-        if not member.alive:
-            raise RuntimeError("Member not alive")
-
         for component in self.controllers:
             component.judge_member(member)
 
@@ -268,8 +265,12 @@ class Simulation:
         for member in members:
             member.prepare_round(self.round)
 
+        # Promote all living members
+        for member in members:
+            if member.league < self.top_league:
+                member.promote("Survivor")
+
         # Repopulate
-        members = self.list_members(alive = True)
         make_count = self.population_size - len(members)
         for make_index in range(make_count):
             self.make_member()
@@ -286,17 +287,20 @@ class Simulation:
             self.evaluate_member(members[member_index])
             printProgressBar(member_index + (self.round - 1) * self.population_size, self.rounds * self.population_size, prefix = "Evaluating %s epoch %s:" % (self.name, self.epoch), length = 50)
 
-        # Contest members randomly
+        # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
-        dead_members = self.list_members(alive = False)
-        member_indexes = random_state.choice(len(members), size = len(members), replace = False)
-        for member_index in range(0, len(members)-1, 2):
-            self.contest_members(members[member_indexes[member_index]], members[member_indexes[member_index+1]])
+        for member1_index in range(len(members)-1):
+            for member2_index in range(member1_index+1, len(members)):
+                self.contest_members(members[member1_index], members[member2_index])
 
-        report_members = [ members[mi] for mi in member_indexes ] + dead_members
+        report_members = self.list_members()
+
+        # Judge all members
+        for member in self.list_members():
+            self.judge_member(member)
 
         # Bury dead members
-        for member in dead_members:
+        for member in self.list_members(alive = False):
             self.bury_member(member)
 
         # Report on what happened
@@ -323,19 +327,6 @@ class Simulation:
             self.run_round()
             if not self.running:
                 break
-
-        # Judge all living members
-        members = self.list_members(alive = True)
-        for member in members:
-            self.judge_member(member)
-
-        # Bury dead members
-        for member in self.list_members(alive = False):
-            self.bury_member(member)
-
-        # Report on what happened
-        for member in members:
-            self.reports.append(self.record_member(member))
 
     def finish(self, reason):
         """

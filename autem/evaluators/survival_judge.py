@@ -30,15 +30,11 @@ class SurvivalJudge(Evaluater):
         contests = len(wonlost)
         victories = sum(wonlost)
 
-        robustness_p = stats.binom_test(victories, n=contests, p=0.5, alternative='less')
-        #kill = robustness_p < self.p_value
         final_round = simulation.round == simulation.rounds
-        minority = victories * 2 < contests and stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
+        meaningful = stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
+        minority = victories * 2 < contests 
 
-        #if kill:
-        #    member.kill("Unfit")
-        #    member.evaluation.survival = "%d|%d unfit" % (victories, contests)
-        if minority and final_round:
+        if meaningful and minority and final_round:
             member.kill("Minority")
             member.evaluation.survival = "%d|%d minority" % (victories, contests)
         elif final_round:

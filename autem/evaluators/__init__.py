@@ -17,8 +17,8 @@ from .voting_contest import VotingContest
 from .diverse_contest import DiverseContest
 from .stability_contest import StabilityContest
 
-from .survival_judge import SurvivalJudge
-from .promotion_judge import PromotionJudge
+from .contest_judge import ContestJudge
+from .contest_judgement import ContestJudgement
 
 from .cross_val_rater import CrossValidationRater
 from .openML_rater import OpenMLRater

@@ -49,6 +49,7 @@ class PromotionJudge(Evaluater):
             member.evaluation.promotion = None
 
     def record_member(self, member, record):
+        contest_judgement = get_contest
         if hasattr(member.evaluation, "promotion"):
             record.PR_judgement = member.evaluation.promotion
         else:

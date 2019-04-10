@@ -16,7 +16,7 @@ def get_test_baseline_name():
     return 'balance-scale'
 
 def get_test_epochs():
-    return 50
+    return 5
 
 def get_test_simulations_path():
     return benchmark.get_simulations_path().joinpath("test")
@@ -29,7 +29,7 @@ def run_test_simulation(baseline_name = None, seed = None):
     study = get_test_study()
     seed = seed if not seed is None else 2
     epochs = get_test_epochs()
-    rounds = 20
+    rounds = 10
     population_size = 20
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 

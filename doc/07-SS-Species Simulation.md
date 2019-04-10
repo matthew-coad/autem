@@ -63,6 +63,22 @@ Promotion/Death is determined by a simply majority of victories at the end of th
 
 This maintains the vs. competitions and has a more rugged evolution *cross fingers*
 
+## SS-Consoliate Majority Workflow
+
+Each epoch is divided into a number of rounds.
+
+For each round we perform evaluation, then have every member contest every other members, tracking the results.
+Then we judge members based on their contest results.
+
+## SS-Terminate Epoch when it Jams
+
+## SS-Terminate Epoch when it stops evolving
+
+## SS-Terminate Epoch after a set period of rounds
+
+
+
+
 **done**
 
 ## SS-Report on scores
