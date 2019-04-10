@@ -3,5 +3,7 @@
     "python.pythonPath": "D:\\Apps\\Anaconda\\python.exe",
     "python.unitTest.unittestEnabled": true,
     "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.pyTestEnabled": false
+    "python.unitTest.pyTestEnabled": false,
+    "explorer.autoReveal": false,
+    "problems.autoReveal": false
 }

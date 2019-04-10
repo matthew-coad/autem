@@ -57,8 +57,3 @@ class StabilityContest(Evaluater):
             contestant2.victory()
             set_outcome(contestant2, "Win")
 
-    def record_member(self, member, record):
-        super().record_member(member, record)
-
-        evaluation = get_stability_contest_evaluation(member)
-        record.ST_outcome = evaluation.stability_contest

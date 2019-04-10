@@ -45,16 +45,3 @@ class ScoreContest(Evaluater):
         loser.evaluation.accuracy_contest = "Loss"
         loser.defeat()
 
-        #if winner.league == 0 and loser.league > 0:
-        #    winner.evaluation.accuracy_contest = "Upset Win"
-        #    loser.evaluation.accuracy_contest = "Upset Loss"
-        #    winner.promote("Upset Win")
-
-    def record_member(self, member, record):
-        super().record_member(member, record)
-
-        evaluation = member.evaluation
-        if hasattr(evaluation, "accuracy_contest"):
-            record.SC_outcome = evaluation.accuracy_contest
-        else:
-            record.SC_outcome = None
