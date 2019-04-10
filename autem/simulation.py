@@ -268,11 +268,6 @@ class Simulation:
         for member in members:
             member.prepare_round(self.round)
 
-        # Judge all living members
-        members = self.list_members(alive = True)
-        for member in members:
-            self.judge_member(member)
-
         # Repopulate
         members = self.list_members(alive = True)
         make_count = self.population_size - len(members)
@@ -293,14 +288,14 @@ class Simulation:
 
         # Contest members randomly
         members = self.list_members(alive = True)
+        dead_members = self.list_members(alive = False)
         member_indexes = random_state.choice(len(members), size = len(members), replace = False)
         for member_index in range(0, len(members)-1, 2):
             self.contest_members(members[member_indexes[member_index]], members[member_indexes[member_index+1]])
 
-        report_members = self.list_members()
+        report_members = [ members[mi] for mi in member_indexes ] + dead_members
 
         # Bury dead members
-        dead_members = self.list_members(alive = False)
         for member in dead_members:
             self.bury_member(member)
 
@@ -328,6 +323,19 @@ class Simulation:
             self.run_round()
             if not self.running:
                 break
+
+        # Judge all living members
+        members = self.list_members(alive = True)
+        for member in members:
+            self.judge_member(member)
+
+        # Bury dead members
+        for member in self.list_members(alive = False):
+            self.bury_member(member)
+
+        # Report on what happened
+        for member in members:
+            self.reports.append(self.record_member(member))
 
     def finish(self, reason):
         """
@@ -396,8 +404,7 @@ class Simulation:
         outline.append_attribute("event", Dataset.Battle, [Role.Property])
         outline.append_attribute("fault", Dataset.Battle, [Role.Property])
 
-        outline.append_attribute("famous", Dataset.Battle, [Role.Property])
-        outline.append_attribute("alive", Dataset.Battle, [Role.Property])
+        outline.append_attribute("league", Dataset.Battle, [Role.Property])
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
         outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
 
@@ -434,7 +441,6 @@ class Simulation:
         record.ranking = member.ranking
 
         record.league = member.league
-        record.alive = member.alive
         record.final = member.final
 
         for component in self.components:

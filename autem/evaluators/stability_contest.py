@@ -39,26 +39,26 @@ class StabilityContest(Evaluater):
 
         # Must have difference scores to have a stability contest
         if contestant1_score_eval.score_std  == contestant2_score_eval.score_std:
-            set_outcome(contestant1, "Standoff")
-            set_outcome(contestant2, "Standoff")
+            set_outcome(contestant1, "Draw")
+            set_outcome(contestant2, "Draw")
             return None
 
         if contestant1_score_eval.score_std < contestant2_score_eval.score_std:
             # Contestant 1 is the winner
             contestant1.victory()
-            set_outcome(contestant1, "Victory")
+            set_outcome(contestant1, "Win")
             contestant2.defeat()
-            set_outcome(contestant2, "Defeat")
+            set_outcome(contestant2, "Loss")
             
         else:
             # Contestant 2 is the winner
             contestant1.defeat()
-            set_outcome(contestant1, "Defeat")
+            set_outcome(contestant1, "Loss")
             contestant2.victory()
-            set_outcome(contestant2, "Victory")
+            set_outcome(contestant2, "Win")
 
     def record_member(self, member, record):
         super().record_member(member, record)
 
         evaluation = get_stability_contest_evaluation(member)
-        record.SC_outcome = evaluation.stability_contest
+        record.ST_outcome = evaluation.stability_contest

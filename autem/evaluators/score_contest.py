@@ -28,35 +28,33 @@ class ScoreContest(Evaluater):
         contestant1_score = get_score_evaluation(contestant1).score
         contestant2_score = get_score_evaluation(contestant2).score
 
-        if contestant1_score == contestant2_score and contestant1.id < contestant2.id:
-            victor = 1
-        elif contestant1_score == contestant2_score and contestant1.id > contestant2.id:
-            victor = 2
-        elif contestant1_score > contestant2_score:
-            victor = 1
-        elif contestant1_score < contestant2_score:
-            victor = 2
-        else:
-            raise RuntimeError("Victory condition not found")
+        if contestant1_score == contestant2_score:
+            contestant1.evaluation.accuracy_contest = "Draw"
+            contestant2.evaluation.accuracy_contest = "Draw"
+            return None
 
-        winner = contestant1 if victor == 1 else contestant2
-        loser = contestant2 if victor == 1 else contestant1
+        if contestant1_score > contestant2_score:
+            winner = contestant1
+            loser = contestant2
+        else:
+            loser = contestant1
+            winner = contestant2
 
         winner.evaluation.accuracy_contest = "Win"
         winner.victory()
         loser.evaluation.accuracy_contest = "Loss"
         loser.defeat()
 
-        if winner.league == 0 and loser.league > 0:
-            winner.evaluation.accuracy_contest = "Upset Win"
-            loser.evaluation.accuracy_contest = "Upset Loss"
-            winner.promote("Upset Win")
+        #if winner.league == 0 and loser.league > 0:
+        #    winner.evaluation.accuracy_contest = "Upset Win"
+        #    loser.evaluation.accuracy_contest = "Upset Loss"
+        #    winner.promote("Upset Win")
 
     def record_member(self, member, record):
         super().record_member(member, record)
 
         evaluation = member.evaluation
         if hasattr(evaluation, "accuracy_contest"):
-            record.accuracy_contest = evaluation.accuracy_contest
+            record.SC_outcome = evaluation.accuracy_contest
         else:
-            record.accuracy_contest = None
+            record.SC_outcome = None

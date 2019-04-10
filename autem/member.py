@@ -111,6 +111,8 @@ class Member:
             self.league += 1
         else:
             self.league = league
+        self.contests[self.epoch] = 0
+        self.wonlost[self.epoch] = []
 
     def kill(self, reason):
         """

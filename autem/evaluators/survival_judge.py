@@ -31,15 +31,23 @@ class SurvivalJudge(Evaluater):
         victories = sum(wonlost)
 
         robustness_p = stats.binom_test(victories, n=contests, p=0.5, alternative='less')
-        kill = robustness_p < self.p_value
-        if kill:
-            member.kill("Unfit")
-            member.evaluation.survival = "%d|%d die" % (victories, contests)
-        else:
+        #kill = robustness_p < self.p_value
+        final_round = simulation.round == simulation.rounds
+        minority = victories * 2 < contests and stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
+
+        #if kill:
+        #    member.kill("Unfit")
+        #    member.evaluation.survival = "%d|%d unfit" % (victories, contests)
+        if minority and final_round:
+            member.kill("Minority")
+            member.evaluation.survival = "%d|%d minority" % (victories, contests)
+        elif final_round:
             member.evaluation.survival = "%d|%d" % (victories, contests)
+        else:
+            member.evaluation.survival = None
 
     def record_member(self, member, record):
         if hasattr(member.evaluation, "survival"):
-            record.survival = member.evaluation.survival
+            record.SU_judgement = member.evaluation.survival
         else:
-            record.survival = None
+            record.SU_judgement = None

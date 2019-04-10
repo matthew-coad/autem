@@ -49,7 +49,21 @@ Make sure all events have a reason. Report reason after event **done**
 
 ## SS-Drop alive
 
-Drop alive from report. Rely on final to report on final components
+Drop alive from report. Rely on final to report on final components **done**
+
+## SS-Draws are not resolved
+
+We want the simulation to lock up. Have draws result in a no-contest. **done**
+
+## SS-Introduce Majority Workflow
+
+The majority simulation workflow runs one round of validation, has a number of scoring steps and the judges the outcome.
+
+Promotion/Death is determined by a simply majority of victories at the end of the scoring round.
+
+This maintains the vs. competitions and has a more rugged evolution *cross fingers*
+
+**done**
 
 ## SS-Report on scores
 

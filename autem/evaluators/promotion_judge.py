@@ -32,21 +32,24 @@ class PromotionJudge(Evaluater):
         victories = sum(wonlost)
 
         top_league = simulation.top_league
-        power_p = stats.binom_test(victories, n=contests, p=0.5, alternative='greater')
-        powerful = power_p < self.p_value
+        #power_p = stats.binom_test(victories, n=contests, p=0.5, alternative='greater')
+        #powerful = power_p < self.p_value
         maxed = member.league == top_league
-        promote = powerful and not maxed
+        final_round = simulation.round == simulation.rounds
+        majority = victories * 2 > contests and stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
 
-        if promote:
-            member.evaluation.promotion = "%d|%d promote" % (victories, contests)
-            member.promote("Powerful")
-        elif promote and maxed:
+        if final_round and majority and not maxed:
+            member.evaluation.promotion = "%d|%d majority" % (victories, contests)
+            member.promote("Majority")
+        elif final_round and majority and maxed:
             member.evaluation.promotion = "%d|%d maxed" % (victories, contests)
-        else:
+        elif final_round:
             member.evaluation.promotion = "%d|%d" % (victories, contests)
+        else:
+            member.evaluation.promotion = None
 
     def record_member(self, member, record):
         if hasattr(member.evaluation, "promotion"):
-            record.promotion = member.evaluation.promotion
+            record.PR_judgement = member.evaluation.promotion
         else:
-            record.promotion = None
+            record.PR_judgement = None
