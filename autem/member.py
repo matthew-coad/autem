@@ -57,17 +57,6 @@ class Member:
         self.fault_component = None
         self.fault_message = None
 
-    def incarnated(self, form, incarnation):
-        """
-        Notify this member that it has incarnated
-        """
-        if self.alive == 1:
-            raise RuntimeError("Member already incarnated")
-        self.form = form
-        self.incarnation = incarnation
-        self.alive = 1
-        self.event = "birth"
-
     def prepare_epoch(self, epoch):
         self.event = None
         self.event_reason = None
@@ -77,10 +66,22 @@ class Member:
         self.round = None
 
     def prepare_round(self, round):
-        self.event = None
-        self.event_reason = None
+        self.event = "survive"
+        self.event_reason = "Next round"
         self.round = round
         self.evaluation_time = time.time()
+
+    def incarnated(self, form, incarnation, reason):
+        """
+        Notify this member that it has incarnated
+        """
+        if self.alive == 1:
+            raise RuntimeError("Member already incarnated")
+        self.form = form
+        self.incarnation = incarnation
+        self.alive = 1
+        self.event = "birth"
+        self.event_reason = reason
 
     def evaluated(self, duration):
         self.evaluation_duration = duration

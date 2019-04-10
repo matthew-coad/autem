@@ -130,7 +130,7 @@ class Simulation:
             if not member.fault is None:
                 break
 
-    def make_member(self):
+    def make_member(self, reason):
         """
         Make a new member
         """
@@ -153,9 +153,9 @@ class Simulation:
             form = Form(self.generate_id(), form_key)
             self.forms[form_key] = form
         form.incarnate()
-        member.incarnated(form, form.reincarnations)
         member.prepare_epoch(self.epoch)
         member.prepare_round(self.round)
+        member.incarnated(form, form.reincarnations, reason)
         self.members.append(member)
         return member
 
@@ -268,12 +268,12 @@ class Simulation:
         # Promote all living members
         for member in members:
             if member.league < self.top_league:
-                member.promote("Survivor")
+                member.promote("Fit")
 
         # Repopulate
         make_count = self.population_size - len(members)
         for make_index in range(make_count):
-            self.make_member()
+            self.make_member("Repopulate")
 
         # If we run out of search space the population can crash.
         # Make sure we don't get into an infinite loop.

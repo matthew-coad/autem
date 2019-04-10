@@ -31,7 +31,7 @@ class ContestJudge(Evaluater):
         epoch = simulation.epoch
 
         if not member.alive:
-            judgement.outcome = member.event_reason
+            judgement.outcome = member.event
             return None
 
         wonlost = member.wonlost[epoch]

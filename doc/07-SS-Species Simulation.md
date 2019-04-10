@@ -78,6 +78,22 @@ Then we judge members based on their contest results.
 
 Reporting is now per round. Remove reporting of contest outcomes.
 
+**done**
+
+## SS-All members have an event
+
+All members should have an event by the end of the round. 
+
+Need to add birth. **done**
+
+Need to add surviving. **done**
+
+Change judgement outcome when judgement is failed/dead becomes the event that causes the failure **done**
+
+## SS-Restore step as total rounds
+
+Restore step function so it is a count of the number of rounds in a simulation. 
+
 ## SS-Terminate Epoch when it Jams
 
 ## SS-Terminate Epoch when it stops evolving
