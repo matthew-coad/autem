@@ -52,6 +52,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             makers.CrossoverMaker(),
 
             evaluators.ScoreEvaluator(),
+            baselines.BaselineStats(baseline_name),
             evaluators.DurationEvaluator(),
             evaluators.ValidationEvaluator(),
 
@@ -61,7 +62,6 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             evaluators.ContestJudge(),
            
             evaluators.CrossValidationRater(),
-            baselines.BaselineStats(baseline_name),
 
             reporters.Path(path),
 

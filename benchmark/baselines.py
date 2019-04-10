@@ -90,8 +90,8 @@ class BaselineStats(Evaluater):
         simulation = member.simulation
         stats = simulation.resources.baseline_stats
 
-        record.top_accuracy = stats["max_score"]
-        record.top_5p_accuracy = stats["top_5p"]
+        record.BL_top_score = stats["max_score"]
+        record.BL_top_5p_score = stats["top_5p"]
 
 if __name__ == '__main__':
     names = get_baseline_names("Select")

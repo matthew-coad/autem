@@ -92,22 +92,35 @@ Change judgement outcome when judgement is failed/dead becomes the event that ca
 
 ## SS-Restore step as total rounds
 
-Restore step function so it is a count of the number of rounds in a simulation. **done**
+Restore step function so it is a count of the number of rounds in a simulation. 
+**done**
 
 ## SS-Remove data column from report
 
 The data column is superfluous so remove it.
+
+**done**
+
+## SS-Port stats to evaluation format
+
+Action - Port the baseline stats function to used an evaluation object.
+Justification - Consistency with evaluation objects and finish the job.
+Outcome - Baseline stats already uses an object and acutally stores data in the simulation. Ported to use new reporting format.
+
+**done**
+
+## SS-Report on new file format
+
+Report format has extensively changed. 
+
+Action - Upgrade version and get the dashboard working.
+Justification - Need dashboard function to inspect new workflow.
 
 ## SS-Terminate Epoch when it Jams
 
 ## SS-Terminate Epoch when it stops evolving
 
 ## SS-Terminate Epoch after a set period of rounds
-
-
-
-
-**done**
 
 ## SS-Report on scores
 
