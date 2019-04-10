@@ -33,9 +33,10 @@ class Member:
         self.evaluations = 0
         self.evaluation_time = None
         self.evaluation_duration = None
-        self.round = None
 
         self.epoch = None
+        self.round = None
+        self.step = None
         self.contests = {} # Map of contests per epoch
         self.wonlost = {}  # Map of wonlost record per epoch
 
@@ -65,10 +66,11 @@ class Member:
         self.wonlost[self.epoch] = []
         self.round = None
 
-    def prepare_round(self, round):
+    def prepare_round(self, round, step):
         self.event = "survive"
         self.event_reason = "Next round"
         self.round = round
+        self.step = step
         self.evaluation_time = time.time()
 
     def incarnated(self, form, incarnation, reason):

@@ -154,7 +154,7 @@ class Simulation:
             self.forms[form_key] = form
         form.incarnate()
         member.prepare_epoch(self.epoch)
-        member.prepare_round(self.round)
+        member.prepare_round(self.round, self.step)
         member.incarnated(form, form.reincarnations, reason)
         self.members.append(member)
         return member
@@ -258,12 +258,13 @@ class Simulation:
         Run a round of the simulation
         """
         self.round += 1
+        self.step += 1
         random_state = self.random_state
 
         # Prepare for the next round
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_round(self.round)
+            member.prepare_round(self.round, self.step)
 
         # Promote all living members
         for member in members:
@@ -417,9 +418,9 @@ class Simulation:
         for property_key in self.properties.keys():
             setattr(record, property_key, self.properties[property_key])
 
-        record.epoch = epoch
-        record.round = round
-        record.step = step
+        record.epoch = member.epoch
+        record.round = member.round
+        record.step = member.step
         record.member_id = member_id
         record.form_id = member.form.id if member.form else None
         record.incarnation = member.incarnation

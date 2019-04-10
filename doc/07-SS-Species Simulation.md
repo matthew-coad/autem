@@ -92,7 +92,7 @@ Change judgement outcome when judgement is failed/dead becomes the event that ca
 
 ## SS-Restore step as total rounds
 
-Restore step function so it is a count of the number of rounds in a simulation. 
+Restore step function so it is a count of the number of rounds in a simulation. **done**
 
 ## SS-Terminate Epoch when it Jams
 
