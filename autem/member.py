@@ -65,6 +65,9 @@ class Member:
         self.contests[self.epoch] = 0
         self.wonlost[self.epoch] = []
         self.round = None
+        self.rating = None
+        self.rating_sd = None
+        self.ranking = None
 
     def prepare_round(self, round, step):
         self.event = "survive"

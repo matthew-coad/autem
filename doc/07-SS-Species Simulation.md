@@ -116,7 +116,17 @@ Report format has extensively changed.
 Action - Upgrade version and get the dashboard working.
 Justification - Need dashboard function to inspect new workflow.
 
-## SS-Terminate Epoch when it Jams
+## SS-Rank members at end of epoch
+
+Action - Evaluate a rating+rank for all surving members at an end of a epoch.
+Justification - To run species we  need to detect that the simulation has converged on a solution. The proposal is to use the fact that the score hasn't
+improved in a given epoch. To determine the epoch score we need the rankings.
+
+**done**
+
+## SS-Detect simulation converged
+
+Action - Detect th
 
 ## SS-Terminate Epoch when it stops evolving
 

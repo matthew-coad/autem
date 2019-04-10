@@ -26,7 +26,7 @@ def get_simulations_path():
     return Path("benchmark/simulations")
 
 def get_version():
-    return 13
+    return 14
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path, properties = {}):
     task = openml.tasks.get_task(task_id)
@@ -127,7 +127,7 @@ def run_benchmark_simulation(study, baseline_name):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 25
+    epochs = 10
     rounds = 20
     max_time = 2 * 60 * 60
     population_size = 20
@@ -135,7 +135,7 @@ def run_benchmark_simulation(study, baseline_name):
 
     utility.prepare_OpenML()
     simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, population_size, path)
-    simulation.run_simulation(rounds, epochs, max_time)
+    simulation.run(rounds, epochs, max_time)
     autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulations(study = None):

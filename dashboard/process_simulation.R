@@ -26,7 +26,7 @@ read_battle_file <- function(file_name) {
     incarnation = col_integer(),
     event = col_character(),
     event_duration = col_double(),
-    time = col_character(),
+    event_time = col_character(),
     fault = col_character(),
     rating = col_double(),
     rating_sd = col_double(),
@@ -133,9 +133,8 @@ read_battle_file <- function(file_name) {
 clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$version <- factor(df$version)
-  df$alive <- factor(df$alive)
   df$final <- factor(df$final)
-  df$event_time <- lubridate::parse_date_time(df$time, orders = "amd HMS Y")
+  df$event_time <- lubridate::parse_date_time(df$event_time, orders = "amd HMS Y")
   df
 }
 
@@ -185,6 +184,7 @@ build_step_detail <- function(battle_df) {
       mutate(
         choice_score = choice_predicted_score,
         choice_score_std = NA,
+        round = NA,
         duration = score_duration,
         relative_duration = NA,
         reason = fault,
@@ -201,6 +201,7 @@ build_step_detail <- function(battle_df) {
       mutate(
         choice_score = choice_predicted_score,
         choice_score_std = choice_predicted_score_std,
+        round = NA,
         duration = DE_duration,
         relative_duration = DE_standard_duration,
         validation_score = VE_score
@@ -214,6 +215,7 @@ build_step_detail <- function(battle_df) {
     step_df13 <- 
       step_df13 %>%
       mutate(
+        round = NA,
         choice_score = CE_score,
         choice_score_std = CE_score_std,
         score = SE_score,
@@ -224,6 +226,25 @@ build_step_detail <- function(battle_df) {
       )
   }
 
+  step_df14 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 14)
+  if (nrow(step_df14) > 0) {
+    step_df14 <- 
+      step_df14 %>%
+      mutate(
+        step = step * 25,
+        round = NA,
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
+      )
+  }
+  
 
   bind_df <- function(step_df, df) {
     if (nrow(df) == 0)
@@ -234,11 +255,10 @@ build_step_detail <- function(battle_df) {
     bind_rows(step_df, df)
   }
   step_df <- NULL
-  #step_df <- bind_df(step_df, step_df9)
-  #step_df <- bind_df(step_df, step_df10)
   step_df <- bind_df(step_df, step_df11)
   step_df <- bind_df(step_df, step_df12)
   step_df <- bind_df(step_df, step_df13)
+  step_df <- bind_df(step_df, step_df14)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
@@ -247,15 +267,15 @@ build_step_detail <- function(battle_df) {
       experiment,
       dataset,
       epoch,
+      round,
       step,
       member_id,
       form_id,
       event,
       event_time,
+      event_reason,
       ranking,
       league,
-      alive,
-      reason,
       final,
       choice_score,
       choice_score_std,
@@ -307,7 +327,6 @@ build_ranking_detail <- function(battle_df) {
     step_df12 <- NULL
   }
   
-
   raw_step_df13 <-
     battle_df %>%
     filter(as.integer(as.character(version)) == 13)
@@ -327,6 +346,27 @@ build_ranking_detail <- function(battle_df) {
   } else {
     step_df13 <- NULL
   }
+  
+  raw_step_df14 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 14)
+  if (nrow(raw_step_df14) > 0) {
+    step_df14 <- 
+      raw_step_df14 %>%
+      mutate(
+        rating_std = rating_sd,
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
+      )
+  } else {
+    step_df14 <- NULL
+  }
+  
 
   bind_df <- function(step_df, df) {
     if (is.null(df))
@@ -339,6 +379,7 @@ build_ranking_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df10)
   step_df <- bind_df(step_df, step_df12)
   step_df <- bind_df(step_df, step_df13)
+  step_df <- bind_df(step_df, step_df14)
 
   ranking_df <-
     step_df %>%
@@ -350,7 +391,7 @@ build_ranking_detail <- function(battle_df) {
        rating_std,
        score,
        score_std,
-       validation_score = VE_score
+       validation_score
     )
   ranking_df
 }

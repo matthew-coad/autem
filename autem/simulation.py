@@ -53,13 +53,16 @@ class Simulation:
         self.next_id += 1
         return id
 
-    def list_members(self, alive = None):
+    def list_members(self, alive = None, top = None):
         """
         List members
         """
+
         def include_member(member):
             alive_passed = alive is None or member.alive == alive
-            return alive_passed
+            is_top = member.league == self.top_league
+            top_passed = top is None or is_top == top
+            return alive_passed and top_passed
 
         candidates = self.members
         members = [ m for m in candidates if include_member(m) ]
@@ -214,9 +217,9 @@ class Simulation:
         """
         Rank all members
         """
-        inductees = [m for m in self.members if m.alive and m.league ]
+        inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
-        progress_prefix = "Rating %s" % self.name
+        progress_prefix = "Rating %s epoch %s:" % (self.name, self.epoch)
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):
@@ -304,6 +307,10 @@ class Simulation:
         for member in self.list_members(alive = False):
             self.bury_member(member)
 
+        # Perform ranking on final round
+        if self.round == self.rounds:
+            self.rank_members()
+
         # Report on what happened
         for member in report_members:
             self.reports.append(self.record_member(member))
@@ -338,16 +345,9 @@ class Simulation:
         random_state = self.random_state
         members = self.members
 
-        # Perform ranking
-        self.rank_members()
-
         # Tell everyone we are done
         for member in members:
             member.finshed(reason)
-
-        # final report on ranked members
-        for member in self.ranking.members:
-            self.reports.append(self.record_member(member))
 
     def stop(self):
         """
