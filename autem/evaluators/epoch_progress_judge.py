@@ -11,7 +11,7 @@ class EpochProgressJudge(Evaluater):
 
     def judge_epoch(self, epoch):
 
-        simulation = epoch.simulation
+        specie = epoch.get_specie()
         if epoch.id == 1:
             # First epoch
             # Indicate that it progressed
@@ -19,10 +19,10 @@ class EpochProgressJudge(Evaluater):
             return None
 
         prior_epoch_id = epoch.id - 1
-        prior_epoch = simulation.epochs[prior_epoch_id]
+        prior_epoch = specie.get_epoch(prior_epoch_id)
 
-        prior_top_member = prior_epoch.ranking.top_member()
-        top_member = epoch.ranking.top_member()
+        prior_top_member = prior_epoch.get_ranking().top_member()
+        top_member = epoch.get_ranking().top_member()
 
         if not prior_top_member:
             epoch.progress(True, "Ranking progressed")

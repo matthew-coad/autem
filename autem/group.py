@@ -68,7 +68,7 @@ class Group(HyperParameter):
         if not self.parameters:
             return False
 
-        random_state = member.simulation.random_state
+        random_state = member.get_random_state()
         parameters = self.parameters
 
         n_parameters = len(parameters)
@@ -82,7 +82,7 @@ class Group(HyperParameter):
 
     def crossover_member(self, member, parent0, parent1):
         if self.parameters:
-            random_state = member.simulation.random_state
+            random_state = member.get_random_state()
             setattr(member.configuration, self.name, SimpleNamespace())
             for parameter in self.parameters:
                 parameter.crossover_member(member, parent0, parent1)

@@ -24,7 +24,8 @@ class CrossValidationRater(Evaluater):
         Only famous members get a rating.
         """
 
-        simulation = member.simulation
+        specie = member.get_specie()
+        simulation = member.get_simulation()
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
@@ -40,4 +41,4 @@ class CrossValidationRater(Evaluater):
         rating = scores.mean()
         rating_sd = scores.std()
 
-        member.rated(simulation.epoch_id, rating, rating_sd)
+        member.rated(specie.get_current_epoch_id(), rating, rating_sd)

@@ -26,13 +26,13 @@ class DurationEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        simulation = member.simulation
+        specie = member.get_specie()
 
         score_evaluation = self.get_score_evaluation(member)
         if not score_evaluation.score_duration:
             return None
 
-        candidates = [ m for m in simulation.members if m.id != member.id and m.league >= 1]
+        candidates = [ m for m in specie.list_members() if m.id != member.id and m.league >= 1]
         if len(candidates) < 5:
             return None
 

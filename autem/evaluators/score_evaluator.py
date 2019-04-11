@@ -41,7 +41,8 @@ class ScoreEvaluator(Evaluater):
 
     def build_scores(self, member, repeat, start, stop):
 
-        simulation = member.simulation
+        specie = member.get_specie()
+        simulation = member.get_simulation()
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
         i_leagues = simulation.resources.i_leagues
@@ -68,7 +69,7 @@ class ScoreEvaluator(Evaluater):
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
-                    member.fail(simulation.epoch_id, ex, "score_evaluator", "ScoreEvaluator")
+                    member.fail(specie.get_current_epoch_id(), ex, "score_evaluator", "ScoreEvaluator")
                     return (None, None, None)
             end_time = time.time()
             duration = end_time - start_time

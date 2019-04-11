@@ -17,7 +17,7 @@ class ValidationEvaluator(Evaluater):
     """
 
     def validate_member(self, member, required_league):
-        simulation = member.simulation
+        simulation = member.get_simulation()
         evaluation = member.evaluation
         if hasattr(evaluation, "validation_evaluation"):
             return None
@@ -25,7 +25,6 @@ class ValidationEvaluator(Evaluater):
         if member.league < required_league:
             return None
 
-        simulation = member.simulation
         scorer = simulation.resources.scorer
         loader = simulation.resources.loader
 
@@ -50,8 +49,7 @@ class ValidationEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        simulation = member.simulation
-        self.validate_member(member, simulation.top_league)
+        self.validate_member(member, member.get_specie().get_max_league())
 
     def rate_member(self, member):
         super().rate_member(member)

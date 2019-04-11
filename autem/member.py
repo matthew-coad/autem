@@ -10,10 +10,9 @@ class Member:
     Member of a population
     """
     def __init__(self, specie): 
-        simulation = specie.simulation
-        self.simulation = simulation
-        self.specie = specie
-        self.id = simulation.generate_id()
+        self._specie = specie
+
+        self.id = specie.generate_id()
         self.configuration = SimpleNamespace()
         self.form = None
         self.incarnation = 0
@@ -47,6 +46,17 @@ class Member:
         self.rating_sd = None
 
         self.ranking = None
+
+    # Environment
+
+    def get_simulation(self):
+        return self._specie.get_simulation()
+
+    def get_specie(self):
+        return self._specie
+
+    def get_random_state(self):
+        return self._specie.get_random_state()
 
     def prepare(self):
         """

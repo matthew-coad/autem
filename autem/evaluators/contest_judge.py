@@ -18,8 +18,7 @@ class ContestJudge(Evaluater):
         self.p_value = p_value
 
     def start_epoch(self, epoch):
-        simulation = epoch.simulation
-        members = simulation.list_members()
+        members = epoch.list_members()
         for member in members:
             member.evaluation.survival = None
 
@@ -28,8 +27,8 @@ class ContestJudge(Evaluater):
         judgement = ContestJudgement()
         member.evaluation.contest_judgement = judgement
 
-        simulation = member.simulation
-        epoch_id = simulation.epoch_id
+        specie = member.get_specie()
+        epoch_id = specie.get_current_epoch_id()
 
         if not member.alive:
             judgement.outcome = member.event
@@ -41,7 +40,7 @@ class ContestJudge(Evaluater):
 
         meaningful = stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
         majority = victories * 2 > contests
-        top_league = simulation.top_league
+        top_league = specie.get_max_league()
 
         if meaningful and majority:
             outcome = "Fit"

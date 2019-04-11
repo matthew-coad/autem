@@ -33,7 +33,7 @@ class TopChoiceMaker(Maker, Controller):
             return output
 
         grid = [ {} ]
-        for component in specie.simulation.hyper_parameters:
+        for component in specie.get_hyper_parameters():
             if isinstance(component, Choice):
                 choice_names = component.get_component_names()
                 grid = cross_values(grid, component.name, choice_names)
@@ -43,16 +43,16 @@ class TopChoiceMaker(Maker, Controller):
 
         # Get the model
 
-        specie.resources.initialization_grid_pred = None
+        specie.get_specie_resources().initialization_grid_pred = None
 
-        model = specie.resources.component_score_model
-        grid = specie.resources.initialization_grid
+        model = specie.get_specie_resources().component_score_model
+        grid = specie.get_specie_resources().initialization_grid
 
         if model is None or grid is None:
             return None
 
         # Build the choices into a dataframe
-        choice_names = [ c.name for c in specie.simulation.hyper_parameters if isinstance(c, Choice) ]
+        choice_names = [ c.name for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
         x_values = {}
         for choice_name in choice_names:
             x_values[choice_name] = [ i[choice_name] for i in grid ]
@@ -61,19 +61,19 @@ class TopChoiceMaker(Maker, Controller):
         # And do the prediction
         pred_y, pred_y_std = model.predict(x, return_std=True)
 
-        specie.resources.initialization_grid_pred = pred_y.tolist()
+        specie.get_specie_resources().initialization_grid_pred = pred_y.tolist()
 
     def start_specie(self, specie):
         grid = self.make_grid(specie)
-        specie.resources.initialization_grid = grid
-        specie.resources.initialization_grid_pred = None
+        specie.get_specie_resources().initialization_grid = grid
+        specie.get_specie_resources().initialization_grid_pred = None
 
     def start_epoch(self, epoch):
-        self.evaluate_grid_predicted_scores(epoch.specie)
+        self.evaluate_grid_predicted_scores(epoch.get_specie())
 
     def make_grid_member(self, specie, grid_index):
-        grid = specie.resources.initialization_grid
-        grid_pred = specie.resources.initialization_grid_pred
+        grid = specie.get_specie_resources().initialization_grid
+        grid_pred = specie.get_specie_resources().initialization_grid_pred
         grid_item = grid[grid_index]
         del grid[grid_index]
 
@@ -81,26 +81,25 @@ class TopChoiceMaker(Maker, Controller):
             del grid_pred[grid_index]
 
         member = Member(specie)
-        for component in specie.simulation.hyper_parameters:
+        for component in specie.get_hyper_parameters():
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
         return member
 
     def make_top_member(self, specie):
-        grid = specie.resources.initialization_grid
-        grid_pred = specie.resources.initialization_grid_pred
+        grid = specie.get_specie_resources().initialization_grid
+        grid_pred = specie.get_specie_resources().initialization_grid_pred
         grid_index = grid_pred.index(max(grid_pred))
         return self.make_grid_member(specie, grid_index)
 
     def make_member(self, specie):
-        simulation = specie.simulation
-        grid = specie.resources.initialization_grid
-        grid_pred = specie.resources.initialization_grid_pred
+        grid = specie.get_specie_resources().initialization_grid
+        grid_pred = specie.get_specie_resources().initialization_grid_pred
         if grid is None or grid_pred is None:
             return None
         member = self.make_top_member(specie)
-        specialized = simulation.specialize_member(member)
+        specialized = specie.specialize_member(member)
         if not specialized:
             member = None
         return member

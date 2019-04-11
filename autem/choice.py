@@ -76,7 +76,7 @@ class Choice(HyperParameter):
         To start a member set a component as active and start it
         """
         components = self.components
-        random_state = member.simulation.random_state
+        random_state = member.get_random_state()
         component_index = random_state.randint(0, len(components))
         component = components[component_index]
         self.set_active_component_name(member, component.name)
@@ -113,7 +113,7 @@ class Choice(HyperParameter):
         """
         Perform a major change to the member
         """
-        random_state = member.simulation.random_state
+        random_state = member.get_random_state()
         current_active_component_name = self.get_active_component_name(member)
         components = self.components
         if len(components) < 2:
@@ -142,7 +142,7 @@ class Choice(HyperParameter):
         """
         Cross over members 
         """
-        random_state = member.simulation.random_state
+        random_state = member.get_random_state()
 
         # If we are in group mode and this is the first group
         # pick one of the parents to base my group on

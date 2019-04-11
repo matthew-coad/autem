@@ -44,7 +44,6 @@ class Preprocesssor(Group):
     def prepare_member(self, member):
         super().prepare_member(member)
 
-        simulation = member.simulation
         resources = member.resources
         processor_name = self.name
         preprocessor = self.make_preprocessor(member)

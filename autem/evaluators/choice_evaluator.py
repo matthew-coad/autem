@@ -38,7 +38,7 @@ class ChoiceEvaluator(Evaluater):
             evaluation.choice_evaluation = ChoiceEvaluation()
         return evaluation.choice_evaluation
 
-    def build_member_score_df(self, simulation):
+    def build_member_score_df(self, specie):
         """
         Build a dataframe containing all scores evaluated for each member
         """
@@ -46,13 +46,13 @@ class ChoiceEvaluator(Evaluater):
         # Collect all members including ones from the graveyard which have scores
         # Not concerned whether they failed or not or whether they were reincarnated
         # Just get as much information as we have
-        all_members = [ m for m in simulation.members + simulation.graveyard if self.get_score_evaluation(m).scores ]
+        all_members = [ m for m in specie.list_members(graveyard = True )  if self.get_score_evaluation(m).scores ]
 
         if not all_members:
             return None
 
         # Get all the choices
-        choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
 
         # Build a frame containing for each member all the choices
         def get_choice_values(choice):
@@ -79,15 +79,13 @@ class ChoiceEvaluator(Evaluater):
 
     def build_model(self, specie):
 
-        simulation = specie.simulation
-
         # Get the data
-        df = self.build_member_score_df(simulation)
+        df = self.build_member_score_df(specie)
         if df is None:
             return None
 
         # Extract the choices as the response variables
-        choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
         choice_names = [ c.name for c in choices ]
         x = df.loc[:, choice_names]
 
@@ -116,12 +114,11 @@ class ChoiceEvaluator(Evaluater):
     def evaluate_model(self, specie):
 
         # Build the model
-        simulation = specie.simulation
         model = self.build_model(specie)
-        specie.resources.component_score_model = model
+        specie.get_specie_resources().component_score_model = model
 
         # Reset the expected score for all members
-        for member in simulation.members:
+        for member in specie.list_members():
             member.evaluation.choice_evaluation = ChoiceEvaluation()
 
     def build_predicted_score(self, member):
@@ -130,14 +127,13 @@ class ChoiceEvaluator(Evaluater):
         """
 
         # Get the model
-        specie = member.specie
-        model = specie.resources.component_score_model
+        specie = member.get_specie()
+        model = specie.get_specie_resources().component_score_model
         if model is None:
             return (None, None)
 
         # Build the choices into a dataframe
-        simulation = member.simulation
-        choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
         choice_values = dict([ (c.name, [c.get_active_component_name(member)]) for c in choices])
         x = pd.DataFrame(choice_values)
 
@@ -156,7 +152,7 @@ class ChoiceEvaluator(Evaluater):
         choice_evaluation.choice_predicted_score_std = choice_predicted_score_std
 
     def start_epoch(self, epoch):
-        self.evaluate_model(epoch.specie)
+        self.evaluate_model(epoch.get_specie())
 
     def record_member(self, member, record):
         super().record_member(member, record)

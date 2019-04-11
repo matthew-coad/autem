@@ -207,3 +207,21 @@ Outcome - Complete
 
 Action - Top choices should be species specific
 Justification - Precondition
+Outcome - Complete
+
+**done**
+
+## SS-Report specie
+
+Action - Report specie id in reports
+Justification - Precondition
+
+## SS-Move member to specie
+
+Action - Move members, forms and graveyard to specie
+Justification - Precondition
+Outcome - Complete
+
+**done**
+
+## SS-Inspect all resources for appropiate location

@@ -21,7 +21,7 @@ class ScoreContest(Evaluater):
 
     def contest_members(self, contestant1, contestant2):
 
-        simulation = contestant1.simulation
+        specie = contestant1.get_specie()
         contestant1.evaluation.accuracy_contest = None
         contestant2.evaluation.accuracy_contest = None
 
@@ -41,7 +41,7 @@ class ScoreContest(Evaluater):
             winner = contestant2
 
         winner.evaluation.accuracy_contest = "Win"
-        winner.victory(simulation.epoch_id)
+        winner.victory(specie.get_current_epoch_id())
         loser.evaluation.accuracy_contest = "Loss"
-        loser.defeat(simulation.epoch_id)
+        loser.defeat(specie.get_current_epoch_id())
 

@@ -44,7 +44,7 @@ class Learner(Group):
 
 
     def prepare_member(self, member):
-        simulation = member.simulation
+        simulation = member.get_simulation()
         resources = member.resources
         learner_name = self.name
 

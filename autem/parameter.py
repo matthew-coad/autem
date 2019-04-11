@@ -99,7 +99,7 @@ class Parameter(Component):
         return False
 
     def crossover_member(self, member, parent0, parent1):
-        random_state = member.simulation.random_state
+        random_state = member.get_random_state()
         parent_index = random_state.randint(0, 2)
         parent = parent0 if parent_index == 0 else parent1
         value = self.get_value(parent)

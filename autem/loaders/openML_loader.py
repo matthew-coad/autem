@@ -69,5 +69,5 @@ class OpenMLLoader(Loader):
         """
         super().record_member(member, record)
 
-        simulation = member.simulation
+        simulation = member.get_simulation()
         record.data = simulation.resources.dataset.name
