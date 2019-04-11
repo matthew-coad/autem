@@ -13,7 +13,7 @@ def get_test_study():
     return benchmark.get_study()
 
 def get_test_baseline_name():
-    return 'balance-scale'
+    return 'diabetes'
 
 def get_test_epochs():
     return 5

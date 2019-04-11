@@ -27,6 +27,7 @@ read_battle_file <- function(file_name) {
     event = col_character(),
     event_duration = col_double(),
     event_time = col_character(),
+    time  = col_character(),
     fault = col_character(),
     rating = col_double(),
     rating_sd = col_double(),
@@ -134,7 +135,6 @@ clean_battle <- function(df) {
   df$simulation <- factor(df$simulation)
   df$version <- factor(df$version)
   df$final <- factor(df$final)
-  df$event_time <- lubridate::parse_date_time(df$event_time, orders = "amd HMS Y")
   df
 }
 
@@ -182,6 +182,7 @@ build_step_detail <- function(battle_df) {
     step_df11 <- 
       step_df11 %>%
       mutate(
+        event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         choice_score = choice_predicted_score,
         choice_score_std = NA,
         round = NA,
@@ -199,6 +200,7 @@ build_step_detail <- function(battle_df) {
     step_df12 <- 
       step_df12 %>%
       mutate(
+        event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         choice_score = choice_predicted_score,
         choice_score_std = choice_predicted_score_std,
         round = NA,
@@ -215,6 +217,7 @@ build_step_detail <- function(battle_df) {
     step_df13 <- 
       step_df13 %>%
       mutate(
+        event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         round = NA,
         choice_score = CE_score,
         choice_score_std = CE_score_std,
@@ -234,6 +237,7 @@ build_step_detail <- function(battle_df) {
       step_df14 %>%
       mutate(
         step = step * 25,
+        event_time = lubridate::parse_date_time(event_time, orders = "amd HMS Y"),
         round = NA,
         choice_score = CE_score,
         choice_score_std = CE_score_std,
@@ -349,7 +353,7 @@ build_ranking_detail <- function(battle_df) {
   
   raw_step_df14 <-
     battle_df %>%
-    filter(as.integer(as.character(version)) == 14)
+    filter(as.integer(as.character(version)) == 14, final == 1)
   if (nrow(raw_step_df14) > 0) {
     step_df14 <- 
       raw_step_df14 %>%

@@ -135,6 +135,24 @@ if an epoch progressed the simulation. Currently the EpochProgressJudge uses sco
 
 **done**
 
+## SS-Compare against PP1 study
+
+Action - Repeast the PP1 study
+
+### Analysis
+
+Locked up for 5 hours on connect-4. Unfortuately cannot see what caused issue.
+
+Early stopping has reduced performance. But we are only just getting starting.
+
+Eucalyptus is a good test target for attempts to improve the alogrithm.
+
+Ideas. 
+
++ GP for local hyper-parameters. 
++ Multiple species. 
++ Voting rules for later species.
+
 ## SS-Restore Step
 
 Restore the step field.

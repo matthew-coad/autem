@@ -38,7 +38,7 @@ class Simulation:
         self.next_id = 1
         self.round = None
         self.step = None
-        self.running = False
+        self.aborted = False
 
         self.members = []
         self.epoch = None
@@ -259,7 +259,7 @@ class Simulation:
         self.outline_simulation()
         for component in self.controllers:
             component.start_simulation(self)
-        self.running = True
+        self.aborted = False
 
     def run_round(self):
         """
@@ -316,65 +316,14 @@ class Simulation:
 
         printProgressBar(self.round * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
 
-        # Perform ranking on final round
-        if self.round == self.round_size:
-            self.rank_members()
-
         # Report on what happened
         for member in report_members:
             self.reports.append(self.record_member(member))
 
-    def run_epoch(self):
-        """
-        Run an epoch
-        """
-        epoch_id = self.epoch.id + 1 if self.epoch else 1
-        epoch = Epoch(self, epoch_id)
-        self.epoch = epoch
-        self.epochs[epoch_id] = epoch
-        epoch.prepare()
-
-        self.round = 0
-
-        for component in self.controllers:
-            component.start_epoch(epoch)
-
-        members = self.list_members(alive = True)
-        for member in members:
-            member.prepare_epoch(self.epoch.id)
-
-        for round in range(self.round_size):
-            self.run_round()
-            if not self.running:
-                break
-
-        self.judge_epoch(epoch)
-        epoch.finished()
-        return epoch
-
-    def finish(self, reason):
-        """
-        Perform final simulation processing
-        """
-        self.running = False
-
-        random_state = self.random_state
-        members = self.members
-
-        # Tell everyone we are done
-        for member in members:
-            member.finshed(reason)
-
-    def stop(self):
-        """
-        Indicate that the simulation should stop
-        """
-        self.running = False
-
     def _simulation_finished(self, epoch, start_time, max_epochs, max_time):
         duration = time.time() - start_time
 
-        if not self.running:
+        if self.aborted:
             return (True, "Aborted")
 
         if not epoch.progressed:
@@ -388,6 +337,52 @@ class Simulation:
         
         return (False, None)
 
+    def run_epoch(self, start_time, max_epochs, max_time):
+        """
+        Run an epoch
+        """
+        epoch_id = self.epoch.id + 1 if self.epoch else 1
+        epoch = Epoch(self, epoch_id)
+        self.epoch = epoch
+        self.epochs[epoch_id] = epoch
+        self.round = 0
+
+        epoch.prepare()
+        for component in self.controllers:
+            component.start_epoch(epoch)
+
+        members = self.list_members(alive = True)
+        for member in members:
+            member.prepare_epoch(self.epoch.id)
+
+        for round in range(self.round_size):
+            self.run_round()
+
+            if self.aborted:
+                break
+
+        if not self.aborted:
+            self.rank_members()
+            self.judge_epoch(epoch)
+        epoch.finished()
+
+        finished, reason = self._simulation_finished(epoch, start_time, max_epochs, max_time)
+        if finished:
+            for member in self.list_members(alive=True):
+                member.finshed(reason)
+
+        # Final report for ranked members
+        for member in epoch.ranking.members:
+            self.reports.append(self.record_member(member))
+        self.report()
+        return (finished, reason)
+
+    def stop(self):
+        """
+        Indicate that the simulation should stop
+        """
+        self.aborted = True
+
     def run(self, max_epochs, max_time = None):
         print("-----------------------------------------------------")
         start_time = time.time()
@@ -398,12 +393,7 @@ class Simulation:
 
         finished = False
         while not finished:
-            epoch = self.run_epoch()
-            progress = epoch.progressed
-            finished, reason = self._simulation_finished(epoch, start_time, max_epochs, max_time)
-            if finished:
-                self.finish(reason)
-            self.report()
+            finished, reason = self.run_epoch(start_time, max_epochs, max_time)
         duration = time.time() - start_time
         print("%s - %s - Duration %s" % (self.name, reason, duration))
 
