@@ -28,7 +28,7 @@ def get_simulations_path():
 def get_version():
     return 14
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs = 10, max_time = None, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
@@ -118,6 +118,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             ]),
         ], 
         seed = seed,
+        max_epochs = max_epochs,
+        max_time = max_time,
         properties = properties,
         n_jobs=6)
     return simulation

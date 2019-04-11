@@ -170,3 +170,22 @@ Outcome - Complete
 Restore the step field.
 
 **done**
+
+## SS-Move round to epoch
+
+Action - Move the round property from simulation to epoch
+Justification - Conceptual coherence, remove duplication
+Outcome - Complete
+
+## SS-Remove step from simulation
+
+Action - Remove step from simulation and calculate on recording
+Justification - Simplify design. Step is obsolete.
+Outcome - Complete
+
+## SS-Specie workflow
+
+Action - Stepup species workflow
+Justification - Precondition
+Outcome - Complete
+

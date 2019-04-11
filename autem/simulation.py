@@ -1,5 +1,6 @@
 from .member import Member
 from .epoch import Epoch
+from .specie import Specie
 from .record import Record
 from .dataset import Dataset
 from .role import Role
@@ -18,7 +19,9 @@ import datetime
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components, seed = 1234, population_size = 10, round_size = 20, top_league = 4, max_reincarnations = 3, properties = {}, n_jobs = -1):
+    def __init__(self, name, components,
+                seed = 1234, population_size = 10, round_size = 20, top_league = 4,
+                max_reincarnations = 3, max_epochs = 10, max_time = None, n_jobs = -1, properties = {}):
         self.name = name
         self.components = components
         self.properties = properties
@@ -27,6 +30,8 @@ class Simulation:
         self.top_league = top_league
         self.max_reincarnations = max_reincarnations
         self.n_jobs = n_jobs
+        self.max_epochs = max_epochs
+        self.max_time = max_time
         self.transmutation_rate = 0.5
 
         self.outline = None
@@ -37,11 +42,13 @@ class Simulation:
         self.random_state = numpy.random.RandomState(seed)
         self.next_id = 1
 
-        self.aborted = False
+        self.start_time = None
+        self.end_time = None
 
+        self.specie_id = None
+        self.species = {}
         self.epoch_id = None
         self.epochs = {}
-        self.step = None
         self.members = []
         self.graveyard = []
         self.forms = {}
@@ -155,9 +162,11 @@ class Simulation:
             form = Form(self.generate_id(), form_key)
             self.forms[form_key] = form
         form.incarnate()
-        member.prepare_epoch(self.epoch_id)
-        member.prepare_round(self.round, self.step)
-        member.incarnated(self.epoch_id, form, form.reincarnations, reason)
+
+        epoch = self.epochs[self.epoch_id]
+        member.prepare_epoch(epoch.id)
+        member.prepare_round(epoch.id, epoch.round)
+        member.incarnated(epoch.id, form, form.reincarnations, reason)
         self.members.append(member)
         return member
 
@@ -240,39 +249,24 @@ class Simulation:
         self.epochs[self.epoch_id].ranked(ranking)
         return ranking
 
-    def start(self):
-        """
-        Perform simulation startup
-        """
-        self.epoch_id = 0
-        self.round = 0
-        self.step = 0
-        self.hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
-        self.controllers = [c for c in self.components if c.is_controller() ]
-        self.outline_simulation()
-        for component in self.controllers:
-            component.start_simulation(self)
-        self.aborted = False
-
     def run_round(self):
         """
         Run a round of the simulation
         """
-        self.round += 1
-        self.step += 1
-        random_state = self.random_state
 
-        operation_name = "Evaluating %s epoch %s:" % (self.name, self.epoch_id)
+        epoch = self.epochs[self.epoch_id]
+        operation_name = "Evaluating %s epoch %s:" % (self.name, epoch.id)
 
         # Prepare for the next round
+        epoch.prepare_round()
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_round(self.round, self.step)
+            member.prepare_round(epoch.id, epoch.round)
 
         # Promote all living members
         for member in members:
             if member.league < self.top_league:
-                member.promote(self.epoch_id, "Fit")
+                member.promote(epoch.id, "Fit")
 
         # Repopulate
         make_count = self.population_size - len(members)
@@ -283,13 +277,12 @@ class Simulation:
         # Make sure we don't get into an infinite loop.
         members = self.list_members(alive = True)
         if len(members) < 2:
-            self.stop()
-            return None
+            raise RuntimeError("Population crash")
 
         # Ensure all members evaluated
         for member_index in range(len(members)):
             self.evaluate_member(members[member_index])
-            printProgressBar(member_index + (self.round - 1) * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
+            printProgressBar(member_index + (epoch.round - 1) * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
 
         # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
@@ -307,29 +300,13 @@ class Simulation:
         for member in self.list_members(alive = False):
             self.bury_member(member)
 
-        printProgressBar(self.round * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
+        printProgressBar(epoch.round * self.population_size, self.round_size * self.population_size, prefix = operation_name, length = 50)
 
         # Report on what happened
         for member in report_members:
             self.reports.append(self.record_member(member))
 
-    def _simulation_finished(self, start_time, max_epochs, max_time):
-        duration = time.time() - start_time
-        epoch = self.epochs[self.epoch_id]
-
-        if self.aborted:
-            return (True, "Aborted")
-
-        if not epoch.progressed:
-            return (True, "No progress")
-
-        if epoch.id == max_epochs:
-            return (True, "Max epochs")
-
-        if max_time is not None and duration >= max_time:
-            return (True, "Max time")
-        
-        return (False, None)
+    ## Epoch life-cycle
 
     def start_epoch(self):
         """
@@ -338,7 +315,6 @@ class Simulation:
         self.epoch_id += 1
         epoch = Epoch(self, self.epoch_id)
         self.epochs[self.epoch_id] = epoch
-        self.round = 0
 
         epoch.prepare()
         for component in self.controllers:
@@ -358,54 +334,166 @@ class Simulation:
         epoch = self.epochs[self.epoch_id]
         for component in self.controllers:
             component.judge_epoch(epoch)
-
         epoch.finished()
 
-    def run_epoch(self, start_time, max_epochs, max_time):
+    def should_finish_epoch(self):
+        """
+        Should we finish the epoch?
+        """
+        duration = time.time() - self.start_time
+        epoch = self.epochs[self.epoch_id]
+
+        if self.max_time is not None and duration >= self.max_time:
+            return (True, "Max time")
+
+        if epoch.round >= self.round_size:
+            return (True, "Max rounds")
+        
+        return (False, None)
+
+    def run_epoch(self):
         """
         Run an epoch
         """
 
         epoch = self.start_epoch()
         
-        for round in range(self.round_size):
+        finished = False
+        while not finished:
             self.run_round()
+            finished, reason = self.should_finish_epoch()
 
-            if self.aborted:
-                break
+        self.finish_epoch()
 
-        if not self.aborted:
-            self.finish_epoch()
-
-        finished, reason = self._simulation_finished(start_time, max_epochs, max_time)
-        if finished:
+        finish_specie, reason = self.should_finish_specie()
+        # If we should finish the species, finish and bury the members
+        # before we report
+        if finish_specie:
             for member in self.list_members(alive=True):
                 member.finshed(epoch.id, reason)
+                self.bury_member(member)
 
         # Final report for ranked members
         for member in epoch.ranking.members:
             self.reports.append(self.record_member(member))
         self.report()
-        return (finished, reason)
 
-    def stop(self):
+        return epoch
+
+    ## Species life-cycle
+
+    def start_specie(self):
         """
-        Indicate that the simulation should stop
+        Start a new specie
         """
-        self.aborted = True
+        specie_id = self.specie_id + 1
+        specie = Specie(self, specie_id)
+        self.specie_id = specie_id
+        self.species[specie_id] = specie
 
-    def run(self, max_epochs, max_time = None):
-        print("-----------------------------------------------------")
-        start_time = time.time()
-        today = datetime.datetime.now()
+        specie.prepare()
+        for component in self.controllers:
+            component.start_specie(specie)
 
-        print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
-        self.start()
+        return specie
+
+    def should_finish_specie(self):
+        """
+        Should we finish the species?
+        """
+        duration = time.time() - self.start_time
+        epoch = self.epochs[self.epoch_id]
+
+        if not epoch.progressed:
+            return (True, "No progress")
+
+        if epoch.id == self.max_epochs:
+            return (True, "Max epochs")
+
+        if self.max_time is not None and duration >= self.max_time:
+            return (True, "Max time")
+        
+        return (False, None)
+
+    def finish_specie(self):
+        """
+        Finish the current specie
+        """
+        specie = self.species[self.specie_id]
+        for component in self.controllers:
+            component.judge_specie(specie)
+        specie.finished()
+
+    def run_specie(self):
+        """
+        Run a a specie
+        """
+
+        specie = self.start_specie()
 
         finished = False
         while not finished:
-            finished, reason = self.run_epoch(start_time, max_epochs, max_time)
-        duration = time.time() - start_time
+            self.run_epoch()
+            finished, reason = self.should_finish_specie()
+
+        self.finish_specie()
+
+        return specie
+
+    ## Simulation life-cycle
+
+    def start_simulation(self):
+        """
+        Perform simulation startup
+        """
+        self.start_time = time.time()
+        self.specie_id = 0
+        self.epoch_id = 0
+        self.hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
+        self.controllers = [c for c in self.components if c.is_controller() ]
+        self.outline_simulation()
+        for component in self.controllers:
+            component.start_simulation(self)
+
+    def should_finish_simulation(self):
+        """
+        Should we finish the simulation?
+        """
+        duration = time.time() - self.start_time
+        epoch = self.epochs[self.epoch_id]
+
+        if not epoch.progressed:
+            return (True, "No progress")
+
+        if epoch.id == self.max_epochs:
+            return (True, "Max epochs")
+
+        if self.max_time is not None and duration >= self.max_time:
+            return (True, "Max time")
+        
+        return (False, None)
+
+    def finish_simulation(self):
+        """
+        Perform simulation finish
+        """
+        self.end_time = time.time()
+
+    def run(self):
+
+        print("-----------------------------------------------------")
+        today = datetime.datetime.now()
+        print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
+
+        self.start_simulation()
+
+        finished = False
+        while not finished:
+            self.run_specie()
+            finished, reason = self.should_finish_simulation()
+
+        self.finish_simulation()
+        duration = self.end_time - self.start_time
         print("%s - %s - Duration %s" % (self.name, reason, duration))
 
     def outline_simulation(self):
@@ -441,8 +529,9 @@ class Simulation:
         """
         member_id = member.id
         epoch_id = self.epoch_id
-        round = self.round
-        step = self.step
+        epoch = self.epochs[epoch_id]
+        round = epoch.round
+        step = (epoch_id - 1) * self.round_size + round
 
         record = Record()
         record.simulation = self.name

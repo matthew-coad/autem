@@ -32,8 +32,8 @@ def run_test_simulation(baseline_name = None, seed = None):
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
-    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed,  path)
-    simulation.run(epochs)
+    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs=epochs)
+    simulation.run()
     autem.ReportManager(path).update_combined_reports()
 
 if __name__ == '__main__':

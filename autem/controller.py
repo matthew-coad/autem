@@ -15,18 +15,6 @@ class Controller(Component):
         """
         return True
 
-    def start_simulation(self, simulation):
-        """
-        Start a simulation
-        """
-        pass
-
-    def start_epoch(self, epoch):
-        """
-        Start a simulation epoch
-        """
-        pass
-
     def evaluate_member(self, member):
         """
         Perform a round of member evaluation
@@ -52,9 +40,51 @@ class Controller(Component):
         """
         pass
 
+    ## Epoch components
+
+    def start_epoch(self, epoch):
+        """
+        Start a simulation epoch
+        """
+        pass
+
     def judge_epoch(self, epoch):
         """
         Judge the current epoch
+        """
+        pass
+
+    def finish_epoch(self, epoch):
+        """
+        Finish an epoch
+        """
+        pass
+
+    ## Specie components
+
+    def start_specie(self, specie):
+        """
+        Start a specie
+        """
+        pass
+
+    def judge_specie(self, specie):
+        """
+        Judge the specie
+        """
+        pass
+
+    def finish_specie(self, specie):
+        """
+        Finish an specieepoch
+        """
+        pass
+
+    ## Simulation components
+
+    def start_simulation(self, simulation):
+        """
+        Start a simulation
         """
         pass
 
@@ -63,4 +93,5 @@ class Controller(Component):
         Report on the progress of a simulation
         """
         pass
+
 

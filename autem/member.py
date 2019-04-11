@@ -65,7 +65,7 @@ class Member:
         self.rating_sd = None
         self.ranking = None
 
-    def prepare_round(self, round, step):
+    def prepare_round(self, epoch_id, round):
         self.event = "survive"
         self.event_reason = "Next round"
         self.evaluation_time = time.time()
