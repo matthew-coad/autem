@@ -30,16 +30,14 @@ class BenchmarkScorer(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        simulation = member.simulation
-        resources = member.resources
         evaluation = member.evaluation
-        random_state = simulation.random_state
+        random_state = member.get_random_state()
 
         did = 470
         dataset = openml.datasets.get_dataset(did)
 
         x, y = dataset.get_data(target=dataset.default_target_attribute)
-        pipeline = resources.pipeline
+        pipeline = member.get_member_resources().pipeline
         scores = cross_val_score(pipeline, x, y, scoring = make_scorer(accuracy_score), cv=10)
 
 

@@ -26,28 +26,27 @@ class ScoreEvaluator(Evaluater):
             evaluation.score_evaluation = ScoreEvaluation()
         return evaluation.score_evaluation
 
-    def evaluate_folds(self, simulation):
+    def evaluate_folds(self, specie):
         """
-        Evaluate folds for the simulation
+        Evaluate folds for the specie
         """
-        top_league = simulation.top_league
-        random_state = simulation.random_state
-        loader = simulation.resources.loader
+        max_league = specie.get_max_league()
+        random_state = specie.get_random_state()
+        loader = specie.get_loader()
 
-        x,y = loader.load_training_data(simulation)
-        folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=top_league, random_state=random_state)
+        x,y = loader.load_training_data(specie.get_simulation())
+        folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=max_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
-        simulation.resources.i_leagues = i_leagues
+        specie.get_specie_resources().i_leagues = i_leagues
 
     def build_scores(self, member, repeat, start, stop):
 
-        specie = member.get_specie()
-        simulation = member.get_simulation()
-        scorer = simulation.resources.scorer
-        loader = simulation.resources.loader
-        i_leagues = simulation.resources.i_leagues
+        scorer = member.get_scorer()
+        loader = member.get_loader()
+        i_leagues = member.get_specie_resources().i_leagues
+        pipeline = member.get_member_resources().pipeline
 
-        x,y = loader.load_training_data(simulation)
+        x,y = loader.load_training_data(member.get_simulation())
         scores = []
         durations = []
         predictions = np.empty(len(y))
@@ -62,14 +61,13 @@ class ScoreEvaluator(Evaluater):
             y_test = y[i_test]
             start_time = time.time()
 
-            pipeline = member.resources.pipeline
             with warnings.catch_warnings():
                 warnings.simplefilter("error")
                 try:
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
-                    member.fail(specie.get_current_epoch_id(), ex, "score_evaluator", "ScoreEvaluator")
+                    member.fail(member.get_current_epoch().id, ex, "score_evaluator", "ScoreEvaluator")
                     return (None, None, None)
             end_time = time.time()
             duration = end_time - start_time
@@ -145,8 +143,8 @@ class ScoreEvaluator(Evaluater):
         score_evaluation.score_duration = np.mean(durations)
         score_evaluation.score_duration_std = np.std(durations)
 
-    def start_simulation(self, simulation):
-        self.evaluate_folds(simulation)
+    def start_specie(self, specie):
+        self.evaluate_folds(specie)
 
     def evaluate_member(self, member):
         super().evaluate_member(member)

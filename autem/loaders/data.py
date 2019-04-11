@@ -54,20 +54,22 @@ class Data(Loader):
 
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
-        simulation.resources.x_train = x_train
-        simulation.resources.x_validation = x_validation
-        simulation.resources.y_train = y_train
-        simulation.resources.y_validation = y_validation
+        resources = simulation.get_simulation_resources()
+        resources.x_train = x_train
+        resources.x_validation = x_validation
+        resources.y_train = y_train
+        resources.y_validation = y_validation
 
     def load_divided_data(self, simulation):
         return (self.x, self.y)
 
     def load_training_data(self, simulation):
-        return (simulation.resources.x_train, simulation.resources.y_train)
+        resources = simulation.get_simulation_resources()
+        return (resources.x_train, resources.y_train)
 
     def load_validation_data(self, simulation):
-        return (simulation.resources.x_validation, simulation.resources.y_validation)
+        resources = simulation.get_simulation_resources()
+        return (resources.x_validation, resources.y_validation)
 
     def get_features(self, simulation):
         return self.features
-

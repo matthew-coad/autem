@@ -20,8 +20,8 @@ class DummyClassifierAccuracy(Evaluater):
 
         simulation = member.simulation
         random_state = simulation.random_state
-        scorer = simulation.resources.scorer
-        loader = simulation.resources.loader
+        scorer = simulation.get_scorer()
+        loader = simulation.get_loader()
 
         x,y = loader.load_training_data(simulation)
 

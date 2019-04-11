@@ -44,8 +44,6 @@ class Learner(Group):
 
 
     def prepare_member(self, member):
-        simulation = member.get_simulation()
-        resources = member.resources
         learner_name = self.name
 
         # Initialize the model parameters
@@ -57,7 +55,7 @@ class Learner(Group):
             pairs = [(p.name, p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
         if 'n_jobs' in model_params:
-            params['n_jobs'] = simulation.n_jobs
+            params['n_jobs'] = member.get_max_jobs()
         model.set_params(**params)
 
         # Read the final model parameters 
@@ -68,6 +66,7 @@ class Learner(Group):
                 parameter.set_value(member, value)
 
         # Build the pipeline
+        resources = member.get_member_resources()
         if not hasattr(resources, "steps"):
             resources.steps = []
         steps = resources.steps

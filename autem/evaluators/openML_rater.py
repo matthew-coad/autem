@@ -19,7 +19,7 @@ class OpenMLRater(Evaluater):
         super().start_simulation(simulation)
         task_id = self.task_id
         task = openml.tasks.get_task(task_id)
-        simulation.resources.task = task
+        simulation.get_simulation_resources().task = task
 
     def rate_member(self, member):
         """
@@ -30,9 +30,8 @@ class OpenMLRater(Evaluater):
             # Don't rerate! It's expensive
             return None
 
-        simulation = member.simulation
-        task = simulation.resources.task 
-        pipeline = member.resources.pipeline
+        task = member.get_simulation_resources().task 
+        pipeline = member.get_member_resources().pipeline
 
         try:
             run = openml.runs.run_model_on_task(task, pipeline)

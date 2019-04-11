@@ -21,14 +21,13 @@ class ValidationAccuracy(Evaluater):
         Only famous members get a rating.
         """
 
-        simulation = member.simulation
-        scorer = simulation.resources.scorer
-        loader = simulation.resources.loader
+        scorer = member.get_scorer()
+        loader = member.get_loader()
+        pipeline = member.get_member_resources().pipeline
 
         x,y = loader.load_training_data(simulation)
-        x_validation, y_validation = loader.load_validation_data(simulation)
+        x_validation, y_validation = loader.load_validation_data(member.get_simulation())
 
-        pipeline = member.resources.pipeline
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             try:

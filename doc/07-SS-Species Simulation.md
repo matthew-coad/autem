@@ -224,4 +224,10 @@ Outcome - Complete
 
 **done**
 
-## SS-Inspect all resources for appropiate location
+## SS-Move resources as required
+
+Action - Move resources to correct simulation level
+Justification - Precondition
+Outcome - Complete
+
+**done**

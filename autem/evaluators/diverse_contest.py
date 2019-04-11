@@ -36,7 +36,8 @@ class DiverseContest(Evaluater):
         contestant2.evaluation.diverse_contest = None
 
         simulation = contestant1.simulation
-        scorer = simulation.resources.scorer
+        scorer = simulation.get_scorer()
+
         max_league = max(contestant1.league, contestant2.league)
         contestant1_score_evaluation = self.get_score_evaluation(contestant1)
         contestant2_score_evaluation = self.get_score_evaluation(contestant2)

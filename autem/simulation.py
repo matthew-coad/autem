@@ -58,22 +58,26 @@ class Simulation:
     def get_current_specie(self):
         return self.species[self.current_specie_id]
 
-    ## Species life-cycle
+    def get_simulation_resources(self):
+        return self.resources
 
-    def start_specie(self):
+    def get_scorer(self):
         """
-        Start the next specie
+        Get simulation scorer
         """
-        specie = Specie(self, self.current_specie_id + 1)
-        self.current_specie_id = specie_id
-        self.species[specie_id] = specie
+        return self.get_simulation_resources().scorer
 
-        specie.start()
-        for component in self.controllers:
-            component.start_specie(specie)
+    def get_loader(self):
+        """
+        Get simulation loader
+        """
+        return self.get_simulation_resources().loader
 
-        return specie
-
+    def get_random_state(self):
+        """
+        Get simulation loader
+        """
+        return self.random_state
 
     ## Simulation life-cycle
 

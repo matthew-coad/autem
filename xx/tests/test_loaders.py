@@ -14,7 +14,9 @@ class sources_fixture(unittest.TestCase):
         x,y = datasets.load_iris()
         simulation = Simulation("test_sources_fixture", [Data("Test", x, y)])
         simulation.start()
-        loader = simulation.resources.loader
+        scorer = simulation.get_scorer()
+        loader = simulation.get_loader()
+
 
         l_x, l_y = loader.load_training_data(simulation)
 

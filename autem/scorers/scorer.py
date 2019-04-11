@@ -10,5 +10,5 @@ class Scorer(Controller):
         raise NotImplementedError("Score function not defined")
 
     def start_simulation(self, simulation):
-        simulation.resources.scorer = self
+        simulation.get_simulation_resources().scorer = self
 

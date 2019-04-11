@@ -15,7 +15,7 @@ class OpenMLLoader(Loader):
     def start_simulation(self, simulation):
         super().start_simulation(simulation)
 
-        random_state = simulation.random_state
+        random_state = simulation.get_random_state()
         validation_size = self.validation_size
         did = self.did
         dataset = openml.datasets.get_dataset(did)
@@ -34,15 +34,17 @@ class OpenMLLoader(Loader):
 
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
-        simulation.resources.dataset = dataset
-        simulation.resources.features = features
-        simulation.resources.x_divided = x
-        simulation.resources.y_divided = y
+        resources = simulation.get_simulation_resources()
 
-        simulation.resources.x_train = x_train
-        simulation.resources.x_validation = x_validation
-        simulation.resources.y_train = y_train
-        simulation.resources.y_validation = y_validation
+        resources.dataset = dataset
+        resources.features = features
+        resources.x_divided = x
+        resources.y_divided = y
+
+        resources.x_train = x_train
+        resources.x_validation = x_validation
+        resources.y_train = y_train
+        resources.y_validation = y_validation
 
 
     def outline_simulation(self, simulation, outline):
@@ -52,16 +54,16 @@ class OpenMLLoader(Loader):
             outline.append_attribute("data", Dataset.Battle, [ Role.Configuration ], "Dataset")
 
     def load_divided_data(self, simulation):
-        return (simulation.resources.x_divided, simulation.resources.y_divided)
+        return (simulation.get_simulation_resources().x_divided, simulation.get_simulation_resources().y_divided)
 
     def load_training_data(self, simulation):
-        return (simulation.resources.x_train, simulation.resources.y_train)
+        return (simulation.get_simulation_resources().x_train, simulation.get_simulation_resources().y_train)
 
     def load_validation_data(self, simulation):
-        return (simulation.resources.x_validation, simulation.resources.y_validation)
+        return (simulation.get_simulation_resources().x_validation, simulation.get_simulation_resources().y_validation)
 
     def get_features(self, simulation):
-        return simulation.resources.features
+        return simulation.get_simulation_resources().features
 
     def record_member(self, member, record):
         """
@@ -69,5 +71,4 @@ class OpenMLLoader(Loader):
         """
         super().record_member(member, record)
 
-        simulation = member.get_simulation()
-        record.data = simulation.resources.dataset.name
+        record.data = member.get_simulation_resources().dataset.name

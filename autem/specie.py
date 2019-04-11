@@ -79,6 +79,12 @@ class Specie:
     def get_random_state(self):
         return self._simulation.random_state
 
+    def get_scorer(self):
+        return self.get_simulation().get_scorer()
+
+    def get_loader(self):
+        return self.get_simulation().get_loader()
+
     def generate_id(self):
         return self._simulation.generate_id()
 

@@ -17,7 +17,7 @@ class ValidationEvaluator(Evaluater):
     """
 
     def validate_member(self, member, required_league):
-        simulation = member.get_simulation()
+
         evaluation = member.evaluation
         if hasattr(evaluation, "validation_evaluation"):
             return None
@@ -25,13 +25,13 @@ class ValidationEvaluator(Evaluater):
         if member.league < required_league:
             return None
 
-        scorer = simulation.resources.scorer
-        loader = simulation.resources.loader
+        scorer = member.get_scorer()
+        loader = member.get_loader()
+        pipeline = member.get_member_resources().pipeline
 
-        x,y = loader.load_training_data(simulation)
-        x_validation, y_validation = loader.load_validation_data(simulation)
+        x,y = loader.load_training_data(member.get_simulation())
+        x_validation, y_validation = loader.load_validation_data(member.get_simulation())
 
-        pipeline = member.resources.pipeline
         with warnings.catch_warnings():
             warnings.simplefilter("error")
             try:
