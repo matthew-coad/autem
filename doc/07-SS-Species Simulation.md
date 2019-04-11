@@ -153,6 +153,18 @@ Ideas.
 + Multiple species. 
 + Voting rules for later species.
 
+## SS-Introduce Species
+
+Introduce specie to the simulation.
+
+## SS-Drop epoch from simulation
+
+Action - Drop epoch from simulation and rely on epochs
+Justification - Remove duplicate data
+Outcome - Complete
+
+**done**
+
 ## SS-Restore Step
 
 Restore the step field.

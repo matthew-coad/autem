@@ -24,20 +24,29 @@ class Epoch:
         self.ranking = None
 
         self.alive = None
+        self.round = None
 
     def prepare(self):
         """
-        Prepare the epoch for execution
+        Prepare the epoch for operation
         """
         self.event = None
         self.event_reason = None
 
         self.alive = True
-        self.start_time = time.time()        
+        self.start_time = time.time()
+
+        self.round = 0
+
+    def prepare_round(self):
+        """
+        Prepare the epoch for its next round
+        """
+        self.round += 1
 
     def progress(self, progressed, reason):
         """
-        Notify the epoch that it progressed the simulation
+        Inform the epoch of its progress
         """
         # When a member gets a promotion its wonlost record is erased
         self.progressed = progressed
@@ -53,7 +62,7 @@ class Epoch:
 
     def finished(self):
         """
-        Inform the epoch that it has finished
+        Epoch has finished
         """
         self.end_time = time.time()
         self.alive = False

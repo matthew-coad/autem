@@ -29,7 +29,7 @@ class ContestJudge(Evaluater):
         member.evaluation.contest_judgement = judgement
 
         simulation = member.simulation
-        epoch_id = simulation.epoch.id
+        epoch_id = simulation.epoch_id
 
         if not member.alive:
             judgement.outcome = member.event
@@ -47,7 +47,7 @@ class ContestJudge(Evaluater):
             outcome = "Fit"
         elif meaningful and not majority:
             outcome = "Unfit"
-            member.kill(outcome)
+            member.kill(epoch_id, outcome)
         elif not meaningful:
             outcome = "Few contests"
         else:

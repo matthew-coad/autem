@@ -34,10 +34,7 @@ class Member:
         self.evaluation_time = None
         self.evaluation_duration = None
 
-        self.epoch_id = None
         self.incarnation_epoch_id = None
-        self.round = None
-        self.step = None
         self.contests = {} # Map of contests per epoch
         self.wonlost = {}  # Map of wonlost record per epoch
 
@@ -62,10 +59,8 @@ class Member:
     def prepare_epoch(self, epoch_id):
         self.event = None
         self.event_reason = None
-        self.epoch_id = epoch_id
-        self.contests[self.epoch_id] = 0
-        self.wonlost[self.epoch_id] = []
-        self.round = None
+        self.contests[epoch_id] = 0
+        self.wonlost[epoch_id] = []
         self.rating = None
         self.rating_sd = None
         self.ranking = None
@@ -73,11 +68,9 @@ class Member:
     def prepare_round(self, round, step):
         self.event = "survive"
         self.event_reason = "Next round"
-        self.round = round
-        self.step = step
         self.evaluation_time = time.time()
 
-    def incarnated(self, form, incarnation, reason):
+    def incarnated(self, epoch_id, form, incarnation, reason):
         """
         Notify this member that it has incarnated
         """
@@ -85,7 +78,7 @@ class Member:
             raise RuntimeError("Member already incarnated")
         self.form = form
         self.incarnation = incarnation
-        self.incarnation_epoch_id = self.epoch_id
+        self.incarnation_epoch_id = epoch_id
         self.alive = 1
         self.event = "birth"
         self.event_reason = reason
@@ -94,21 +87,21 @@ class Member:
         self.evaluation_duration = duration
         self.evaluations += 1
 
-    def victory(self):
+    def victory(self, epoch_id):
         """
         Record a victory at a given step
         """
-        self.contests[self.epoch_id] += 1
-        self.wonlost[self.epoch_id].append(1)
+        self.contests[epoch_id] += 1
+        self.wonlost[epoch_id].append(1)
 
-    def defeat(self):
+    def defeat(self, epoch_id):
         """
         Record a defeat at a given epoch
         """
-        self.contests[self.epoch_id] += 1
-        self.wonlost[self.epoch_id].append(0)
+        self.contests[epoch_id] += 1
+        self.wonlost[epoch_id].append(0)
 
-    def promote(self, reason, league = None):
+    def promote(self, epoch_id, reason, league = None):
         """
         Promote the member to the next league
         """
@@ -119,10 +112,10 @@ class Member:
             self.league += 1
         else:
             self.league = league
-        self.contests[self.epoch_id] = 0
-        self.wonlost[self.epoch_id] = []
+        self.contests[epoch_id] = 0
+        self.wonlost[epoch_id] = []
 
-    def kill(self, reason):
+    def kill(self, epoch_id, reason):
         """
         Kill this member
         """
@@ -131,7 +124,7 @@ class Member:
         self.alive = 0
         self.final = 1
 
-    def fail(self, fault, operation, component):
+    def fail(self, epoch_id, fault, operation, component):
         """
         Inform this member that it has failed for some reason
         """
@@ -144,20 +137,20 @@ class Member:
         self.alive = 0
         self.final = 1
 
-    def rated(self, rating, rating_sd):
+    def rated(self, epoch_id, rating, rating_sd):
         """
         Set the members rating in the hall of fame
         """
         self.rating = rating
         self.rating_sd = rating_sd
 
-    def ranked(self, ranking):
+    def ranked(self, epoch_id, ranking):
         """
         Set the members ranking in the hall of fame
         """
         self.ranking = ranking
 
-    def finshed(self, reason):
+    def finshed(self, epoch_id, reason):
         """
         Notify that this member it is finished with, because the simulation has finished
         """

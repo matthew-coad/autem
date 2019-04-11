@@ -41,7 +41,7 @@ class ScoreContest(Evaluater):
             winner = contestant2
 
         winner.evaluation.accuracy_contest = "Win"
-        winner.victory()
+        winner.victory(simulation.epoch_id)
         loser.evaluation.accuracy_contest = "Loss"
-        loser.defeat()
+        loser.defeat(simulation.epoch_id)
 

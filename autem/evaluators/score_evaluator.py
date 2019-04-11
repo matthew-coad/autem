@@ -68,7 +68,7 @@ class ScoreEvaluator(Evaluater):
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
-                    member.fail(ex, "score_evaluator", "ScoreEvaluator")
+                    member.fail(simulation.epoch_id, ex, "score_evaluator", "ScoreEvaluator")
                     return (None, None, None)
             end_time = time.time()
             duration = end_time - start_time

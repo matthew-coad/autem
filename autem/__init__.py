@@ -6,6 +6,7 @@ from .simulation_info import SimulationInfo
 
 from .member import Member
 from .epoch import Epoch
+from .specie import Specie
 from .simulation import Simulation 
 from .dataset import Dataset
 from .role import Role

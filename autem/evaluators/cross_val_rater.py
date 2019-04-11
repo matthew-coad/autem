@@ -40,4 +40,4 @@ class CrossValidationRater(Evaluater):
         rating = scores.mean()
         rating_sd = scores.std()
 
-        member.rated(rating, rating_sd)
+        member.rated(simulation.epoch_id, rating, rating_sd)
