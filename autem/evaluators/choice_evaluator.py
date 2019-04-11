@@ -77,7 +77,9 @@ class ChoiceEvaluator(Evaluater):
         member_score_df = member_score_df.groupby(choice_names, as_index=False).agg({"score": "mean"})
         return member_score_df
 
-    def build_model(self, simulation):
+    def build_model(self, specie):
+
+        simulation = specie.simulation
 
         # Get the data
         df = self.build_member_score_df(simulation)
@@ -111,15 +113,16 @@ class ChoiceEvaluator(Evaluater):
 
         return pipeline
 
-    def evaluate_model(self, simulation):
+    def evaluate_model(self, specie):
 
         # Build the model
-        model = self.build_model(simulation)
-        simulation.resources.component_score_model = model
+        simulation = specie.simulation
+        model = self.build_model(specie)
+        specie.resources.component_score_model = model
 
         # Reset the expected score for all members
         for member in simulation.members:
-            member.choice_evaluation = ChoiceEvaluation()
+            member.evaluation.choice_evaluation = ChoiceEvaluation()
 
     def build_predicted_score(self, member):
         """
@@ -127,12 +130,13 @@ class ChoiceEvaluator(Evaluater):
         """
 
         # Get the model
-        simulation = member.simulation
-        model = simulation.resources.component_score_model
+        specie = member.specie
+        model = specie.resources.component_score_model
         if model is None:
             return (None, None)
 
         # Build the choices into a dataframe
+        simulation = member.simulation
         choices = [ c for c in simulation.hyper_parameters if isinstance(c, Choice) ]
         choice_values = dict([ (c.name, [c.get_active_component_name(member)]) for c in choices])
         x = pd.DataFrame(choice_values)
@@ -152,7 +156,7 @@ class ChoiceEvaluator(Evaluater):
         choice_evaluation.choice_predicted_score_std = choice_predicted_score_std
 
     def start_epoch(self, epoch):
-        self.evaluate_model(epoch.simulation)
+        self.evaluate_model(epoch.specie)
 
     def record_member(self, member, record):
         super().record_member(member, record)

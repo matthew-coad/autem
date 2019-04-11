@@ -21,8 +21,8 @@ class Specie:
         self.end_time = None
 
         self.ranking = None
-
         self.alive = None
+        self.resources = SimpleNamespace()
 
     def prepare(self):
         """

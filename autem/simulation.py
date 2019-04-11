@@ -431,16 +431,12 @@ class Simulation:
         """
         Run a a specie
         """
-
         specie = self.start_specie()
-
         finished = False
         while not finished:
             self.run_epoch()
             finished, reason = self.should_finish_specie()
-
         self.finish_specie()
-
         return specie
 
     ## Simulation life-cycle
