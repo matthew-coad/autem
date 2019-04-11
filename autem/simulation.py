@@ -144,13 +144,15 @@ class Simulation:
         Make a new member
         """
 
+        specie = self.species[self.specie_id]
+
         # Find all makers
         makers = [ c for c in self.components if isinstance(c, Maker)]
         maker_indexes = self.random_state.choice(len(makers), size = len(makers), replace=False)
 
         # Invoke members in random order till one makes the member
         for maker_index in maker_indexes:
-            member = makers[maker_index].make_member(self)
+            member = makers[maker_index].make_member(specie)
             if member:
                 break
         if not member:
@@ -312,8 +314,9 @@ class Simulation:
         """
         Start a new epoch
         """
+        specie = self.species[self.specie_id]
         self.epoch_id += 1
-        epoch = Epoch(self, self.epoch_id)
+        epoch = Epoch(specie, self.epoch_id)
         self.epochs[self.epoch_id] = epoch
 
         epoch.prepare()

@@ -10,7 +10,9 @@ class Epoch:
     """
     Epoch of a simulation
     """
-    def __init__(self, simulation, epoch_id): 
+    def __init__(self, specie, epoch_id): 
+        simulation = specie.simulation
+        self.specie = specie
         self.simulation = simulation
         self.id = epoch_id
 

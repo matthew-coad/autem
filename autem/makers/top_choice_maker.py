@@ -72,7 +72,8 @@ class TopChoiceMaker(Maker, Controller):
         simulation = epoch.simulation
         self.evaluate_grid_predicted_scores(simulation)
 
-    def make_grid_member(self, simulation, grid_index):
+    def make_grid_member(self, specie, grid_index):
+        simulation = specie.simulation
         grid = simulation.resources.initialization_grid
         grid_pred = simulation.resources.initialization_grid_pred
         grid_item = grid[grid_index]
@@ -81,25 +82,27 @@ class TopChoiceMaker(Maker, Controller):
         if not grid_pred is None:
             del grid_pred[grid_index]
 
-        member = Member(simulation)
+        member = Member(specie)
         for component in simulation.hyper_parameters:
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
         return member
 
-    def make_top_member(self, simulation):
+    def make_top_member(self, specie):
+        simulation = specie.simulation
         grid = simulation.resources.initialization_grid
         grid_pred = simulation.resources.initialization_grid_pred
         grid_index = grid_pred.index(max(grid_pred))
-        return self.make_grid_member(simulation, grid_index)
+        return self.make_grid_member(specie, grid_index)
 
-    def make_member(self, simulation):
+    def make_member(self, specie):
+        simulation = specie.simulation
         grid = simulation.resources.initialization_grid
         grid_pred = simulation.resources.initialization_grid_pred
         if grid is None or grid_pred is None:
             return None
-        member = self.make_top_member(simulation)
+        member = self.make_top_member(specie)
         specialized = simulation.specialize_member(member)
         if not specialized:
             member = None

@@ -9,17 +9,20 @@ class Member:
     """
     Member of a population
     """
-    def __init__(self, simulation): 
+    def __init__(self, specie): 
+        simulation = specie.simulation
         self.simulation = simulation
+        self.specie = specie
         self.id = simulation.generate_id()
         self.configuration = SimpleNamespace()
         self.form = None
+        self.incarnation = 0
+        self.incarnation_epoch_id = None
 
         self.event = None
         self.event_reason = None
 
         self.alive = 0
-        self.incarnation = 0
         self.final = 0
 
         self.resources = None
@@ -34,7 +37,6 @@ class Member:
         self.evaluation_time = None
         self.evaluation_duration = None
 
-        self.incarnation_epoch_id = None
         self.contests = {} # Map of contests per epoch
         self.wonlost = {}  # Map of wonlost record per epoch
 
@@ -56,6 +58,19 @@ class Member:
         self.fault_component = None
         self.fault_message = None
 
+    def incarnated(self, epoch_id, form, incarnation, reason):
+        """
+        Notify this member that it has incarnated
+        """
+        if self.alive == 1:
+            raise RuntimeError("Member already incarnated")
+        self.form = form
+        self.incarnation = incarnation
+        self.incarnation_epoch_id = epoch_id
+        self.alive = 1
+        self.event = "birth"
+        self.event_reason = reason
+
     def prepare_epoch(self, epoch_id):
         self.event = None
         self.event_reason = None
@@ -69,19 +84,6 @@ class Member:
         self.event = "survive"
         self.event_reason = "Next round"
         self.evaluation_time = time.time()
-
-    def incarnated(self, epoch_id, form, incarnation, reason):
-        """
-        Notify this member that it has incarnated
-        """
-        if self.alive == 1:
-            raise RuntimeError("Member already incarnated")
-        self.form = form
-        self.incarnation = incarnation
-        self.incarnation_epoch_id = epoch_id
-        self.alive = 1
-        self.event = "birth"
-        self.event_reason = reason
 
     def evaluated(self, duration):
         self.evaluation_duration = duration

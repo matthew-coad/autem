@@ -177,11 +177,15 @@ Action - Move the round property from simulation to epoch
 Justification - Conceptual coherence, remove duplication
 Outcome - Complete
 
+**done**
+
 ## SS-Remove step from simulation
 
 Action - Remove step from simulation and calculate on recording
 Justification - Simplify design. Step is obsolete.
 Outcome - Complete
+
+**done**
 
 ## SS-Specie workflow
 
@@ -189,3 +193,17 @@ Action - Stepup species workflow
 Justification - Precondition
 Outcome - Complete
 
+**done**
+
+## SS-Record specie
+
+Action - Record specie in epoch and members
+Justification - Precondition
+Outcome - Complete
+
+**done**
+
+## SS-Top choices species specific
+
+Action - Top choices should be species specific
+Justification - Precondition
