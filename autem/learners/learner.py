@@ -66,7 +66,7 @@ class Learner(Group):
                 parameter.set_value(member, value)
 
         # Build the pipeline
-        resources = member.get_member_resources()
+        resources = member.get_resources()
         if not hasattr(resources, "steps"):
             resources.steps = []
         steps = resources.steps

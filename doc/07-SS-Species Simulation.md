@@ -231,3 +231,15 @@ Justification - Precondition
 Outcome - Complete
 
 **done**
+
+## SS-Focus member context methods
+
+Contextual accessors for an object should either be to navigate to immediate relatives or provide a service
+required by the object.
+
+E.G. for member we have get_specie() to navigate to an immediate relative but not get_simulation() (Two steps away)
+Likewise don't provide get_simulation_resources() to member. Its not a service that directly relates to member or is used
+directly with member. We invoke get_specie().get_simulation().get_resources().
+
+Action - Focus the contextual methods in member. 
+Justification - Working on correct onwership. Starting with member.

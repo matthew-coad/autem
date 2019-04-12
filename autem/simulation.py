@@ -58,20 +58,20 @@ class Simulation:
     def get_current_specie(self):
         return self.species[self.current_specie_id]
 
-    def get_simulation_resources(self):
+    def get_resources(self):
         return self.resources
 
     def get_scorer(self):
         """
         Get simulation scorer
         """
-        return self.get_simulation_resources().scorer
+        return self.get_resources().scorer
 
     def get_loader(self):
         """
         Get simulation loader
         """
-        return self.get_simulation_resources().loader
+        return self.get_resources().loader
 
     def get_random_state(self):
         """

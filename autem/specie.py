@@ -52,7 +52,7 @@ class Specie:
     def get_epoch(self, id):
         return self._epochs[id]
 
-    def get_specie_resources(self):
+    def get_resources(self):
         return self._resources
 
     def get_components(self):
@@ -75,6 +75,9 @@ class Specie:
 
     def get_max_league(self):
         return self._simulation.top_league
+
+    def get_max_jobs(self):
+        return self._simulation.n_jobs
 
     def get_random_state(self):
         return self._simulation.random_state

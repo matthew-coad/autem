@@ -43,10 +43,10 @@ class TopChoiceMaker(Maker, Controller):
 
         # Get the model
 
-        specie.get_specie_resources().initialization_grid_pred = None
+        specie.get_resources().initialization_grid_pred = None
 
-        model = specie.get_specie_resources().component_score_model
-        grid = specie.get_specie_resources().initialization_grid
+        model = specie.get_resources().component_score_model
+        grid = specie.get_resources().initialization_grid
 
         if model is None or grid is None:
             return None
@@ -61,19 +61,19 @@ class TopChoiceMaker(Maker, Controller):
         # And do the prediction
         pred_y, pred_y_std = model.predict(x, return_std=True)
 
-        specie.get_specie_resources().initialization_grid_pred = pred_y.tolist()
+        specie.get_resources().initialization_grid_pred = pred_y.tolist()
 
     def start_specie(self, specie):
         grid = self.make_grid(specie)
-        specie.get_specie_resources().initialization_grid = grid
-        specie.get_specie_resources().initialization_grid_pred = None
+        specie.get_resources().initialization_grid = grid
+        specie.get_resources().initialization_grid_pred = None
 
     def start_epoch(self, epoch):
         self.evaluate_grid_predicted_scores(epoch.get_specie())
 
     def make_grid_member(self, specie, grid_index):
-        grid = specie.get_specie_resources().initialization_grid
-        grid_pred = specie.get_specie_resources().initialization_grid_pred
+        grid = specie.get_resources().initialization_grid
+        grid_pred = specie.get_resources().initialization_grid_pred
         grid_item = grid[grid_index]
         del grid[grid_index]
 
@@ -88,14 +88,14 @@ class TopChoiceMaker(Maker, Controller):
         return member
 
     def make_top_member(self, specie):
-        grid = specie.get_specie_resources().initialization_grid
-        grid_pred = specie.get_specie_resources().initialization_grid_pred
+        grid = specie.get_resources().initialization_grid
+        grid_pred = specie.get_resources().initialization_grid_pred
         grid_index = grid_pred.index(max(grid_pred))
         return self.make_grid_member(specie, grid_index)
 
     def make_member(self, specie):
-        grid = specie.get_specie_resources().initialization_grid
-        grid_pred = specie.get_specie_resources().initialization_grid_pred
+        grid = specie.get_resources().initialization_grid
+        grid_pred = specie.get_resources().initialization_grid_pred
         if grid is None or grid_pred is None:
             return None
         member = self.make_top_member(specie)

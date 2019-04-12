@@ -27,8 +27,8 @@ class CrossValidationRater(Evaluater):
         scorer = member.get_scorer()
         loader = member.get_loader()
 
-        x,y = loader.load_divided_data(member.get_simulation())
-        pipeline = member.get_member_resources().pipeline
+        x,y = loader.load_divided_data(member.get_specie().get_simulation())
+        pipeline = member.get_resources().pipeline
 
         try:
             scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')
@@ -39,4 +39,4 @@ class CrossValidationRater(Evaluater):
         rating = scores.mean()
         rating_sd = scores.std()
 
-        member.rated(member.get_current_epoch().id, rating, rating_sd)
+        member.rated(member.get_specie().get_current_epoch().id, rating, rating_sd)

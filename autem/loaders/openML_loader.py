@@ -34,7 +34,7 @@ class OpenMLLoader(Loader):
 
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
-        resources = simulation.get_simulation_resources()
+        resources = simulation.get_resources()
 
         resources.dataset = dataset
         resources.features = features
@@ -54,16 +54,16 @@ class OpenMLLoader(Loader):
             outline.append_attribute("data", Dataset.Battle, [ Role.Configuration ], "Dataset")
 
     def load_divided_data(self, simulation):
-        return (simulation.get_simulation_resources().x_divided, simulation.get_simulation_resources().y_divided)
+        return (simulation.get_resources().x_divided, simulation.get_resources().y_divided)
 
     def load_training_data(self, simulation):
-        return (simulation.get_simulation_resources().x_train, simulation.get_simulation_resources().y_train)
+        return (simulation.get_resources().x_train, simulation.get_resources().y_train)
 
     def load_validation_data(self, simulation):
-        return (simulation.get_simulation_resources().x_validation, simulation.get_simulation_resources().y_validation)
+        return (simulation.get_resources().x_validation, simulation.get_resources().y_validation)
 
     def get_features(self, simulation):
-        return simulation.get_simulation_resources().features
+        return simulation.get_resources().features
 
     def record_member(self, member, record):
         """
@@ -71,4 +71,4 @@ class OpenMLLoader(Loader):
         """
         super().record_member(member, record)
 
-        record.data = member.get_simulation_resources().dataset.name
+        record.data = member.get_specie().get_simulation().get_resources().dataset.name

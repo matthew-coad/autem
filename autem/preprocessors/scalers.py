@@ -21,13 +21,13 @@ class Scaler(Preprocesssor):
         raise NotImplementedError()
 
     def make_preprocessor(self, member):
-        loader = member.get_simulation().resources.loader
-        features = loader.get_features(member.get_simulation())
+        loader = member.get_loader()
+        features = loader.get_features(member.get_specie().get_simulation())
 
         categorical_features = features['nominal']
         numeric_features = features['numeric']
 
-        x,y = loader.load_divided_data(member.get_simulation())
+        x,y = loader.load_divided_data(member.get_specie().get_simulation())
 
         categories = []
         for feature in categorical_features:

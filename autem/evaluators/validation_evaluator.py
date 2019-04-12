@@ -27,10 +27,10 @@ class ValidationEvaluator(Evaluater):
 
         scorer = member.get_scorer()
         loader = member.get_loader()
-        pipeline = member.get_member_resources().pipeline
+        pipeline = member.get_resources().pipeline
 
-        x,y = loader.load_training_data(member.get_simulation())
-        x_validation, y_validation = loader.load_validation_data(member.get_simulation())
+        x,y = loader.load_training_data(member.get_specie().get_simulation())
+        x_validation, y_validation = loader.load_validation_data(member.get_specie().get_simulation())
 
         with warnings.catch_warnings():
             warnings.simplefilter("error")

@@ -37,16 +37,16 @@ class ScoreEvaluator(Evaluater):
         x,y = loader.load_training_data(specie.get_simulation())
         folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=max_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
-        specie.get_specie_resources().i_leagues = i_leagues
+        specie.get_resources().i_leagues = i_leagues
 
     def build_scores(self, member, repeat, start, stop):
 
         scorer = member.get_scorer()
         loader = member.get_loader()
-        i_leagues = member.get_specie_resources().i_leagues
-        pipeline = member.get_member_resources().pipeline
+        i_leagues = member.get_specie().get_resources().i_leagues
+        pipeline = member.get_resources().pipeline
 
-        x,y = loader.load_training_data(member.get_simulation())
+        x,y = loader.load_training_data(member.get_specie().get_simulation())
         scores = []
         durations = []
         predictions = np.empty(len(y))
@@ -67,7 +67,7 @@ class ScoreEvaluator(Evaluater):
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
-                    member.fail(member.get_current_epoch().id, ex, "score_evaluator", "ScoreEvaluator")
+                    member.fail(member.get_specie().get_current_epoch().id, ex, "score_evaluator", "ScoreEvaluator")
                     return (None, None, None)
             end_time = time.time()
             duration = end_time - start_time

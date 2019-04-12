@@ -49,35 +49,23 @@ class Member:
 
     # Environment
 
-    def get_simulation(self):
-        return self._specie.get_simulation()
-
-    def get_random_state(self):
-        return self.get_simulation().get_random_state()
-
-    def get_simulation_resources(self):
-        return self.get_simulation().get_simulation_resources()
-
     def get_specie(self):
         return self._specie
 
-    def get_specie_resources(self):
-        return self.get_specie().get_specie_resources()
-
-    def get_current_epoch(self):
-        return self.get_specie().get_current_epoch()
-
-    def get_member_resources(self):
+    def get_resources(self):
         return self.resources
 
+    def get_random_state(self):
+        return self.get_specie().get_random_state()
+
     def get_scorer(self):
-        return self.get_simulation().get_scorer()
+        return self.get_specie().get_scorer()
 
     def get_loader(self):
-        return self.get_simulation().get_loader()
+        return self.get_specie().get_loader()
 
     def get_max_jobs(self):
-        return self.get_simulation().n_jobs
+        return self.get_specie().get_max_jobs()
 
     def prepare(self):
         """

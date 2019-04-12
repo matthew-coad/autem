@@ -27,4 +27,4 @@ class Loader(Controller):
         raise NotImplementedError()
 
     def start_simulation(self, simulation):
-        simulation.get_simulation_resources().loader = self
+        simulation.get_resources().loader = self
