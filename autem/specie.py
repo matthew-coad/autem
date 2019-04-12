@@ -151,20 +151,21 @@ class Specie:
 
     ## Members
 
-    def list_members(self, alive = None, top = None, graveyard = None):
+    def list_members(self, alive = None, top = None, buried = False):
         """
         List members
         """
-        def include_member(member):
+        def include_member(member, is_buried):
             alive_passed = alive is None or member.alive == alive
             is_top = member.league == self.get_settings().get_max_league()
             top_passed = top is None or is_top == top
-            return alive_passed and top_passed
+            buried_passed = buried is None or buried == is_buried
+            return alive_passed and top_passed and buried_passed
 
-        candidates = self._members
-        if graveyard:
-            candidates = candidates + self._graveyard
-        members = [ m for m in candidates if include_member(m) ]
+        members = [ m for m in self._members if include_member(m, False) ]
+        if buried is None or buried:
+            buried_members = [ m for m in self._graveyard if include_member(m, True) ]
+            members = members + buried_members
         return members
 
     def _mutate_member(self, member, transmute):

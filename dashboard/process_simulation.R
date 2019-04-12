@@ -236,7 +236,7 @@ build_step_detail <- function(battle_df) {
     step_df14 <- 
       step_df14 %>%
       mutate(
-        step = step,
+        step = step * 20,
         event_time = lubridate::parse_date_time(event_time, orders = "amd HMS Y"),
         round = NA,
         choice_score = CE_score,

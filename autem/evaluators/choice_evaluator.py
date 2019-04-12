@@ -43,10 +43,12 @@ class ChoiceEvaluator(Evaluater):
         Build a dataframe containing all scores evaluated for each member
         """
 
-        # Collect all members including ones from the graveyard which have scores
-        # Not concerned whether they failed or not or whether they were reincarnated
-        # Just get as much information as we have
-        all_members = [ m for m in specie.list_members(graveyard = True )  if self.get_score_evaluation(m).scores ]
+        # Collect all members including ones from the graveyard and from previous species
+        # Just as long as theu have scores
+        simulation = specie.get_simulation()
+        combined_members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) ] 
+
+        all_members = [ m for m in combined_members if self.get_score_evaluation(m).scores ]
 
         if not all_members:
             return None
@@ -65,16 +67,16 @@ class ChoiceEvaluator(Evaluater):
             member_choices[choice.name] = get_choice_values(choice)
         choice_df = pd.DataFrame(member_choices)
 
-        # Build a frame containing all fit scores for each member
-        scores = [(m.id, s) for m in all_members for s in self.get_score_evaluation(m).scores ]
+        # Build a frame containing fit score for each member
+        scores = [(m.id, self.get_score_evaluation(m).score) for m in all_members ]
         score_df = pd.DataFrame(scores, columns=['member_id', 'score'])
 
         # Join the frames together
         member_score_df = pd.merge(choice_df, score_df, on='member_id', how='inner')
 
-        # Determine mean score per component group
+        # Determine max score per component group
         choice_names = [ c.name for c in choices ]
-        member_score_df = member_score_df.groupby(choice_names, as_index=False).agg({"score": "mean"})
+        member_score_df = member_score_df.groupby(choice_names, as_index=False).agg({"score": "max"})
         return member_score_df
 
     def build_model(self, specie):

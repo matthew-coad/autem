@@ -454,7 +454,7 @@ renderPlot({
   step_detail_df <- 
     step_detail_rdf() %>% 
     filtered_data(input$experiment) %>%
-    filter(!is.na(score), !is.na(choice_score)) %>%
+    filter(!is.na(score)) %>%
     group_by(member_id, league) %>%
     filter(step == min(step)) %>%
     mutate(

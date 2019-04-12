@@ -93,12 +93,22 @@ class TopChoiceMaker(Maker, Controller):
         grid_index = grid_pred.index(max(grid_pred))
         return self.make_grid_member(specie, grid_index)
 
+    def make_random_member(self, specie):
+        member = Member(specie)
+        for component in specie.get_settings().get_hyper_parameters():
+            component.initialize_member(member)
+        specialized = specie.specialize_member(member)
+        if not specialized:
+            member = None
+        return member
+
     def make_member(self, specie):
         grid = specie.get_resources().initialization_grid
         grid_pred = specie.get_resources().initialization_grid_pred
         if grid is None or grid_pred is None:
-            return None
-        member = self.make_top_member(specie)
+            member = self.make_random_member(specie)
+        else:
+            member = self.make_top_member(specie)
         specialized = specie.specialize_member(member)
         if not specialized:
             member = None

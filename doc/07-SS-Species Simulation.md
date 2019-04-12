@@ -259,3 +259,8 @@ Justification - precondition
 Outcome - Complete
 
 **done**
+
+## SS-Top choices model cross species
+
+Action - Top choices are evaluated using the entire simulation
+Justification - Allows species to use prior species

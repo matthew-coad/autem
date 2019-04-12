@@ -16,10 +16,10 @@ def get_test_baseline_name():
     return 'diabetes'
 
 def get_test_species():
-    return 2
+    return 3
 
 def get_test_epochs():
-    return 2
+    return 5
 
 def get_test_simulations_path():
     return benchmark.get_simulations_path().joinpath("test")
