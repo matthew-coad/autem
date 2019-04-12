@@ -16,7 +16,7 @@ class Specie:
     """
     Specie of a simulation
     """
-    def __init__(self, simulation, specie_id): 
+    def __init__(self, simulation, specie_id, specie_n, prior_epoch_id): 
         self._simulation = simulation
         self.id = specie_id
 
@@ -29,6 +29,8 @@ class Specie:
         self._alive = None
         self._resources = SimpleNamespace()
 
+        self._specie_n = specie_n
+        self._prior_epoch_id = prior_epoch_id
         self._current_epoch_id = None
         self._epochs = None
 
@@ -46,32 +48,11 @@ class Specie:
     def get_settings(self):
         return self.get_simulation().get_settings()
 
-    def get_current_epoch_id(self):
-        return self._current_epoch_id
-
-    def get_current_epoch(self):
-        return self._epochs[self._current_epoch_id]
-
-    def get_epoch(self, id):
-        return self._epochs[id]
-
     def get_resources(self):
         return self._resources
-
-    def get_max_reincarnations(self):
-        return self.get_simulation().get_settings().max_reincarnations
-
-    def get_max_epochs(self):
-        return self.get_simulation().get_settings().max_epochs
     
-    def get_max_time(self):
-        return self.get_simulation().get_settings().max_time
-
-    def get_max_league(self):
-        return self.get_simulation().get_settings().max_league
-
-    def get_n_jobs(self):
-        return self.get_simulation().get_settings().n_jobs
+    def get_specie_n(self):
+        return self._specie_n
 
     def get_random_state(self):
         return self.get_simulation().get_random_state()
@@ -91,16 +72,16 @@ class Specie:
         """
         Should we finish the species?
         """
-        simulation = self._simulation
         epoch = self.get_current_epoch()
-        duration = time.time() - simulation.start_time
-        max_epochs = self.get_max_epochs()
-        max_time = self.get_max_time()
+        duration = time.time() - self.get_simulation().get_start_time()
+        n_epochs = len(self.list_epochs())
+        max_epochs = self.get_settings().get_max_epochs()
+        max_time = self.get_settings().get_max_time()
 
         if not epoch.get_progressed():
             return (True, "No progress")
 
-        if epoch.id == max_epochs:
+        if n_epochs == max_epochs:
             return (True, "Max epochs")
 
         if max_time is not None and duration >= max_time:
@@ -118,7 +99,7 @@ class Specie:
         self._alive = True
         self._start_time = time.time()
 
-        self._current_epoch_id = 0
+        self._current_epoch_id = self._prior_epoch_id
         self._epochs = {}
 
         self._members = []
@@ -130,7 +111,8 @@ class Specie:
 
         finished = False
         while not finished:
-            epoch = Epoch(self, self._current_epoch_id+1)
+            n_epochs = len(self._epochs.values())
+            epoch = Epoch(self, self._current_epoch_id+1, n_epochs + 1)
             self._epochs[epoch.id] = epoch
             self._current_epoch_id = epoch.id
             epoch.run()
@@ -142,6 +124,31 @@ class Specie:
         self._end_time = time.time()
         self._alive = False
 
+    def get_alive(self):
+        return self._alive
+
+    ## Epochs
+
+    def get_current_epoch_id(self):
+        return self._current_epoch_id
+
+    def get_current_epoch(self):
+        return self._epochs[self._current_epoch_id]
+
+    def get_epoch(self, id):
+        return self._epochs[id]
+
+    def list_epochs(self, alive = None):
+        """
+        List epochs
+        """
+        def include_epoch(epochs):
+            alive_passed = alive is None or epochs.get_alive() == alive
+            return alive_passed
+
+        epochs = [ e for e in self._epochs.values() if include_epoch(e) ]
+        return epochs
+
     ## Members
 
     def list_members(self, alive = None, top = None, graveyard = None):
@@ -150,7 +157,7 @@ class Specie:
         """
         def include_member(member):
             alive_passed = alive is None or member.alive == alive
-            is_top = member.league == self.get_max_league()
+            is_top = member.league == self.get_settings().get_max_league()
             top_passed = top is None or is_top == top
             return alive_passed and top_passed
 
@@ -200,7 +207,7 @@ class Specie:
         attempts = 0
         max_attempts = 100
         random_state = self.get_random_state()
-        max_reincarnations = self.get_max_reincarnations()
+        max_reincarnations = self.get_settings().get_max_reincarnations()
 
         # Sometimes transmute the first mutation attept
         transmute = random_state.random_sample() <= self._transmutation_rate

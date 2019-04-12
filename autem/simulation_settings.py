@@ -2,20 +2,20 @@ class SimulationSettings:
 
     def __init__(self,
             components, properties, seed, 
-            max_specie, max_epochs, max_rounds, max_time, n_jobs,
+            max_species, max_epochs, max_rounds, max_time, n_jobs,
             max_reincarnations, max_population, max_league):
         self.components = components
         self.properties = properties
         self.seed = seed,
-        self.max_specie = max_specie
-        self.max_epochs = max_epochs
-        self.max_rounds = max_rounds
-        self.max_time = max_time
-        self.n_jobs = n_jobs
+        self._max_species = max_species
+        self._max_epochs = max_epochs
+        self._max_rounds = max_rounds
+        self._max_time = max_time
+        self._n_jobs = n_jobs
 
-        self.max_reincarnations = max_reincarnations
-        self.max_population = max_population
-        self.max_league = max_league
+        self._max_reincarnations = max_reincarnations
+        self._max_population = max_population
+        self._max_league = max_league
 
     def get_properties(self):
         return self.properties
@@ -31,12 +31,27 @@ class SimulationSettings:
         controllers = [c for c in self.components if c.is_controller() ]
         return controllers
 
+    def get_max_species(self):
+        return self._max_species
+
+    def get_max_epochs(self):
+        return self._max_epochs
+
     def get_max_rounds(self):
-        return self.max_rounds
+        return self._max_rounds
+
+    def get_max_time(self):
+        return self._max_time
+
+    def get_max_reincarnations(self):
+        return self._max_reincarnations
 
     def get_max_population(self):
-        return self.max_population
+        return self._max_population
+
+    def get_max_league(self):
+        return self._max_league
 
     def get_n_jobs(self):
-        return self.n_jobs
+        return self._n_jobs
 

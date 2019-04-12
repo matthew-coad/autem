@@ -30,7 +30,7 @@ class ScoreEvaluator(Evaluater):
         """
         Evaluate folds for the specie
         """
-        max_league = specie.get_max_league()
+        max_league = specie.get_settings().get_max_league()
         random_state = specie.get_random_state()
         loader = specie.get_loader()
 

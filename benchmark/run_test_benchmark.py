@@ -15,8 +15,11 @@ def get_test_study():
 def get_test_baseline_name():
     return 'diabetes'
 
+def get_test_species():
+    return 2
+
 def get_test_epochs():
-    return 5
+    return 2
 
 def get_test_simulations_path():
     return benchmark.get_simulations_path().joinpath("test")
@@ -29,10 +32,12 @@ def run_test_simulation(baseline_name = None, seed = None):
     study = get_test_study()
     seed = seed if not seed is None else 2
     epochs = get_test_epochs()
+    species = get_test_species()
+
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
 
     utility.prepare_OpenML()
-    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs=epochs)
+    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs=epochs, max_species=species)
     simulation.run()
     autem.ReportManager(path).update_combined_reports()
 

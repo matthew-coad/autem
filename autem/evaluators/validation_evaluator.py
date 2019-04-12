@@ -49,7 +49,7 @@ class ValidationEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        self.validate_member(member, member.get_specie().get_max_league())
+        self.validate_member(member, member.get_settings().get_max_league())
 
     def rate_member(self, member):
         super().rate_member(member)

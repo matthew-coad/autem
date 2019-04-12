@@ -40,7 +40,7 @@ class ContestJudge(Evaluater):
 
         meaningful = stats.binom_test(0, n=contests, p=0.5, alternative='less') < self.p_value
         majority = victories * 2 > contests
-        top_league = specie.get_max_league()
+        top_league = member.get_settings().get_max_league()
 
         if meaningful and majority:
             outcome = "Fit"

@@ -21,11 +21,11 @@ class Simulation:
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
-                max_specie = 4, max_epochs = 10, max_rounds = 20, max_time = None, n_jobs = -1):
+                max_species = 3, max_epochs = 10, max_rounds = 20, max_time = None, n_jobs = -1):
         self.name = name
         self._settings = SimulationSettings(
             components  = components, properties = properties, seed = seed, 
-            max_specie = max_specie, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
+            max_species = max_species, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
             max_reincarnations = 3, max_population = 20, max_league = 4)
 
         self.outline = None
@@ -34,12 +34,12 @@ class Simulation:
         self._random_state = numpy.random.RandomState(seed)
         self._next_id = 1
 
-        self.start_time = None
-        self.end_time = None
+        self._start_time = None
+        self._end_time = None
 
         self._current_specie_id = None
-        self._species = {}
-        self.reports = []
+        self._species = None
+        self.reports = None
 
     def generate_id(self):
         id = self._next_id
@@ -51,8 +51,20 @@ class Simulation:
     def get_settings(self):
         return self._settings
 
+    def list_species(self, alive = None):
+        """
+        List species
+        """
+        def include_specie(specie):
+            alive_passed = alive is None or specie.get_alive() == alive
+            return alive_passed
+
+        species = [ s for s in self._species.values() if include_specie(s) ]
+        return species
+
     def get_current_specie(self):
-        return self._species[self._current_specie_id]
+        specie = self._species[self._current_specie_id] if self._current_specie_id else None
+        return specie
 
     def get_resources(self):
         return self._resources
@@ -75,32 +87,29 @@ class Simulation:
         """
         return self._random_state
 
-    ## Simulation life-cycle
+    def get_start_time(self):
+        return self._start_time
 
-    def start(self):
-        """
-        Perform simulation startup
-        """
-        self.start_time = time.time()
-        self._current_specie_id = 0
-        self.outline_simulation()
-        for component in self.get_settings().get_controllers():
-            component.start_simulation(self)
+    def get_end_time(self):
+        return self._end_time
+
+    ## Simulation life-cycle
 
     def should_finish(self):
         """
         Should we finish the simulation?
         """
-        duration = time.time() - self.start_time
-        epoch = self.get_current_specie().get_current_epoch()
+        duration = time.time() - self.get_start_time()
+        specie = self.get_current_specie()
 
-        if not epoch.get_progressed():
-            return (True, "No progress")
+        max_species = self.get_settings().get_max_species()
+        n_species = len(self.list_species())
 
-        if epoch.id == self.max_epochs:
-            return (True, "Max epochs")
+        if n_species == max_species:
+            return (True, "Max specie")
 
-        if self.max_time is not None and duration >= self.max_time:
+        max_time = self.get_settings().get_max_time()
+        if max_time is not None and duration >= max_time:
             return (True, "Max time")
         
         return (False, None)
@@ -111,19 +120,29 @@ class Simulation:
         today = datetime.datetime.now()
         print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
 
-        self.start()
+        self._start_time = time.time()
+        self._current_specie_id = 0
+        self._species = {}
+        self.reports = []
+
+        self.outline_simulation()
+        for component in self.get_settings().get_controllers():
+            component.start_simulation(self)
 
         finished = False
         while not finished:
-            specie = Specie(self, self._current_specie_id+1)
+            prior_specie = self.get_current_specie()
+            prior_epoch_id = prior_specie.get_current_epoch().id if not prior_specie is None else 0
+            n_specie = len(self._species.values())
+            specie = Specie(self, self._current_specie_id+1, n_specie, prior_epoch_id)
             self._species[specie.id] = specie
             self._current_specie_id = specie.id
 
             specie.run()
             finished, reason = self.should_finish()
 
-        self.end_time = time.time()
-        duration = self.end_time - self.start_time
+        self._end_time = time.time()
+        duration = self.get_end_time() - self.get_start_time()
         print("%s - %s - Duration %s" % (self.name, reason, duration))
 
     def outline_simulation(self):
@@ -164,7 +183,10 @@ class Simulation:
         specie_id = specie.id
         epoch_id = epoch.id
         round = epoch.get_round()
-        step = (epoch_id - 1) * epoch.get_max_rounds() + round
+
+        prior_specie_rounds = sum(e.get_round() for s in self.list_species(alive = False) for e in s.list_epochs())
+        prior_epoch_rounds = sum(e.get_round() for e in specie.list_epochs(alive = False) )
+        step = prior_specie_rounds + prior_epoch_rounds + round
 
         record = Record()
         record.simulation = self.name
@@ -172,8 +194,8 @@ class Simulation:
         for property_key in properties.keys():
             setattr(record, property_key, properties[property_key])
 
-        record.epoch = epoch_id
         record.species = specie_id
+        record.epoch = epoch_id
         record.round = round
         record.step = step
         record.member_id = member_id

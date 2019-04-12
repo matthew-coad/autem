@@ -12,7 +12,7 @@ class EpochProgressJudge(Evaluater):
     def judge_epoch(self, epoch):
 
         specie = epoch.get_specie()
-        if epoch.id == 1:
+        if epoch.get_epoch_n() == 1:
             # First epoch
             # Indicate that it progressed
             epoch.progress(True, "First epoch")

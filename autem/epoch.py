@@ -13,11 +13,12 @@ class Epoch:
     """
     Epoch of a simulation
     """
-    def __init__(self, specie, epoch_id): 
+    def __init__(self, specie, epoch_id, epoch_n): 
         self._specie = specie
         self._simulation = specie.get_simulation()
 
         self.id = epoch_id
+        self._epoch_n = epoch_n
 
         self._event = None
         self._event_reason = None
@@ -31,7 +32,7 @@ class Epoch:
         self._progressed = None
         self._ranking = None
 
-    # Environment
+    # Context
 
     def get_simulation(self):
         return self._simulation
@@ -42,35 +43,14 @@ class Epoch:
     def get_settings(self):
         return self.get_specie().get_settings()
 
-    def get_max_epochs(self):
-        return self.get_settings().max_epochs
-
-    def get_max_rounds(self):
-        return self.get_settings().max_rounds
-    
-    def get_max_time(self):
-        return self.get_settings().max_time
-
-    def get_max_league(self):
-        return self.get_settings().max_league
-
-    def get_max_population(self):
-        return self.get_settings().max_population
-
     def get_random_state(self):
         return self._simulation.random_state
 
-    def get_round(self):
-        return self._round
-
-    def get_progressed(self):
-        return self._progressed
-
-    def get_ranking(self):
-        return self._ranking
-
-    def get_ranked_members(self):
-        return self._ranking.members
+    def get_epoch_n(self):
+        """
+        Epoch number. Number of the epoch within the specie
+        """
+        return self._epoch_n
 
     # Lifecycle
 
@@ -78,15 +58,15 @@ class Epoch:
         """
         Should we finish the epoch?
         """
-        simulation = self._simulation
-        duration = time.time() - simulation.start_time
-        max_epochs = self.get_max_epochs()
-        max_time = self.get_max_time()
+        max_epochs = self.get_settings().get_max_epochs()
+        max_rounds = self.get_settings().get_max_rounds()
+        max_time = self.get_settings().get_max_time()
+        duration = time.time() - self.get_simulation().get_start_time()
 
         if max_time is not None and duration >= max_time:
             return (True, "Max time")
 
-        if self.get_round() >= self.get_max_rounds():
+        if self.get_round() >= max_rounds:
             return (True, "Max rounds")
         
         return (False, None)
@@ -117,45 +97,60 @@ class Epoch:
             self.run_round()
             finished, reason = self.should_finish()
 
-        self.rank_members()
-        for component in self.get_settings().get_controllers():
-            component.judge_epoch(self)
-        self._end_time = time.time()
-        self._alive = False
+            report_members = self.list_members()
 
-        finish_specie, reason = self.get_specie().should_finish()
-        # If we should finish the species, finish and bury the members
-        # before we report
-        if finish_specie:
-            for member in self.list_members(alive=True):
-                member.finshed(self.id, reason)
+            # Bury dead members
+            for member in self.list_members(alive = False):
                 self.bury_member(member)
 
-        # Final report for ranked members
-        for member in self.get_ranked_members():
-            self.record_member(member)
+            if finished:
+                self.rank_members()
+                for component in self.get_settings().get_controllers():
+                    component.judge_epoch(self)
+
+            # If we should finish the species, finish and bury all alive members
+            # before we report
+            finish_specie, reason = self.get_specie().should_finish()
+            if finished and finish_specie:
+                for member in self.list_members(alive=True):
+                    member.finshed(reason)
+                    self.bury_member(member)
+
+            # Report on what happened
+            for member in report_members:
+                self.record_member(member)
+
         self.report()
+
+        self._end_time = time.time()
+        self._alive = False
 
     def run_round(self):
         """
         Run a round of the simulation
         """
 
-        operation_name = "Evaluating %s epoch %s:" % (self._simulation.name, self.id)
+        self._round += 1
+
+        specie = self.get_specie()
+        operation_name = "Evaluating %s specie %s epoch %s:" % (self._simulation.name, specie.id, self.id)
+        current_round = self.get_round()
+        max_population = self.get_settings().get_max_population()
+        max_rounds = self.get_settings().get_max_rounds()
+        max_league = self.get_settings().get_max_league()
 
         # Prepare for the next round
-        self._round += 1
         members = self.list_members(alive = True)
         for member in members:
             member.prepare_round(self, self.get_round())
 
         # Promote all living members
         for member in members:
-            if member.league < self.get_max_league():
+            if member.league < max_league:
                 member.promote(self, "Fit")
 
         # Repopulate
-        make_count = self.get_max_population() - len(members)
+        make_count = max_population - len(members)
         for make_index in range(make_count):
             self.make_member("Repopulate")
 
@@ -168,7 +163,7 @@ class Epoch:
         # Ensure all members evaluated
         for member_index in range(len(members)):
             self.evaluate_member(members[member_index])
-            printProgressBar(member_index + (self.get_round() - 1) * self.get_settings().get_max_population(), self.get_settings().get_max_rounds() * self.get_settings().get_max_population(), prefix = operation_name, length = 50)
+            printProgressBar(member_index + (current_round - 1) * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
 
         # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
@@ -176,21 +171,17 @@ class Epoch:
             for member2_index in range(member1_index+1, len(members)):
                 self.contest_members(members[member1_index], members[member2_index])
 
-        report_members = self.list_members()
-
         # Judge all members
         for member in self.list_members():
             self.judge_member(member)
 
-        # Bury dead members
-        for member in self.list_members(alive = False):
-            self.bury_member(member)
+        printProgressBar(current_round * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
 
-        printProgressBar(self.get_round() * self.get_settings().get_max_population(), self.get_max_rounds() * self.get_settings().get_max_population(), prefix = operation_name, length = 50)
+    def get_alive(self):
+        return self._alive
 
-        # Report on what happened
-        for member in report_members:
-            self.record_member(member)
+    def get_round(self):
+        return self._round
 
     # Members
 
@@ -252,7 +243,8 @@ class Epoch:
         """
         inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
-        progress_prefix = "Rating %s epoch %s:" % (self._simulation.name, self.id)
+        specie = self.get_specie()
+        progress_prefix = "Rating %s specie %s epoch %s:" % (self._simulation.name, specie.id, self.id)
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):
@@ -276,6 +268,12 @@ class Epoch:
         self._ranking = ranking
         return ranking
 
+    def get_ranking(self):
+        return self._ranking
+
+    def get_ranked_members(self):
+        return self._ranking.members
+
     # Reporting
 
     def record_member(self, member):
@@ -290,7 +288,7 @@ class Epoch:
         """
         self._simulation.report()
 
-    # Notifications
+    # Progress
 
     def progress(self, progressed, reason):
         """
@@ -301,4 +299,6 @@ class Epoch:
         self._event = "progress"
         self._event_reason = reason
 
-    
+    def get_progressed(self):
+        return self._progressed
+
