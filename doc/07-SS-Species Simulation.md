@@ -243,3 +243,12 @@ directly with member. We invoke get_specie().get_simulation().get_resources().
 
 Action - Focus the contextual methods in member. 
 Justification - Working on correct onwership. Starting with member.
+
+## SS-Introduce settings
+
+Action - Introduce simulation settings
+Justification - Reduce duplication
+Outcome - Started
+
+**done**
+

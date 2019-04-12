@@ -7,7 +7,7 @@ class RandomMaker(Maker):
     """
     def make_member(self, specie):
         member = Member(specie)
-        for component in specie.get_hyper_parameters():
+        for component in specie.get_settings().get_hyper_parameters():
             component.initialize_member(member)
         specialized = specie.specialize_member(member)
         if not specialized:

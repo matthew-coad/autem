@@ -52,7 +52,7 @@ class ChoiceEvaluator(Evaluater):
             return None
 
         # Get all the choices
-        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
 
         # Build a frame containing for each member all the choices
         def get_choice_values(choice):
@@ -85,7 +85,7 @@ class ChoiceEvaluator(Evaluater):
             return None
 
         # Extract the choices as the response variables
-        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
         choice_names = [ c.name for c in choices ]
         x = df.loc[:, choice_names]
 
@@ -133,7 +133,7 @@ class ChoiceEvaluator(Evaluater):
             return (None, None)
 
         # Build the choices into a dataframe
-        choices = [ c for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
+        choices = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
         choice_values = dict([ (c.name, [c.get_active_component_name(member)]) for c in choices])
         x = pd.DataFrame(choice_values)
 

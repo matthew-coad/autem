@@ -39,29 +39,23 @@ class Epoch:
     def get_specie(self):
         return self._specie
 
-    def get_components(self):
-        return self._simulation.components
-
-    def get_controllers(self):
-        return self._simulation.controllers
-
-    def get_hyper_parameters(self):
-        return self._simulation.hyper_parameters
+    def get_settings(self):
+        return self.get_specie().get_settings()
 
     def get_max_epochs(self):
-        return self._simulation.max_epochs
+        return self.get_settings().max_epochs
 
     def get_max_rounds(self):
-        return self._simulation.max_rounds
+        return self.get_settings().max_rounds
     
     def get_max_time(self):
-        return self._simulation.max_time
+        return self.get_settings().max_time
 
     def get_max_league(self):
-        return self._simulation.top_league
+        return self.get_settings().max_league
 
-    def get_population_size(self):
-        return self._simulation.population_size
+    def get_max_population(self):
+        return self.get_settings().max_population
 
     def get_random_state(self):
         return self._simulation.random_state
@@ -111,12 +105,12 @@ class Epoch:
         self._progressed = None
         self._ranking = None
 
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.start_epoch(self)
 
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_epoch(self.id)
+            member.prepare_epoch(self)
 
         finished = False
         while not finished:
@@ -124,7 +118,7 @@ class Epoch:
             finished, reason = self.should_finish()
 
         self.rank_members()
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.judge_epoch(self)
         self._end_time = time.time()
         self._alive = False
@@ -153,15 +147,15 @@ class Epoch:
         self._round += 1
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_round(self.id, self.get_round())
+            member.prepare_round(self, self.get_round())
 
         # Promote all living members
         for member in members:
             if member.league < self.get_max_league():
-                member.promote(self.id, "Fit")
+                member.promote(self, "Fit")
 
         # Repopulate
-        make_count = self.get_population_size() - len(members)
+        make_count = self.get_max_population() - len(members)
         for make_index in range(make_count):
             self.make_member("Repopulate")
 
@@ -174,7 +168,7 @@ class Epoch:
         # Ensure all members evaluated
         for member_index in range(len(members)):
             self.evaluate_member(members[member_index])
-            printProgressBar(member_index + (self.get_round() - 1) * self.get_population_size(), self.get_max_rounds() * self.get_population_size(), prefix = operation_name, length = 50)
+            printProgressBar(member_index + (self.get_round() - 1) * self.get_settings().get_max_population(), self.get_settings().get_max_rounds() * self.get_settings().get_max_population(), prefix = operation_name, length = 50)
 
         # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
@@ -192,7 +186,7 @@ class Epoch:
         for member in self.list_members(alive = False):
             self.bury_member(member)
 
-        printProgressBar(self.get_round() * self.get_population_size(), self.get_max_rounds() * self.get_population_size(), prefix = operation_name, length = 50)
+        printProgressBar(self.get_round() * self.get_settings().get_max_population(), self.get_max_rounds() * self.get_settings().get_max_population(), prefix = operation_name, length = 50)
 
         # Report on what happened
         for member in report_members:
@@ -214,7 +208,7 @@ class Epoch:
             raise RuntimeError("Member not alive")
 
         start_time = time.time()
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.evaluate_member(member)
             if not member.alive:
                 break
@@ -229,11 +223,11 @@ class Epoch:
         if contestant1.form is contestant2.form:
             raise RuntimeError("Contestants have duplicate forms")
 
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.contest_members(contestant1, contestant2)
 
     def judge_member(self, member):
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.judge_member(member)
 
     def bury_member(self, member):
@@ -249,7 +243,7 @@ class Epoch:
         if not member.alive:
             raise RuntimeError("Members is not alive")
 
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.rate_member(member)
 
     def rank_members(self):
@@ -276,7 +270,7 @@ class Epoch:
 
         rank = len(candidates)
         for candidate in candidates:
-            candidate.ranked(self.id, rank)
+            candidate.ranked(rank)
             rank -= 1
 
         self._ranking = ranking

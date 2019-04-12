@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from .feedback import printProgressBar
 from .maker import Maker
 from .choice import Choice
+from .simulation_settings import SimulationSettings
 
 import numpy
 import time
@@ -19,47 +20,42 @@ import datetime
 class Simulation:
 
     """Simulation state"""
-    def __init__(self, name, components,
-                seed = 1234, population_size = 10, top_league = 4,
-                max_rounds = 20, max_reincarnations = 3, max_epochs = 10, max_time = None, n_jobs = -1, properties = {}):
+    def __init__(self, name, components, properties = {}, seed = 1234, 
+                max_specie = 4, max_epochs = 10, max_rounds = 20, max_time = None, n_jobs = -1):
         self.name = name
-        self.components = components
-        self.properties = properties
-        self.population_size = population_size
-        self.top_league = top_league
-        self.max_rounds = max_rounds
-        self.max_reincarnations = max_reincarnations
-        self.max_epochs = max_epochs
-        self.max_time = max_time
-        self.n_jobs = n_jobs
+        self._settings = SimulationSettings(
+            components  = components, properties = properties, seed = seed, 
+            max_specie = max_specie, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
+            max_reincarnations = 3, max_population = 20, max_league = 4)
 
         self.outline = None
-        self.resources = SimpleNamespace()
-        self.hyper_parameters = None
-        self.controllers = None
+        self._resources = SimpleNamespace()
 
-        self.random_state = numpy.random.RandomState(seed)
-        self.next_id = 1
+        self._random_state = numpy.random.RandomState(seed)
+        self._next_id = 1
 
         self.start_time = None
         self.end_time = None
 
-        self.current_specie_id = None
-        self.species = {}
+        self._current_specie_id = None
+        self._species = {}
         self.reports = []
 
     def generate_id(self):
-        id = self.next_id
-        self.next_id += 1
+        id = self._next_id
+        self._next_id += 1
         return id
 
     ## Environment
 
+    def get_settings(self):
+        return self._settings
+
     def get_current_specie(self):
-        return self.species[self.current_specie_id]
+        return self._species[self._current_specie_id]
 
     def get_resources(self):
-        return self.resources
+        return self._resources
 
     def get_scorer(self):
         """
@@ -77,7 +73,7 @@ class Simulation:
         """
         Get simulation loader
         """
-        return self.random_state
+        return self._random_state
 
     ## Simulation life-cycle
 
@@ -86,11 +82,9 @@ class Simulation:
         Perform simulation startup
         """
         self.start_time = time.time()
-        self.current_specie_id = 0
-        self.hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
-        self.controllers = [c for c in self.components if c.is_controller() ]
+        self._current_specie_id = 0
         self.outline_simulation()
-        for component in self.controllers:
+        for component in self.get_settings().get_controllers():
             component.start_simulation(self)
 
     def should_finish(self):
@@ -121,9 +115,9 @@ class Simulation:
 
         finished = False
         while not finished:
-            specie = Specie(self, self.current_specie_id+1)
-            self.species[specie.id] = specie
-            self.current_specie_id = specie.id
+            specie = Specie(self, self._current_specie_id+1)
+            self._species[specie.id] = specie
+            self._current_specie_id = specie.id
 
             specie.run()
             finished, reason = self.should_finish()
@@ -138,7 +132,7 @@ class Simulation:
         """
         outline = Outline()
         outline.append_attribute("simulation", Dataset.Battle, [Role.Configuration])
-        for property_key in self.properties.keys():
+        for property_key in self.get_settings().get_properties().keys():
             outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
         outline.append_attribute("species", Dataset.Battle, [Role.ID])
         outline.append_attribute("epoch", Dataset.Battle, [Role.ID])
@@ -156,7 +150,7 @@ class Simulation:
         outline.append_attribute("league", Dataset.Battle, [Role.Property])
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
 
-        for component in self.components:
+        for component in self.get_settings().get_components():
             component.outline_simulation(self, outline)
         self.outline = outline
 
@@ -174,8 +168,9 @@ class Simulation:
 
         record = Record()
         record.simulation = self.name
-        for property_key in self.properties.keys():
-            setattr(record, property_key, self.properties[property_key])
+        properties = self.get_settings().get_properties()
+        for property_key in properties.keys():
+            setattr(record, property_key, properties[property_key])
 
         record.epoch = epoch_id
         record.species = specie_id
@@ -196,7 +191,7 @@ class Simulation:
         record.league = member.league
         record.final = member.final
 
-        for component in self.components:
+        for component in self.get_settings().get_components():
             component.record_member(member, record)
         return record
 
@@ -204,6 +199,6 @@ class Simulation:
         """
         Report on progress of the simulation
         """
-        for component in self.controllers:
+        for component in self.get_settings().get_controllers():
             component.report_simulation(self)
         self.reports = []

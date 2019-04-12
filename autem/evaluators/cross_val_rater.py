@@ -39,4 +39,4 @@ class CrossValidationRater(Evaluater):
         rating = scores.mean()
         rating_sd = scores.std()
 
-        member.rated(member.get_specie().get_current_epoch().id, rating, rating_sd)
+        member.rated(rating, rating_sd)

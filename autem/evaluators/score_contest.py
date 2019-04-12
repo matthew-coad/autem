@@ -41,7 +41,7 @@ class ScoreContest(Evaluater):
             winner = contestant2
 
         winner.evaluation.accuracy_contest = "Win"
-        winner.victory(specie.get_current_epoch_id())
+        winner.victory(specie.get_current_epoch())
         loser.evaluation.accuracy_contest = "Loss"
-        loser.defeat(specie.get_current_epoch_id())
+        loser.defeat(specie.get_current_epoch())
 

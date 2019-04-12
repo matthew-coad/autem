@@ -13,7 +13,7 @@ class CrossoverMaker(Maker, Controller):
         parent1 = candidates[parent_indexes[0]]
         parent2 = candidates[parent_indexes[1]]
         member = Member(specie)
-        for component in specie.get_hyper_parameters():
+        for component in specie.get_settings().get_hyper_parameters():
             component.crossover_member(member, parent1, parent2)
         specialized = specie.specialize_member(member)
         if not specialized:

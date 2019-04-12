@@ -33,7 +33,7 @@ class TopChoiceMaker(Maker, Controller):
             return output
 
         grid = [ {} ]
-        for component in specie.get_hyper_parameters():
+        for component in specie.get_settings().get_hyper_parameters():
             if isinstance(component, Choice):
                 choice_names = component.get_component_names()
                 grid = cross_values(grid, component.name, choice_names)
@@ -52,7 +52,7 @@ class TopChoiceMaker(Maker, Controller):
             return None
 
         # Build the choices into a dataframe
-        choice_names = [ c.name for c in specie.get_hyper_parameters() if isinstance(c, Choice) ]
+        choice_names = [ c.name for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
         x_values = {}
         for choice_name in choice_names:
             x_values[choice_name] = [ i[choice_name] for i in grid ]
@@ -81,7 +81,7 @@ class TopChoiceMaker(Maker, Controller):
             del grid_pred[grid_index]
 
         member = Member(specie)
-        for component in specie.get_hyper_parameters():
+        for component in specie.get_settings().get_hyper_parameters():
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])

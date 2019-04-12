@@ -43,6 +43,9 @@ class Specie:
     def get_simulation(self):
         return self._simulation
 
+    def get_settings(self):
+        return self.get_simulation().get_settings()
+
     def get_current_epoch_id(self):
         return self._current_epoch_id
 
@@ -55,32 +58,23 @@ class Specie:
     def get_resources(self):
         return self._resources
 
-    def get_components(self):
-        return self._simulation.components
-
-    def get_controllers(self):
-        return self._simulation.controllers
-
-    def get_hyper_parameters(self):
-        return self._simulation.hyper_parameters
-
     def get_max_reincarnations(self):
-        return self._simulation.max_reincarnations
+        return self.get_simulation().get_settings().max_reincarnations
 
     def get_max_epochs(self):
-        return self._simulation.max_epochs
+        return self.get_simulation().get_settings().max_epochs
     
     def get_max_time(self):
-        return self._simulation.max_time
+        return self.get_simulation().get_settings().max_time
 
     def get_max_league(self):
-        return self._simulation.top_league
+        return self.get_simulation().get_settings().max_league
 
-    def get_max_jobs(self):
-        return self._simulation.n_jobs
+    def get_n_jobs(self):
+        return self.get_simulation().get_settings().n_jobs
 
     def get_random_state(self):
-        return self._simulation.random_state
+        return self.get_simulation().get_random_state()
 
     def get_scorer(self):
         return self.get_simulation().get_scorer()
@@ -131,7 +125,7 @@ class Specie:
         self._graveyard = []
         self._forms = {}
 
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.start_specie(self)
 
         finished = False
@@ -142,7 +136,7 @@ class Specie:
             epoch.run()
             finished, reason = self.should_finish()
 
-        for component in self.get_controllers():
+        for component in self.get_settings().get_controllers():
             component.judge_specie(self)
 
         self._end_time = time.time()
@@ -172,7 +166,7 @@ class Specie:
         """
         prior_repr = repr(member.configuration)
         random_state = self.get_random_state()
-        components = self.get_hyper_parameters()
+        components = self.get_settings().get_hyper_parameters()
         n_components = len(components)
 
         # Try each component in a random order until a component claims to have mutated the state
@@ -194,7 +188,7 @@ class Specie:
         Perform once off member preparation
         """
         member.prepare()
-        for component in self.get_hyper_parameters():
+        for component in self.get_settings().get_hyper_parameters():
             component.prepare_member(member)
             if not member.fault is None:
                 break
@@ -237,7 +231,7 @@ class Specie:
         """
 
         # Find all makers
-        makers = [ c for c in self.get_components() if isinstance(c, Maker)]
+        makers = [ c for c in self.get_settings().get_components() if isinstance(c, Maker)]
         maker_indexes = self.get_random_state().choice(len(makers), size = len(makers), replace=False)
 
         # Invoke members in random order till one makes the member
@@ -256,9 +250,9 @@ class Specie:
         form.incarnate()
 
         epoch = self.get_current_epoch()
-        member.prepare_epoch(epoch.id)
-        member.prepare_round(epoch.id, epoch.get_round())
-        member.incarnated(epoch.id, form, form.reincarnations, reason)
+        member.prepare_epoch(epoch)
+        member.prepare_round(epoch, epoch.get_round())
+        member.incarnated(epoch, form, form.reincarnations, reason)
         self._members.append(member)
         return member
 

@@ -28,13 +28,13 @@ class ContestJudge(Evaluater):
         member.evaluation.contest_judgement = judgement
 
         specie = member.get_specie()
-        epoch_id = specie.get_current_epoch_id()
+        epoch = specie.get_current_epoch()
 
         if not member.alive:
             judgement.outcome = member.event
             return None
 
-        wonlost = member.wonlost[epoch_id]
+        wonlost = member.wonlost[epoch.id]
         contests = len(wonlost)
         victories = sum(wonlost)
 
@@ -46,7 +46,7 @@ class ContestJudge(Evaluater):
             outcome = "Fit"
         elif meaningful and not majority:
             outcome = "Unfit"
-            member.kill(epoch_id, outcome)
+            member.kill(outcome)
         elif not meaningful:
             outcome = "Few contests"
         else:
