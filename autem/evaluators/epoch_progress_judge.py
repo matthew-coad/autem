@@ -21,8 +21,8 @@ class EpochProgressJudge(Evaluater):
         prior_epoch_id = epoch.id - 1
         prior_epoch = specie.get_epoch(prior_epoch_id)
 
-        prior_top_member = prior_epoch.get_ranking().top_member()
-        top_member = epoch.get_ranking().top_member()
+        prior_top_member = prior_epoch.get_ranking().get_top_member()
+        top_member = epoch.get_ranking().get_top_member()
 
         if not prior_top_member:
             epoch.progress(True, "Ranking progressed")

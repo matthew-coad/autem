@@ -1,5 +1,7 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
+from .score_evaluation import ScoreEvaluation, get_score_evaluation
+from .voting_evaluation import VotingEvaluation, get_voting_evaluation
 
 import numpy as np
 from scipy import stats
@@ -17,31 +19,20 @@ class VotingContest(Evaluater):
     of a voting classifier
     """
 
-    def __init__(self, p_value = 0.1):
-        """
-        P value used to determine if the scores are significantly different
-        """
-        self.p_value = p_value
-
-    def get_score_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "score_evaluation"):
-            evaluation.score_evaluation = ScoreEvaluation()
-        return evaluation.score_evaluation
-
     def calculate_voting_predictions(self, members, league):
         """
         Calculate the voting predictions for a list of members
         """
-        votes = np.array([ self.get_score_evaluation(m).league_predictions[league].astype(int) for m in members ])
+        votes = np.array([ get_score_evaluation(m).league_predictions[league].astype(int) for m in members ])
         predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=0, arr=votes)
         return predictions
 
-    def calculate_score_boost(self, member, base_members, league):
+    def calculate_voting_evaluation(self, member, base_members, league):
         """
         Calculate the boost that a member gives to the hard voting prediction of a set of stacked members
         """
-        simulation = member.simulation
+        specie = member.get_specie()
+        simulation = specie.get_simulation()
         scorer = simulation.get_scorer()
         loader = simulation.get_loader()
 
@@ -49,54 +40,83 @@ class VotingContest(Evaluater):
         base_predictions = self.calculate_voting_predictions(base_members, league)
         base_score = scorer.score(y, base_predictions)
 
-        combined_members = base_members + [ member ]
+        combined_members = [ member ] + base_members
         combined_predictions = self.calculate_voting_predictions(combined_members, league)
         combined_score = scorer.score(y, combined_predictions)
 
         score_boost = combined_score - base_score
-        return score_boost
+
+        voting_evaluation = VotingEvaluation()
+        voting_evaluation.base_score = base_score
+        voting_evaluation.combined_score = combined_score
+        voting_evaluation.score_boost = score_boost
+        voting_evaluation.evaluated = True
+        return voting_evaluation
+
+    def evaluate_base_members(self, member):
+        """
+        Voting base members are the top scorers for all of the prior species
+        """
+        specie = member.get_specie()
+        simulation = specie.get_simulation()
+        base_members = [ s.get_ranking().get_top_member() for s in simulation.list_species() if s.id != specie.id and s.get_ranking().is_conclusive() ]
+        return base_members
+
+    def evaluate_member(self, member):
+
+        voting_evaluation = get_voting_evaluation(member)
+        if voting_evaluation.evaluated:
+            return None
+
+        if not 1 in get_score_evaluation(member).league_predictions:
+            return None
+
+        base_members = self.evaluate_base_members(member)
+        if not base_members:
+            voting_evaluation.evaluated = True
+            return None
+
+        member.evaluation.voting_evaluation = self.calculate_voting_evaluation(member, base_members, 1)
+
+    def start_epoch(self, epoch):
+        for member in epoch.list_members(alive = True):
+            votes = get_voting_evaluation(member)
+            votes.victories = 0
 
     def contest_members(self, contestant1, contestant2):
 
-        contestant1.evaluation.voting_boost = None
+        specie = contestant1.get_specie()
+        epoch = specie.get_current_epoch()
         contestant1.evaluation.voting_contest = None
-        contestant2.evaluation.voting_boost = None
         contestant2.evaluation.voting_contest = None
 
-        simulation = contestant1.simulation
+        contestant1_votes = get_voting_evaluation(contestant1)
+        contestant2_votes = get_voting_evaluation(contestant2)
 
-        top_league = simulation.top_league
-        if not top_league in self.get_score_evaluation(contestant1).league_predictions or not top_league in self.get_score_evaluation(contestant2).league_predictions:
+        if contestant1_votes.score_boost is None or contestant2_votes.score_boost is None:
             return None
 
-        base_members = [ m for m in simulation.members if m.league == top_league and m.id != contestant1.id and m.id != contestant2.id and top_league in self.get_score_evaluation(m).league_predictions]
-        if not base_members:
+        if contestant1_votes.score_boost == contestant2_votes.score_boost:
+            contestant1.evaluation.voting_contest = "Draw"
+            contestant2.evaluation.voting_contest = "Draw"
             return None
 
-        contestant1_boost = self.calculate_score_boost(contestant1, base_members, top_league)
-        contestant1.evaluation.voting_boost = contestant1_boost
-        contestant2_boost = self.calculate_score_boost(contestant2, base_members, top_league)
-        contestant2.evaluation.voting_boost = contestant2_boost
-
-        if contestant1_boost > contestant2_boost:
+        if contestant1_votes.score_boost > contestant2_votes.score_boost:
             contestant1.evaluation.voting_contest = "Win"
+            contestant1.victory(epoch)
+            contestant1_votes.victories += 1
             contestant2.evaluation.voting_contest = "Lose"
-            contestant1.victory()
-            contestant2.defeat()
-
-        if contestant1_boost < contestant2_boost:
+            contestant2.defeat(epoch)
+        else:
             contestant1.evaluation.voting_contest = "Lose"
+            contestant1.defeat(epoch)
             contestant2.evaluation.voting_contest = "Win"
-            contestant1.defeat()            
-            contestant2.victory()
+            contestant2.defeat(epoch)
+            contestant2_votes.victories += 1
 
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        evaluation = member.evaluation
-        if hasattr(evaluation, "voting_boost"):
-            record.voting_boost = evaluation.voting_boost
-            record.voting_contest = evaluation.voting_contest
-        else:
-            record.voting_boost = None
-            record.voting_contest = None
+        voting_evaluation = get_voting_evaluation(member)
+        record.VC_boost = voting_evaluation.score_boost
+        record.VC_victories = voting_evaluation.victories

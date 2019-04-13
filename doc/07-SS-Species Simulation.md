@@ -263,4 +263,23 @@ Outcome - Complete
 ## SS-Top choices model cross species
 
 Action - Top choices are evaluated using the entire simulation
-Justification - Allows species to use prior species
+Justification - Allows species to use prior species knowledge.
+Outcome - Complete. Looks like it works!
+
+**done**
+
+## SS-Voting contest uses best ranked member of prior species
+
+Action - Need top ranked member for a specie. Can simply be the ranking for the last epoch.
+Action - Voting is based on top members of all prior species. No vote if no top members.
+
+Outcome - Complete. Doesn't seem to improve performance. Target for a future study.
+
+++issue++
+
+## SS-Constests are per round
+
+Action - Constests are per round
+Justification - Obsolete behavior. Evolution is not based on rounds
+
+

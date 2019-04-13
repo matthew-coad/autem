@@ -183,6 +183,7 @@ build_step_detail <- function(battle_df) {
       step_df11 %>%
       mutate(
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
+        event_reason = reason,
         choice_score = choice_predicted_score,
         choice_score_std = NA,
         round = NA,
@@ -201,6 +202,7 @@ build_step_detail <- function(battle_df) {
       step_df12 %>%
       mutate(
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
+        event_reason = reason,
         choice_score = choice_predicted_score,
         choice_score_std = choice_predicted_score_std,
         round = NA,
@@ -218,6 +220,7 @@ build_step_detail <- function(battle_df) {
       step_df13 %>%
       mutate(
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
+        event_reason = reason,
         round = NA,
         choice_score = CE_score,
         choice_score_std = CE_score_std,

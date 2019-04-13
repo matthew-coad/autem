@@ -83,7 +83,9 @@ class Epoch:
         self._round = 0
 
         self._progressed = None
-        self._ranking = None
+        ranking = Ranking()
+        ranking.inconclusive()
+        self._ranking = ranking
 
         for component in self.get_settings().get_controllers():
             component.start_epoch(self)
@@ -270,9 +272,6 @@ class Epoch:
 
     def get_ranking(self):
         return self._ranking
-
-    def get_ranked_members(self):
-        return self._ranking.members
 
     # Reporting
 

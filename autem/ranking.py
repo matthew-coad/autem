@@ -14,6 +14,7 @@ class Ranking(SimpleNamespace):
 
     def inconclusive(self):
         self.type = RankingType.Inconclusive
+        self.members = None
 
     def conclusive(self, members):
         """
@@ -22,8 +23,8 @@ class Ranking(SimpleNamespace):
         self.type = RankingType.Conclusive
         self.members = members
 
-    def top_member(self):
-        if not self.members:
+    def get_top_member(self):
+        if not self.is_conclusive():
             return None
         member = next((m for m in self.members if m.ranking == 1), None)
         return member

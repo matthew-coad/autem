@@ -272,3 +272,7 @@ class Specie:
         self._members.remove(member)
         member.form.disembody()
 
+    ## Ranking
+
+    def get_ranking(self):
+        return self.get_current_epoch().get_ranking()
