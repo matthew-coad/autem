@@ -280,6 +280,5 @@ Outcome - Complete. Doesn't seem to improve performance. Target for a future stu
 ## SS-Constests are per round
 
 Action - Constests are per round
-Justification - Obsolete behavior. Evolution is not based on rounds
-
-
+Justification - Obsolete behavior. Evolution is not based on rounds.
+Outcome - Complete.

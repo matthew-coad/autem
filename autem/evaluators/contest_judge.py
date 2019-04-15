@@ -34,7 +34,7 @@ class ContestJudge(Evaluater):
             judgement.outcome = member.event
             return None
 
-        wonlost = member.wonlost[epoch.id]
+        wonlost = member.wonlost
         contests = len(wonlost)
         victories = sum(wonlost)
 

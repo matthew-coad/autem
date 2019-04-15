@@ -259,7 +259,7 @@ class Specie:
 
         epoch = self.get_current_epoch()
         member.prepare_epoch(epoch)
-        member.prepare_round(epoch, epoch.get_round())
+        member.prepare_round(epoch.get_round())
         member.incarnated(epoch, form, form.reincarnations, reason)
         self._members.append(member)
         return member

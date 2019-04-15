@@ -103,15 +103,15 @@ class VotingContest(Evaluater):
 
         if contestant1_votes.score_boost > contestant2_votes.score_boost:
             contestant1.evaluation.voting_contest = "Win"
-            contestant1.victory(epoch)
+            contestant1.victory()
             contestant1_votes.victories += 1
             contestant2.evaluation.voting_contest = "Lose"
-            contestant2.defeat(epoch)
+            contestant2.defeat()
         else:
             contestant1.evaluation.voting_contest = "Lose"
-            contestant1.defeat(epoch)
+            contestant1.defeat()
             contestant2.evaluation.voting_contest = "Win"
-            contestant2.defeat(epoch)
+            contestant2.defeat()
             contestant2_votes.victories += 1
 
     def record_member(self, member, record):

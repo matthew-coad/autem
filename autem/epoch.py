@@ -144,12 +144,12 @@ class Epoch:
         # Prepare for the next round
         members = self.list_members(alive = True)
         for member in members:
-            member.prepare_round(self, self.get_round())
+            member.prepare_round(self.get_round())
 
         # Promote all living members
         for member in members:
             if member.league < max_league:
-                member.promote(self, "Fit")
+                member.promote("Fit")
 
         # Repopulate
         make_count = max_population - len(members)

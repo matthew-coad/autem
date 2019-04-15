@@ -36,8 +36,7 @@ class Member:
         self.evaluation_time = None
         self.evaluation_duration = None
 
-        self.contests = {} # Map of contests per epoch
-        self.wonlost = {}  # Map of wonlost record per epoch
+        self.wonlost = None # Map of wonlost record per epoch
 
         self.league = 0
 
@@ -93,36 +92,33 @@ class Member:
     def prepare_epoch(self, epoch):
         self.event = None
         self.event_reason = None
-        self.contests[epoch.id] = 0
-        self.wonlost[epoch.id] = []
         self.rating = None
         self.rating_sd = None
         self.ranking = None
 
-    def prepare_round(self, epoch, round):
+    def prepare_round(self, round):
         self.event = "survive"
         self.event_reason = "Next round"
         self.evaluation_time = time.time()
+        self.wonlost = []
 
     def evaluated(self, duration):
         self.evaluation_duration = duration
         self.evaluations += 1
 
-    def victory(self, epoch):
+    def victory(self):
         """
         Record a victory at a given step
         """
-        self.contests[epoch.id] += 1
-        self.wonlost[epoch.id].append(1)
+        self.wonlost.append(1)
 
-    def defeat(self, epoch):
+    def defeat(self):
         """
         Record a defeat at a given epoch
         """
-        self.contests[epoch.id] += 1
-        self.wonlost[epoch.id].append(0)
+        self.wonlost.append(0)
 
-    def promote(self, epoch, reason, league = None):
+    def promote(self, reason, league = None):
         """
         Promote the member to the next league
         """
@@ -133,8 +129,6 @@ class Member:
             self.league += 1
         else:
             self.league = league
-        self.contests[epoch.id] = 0
-        self.wonlost[epoch.id] = []
 
     def kill(self, reason):
         """
