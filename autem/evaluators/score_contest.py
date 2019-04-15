@@ -22,15 +22,11 @@ class ScoreContest(Evaluater):
     def contest_members(self, contestant1, contestant2):
 
         specie = contestant1.get_specie()
-        contestant1.evaluation.accuracy_contest = None
-        contestant2.evaluation.accuracy_contest = None
 
         contestant1_score = get_score_evaluation(contestant1).score
         contestant2_score = get_score_evaluation(contestant2).score
 
         if contestant1_score == contestant2_score:
-            contestant1.evaluation.accuracy_contest = "Draw"
-            contestant2.evaluation.accuracy_contest = "Draw"
             return None
 
         if contestant1_score > contestant2_score:
@@ -40,8 +36,8 @@ class ScoreContest(Evaluater):
             loser = contestant1
             winner = contestant2
 
-        winner.evaluation.accuracy_contest = "Win"
-        winner.victory()
-        loser.evaluation.accuracy_contest = "Loss"
-        loser.defeat()
-
+        if loser.league <= winner.league:
+            winner.victory()
+            loser.defeat()
+        else:
+            winner.victory()

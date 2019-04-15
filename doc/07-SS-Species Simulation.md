@@ -298,3 +298,6 @@ Members with low league levels are killing higher league contestants despite hav
 Action - You can only loose a contest to a member with the same or higher league level
 Justification - Low league levels can have really unaccurate scores. Low leaguers are killing higher league levels, then found to have poor accuracy
 Outcome - Complete
+
+## SS-Re run SS2 evaluation
+

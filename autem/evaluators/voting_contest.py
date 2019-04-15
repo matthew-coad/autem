@@ -87,8 +87,6 @@ class VotingContest(Evaluater):
 
         specie = contestant1.get_specie()
         epoch = specie.get_current_epoch()
-        contestant1.evaluation.voting_contest = None
-        contestant2.evaluation.voting_contest = None
 
         contestant1_votes = get_voting_evaluation(contestant1)
         contestant2_votes = get_voting_evaluation(contestant2)
@@ -97,20 +95,14 @@ class VotingContest(Evaluater):
             return None
 
         if contestant1_votes.score_boost == contestant2_votes.score_boost:
-            contestant1.evaluation.voting_contest = "Draw"
-            contestant2.evaluation.voting_contest = "Draw"
             return None
 
         if contestant1_votes.score_boost > contestant2_votes.score_boost:
-            contestant1.evaluation.voting_contest = "Win"
             contestant1.victory()
             contestant1_votes.victories += 1
-            contestant2.evaluation.voting_contest = "Lose"
             contestant2.defeat()
         else:
-            contestant1.evaluation.voting_contest = "Lose"
             contestant1.defeat()
-            contestant2.evaluation.voting_contest = "Win"
             contestant2.defeat()
             contestant2_votes.victories += 1
 

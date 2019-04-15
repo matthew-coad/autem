@@ -46,20 +46,21 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            evaluators.ChoiceEvaluator(),
-            makers.TopChoiceMaker(),
-            makers.CrossoverMaker(),
-
             evaluators.ScoreEvaluator(),
+            evaluators.ChoiceEvaluator(),
             baselines.BaselineStats(baseline_name),
             evaluators.DurationEvaluator(),
             evaluators.ValidationEvaluator(),
 
             evaluators.ScoreContest(),
+
+            makers.TopChoiceMaker(),
+            makers.CrossoverMaker(),
+
+            # valuators.VotingContest(),
             # evaluators.StabilityContest(),
 
             evaluators.ContestJudge(),
-            # valuators.VotingContest(),
             evaluators.EpochProgressJudge(),
            
             evaluators.CrossValidationRater(),
