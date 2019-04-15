@@ -52,5 +52,5 @@ class Preprocesssor(Group):
         self.configure_preprocessor(member, preprocessor)
         self.update_parameters(member, preprocessor)
 
-        steps = member.get_resource("steps", [])
+        steps = member.get_resource("steps", lambda: [])
         steps.append((processor_name, preprocessor))

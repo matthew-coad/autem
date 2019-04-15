@@ -1,6 +1,7 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
 from .score_evaluation import ScoreEvaluation, get_score_evaluation
+from .score_resources import get_score_resources
 from .voting_evaluation import VotingEvaluation, get_voting_evaluation
 
 import numpy as np
@@ -23,7 +24,7 @@ class VotingContest(Evaluater):
         """
         Calculate the voting predictions for a list of members
         """
-        votes = np.array([ get_score_evaluation(m).league_predictions[league].astype(int) for m in members ])
+        votes = np.array([ get_score_resources(m).league_predictions[league].astype(int) for m in members ])
         predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=0, arr=votes)
         return predictions
 
@@ -68,7 +69,7 @@ class VotingContest(Evaluater):
         if voting_evaluation.evaluated:
             return None
 
-        if not 1 in get_score_evaluation(member).league_predictions:
+        if not 1 in get_score_resources(member).league_predictions:
             return None
 
         base_members = self.evaluate_base_members(member)

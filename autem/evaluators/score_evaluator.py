@@ -1,6 +1,7 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation
+from .score_evaluation import ScoreEvaluation, get_score_evaluation
+from .score_resources import ScoreResources, get_score_resources
 
 import numpy as np
 from scipy import stats
@@ -18,13 +19,7 @@ class ScoreEvaluator(Evaluater):
     """
 
     def __init__(self):
-        self.n_splits = 5
-
-    def get_score_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "score_evaluation"):
-            evaluation.score_evaluation = ScoreEvaluation()
-        return evaluation.score_evaluation
+        self.n_splits = 10
 
     def evaluate_folds(self, specie):
         """
@@ -88,10 +83,12 @@ class ScoreEvaluator(Evaluater):
         quick_score = scores[0]
         quick_duration = durations[0]
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
+        score_resources = get_score_resources(member)
+
         score_evaluation.quick_score = quick_score
         score_evaluation.quick_duration = quick_duration
-        score_evaluation.quick_predictions = predictions
+        score_resources.quick_predictions = predictions
 
         score_evaluation.scores = [ quick_score ]
         score_evaluation.score = quick_score
@@ -111,12 +108,13 @@ class ScoreEvaluator(Evaluater):
         if scores is None:
             return False
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
+        score_resources = get_score_resources(member)
         score_evaluation.league_scores[1] = [ score_evaluation.quick_score ] + scores
         score_evaluation.league_durations[1] = [ score_evaluation.quick_duration ] + durations
-        quick_predictions = score_evaluation.quick_predictions
+        quick_predictions = score_resources.quick_predictions
         league_predictions = np.where(np.isnan(predictions), quick_predictions, predictions)
-        score_evaluation.league_predictions[1] = league_predictions
+        score_resources.league_predictions[1] = league_predictions
         return True
 
     def evaluate_league_scores(self, member, league):
@@ -124,14 +122,15 @@ class ScoreEvaluator(Evaluater):
         if scores is None:
             return False
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
+        score_resources = get_score_resources(member)
         score_evaluation.league_scores[league] = scores
         score_evaluation.league_durations[league] = durations
-        score_evaluation.league_predictions[league] = predictions
+        score_resources.league_predictions[league] = predictions
         return True
 
     def evaluate_scores(self, member):
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
 
         scores = np.concatenate([ score_evaluation.league_scores[l] for l in score_evaluation.league_scores ])
         score_evaluation.scores = scores.tolist()
@@ -149,7 +148,7 @@ class ScoreEvaluator(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
         if member.league == 0 and score_evaluation.quick_score is None:
             self.evaluate_quick_score(member)
             return None
@@ -169,6 +168,6 @@ class ScoreEvaluator(Evaluater):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
         record.SE_score = score_evaluation.score
         record.SE_score_std = score_evaluation.score_std

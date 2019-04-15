@@ -39,8 +39,8 @@ class DiverseContest(Evaluater):
         scorer = simulation.get_scorer()
 
         max_league = max(contestant1.league, contestant2.league)
-        contestant1_score_evaluation = self.get_score_evaluation(contestant1)
-        contestant2_score_evaluation = self.get_score_evaluation(contestant2)
+        contestant1_score_evaluation = get_score_evaluation(contestant1)
+        contestant2_score_evaluation = get_score_evaluation(contestant2)
 
         if max_league == 0:
             return None

@@ -22,6 +22,7 @@ from .contest_judgement import ContestJudgement
 
 from .cross_val_rater import CrossValidationRater
 from .openML_rater import OpenMLRater
+from .score_rater import ScoreRater
 
 from .dummy_classifier_accuracy import DummyClassifierAccuracy
 

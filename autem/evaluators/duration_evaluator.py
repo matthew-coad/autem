@@ -1,5 +1,6 @@
 from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
+from .score_evaluation import ScoreEvaluation, get_score_evaluation
 
 import numpy as np
 from scipy import stats
@@ -10,12 +11,6 @@ class DurationEvaluator(Evaluater):
     """
     Assesses a members duration
     """
-
-    def get_score_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "score_evaluation"):
-            evaluation.score_evaluation = ScoreEvaluation()
-        return evaluation.score_evaluation
 
     def get_duration_evaluation(self, member):
         evaluation = member.evaluation
@@ -28,7 +23,7 @@ class DurationEvaluator(Evaluater):
 
         specie = member.get_specie()
 
-        score_evaluation = self.get_score_evaluation(member)
+        score_evaluation = get_score_evaluation(member)
         if not score_evaluation.score_duration:
             return None
 
@@ -38,7 +33,7 @@ class DurationEvaluator(Evaluater):
 
         base_durations = []
         for candidate in candidates:
-            base_durations.append(self.get_score_evaluation(candidate).score_duration)
+            base_durations.append(get_score_evaluation(candidate).score_duration)
 
         duration_evaluation = self.get_duration_evaluation(member)
 

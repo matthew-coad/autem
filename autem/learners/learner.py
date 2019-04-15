@@ -66,6 +66,6 @@ class Learner(Group):
                 parameter.set_value(member, value)
 
         # Build the pipeline
-        steps = member.get_resource("steps", [])
+        steps = member.get_resource("steps", lambda: [])
         steps.append((learner_name, model))
         member.set_resource("pipeline", Pipeline(steps=steps))

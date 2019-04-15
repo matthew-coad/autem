@@ -21,12 +21,12 @@ class Simulation:
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
-                max_species = 3, max_epochs = 10, max_rounds = 20, max_time = None, n_jobs = -1):
+                max_species = 3, max_epochs = 20, max_rounds = 10, max_time = None, n_jobs = -1):
         self.name = name
         self._settings = SimulationSettings(
             components  = components, properties = properties, seed = seed, 
             max_species = max_species, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
-            max_reincarnations = 3, max_population = 20, max_league = 4)
+            max_reincarnations = 3, max_population = 20, max_league = 3)
 
         self.outline = None
         self._resources = SimpleNamespace()

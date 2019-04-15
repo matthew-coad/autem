@@ -69,13 +69,27 @@ class Member:
     def get_resources(self):
         return self._resources
 
-    def get_resource(self, name, default = None):
+    def get_resource(self, name, default = lambda: None):
         if not hasattr(self._resources, name):
-            setattr(self._resources, name, default)
+            setattr(self._resources, name, default())
         return getattr(self._resources, name)
 
     def set_resource(self, name, value):
         setattr(self._resources, name, value)
+
+    # Evaluations
+
+    def get_evaluations(self):
+        return self.evaluation
+
+    def get_evaluation(self, name, default = lambda: None):
+        if not hasattr(self.evaluation, name):
+            setattr(self.evaluation, name, default())
+        return getattr(self.evaluation, name)
+
+    def set_evaluation(self, name, value):
+        setattr(self.evaluation, name, value)
+
 
     # Forms
 

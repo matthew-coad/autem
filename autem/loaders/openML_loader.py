@@ -8,7 +8,7 @@ import pandas as pd
 
 class OpenMLLoader(Loader):
 
-    def __init__(self, did, validation_size = 0.2):
+    def __init__(self, did, validation_size = None):
         self.did = did
         self.validation_size = validation_size
 
@@ -32,7 +32,10 @@ class OpenMLLoader(Loader):
             "string": string_features
         }
 
-        x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
+        if not validation_size is None:
+            x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
+        else:
+            x_train, x_validation, y_train, y_validation = (x, None, y, None)
 
         resources = simulation.get_resources()
 

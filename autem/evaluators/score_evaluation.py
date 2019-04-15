@@ -20,8 +20,4 @@ def get_score_evaluation(member):
     """
      Get score evaluation for a member
     """
-    evaluation = member.evaluation
-    if not hasattr(evaluation, "score_evaluation"):
-        evaluation.score_evaluation = ScoreEvaluation()
-    return evaluation.score_evaluation
-
+    return member.get_evaluation("score_evaluation", lambda: ScoreEvaluation())
