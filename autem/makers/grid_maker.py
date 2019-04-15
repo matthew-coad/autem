@@ -34,22 +34,17 @@ class GridMaker(Maker, Controller):
         grid = self.make_grid(specie)
         specie.resources.initialization_grid = grid
 
-    def make_member(self, specie):
+    def configure_member(self, member):
+        raise NotImplementedError()
         
-        simulation = specie.simulation
         random_state = simulation.random_state
         grid = specie.resources.initialization_grid
         grid_index = random_state.randint(0, len(grid))
         grid_item = grid[grid_index]
         del grid[grid_index]
 
-        member = Member(specie)
         for component in simulation.hyper_parameters:
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
-        specialized = simulation.specialize_member(member)
-        if specialized:
-            return member
-        else:
-            return None
+        return False

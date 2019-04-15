@@ -1,4 +1,5 @@
 from .component import Component
+from .maker import Maker
 
 import time
 
@@ -24,7 +25,7 @@ class Member:
         self.alive = 0
         self.final = 0
 
-        self.resources = None
+        self._resources = None
 
         self.fault = None
         self.fault_operation = None
@@ -46,16 +47,13 @@ class Member:
 
         self.ranking = None
 
-    # Environment
+    # Context
 
     def get_specie(self):
         return self._specie
 
     def get_settings(self):
         return self.get_specie().get_settings()
-
-    def get_resources(self):
-        return self.resources
 
     def get_random_state(self):
         return self.get_specie().get_random_state()
@@ -66,28 +64,133 @@ class Member:
     def get_loader(self):
         return self.get_specie().get_loader()
 
+    # Resources
+
+    def get_resources(self):
+        return self._resources
+
+    def get_resource(self, name, default = None):
+        if not hasattr(self._resources, name):
+            setattr(self._resources, name, default)
+        return getattr(self._resources, name)
+
+    def set_resource(self, name, value):
+        setattr(self._resources, name, value)
+
+    # Forms
+
+    def get_form(self):
+        """
+        Get this members form
+        """
+        return self.form
+
+    # Preparation
+
     def prepare(self):
         """
-        Prepare this member for incarnation
+        Perform pre-incarnation preparation
         """
-        self.resources = SimpleNamespace()
+        self._resources = SimpleNamespace()
         self.fault = None
         self.fault_operation = None
         self.fault_component = None
         self.fault_message = None
 
-    def incarnated(self, epoch, form, incarnation, reason):
+        for component in self.get_settings().get_hyper_parameters():
+            component.prepare_member(self)
+            if not self.fault is None:
+                break
+
+    def mutate(self, transmute):
         """
-        Notify this member that it has incarnated
+        Mutate the member
         """
-        if self.alive == 1:
-            raise RuntimeError("Member already incarnated")
-        self.form = form
-        self.incarnation = incarnation
-        self.incarnation_epoch_id = epoch.id
+        prior_repr = repr(self.configuration)
+        random_state = self.get_random_state()
+        components = self.get_settings().get_hyper_parameters()
+        n_components = len(components)
+
+        # Try each component in a random order until a component claims to have mutated the state
+        component_indexes = random_state.choice(n_components, size=n_components, replace=False)
+        for component_index in component_indexes:
+            component = components[component_index]
+            if not transmute:
+                mutated = component.mutate_member(self)
+            else:
+                mutated = component.transmute_member(self)
+            if mutated:
+                if repr(self.configuration) == prior_repr:
+                    raise RuntimeError("Configuration was not mutated as requested")
+                return True
+        return False
+
+    def get_transmutation_rate(self):
+        return 0.5
+
+    def specialize(self):
+        """
+        Make sure that the member has a new unique form
+        """
+        attempts = 0
+        max_attempts = 100
+        max_reincarnations = self.get_settings().get_max_reincarnations()
+
+        # Sometimes transmute the first mutation attept
+        transmute = self.get_random_state().random_sample() <= self.get_transmutation_rate()
+        while True:
+            self.prepare()
+            if self.fault is None:
+                form = self.get_specie().get_form(self.configuration)
+                if form.incarnations == 0 and form.reincarnations < max_reincarnations:
+                    return True
+            mutated = False
+            mutated = self.mutate(transmute)
+            transmute = False
+            attempts += 1
+            if attempts > max_attempts:
+                return False
+
+    def incarnate(self, reason):
+        """
+        Incarnate a new form
+        """
+
+        # Find all makers
+        makers = [ c for c in self.get_settings().get_components() if isinstance(c, Maker)]
+        maker_indexes = self.get_random_state().choice(len(makers), size = len(makers), replace=False)
+
+        # Invoke members in random order till one makes the member
+        configured = False
+        for maker_index in maker_indexes:
+            configured = makers[maker_index].configure_member(self)
+            if configured:
+                break
+
+        if not configured:
+            raise RuntimeError("Member not configured")
+
+        specialized = self.specialize()
+        if not specialized:
+            return False
+
         self.alive = 1
         self.event = "birth"
         self.event_reason = reason
+        self.evaluation_time = time.time()
+        self.wonlost = []
+        self.rating = None
+        self.rating_sd = None
+        self.ranking = None
+
+        epoch = self.get_specie().get_current_epoch()
+        self.incarnation_epoch_id = epoch.id
+
+        form = self.get_specie().get_form(self.configuration)
+        form.incarnate()
+        self.form = form
+        self.incarnation = form.reincarnations
+        return True
 
     def prepare_epoch(self, epoch):
         self.event = None
@@ -173,3 +276,10 @@ class Member:
         self.event_reason = reason
         self.alive = 0
         self.final = 1
+
+    def disembody(self):
+        """
+        Disembody the member
+        """
+        self.get_form().disembody()
+        self._resources = None

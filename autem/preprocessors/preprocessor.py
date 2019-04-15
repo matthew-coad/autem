@@ -44,7 +44,6 @@ class Preprocesssor(Group):
     def prepare_member(self, member):
         super().prepare_member(member)
 
-        resources = member.resources
         processor_name = self.name
         preprocessor = self.make_preprocessor(member)
         if preprocessor is None:
@@ -52,8 +51,6 @@ class Preprocesssor(Group):
 
         self.configure_preprocessor(member, preprocessor)
         self.update_parameters(member, preprocessor)
-        if not hasattr(resources, "steps"):
-            resources.steps = []
-            
-        steps = resources.steps
+
+        steps = member.get_resource("steps", [])
         steps.append((processor_name, preprocessor))

@@ -282,3 +282,19 @@ Outcome - Complete. Doesn't seem to improve performance. Target for a future stu
 Action - Constests are per round
 Justification - Obsolete behavior. Evolution is not based on rounds.
 Outcome - Complete.
+
+## SS-Resource leakage
+
+Resources like threads appear to be leaking.
+
+Action - Dispose all resources when a member is finished.
+Justification - Disposing of the pipeline contained within the resources may reclaim memory and dispose of threads.
+Outcome - Complete
+
+## SS-Contests too aggressive
+
+Members with low league levels are killing higher league contestants despite having poor accuracy.
+
+Action - You can only loose a contest to a member with the same or higher league level
+Justification - Low league levels can have really unaccurate scores. Low leaguers are killing higher league levels, then found to have poor accuracy
+Outcome - Complete

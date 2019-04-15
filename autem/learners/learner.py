@@ -66,10 +66,6 @@ class Learner(Group):
                 parameter.set_value(member, value)
 
         # Build the pipeline
-        resources = member.get_resources()
-        if not hasattr(resources, "steps"):
-            resources.steps = []
-        steps = resources.steps
+        steps = member.get_resource("steps", [])
         steps.append((learner_name, model))
-        pipeline = Pipeline(steps=steps)
-        resources.pipeline = pipeline
+        member.set_resource("pipeline", Pipeline(steps=steps))

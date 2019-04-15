@@ -71,7 +71,7 @@ class TopChoiceMaker(Maker, Controller):
     def start_epoch(self, epoch):
         self.evaluate_grid_predicted_scores(epoch.get_specie())
 
-    def make_grid_member(self, specie, grid_index):
+    def configure_grid_member(self, specie, member, grid_index):
         grid = specie.get_resources().initialization_grid
         grid_pred = specie.get_resources().initialization_grid_pred
         grid_item = grid[grid_index]
@@ -80,36 +80,28 @@ class TopChoiceMaker(Maker, Controller):
         if not grid_pred is None:
             del grid_pred[grid_index]
 
-        member = Member(specie)
         for component in specie.get_settings().get_hyper_parameters():
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
-        return member
+        return True
 
-    def make_top_member(self, specie):
+    def configure_top_member(self, specie, member):
         grid = specie.get_resources().initialization_grid
         grid_pred = specie.get_resources().initialization_grid_pred
         grid_index = grid_pred.index(max(grid_pred))
-        return self.make_grid_member(specie, grid_index)
+        return self.configure_grid_member(specie, member, grid_index)
 
-    def make_random_member(self, specie):
-        member = Member(specie)
-        for component in specie.get_settings().get_hyper_parameters():
+    def configure_random_member(self, member):
+        for component in member.get_settings().get_hyper_parameters():
             component.initialize_member(member)
-        specialized = specie.specialize_member(member)
-        if not specialized:
-            member = None
-        return member
+        return True
 
-    def make_member(self, specie):
+    def configure_member(self, member):
+        specie = member.get_specie()
         grid = specie.get_resources().initialization_grid
         grid_pred = specie.get_resources().initialization_grid_pred
         if grid is None or grid_pred is None:
-            member = self.make_random_member(specie)
+            return self.configure_random_member(member)
         else:
-            member = self.make_top_member(specie)
-        specialized = specie.specialize_member(member)
-        if not specialized:
-            member = None
-        return member
+            return self.configure_top_member(specie, member)

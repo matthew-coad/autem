@@ -199,7 +199,7 @@ class Simulation:
         record.round = round
         record.step = step
         record.member_id = member_id
-        record.form_id = member.form.id if member.form else None
+        record.form_id = member.get_form().id
         record.incarnation = member.incarnation
         record.incarnation_epoch = member.incarnation_epoch_id
         record.event_time = time.ctime(member.evaluation_time)

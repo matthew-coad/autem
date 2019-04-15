@@ -5,11 +5,7 @@ class RandomMaker(Maker):
     """
     Maker that just builds members randomly
     """
-    def make_member(self, specie):
-        member = Member(specie)
-        for component in specie.get_settings().get_hyper_parameters():
+    def configure_member(self, member):
+        for component in member.get_settings().get_hyper_parameters():
             component.initialize_member(member)
-        specialized = specie.specialize_member(member)
-        if not specialized:
-            member = None
-        return member
+        return True

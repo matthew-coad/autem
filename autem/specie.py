@@ -3,7 +3,6 @@ from .epoch import Epoch
 from .form import Form
 from .ranking import Ranking
 from .choice import Choice
-from .maker import Maker
 
 
 import numpy as np
@@ -37,8 +36,6 @@ class Specie:
         self._members = None
         self._graveyard = None
         self._forms = None
-
-        self._transmutation_rate = 0.5
 
     ## Environment
 
@@ -149,6 +146,20 @@ class Specie:
         epochs = [ e for e in self._epochs.values() if include_epoch(e) ]
         return epochs
 
+    ## Forms
+
+    def get_form(self, configuration):
+        """
+        Get form for a given configuration
+        """
+        form_key = repr(configuration)
+        if form_key in self._forms:
+            form = self._forms[form_key]
+        else:
+            form = Form(self.generate_id(), form_key)
+            self._forms[form_key] = form
+        return form
+
     ## Members
 
     def list_members(self, alive = None, top = None, buried = False):
@@ -168,99 +179,14 @@ class Specie:
             members = members + buried_members
         return members
 
-    def _mutate_member(self, member, transmute):
-        """
-        Mutate a member, making a guaranteed modification to its configuration
-        """
-        prior_repr = repr(member.configuration)
-        random_state = self.get_random_state()
-        components = self.get_settings().get_hyper_parameters()
-        n_components = len(components)
-
-        # Try each component in a random order until a component claims to have mutated the state
-        component_indexes = random_state.choice(n_components, size=n_components, replace=False)
-        for component_index in component_indexes:
-            component = components[component_index]
-            if not transmute:
-                mutated = component.mutate_member(member)
-            else:
-                mutated = component.transmute_member(member)
-            if mutated:
-                if repr(member.configuration) == prior_repr:
-                    raise RuntimeError("Configuration was not mutated as requested")
-                return True
-        return False
-
-    def _prepare_member(self, member):
-        """
-        Perform once off member preparation
-        """
-        member.prepare()
-        for component in self.get_settings().get_hyper_parameters():
-            component.prepare_member(member)
-            if not member.fault is None:
-                break
-
-    def specialize_member(self, member):
-        """
-        Make sure that the member has a new unique form
-        """
-        attempts = 0
-        max_attempts = 100
-        random_state = self.get_random_state()
-        max_reincarnations = self.get_settings().get_max_reincarnations()
-
-        # Sometimes transmute the first mutation attept
-        transmute = random_state.random_sample() <= self._transmutation_rate
-        while True:
-            self._prepare_member(member)
-            if member.fault is None:
-                form_key = repr(member.configuration)
-                if not form_key in self._forms:
-                    return True
-                form = self._forms[form_key]
-                if form.incarnations == 0 and form.reincarnations < max_reincarnations:
-                    return True
-            mutated = False
-            if attempts == 0:
-                mutated = self._mutate_member(member, transmute)
-            else:
-                mutated = self._mutate_member(member, False)
-            if not mutated:
-                return False
-
-            attempts += 1
-            if attempts > max_attempts:
-                return False
-
     def make_member(self, reason):
         """
         Make a new member
         """
-
-        # Find all makers
-        makers = [ c for c in self.get_settings().get_components() if isinstance(c, Maker)]
-        maker_indexes = self.get_random_state().choice(len(makers), size = len(makers), replace=False)
-
-        # Invoke members in random order till one makes the member
-        for maker_index in maker_indexes:
-            member = makers[maker_index].make_member(self)
-            if member:
-                break
-        if not member:
-            raise RuntimeError("Member not created")
-        form_key = repr(member.configuration)
-        if form_key in self._forms:
-            form = self._forms[form_key]
-        else:
-            form = Form(self.generate_id(), form_key)
-            self._forms[form_key] = form
-        form.incarnate()
-
-        epoch = self.get_current_epoch()
-        member.prepare_epoch(epoch)
-        member.prepare_round(epoch.get_round())
-        member.incarnated(epoch, form, form.reincarnations, reason)
+        member = Member(self)
+        incarnated = member.incarnate(reason)
+        if not incarnated:
+            return None
         self._members.append(member)
         return member
 
@@ -268,9 +194,9 @@ class Specie:
         """
         Remove a member from the active pool
         """
+        member.disembody()
         self._graveyard.append(member)
         self._members.remove(member)
-        member.form.disembody()
 
     ## Ranking
 

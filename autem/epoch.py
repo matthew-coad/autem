@@ -213,7 +213,7 @@ class Epoch:
         if not contestant1.alive and not contestant2.alive:
             raise RuntimeError("Contestants not alive")
 
-        if contestant1.form is contestant2.form:
+        if contestant1.get_form() is contestant2.get_form():
             raise RuntimeError("Contestants have duplicate forms")
 
         for component in self.get_settings().get_controllers():

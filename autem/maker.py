@@ -2,8 +2,8 @@ from .controller import Controller
 
 class Maker(Controller):
 
-    def make_member(self, specie):
+    def configure_member(self, member):
         """
-        Make a new member
+        Configure a new member
         """
         pass
