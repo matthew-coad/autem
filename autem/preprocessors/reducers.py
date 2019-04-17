@@ -41,7 +41,7 @@ class FastICA(Reducer):
         Reducer.__init__(self, "FIC", "Fast ICA", make_choice_list(self.config))
 
     def make_preprocessor(self, member):
-        return sklearn.decomposition.FastICA()
+        return sklearn.decomposition.FastICA(tol = 0.05)
 
 class FeatureAgglomeration(Reducer):
 
@@ -61,8 +61,8 @@ class FeatureAgglomeration(Reducer):
 class PCA(Reducer):
 
     config = {
-        'nominal': {
-            'iterated_power': [ 'auto' ] + list(map(str, range(1, 11)))
+        'numeric': {
+            'iterated_power': range(1, 11)
         },
     }
 
@@ -70,4 +70,4 @@ class PCA(Reducer):
         Reducer.__init__(self, "PCA", "PCA", make_choice_list(self.config))
 
     def make_preprocessor(self, member):
-        return sklearn.decomposition.PCA(svd_solver = 'randomized')
+        return sklearn.decomposition.PCA(svd_solver = 'randomized', iterated_power=3)

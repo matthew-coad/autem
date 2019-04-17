@@ -1,8 +1,8 @@
 from .. import Maker, Member, Controller, Choice
 
-class CrossoverMaker(Maker, Controller):
+class MuationMaker(Maker, Controller):
     """
-    Makes new members by a cross over operation
+    Makes a new member by mutating a top member
     """
 
     def configure_member(self, member):

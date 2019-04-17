@@ -1,7 +1,7 @@
 from .. import Dataset, Role, WarningInterceptor, Choice
 from .evaluator import Evaluater
 from .score_evaluation import ScoreEvaluation, get_score_evaluation
-from .parameter_state import ParameterEvaluation, get_parameter_evaluation, ParameterModelResources, get_parameter_models
+from .parameter_state import ParameterEvaluation, get_parameter_evaluation, set_parameter_evaluation, ParameterModel, ParameterModelResources, get_parameter_models
 
 import numpy as np
 import pandas as pd
@@ -13,8 +13,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold
 from sklearn.gaussian_process import GaussianProcessRegressor
 import sklearn.gaussian_process.kernels as kernels
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 
 import warnings
@@ -62,7 +61,7 @@ class ParameterEvaluator(Evaluater):
                 match = match and component.get_active_component_name(member) == choices[component.name]
             return match
         members = [ m for m in members if choices_match(m) ]
-        if len(members) < 5:
+        if not members:
             return None
 
         # Build a frame containing for each member its parameters
@@ -90,10 +89,11 @@ class ParameterEvaluator(Evaluater):
 
         # Get the data
         df = self.build_member_score_df(specie, choices)
-        if df is None or df.shape[0] == 0:
+        if df is None or df.shape[0] < 5:
             return None
 
         # Extract the parameters as the response variables
+        contribution_count = df.shape[0]
         parameters = self.get_parameter_components(specie, choices)
         parameter_names = [ p.get_record_name() for p in parameters ]
         x = df.loc[:, parameter_names]
@@ -112,7 +112,7 @@ class ParameterEvaluator(Evaluater):
 
         # We create the preprocessing pipelines for both numeric and categorical data.
         # numeric_features = [0, 1, 2, 5, 6]
-        numeric_scaler = PowerTransformer(method='yeo-johnson', standardize=True)
+        numeric_scaler = StandardScaler()
         numeric_transformer = numeric_scaler
 
         # categorical_features = [3, 4, 7, 8]
@@ -135,16 +135,19 @@ class ParameterEvaluator(Evaluater):
             ('prep', preprocessor),
             ('regressor', regressor)
         ])
-        try:
-            pipeline.fit(x, y)
-        except:
-            raise RuntimeError("Fit failed")
-        return pipeline
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            try:
+                pipeline.fit(x, y)
+            except Exception as ex:
+                return None
+        return ParameterModel(pipeline, contribution_count)
 
     def evaluate_model(self, specie, choices):
 
         # Get the cached model
-        models = get_parameter_models(specie).score_models
+        models = get_parameter_models(specie).models
         model_key = str(choices)
         model = None
         if model_key in models:
@@ -154,7 +157,6 @@ class ParameterEvaluator(Evaluater):
             model = self.build_model(specie, choices)
             if not model is None:
                 models[model_key] = model
-
         return model
 
     def build_predicted_score(self, member, choices):
@@ -164,9 +166,10 @@ class ParameterEvaluator(Evaluater):
 
         # Get the model
         specie = member.get_specie()
-        model = self.evaluate_model(specie, choices)
-        if model is None:
-            return (None, None)
+        parameter_model = self.evaluate_model(specie, choices)
+        parameter_evaluation = ParameterEvaluation()
+        if parameter_model is None:
+            return parameter_evaluation
 
         # Build the parmaeters into a data from
         parameters = self.get_parameter_components(specie, choices)
@@ -174,8 +177,11 @@ class ParameterEvaluator(Evaluater):
         x = pd.DataFrame(parameter_values)
 
         # And do the prediction
-        pred_y, pred_y_std = model.predict(x, return_std=True)
-        return (pred_y[0], pred_y_std[0])
+        pred_y, pred_y_std = parameter_model.model.predict(x, return_std=True)
+        parameter_evaluation.predicted_score = pred_y[0]
+        parameter_evaluation.predicted_score_std = pred_y_std[0]
+        parameter_evaluation.contribution_count = parameter_model.contribution_count
+        return parameter_evaluation
 
     def evaluate_member(self, member):
 
@@ -187,9 +193,8 @@ class ParameterEvaluator(Evaluater):
         choice_components = self.get_choice_components(specie)
         choices = dict([ (c.name, c.get_active_component_name(member)) for c in choice_components])
 
-        predicted_score, predicted_score_std = self.build_predicted_score(member, choices)
-        parameter_evaluation.predicted_score = predicted_score
-        parameter_evaluation.predicted_score_std = predicted_score_std
+        parameter_evaluation = self.build_predicted_score(member, choices)
+        set_parameter_evaluation(member, parameter_evaluation)
 
     def start_epoch(self, epoch):
         # Force all score models to be recalculated at the start of every epoch
@@ -203,3 +208,4 @@ class ParameterEvaluator(Evaluater):
 
         record.PE_score = parameter_evaluation.predicted_score
         record.PE_score_std = parameter_evaluation.predicted_score_std
+        record.PE_contributions = parameter_evaluation.contribution_count

@@ -1,10 +1,12 @@
 from .parameter import Parameter
 
+import numpy as np
+
 class ChoicesParameter(Parameter):
 
-    def __init__(self, name, label, type, choices, shared = False):
-        Parameter.__init__(self, name, label, type, shared)
-        self.choices = choices
+    def __init__(self, name, label, feature_type, choices, shared = False):
+        Parameter.__init__(self, name, label, feature_type, shared)
+        self.choices = choices if not type(choices) is np.ndarray else choices.tolist()
         if len(choices) < 2:
             raise RuntimeError("At least 2 choices required")
 

@@ -58,4 +58,4 @@ class Nystroem(Approximator):
         Approximator.__init__(self, "NYS", "Nystroem", make_choice_list(self.config))
 
     def make_preprocessor(self, member):
-        return sklearn.kernel_approximation.Nystroem()
+        return sklearn.kernel_approximation.Nystroem(gamma = 0.2, n_components = 10)
