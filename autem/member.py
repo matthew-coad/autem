@@ -140,7 +140,7 @@ class Member:
         return False
 
     def get_transmutation_rate(self):
-        return 0.5
+        return 0.0
 
     def specialize(self):
         """

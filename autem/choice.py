@@ -62,12 +62,15 @@ class Choice(HyperParameter):
         """
         setattr(member.configuration, self.name, component_name)
 
-    def get_active_component(self, member):
-        component_name = self.get_active_component_name(member)
+    def get_component(self, component_name):
         candidates = [c for c in self.components if c.name == component_name]
         if len(candidates) != 1:
-            raise RuntimeError("Cannot find active component")
+            raise RuntimeError("Cannot find component")
         return candidates[0]
+
+    def get_active_component(self, member):
+        active_component = self.get_component(self.get_active_component_name(member))
+        return active_component
 
     # Initialize
 

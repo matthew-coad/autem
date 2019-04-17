@@ -31,8 +31,8 @@ class NoSelector(Selector):
 class SelectPercentile(Selector):
 
     def __init__(self):
-        scorer_parameter = ChoicesParameter("scorer", "scorer", ['f_classif', 'mutual_info_classif', 'chi2'])
-        percentile_parameter = ChoicesParameter("percentile", "percentile", [1,2,5,10,20,30,40,50,60,70,80,90,95,100])
+        scorer_parameter = ChoicesParameter("scorer", "scorer", 'nominal', ['f_classif', 'mutual_info_classif', 'chi2'])
+        percentile_parameter = ChoicesParameter("percentile", "percentile", 'numeric', [1,2,5,10,20,30,40,50,60,70,80,90,95,100])
         Selector.__init__(self, "LPC", "Select Percentile", [scorer_parameter, percentile_parameter])
 
     def make_preprocessor(self, member):
@@ -66,7 +66,7 @@ class SelectPercentile(Selector):
 class VarianceThreshold(Selector):
 
     def __init__(self):
-        threshold_parameter = ChoicesParameter("threshold", "threshold", [0.0, 0.05, 0.1, 0.15, 0.2])
+        threshold_parameter = ChoicesParameter("threshold", "threshold", "numeric", [0.0, 0.05, 0.1, 0.15, 0.2])
         Selector.__init__(self, "LVT", "Variance Threshold", [threshold_parameter])
 
     def make_preprocessor(self, member):

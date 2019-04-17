@@ -63,6 +63,19 @@ class Specie:
     def generate_id(self):
         return self._simulation.generate_id()
 
+    # Resources
+
+    def get_resources(self):
+        return self._resources
+
+    def get_resource(self, name, default = lambda: None):
+        if not hasattr(self._resources, name):
+            setattr(self._resources, name, default())
+        return getattr(self._resources, name)
+
+    def set_resource(self, name, value):
+        setattr(self._resources, name, value)
+
     ## Lifecycle
 
     def should_finish(self):

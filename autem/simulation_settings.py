@@ -2,7 +2,7 @@ class SimulationSettings:
 
     def __init__(self,
             components, properties, seed, 
-            max_species, max_epochs, max_rounds, max_time, n_jobs,
+            max_species, max_epochs, max_rounds, max_time, n_jobs, memory,
             max_reincarnations, max_population, max_league):
         self.components = components
         self.properties = properties
@@ -12,6 +12,7 @@ class SimulationSettings:
         self._max_rounds = max_rounds
         self._max_time = max_time
         self._n_jobs = n_jobs
+        self._memory = memory
 
         self._max_reincarnations = max_reincarnations
         self._max_population = max_population
@@ -54,4 +55,7 @@ class SimulationSettings:
 
     def get_n_jobs(self):
         return self._n_jobs
+
+    def get_memory(self):
+        return self._memory
 

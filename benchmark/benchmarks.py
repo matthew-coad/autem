@@ -28,7 +28,7 @@ def get_simulations_path():
 def get_version():
     return 14
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_species = 3, max_epochs = 20, max_time = None, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_species = 3, max_epochs = 20, max_time = None, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
@@ -37,7 +37,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
     simulation_name = "%s_%s_v%d" % (study, experiment, version)
     properties['study'] = study
     properties['experiment'] = experiment
-    properties['dataset'] = dataset_name        
+    properties['dataset'] = dataset_name
     properties['version'] = version
     
     simulation = autem.Simulation(
@@ -48,6 +48,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
 
             evaluators.ScoreEvaluator(),
             evaluators.ChoiceEvaluator(),
+            evaluators.ParameterEvaluator(),
             baselines.BaselineStats(baseline_name),
             evaluators.DurationEvaluator(),
 
@@ -105,13 +106,13 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
-                learners.RadialBasisSVC(),
-                learners.PolySVC(),
+                #learners.RadialBasisSVC(),
+                #learners.PolySVC(),
                 learners.LogisticRegression(),
                 learners.LinearDiscriminantAnalysis(),
 
-                learners.RandomForestClassifier(),
-                learners.ExtraTreesClassifier(),
+                #learners.RandomForestClassifier(),
+                #learners.ExtraTreesClassifier(),
             ]),
         ], 
         seed = seed,
@@ -119,7 +120,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
         max_time = max_time,
         max_species = max_species,
         properties = properties,
-        n_jobs=6)
+        n_jobs=6,
+        memory=memory)
     return simulation
 
 def run_benchmark_simulation(study, baseline_name):

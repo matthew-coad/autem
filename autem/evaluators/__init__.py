@@ -6,6 +6,9 @@ from .score_evaluator import ScoreEvaluator
 from .choice_evaluation import ChoiceEvaluation
 from .choice_evaluator import ChoiceEvaluator
 
+from .parameter_evaluator import ParameterEvaluator
+from .parameter_state import get_parameter_evaluation
+
 from .duration_evaluation import DurationEvaluation
 from .duration_evaluator import DurationEvaluator
 

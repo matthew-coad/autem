@@ -2,8 +2,8 @@ from .parameter import Parameter
 
 class ChoicesParameter(Parameter):
 
-    def __init__(self, name, label, choices, shared = False):
-        Parameter.__init__(self, name, label, shared)
+    def __init__(self, name, label, type, choices, shared = False):
+        Parameter.__init__(self, name, label, type, shared)
         self.choices = choices
         if len(choices) < 2:
             raise RuntimeError("At least 2 choices required")
@@ -16,12 +16,20 @@ class ChoicesParameter(Parameter):
         choice_index = random_state.randint(0, len(self.choices))
         return self.choices[choice_index]
 
-def make_choice(name, choices):
-    return ChoicesParameter(name, name, choices)
+def make_choice(name, type, choices):
+    return ChoicesParameter(name, name, type, choices)
 
 def make_choice_list(choice_dict):
     """
     Make a set of choice parameters from a dictionary of name, choices dictionary
     """
-    parameters = [ make_choice(k, choice_dict[k]) for k in choice_dict]
-    return parameters
+    def make_type_choice_list(type):
+        if not type in ['numeric', 'nominal']:
+            raise RuntimeError("Invalid choice type")
+        if not type in choice_dict:
+            return []
+        return [ make_choice(k, type, choice_dict[type][k]) for k in choice_dict[type]]
+    choice_list = []
+    for key in choice_dict:
+        choice_list = choice_list + make_type_choice_list(key)
+    return choice_list

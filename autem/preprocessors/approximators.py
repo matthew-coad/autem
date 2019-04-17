@@ -31,7 +31,9 @@ class NoApproximator(Approximator):
 class RBFSampler(Approximator):
 
     config = {
-        'gamma': np.arange(0.0, 1.01, 0.05)
+        'numeric': {
+            'gamma': np.arange(0.0, 1.01, 0.05)
+        }
     }
 
     def __init__(self):
@@ -43,9 +45,13 @@ class RBFSampler(Approximator):
 class Nystroem(Approximator):
 
     config = {
-        'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
-        'gamma': np.arange(0.0, 1.01, 0.05),
-        'n_components': range(1, 11)
+        'nominal': {
+            'kernel': ['rbf', 'cosine', 'chi2', 'laplacian', 'polynomial', 'poly', 'linear', 'additive_chi2', 'sigmoid'],
+        },
+        'numeric': {
+            'gamma': np.arange(0.0, 1.01, 0.05),
+            'n_components': range(1, 11)
+        }
     }
 
     def __init__(self):

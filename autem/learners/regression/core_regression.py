@@ -1,5 +1,5 @@
 from ..learner import Learner
-from ... import Dataset, Role, ChoicesParameter
+from ... import Dataset, Role, ChoicesParameter, make_choice_list
 
 import sklearn.linear_model 
 import sklearn.tree 
@@ -13,11 +13,7 @@ def convert_parameters(learner_dict, override_parameters = None):
     if not override_parameters is None:
         return override_parameters
 
-    def _parameter(key, values):
-        return ChoicesParameter(key, key, values)
-
-    parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
-    return parameters
+    return make_choice_list(learner_dict)
 
 class AdaBoostRegressor(Learner):
 

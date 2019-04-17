@@ -4,12 +4,16 @@ from .component import Component
 
 class Parameter(Component):
 
-    def __init__(self, name, label, shared = False):
+    def __init__(self, name, label, type, shared = False):
         self.name = name
         self.label = label
+        self.type = type
         self.group_name = None
         self.choice_name = None
         self.shared = shared
+
+        if not type in ["nominal", "numeric"]:
+            raise RuntimeError("Type is not valid")
 
     def is_hyper_parameter(self):
         """

@@ -32,7 +32,9 @@ class NoReducer(Reducer):
 class FastICA(Reducer):
 
     config = {
-        'tol': np.arange(0.0, 1.01, 0.05)
+        'numeric': {
+            'tol': np.arange(0.0, 1.01, 0.05)
+        }
     }
 
     def __init__(self):
@@ -44,8 +46,10 @@ class FastICA(Reducer):
 class FeatureAgglomeration(Reducer):
 
     config = {
-        'linkage': ['ward', 'complete', 'average'],
-        'affinity': ['euclidean', 'l1', 'l2', 'manhattan', 'cosine']
+        'nominal': {
+            'linkage': ['ward', 'complete', 'average'],
+            'affinity': ['euclidean', 'l1', 'l2', 'manhattan', 'cosine']
+        },
     }
 
     def __init__(self):
@@ -57,7 +61,9 @@ class FeatureAgglomeration(Reducer):
 class PCA(Reducer):
 
     config = {
-        'iterated_power': range(1, 11)
+        'nominal': {
+            'iterated_power': [ 'auto' ] + list(map(str, range(1, 11)))
+        },
     }
 
     def __init__(self):

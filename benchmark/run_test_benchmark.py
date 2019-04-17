@@ -35,9 +35,10 @@ def run_test_simulation(baseline_name = None, seed = None):
     species = get_test_species()
 
     path = get_test_simulations_path().joinpath(study).joinpath(experiment)
+    memory = str(get_test_simulations_path().joinpath(study).joinpath("cache"))
 
     utility.prepare_OpenML()
-    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs=epochs, max_species=species)
+    simulation = benchmark.make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory = memory, max_epochs=epochs, max_species=species)
     simulation.run()
     autem.ReportManager(path).update_combined_reports()
 

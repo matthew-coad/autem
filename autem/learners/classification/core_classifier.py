@@ -1,5 +1,5 @@
 from ..learner import Learner
-from ... import Dataset, Role, ChoicesParameter
+from ... import Dataset, Role, ChoicesParameter, make_choice, make_choice_list
 
 import sklearn.linear_model
 import sklearn.neighbors
@@ -19,85 +19,118 @@ classifier_config_dict = {
     },
 
     'sklearn.naive_bayes.BernoulliNB': {
-        'alpha': [1e-3, 1e-2, 1e-1, 1., 10., 100.],
-        'fit_prior': [True, False]
+        'numeric' : {
+            'alpha': [1e-3, 1e-2, 1e-1, 1., 10., 100.],
+        },
+        'nominal': {
+            'fit_prior': [True, False],
+        }
     },
 
     'sklearn.naive_bayes.MultinomialNB': {
-        'alpha': [1e-3, 1e-2, 1e-1, 1., 10., 100.],
-        'fit_prior': [True, False]
+        'numeric' : {
+            'alpha': [1e-3, 1e-2, 1e-1, 1., 10., 100.],
+        },
+        'nominal': {
+            'fit_prior': [True, False]
+        },
     },
 
     'sklearn.tree.DecisionTreeClassifier': {
-        'criterion': ["gini", "entropy"],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21)
+        'numeric' : {
+            'max_depth': range(1, 11),
+            'min_samples_split': range(2, 21),
+            'min_samples_leaf': range(1, 21)
+        },
+        'nominal': {
+            'criterion': ["gini", "entropy"],
+        },
     },
 
     'sklearn.ensemble.ExtraTreesClassifier': {
+        'numeric' : {
+            'criterion': ["gini", "entropy"],
+            'max_features': np.arange(0.05, 1.01, 0.05),
+            'min_samples_split': range(2, 21),
+            'min_samples_leaf': range(1, 21),
+        },
         #'n_estimators': [100],
-        'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
         #'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.RandomForestClassifier': {
-        'criterion': ["gini", "entropy"],
-        'max_features': np.arange(0.05, 1.01, 0.05),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf':  range(1, 21),
+        'numeric' : {
+            'max_features': np.arange(0.05, 1.01, 0.05),
+            'min_samples_split': range(2, 21),
+            'min_samples_leaf':  range(1, 21),
+        },
+        'nominal': {
+            'criterion': ["gini", "entropy"],
+        },
+
         #'bootstrap': [True, False]
     },
 
     'sklearn.ensemble.GradientBoostingClassifier': {
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'max_depth': range(1, 11),
-        'min_samples_split': range(2, 21),
-        'min_samples_leaf': range(1, 21),
-        'subsample': np.arange(0.05, 1.01, 0.05),
-        'max_features': np.arange(0.05, 1.01, 0.05)
+        'numeric' : {
+            'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
+            'max_depth': range(1, 11),
+            'min_samples_split': range(2, 21),
+            'min_samples_leaf': range(1, 21),
+            'subsample': np.arange(0.05, 1.01, 0.05),
+            'max_features': np.arange(0.05, 1.01, 0.05)
+        },
     },
 
     'sklearn.neighbors.KNeighborsClassifier': {
-        'n_neighbors': range(1, 101),
-        'weights': ["uniform", "distance"],
-        'p': [1, 2]
+        'numeric' : {
+            'n_neighbors': range(1, 101),
+        },
+        'nominal': {
+            'weights': ["uniform", "distance"],
+            'p': [1, 2],
+        },
     },
 
     'sklearn.linear_model.LogisticRegression': {
-        'penalty': ["l1", "l2"],
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
-        'dual': [True, False]
+        'numeric' : {
+            'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25.],
+        },
+        'nominal': {
+            'penalty': ["l1", "l2"],
+            'dual': [True, False],
+        },
     },
 
     'xgboost.XGBClassifier': {
-        'n_estimators': [100],
-        'max_depth': range(1, 11),
-        'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-        'subsample': np.arange(0.05, 1.01, 0.05),
-        'min_child_weight': range(1, 21),
-        'nthread': [1]
+        'numeric' : {
+            'max_depth': range(1, 11),
+            'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
+            'subsample': np.arange(0.05, 1.01, 0.05),
+            'min_child_weight': range(1, 21),
+        },
+        'nominal': {
+            'n_estimators': [100],
+            'nthread': [1]
+
+        },
     }
 
 }
 
-def convert_parameters(learner_dict, override_parameters = None):
-
+def get_parameters(config, override_parameters = None):
     if not override_parameters is None:
         return override_parameters
 
-    def _parameter(key, values):
-        return ChoicesParameter(key, key, values)
-
-    parameters = [ _parameter(k, learner_dict[k]) for k in learner_dict]
+    learner_dict = classifier_config_dict[config]
+    parameters = make_choice_list(learner_dict)
     return parameters
 
-def get_parameters(config, override_parameters = None):
-    learner_dict = classifier_config_dict[config]
-    parameters = convert_parameters(learner_dict, override_parameters)
+def convert_parameters(config_dict, override_parameters = None):
+    if not override_parameters is None:
+        return override_parameters
+
+    parameters = make_choice_list(config_dict)
     return parameters
 
 class GaussianNB(Learner):
@@ -167,11 +200,15 @@ class KNeighborsClassifier(Learner):
 class LinearSVC(Learner):
 
     config_dict = {
-        'penalty': ["l1", "l2"],
-        'loss': ["hinge", "squared_hinge"],
-        'dual': [True, False],
-        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0]
+        'nominal': {
+            'penalty': ["l1", "l2"],
+            'loss': ["hinge", "squared_hinge"],
+            'dual': [True, False],
+        },
+        'numeric': {
+            'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+            'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0]
+        }
     }
 
     def __init__(self, parameters = None):
@@ -183,9 +220,11 @@ class LinearSVC(Learner):
 class RadialBasisSVC(Learner):
 
     config_dict = { 
-        'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
-        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+        'numeric': {
+            'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
+            'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
+            'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+        },
     }
 
     def __init__(self, parameters = None):
@@ -197,10 +236,14 @@ class RadialBasisSVC(Learner):
 class PolySVC(Learner):
 
     config_dict = { 
-        'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
-        'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
-        'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
-        'degree' : [2,3,4,5]
+        'numeric': {
+            'gamma': [.1, 1e-2, 1e-3, 1e-4, 1e-5], 
+            'tol': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+            'C': [1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1., 5., 10., 15., 20., 25., 50., 100.0, 500.0, 1000.0],
+        },
+        'nominal': {
+            'degree' : [2,3,4,5]
+        },
     }
 
     def __init__(self, parameters = None):

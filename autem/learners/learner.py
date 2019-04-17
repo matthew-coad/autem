@@ -68,4 +68,6 @@ class Learner(Group):
         # Build the pipeline
         steps = member.get_resource("steps", lambda: [])
         steps.append((learner_name, model))
-        member.set_resource("pipeline", Pipeline(steps=steps))
+        memory = member.get_settings().get_memory()
+        pipeline = Pipeline(steps=steps, memory=memory)
+        member.set_resource("pipeline", pipeline)

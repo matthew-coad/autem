@@ -13,7 +13,7 @@ import numpy as np
 class Scaler(Preprocesssor):
 
     def __init__(self, name, label, parameters):
-        config_parameter = ChoicesParameter('num__imp__strategy', 'strategy', ['mean', 'median'], True)
+        config_parameter = ChoicesParameter('num__imp__strategy', 'strategy', 'nominal', ['mean', 'median'], True)
         parameters = [config_parameter] + parameters
         Preprocesssor.__init__(self, name, label, parameters)
 
@@ -105,7 +105,9 @@ class MinMaxScaler(Scaler):
 class Normalizer(Scaler):
 
     config = {
-        'num__scaler__norm': ['l1', 'l2', 'max']
+        'nominal' : {
+            'num__scaler__norm': ['l1', 'l2', 'max']
+        }
     }
 
     def __init__(self):
@@ -125,7 +127,9 @@ class RobustScaler(Scaler):
 class StandardScaler(Scaler):
 
     config = {
-        'num__scaler__with_mean': [True, False]
+        'nominal' : {
+            'num__scaler__with_mean': [True, False]
+        },
     }
 
     def __init__(self):
@@ -137,7 +141,9 @@ class StandardScaler(Scaler):
 class Binarizer(Scaler):
 
     config = {
-        'num__scaler__threshold': np.arange(0.0, 1.01, 0.05)
+        'numeric' : {
+            'num__scaler__threshold': np.arange(0.0, 1.01, 0.05)
+        }
     }
 
     def __init__(self):
