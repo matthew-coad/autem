@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "SS2"
+    return "TN1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -131,13 +131,14 @@ def run_benchmark_simulation(study, baseline_name):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    epochs = 10
-    species = 3
+    spotchecks = 1
+    tunes = 1
     max_time = 2 * 60 * 60
     path = get_simulations_path().joinpath(study).joinpath(experiment)
+    memory = str(path.joinpath("cache"))
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, max_epochs=epochs, max_species=species)
+    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory=memory, max_spotchecks=spotchecks, max_tunes = tunes)
     simulation.run()
     autem.ReportManager(path).update_combined_reports()
 
