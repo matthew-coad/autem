@@ -8,7 +8,7 @@ import pandas as pd
 
 class OpenMLLoader(Loader):
 
-    def __init__(self, did, validation_size = None):
+    def __init__(self, did, validation_size = 0.2):
         self.did = did
         self.validation_size = validation_size
 

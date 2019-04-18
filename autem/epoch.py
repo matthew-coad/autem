@@ -135,7 +135,8 @@ class Epoch:
         self._round += 1
 
         specie = self.get_specie()
-        operation_name = "Evaluating %s specie %s epoch %s:" % (self._simulation.name, specie.id, self.id)
+        mode = specie.get_mode()
+        operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self._simulation.name, specie.id, mode, self.id)
         current_round = self.get_round()
         max_population = self.get_settings().get_max_population()
         max_rounds = self.get_settings().get_max_rounds()
@@ -149,12 +150,12 @@ class Epoch:
         # Promote all living members
         for member in members:
             if member.league < max_league:
-                member.promote("Fit")
+                member.promote("Survived")
 
         # Repopulate
         make_count = max_population - len(members)
         for make_index in range(make_count):
-            self.make_member("Repopulate")
+            self.make_member("Population low")
 
         # If we run out of search space the population can crash.
         # Make sure we don't get into an infinite loop.
@@ -210,11 +211,11 @@ class Epoch:
 
     def contest_members(self, contestant1, contestant2):
 
-        if not contestant1.alive and not contestant2.alive:
-            raise RuntimeError("Contestants not alive")
-
         if contestant1.get_form() is contestant2.get_form():
             raise RuntimeError("Contestants have duplicate forms")
+
+        if not contestant1.alive or not contestant2.alive:
+            return None
 
         for component in self.get_settings().get_controllers():
             component.contest_members(contestant1, contestant2)
@@ -246,7 +247,8 @@ class Epoch:
         inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
         specie = self.get_specie()
-        progress_prefix = "Rating %s specie %s epoch %s:" % (self._simulation.name, specie.id, self.id)
+        mode = specie.get_mode()
+        progress_prefix = "Rating %s specie %s mode %s epoch %s:" % (self._simulation.name, specie.id, mode, self.id)
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):
@@ -255,17 +257,17 @@ class Epoch:
             printProgressBar(n_inductees, n_inductees, prefix = progress_prefix, length = 50)
 
         candidates = [m for m in inductees if not m.rating is None]
+        ranked_candidates = list(reversed(sorted(candidates, key=lambda member: member.rating)))
+        rank = 1
+        for candidate in ranked_candidates:
+            candidate.ranked(rank)
+            rank += 1
+
         ranking = Ranking()
-        if not candidates:
+        if not ranked_candidates:
             ranking.inconclusive()
         else:
-            candidates = sorted(candidates, key=lambda member: member.rating)
-            ranking.conclusive(candidates)
-
-        rank = len(candidates)
-        for candidate in candidates:
-            candidate.ranked(rank)
-            rank -= 1
+            ranking.conclusive(ranked_candidates)
 
         self._ranking = ranking
         return ranking

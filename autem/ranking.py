@@ -26,7 +26,7 @@ class Ranking(SimpleNamespace):
     def get_top_member(self):
         if not self.is_conclusive():
             return None
-        member = next((m for m in self.members if m.ranking == 1), None)
+        member = self.members[0]
         return member
 
     def is_uncontested(self):

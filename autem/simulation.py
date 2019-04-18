@@ -21,12 +21,12 @@ class Simulation:
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
-                max_species = 3, max_epochs = 20, max_rounds = 10, max_time = None, n_jobs = -1, memory = None):
+                max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
         self.name = name
         self._settings = SimulationSettings(
             components  = components, properties = properties, seed = seed, 
-            max_species = max_species, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
-            max_reincarnations = 3, max_population = 20, max_league = 3, memory = memory)
+            max_spotchecks = max_spotchecks, max_tunes = max_tunes, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
+            max_reincarnations = 3, max_population = 20, max_league = 4, memory = memory)
 
         self.outline = None
         self._resources = SimpleNamespace()
@@ -51,13 +51,14 @@ class Simulation:
     def get_settings(self):
         return self._settings
 
-    def list_species(self, alive = None):
+    def list_species(self, alive = None, mode = None):
         """
         List species
         """
         def include_specie(specie):
             alive_passed = alive is None or specie.get_alive() == alive
-            return alive_passed
+            mode_passed = mode is None or specie.get_mode() == mode
+            return alive_passed and mode_passed
 
         species = [ s for s in self._species.values() if include_specie(s) ]
         return species
@@ -102,15 +103,18 @@ class Simulation:
         duration = time.time() - self.get_start_time()
         specie = self.get_current_specie()
 
-        max_species = self.get_settings().get_max_species()
-        n_species = len(self.list_species())
+        max_spotchecks = self.get_settings().get_max_spotchecks()
+        n_spotchecks = len(self.list_species(mode = "spotcheck" ))
 
-        if n_species == max_species:
-            return (True, "Max specie")
+        max_tunes = self.get_settings().get_max_tunes()
+        n_tunes = len(self.list_species(mode = "tune" ))
+
+        if n_spotchecks + n_tunes >= max_spotchecks + max_tunes:
+            return (True, "Reached max species")
 
         max_time = self.get_settings().get_max_time()
         if max_time is not None and duration >= max_time:
-            return (True, "Max time")
+            return (True, "Reached max time")
         
         return (False, None)
 
@@ -133,8 +137,9 @@ class Simulation:
         while not finished:
             prior_specie = self.get_current_specie()
             prior_epoch_id = prior_specie.get_current_epoch().id if not prior_specie is None else 0
-            n_specie = len(self._species.values())
-            specie = Specie(self, self._current_specie_id+1, n_specie, prior_epoch_id)
+            n_specie = len(self.list_species())
+            mode = "spotcheck" if n_specie < self.get_settings().get_max_spotchecks() else "tune"
+            specie = Specie(self, self._current_specie_id+1, mode, n_specie, prior_epoch_id)
             self._species[specie.id] = specie
             self._current_specie_id = specie.id
 
@@ -195,6 +200,7 @@ class Simulation:
             setattr(record, property_key, properties[property_key])
 
         record.species = specie_id
+        record.mode = specie.get_mode() 
         record.epoch = epoch_id
         record.round = round
         record.step = step

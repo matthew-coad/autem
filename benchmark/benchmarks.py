@@ -28,7 +28,7 @@ def get_simulations_path():
 def get_version():
     return 14
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_species = 3, max_epochs = 20, max_time = None, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_spotchecks, max_tunes, max_time = None, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
@@ -48,14 +48,16 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
 
             evaluators.ScoreEvaluator(),
             evaluators.ChoiceEvaluator(),
-            evaluators.ParameterEvaluator(),
+            evaluators.ValidationEvaluator(),
             baselines.BaselineStats(baseline_name),
             evaluators.DurationEvaluator(),
 
             evaluators.ScoreContest(),
+            evaluators.DiverseContest(1.0),
 
             makers.TopChoiceMaker(),
             makers.CrossoverMaker(),
+            makers.TuneMaker(),
 
             evaluators.ContestJudge(),
             evaluators.EpochProgressJudge(),
@@ -116,9 +118,9 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             ]),
         ], 
         seed = seed,
-        max_epochs = max_epochs,
         max_time = max_time,
-        max_species = max_species,
+        max_spotchecks = max_spotchecks,
+        max_tunes = max_tunes,
         properties = properties,
         n_jobs=6,
         memory=memory)

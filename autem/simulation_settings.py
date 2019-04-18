@@ -2,12 +2,13 @@ class SimulationSettings:
 
     def __init__(self,
             components, properties, seed, 
-            max_species, max_epochs, max_rounds, max_time, n_jobs, memory,
+            max_spotchecks, max_tunes, max_epochs, max_rounds, max_time, n_jobs, memory,
             max_reincarnations, max_population, max_league):
         self.components = components
         self.properties = properties
         self.seed = seed,
-        self._max_species = max_species
+        self._max_spotchecks = max_spotchecks
+        self._max_tunes = max_tunes
         self._max_epochs = max_epochs
         self._max_rounds = max_rounds
         self._max_time = max_time
@@ -32,8 +33,11 @@ class SimulationSettings:
         controllers = [c for c in self.components if c.is_controller() ]
         return controllers
 
-    def get_max_species(self):
-        return self._max_species
+    def get_max_spotchecks(self):
+        return self._max_spotchecks
+
+    def get_max_tunes(self):
+        return self._max_tunes
 
     def get_max_epochs(self):
         return self._max_epochs

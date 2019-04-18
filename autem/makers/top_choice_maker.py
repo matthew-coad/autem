@@ -99,6 +99,9 @@ class TopChoiceMaker(Maker, Controller):
 
     def configure_member(self, member):
         specie = member.get_specie()
+        if not specie.is_spotchecking():
+            return False
+
         grid = specie.get_resources().initialization_grid
         grid_pred = specie.get_resources().initialization_grid_pred
         if grid is None or grid_pred is None:

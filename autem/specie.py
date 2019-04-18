@@ -15,9 +15,10 @@ class Specie:
     """
     Specie of a simulation
     """
-    def __init__(self, simulation, specie_id, specie_n, prior_epoch_id): 
+    def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
         self._simulation = simulation
         self.id = specie_id
+        self._mode = mode
 
         self._event = None
         self._event_reason = None
@@ -62,6 +63,17 @@ class Specie:
 
     def generate_id(self):
         return self._simulation.generate_id()
+
+    # Mode
+
+    def get_mode(self):
+        return self._mode
+
+    def is_spotchecking(self):
+        return self.get_mode() == "spotcheck"
+
+    def is_tuning(self):
+        return self.get_mode() == "tune"
 
     # Resources
 

@@ -25,7 +25,7 @@ class EpochProgressJudge(Evaluater):
         top_member = epoch.get_ranking().get_top_member()
 
         if not prior_top_member:
-            epoch.progress(True, "Ranking progressed")
+            epoch.progress(True, "No prior top member")
             return None
 
         if not top_member:

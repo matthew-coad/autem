@@ -6,6 +6,8 @@ class MuationMaker(Maker, Controller):
     """
 
     def configure_member(self, member):
+        raise NotImplementedError()
+
         specie = member.get_specie()
         candidates = specie.list_members(alive = True, top = True)
         if len(candidates) < 2:

@@ -19,7 +19,7 @@ class ScoreEvaluator(Evaluater):
     """
 
     def __init__(self):
-        self.n_splits = 10
+        self.n_splits = 5
 
     def evaluate_folds(self, specie):
         """
