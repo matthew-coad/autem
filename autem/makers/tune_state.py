@@ -6,3 +6,4 @@ class TuneSpecieState():
     def __init__(self):
         self.tuning = False
         self.choices = None
+        self.prototype = None

@@ -5,6 +5,7 @@ import time
 
 from types import SimpleNamespace
 import numpy as np
+import copy
 
 class Member:
     """
@@ -115,6 +116,12 @@ class Member:
             component.prepare_member(self)
             if not self.fault is None:
                 break
+
+    def impersonate(self, other):
+        """
+        Impersonate an existing member
+        """
+        self.configuration = copy.deepcopy(other.configuration)
 
     def mutate(self, transmute):
         """

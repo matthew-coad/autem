@@ -182,6 +182,7 @@ build_step_detail <- function(battle_df) {
     step_df11 <- 
       step_df11 %>%
       mutate(
+        species = 1,
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         event_reason = reason,
         choice_score = choice_predicted_score,
@@ -201,6 +202,7 @@ build_step_detail <- function(battle_df) {
     step_df12 <- 
       step_df12 %>%
       mutate(
+        species = 1,
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         event_reason = reason,
         choice_score = choice_predicted_score,
@@ -219,6 +221,7 @@ build_step_detail <- function(battle_df) {
     step_df13 <- 
       step_df13 %>%
       mutate(
+        species = 1,
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
         event_reason = reason,
         round = NA,
@@ -238,6 +241,27 @@ build_step_detail <- function(battle_df) {
   if (nrow(step_df14) > 0) {
     step_df14 <- 
       step_df14 %>%
+      mutate(
+        species = 1,
+        step = step * 20,
+        event_time = lubridate::parse_date_time(event_time, orders = "amd HMS Y"),
+        round = NA,
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
+      )
+  }
+
+  step_df15 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 15)
+  if (nrow(step_df15) > 0) {
+    step_df15 <- 
+      step_df15 %>%
       mutate(
         step = step * 20,
         event_time = lubridate::parse_date_time(event_time, orders = "amd HMS Y"),
@@ -266,6 +290,7 @@ build_step_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df12)
   step_df <- bind_df(step_df, step_df13)
   step_df <- bind_df(step_df, step_df14)
+  step_df <- bind_df(step_df, step_df15)
   step_df <-
     step_df %>%
     mutate(league = factor(league)) %>%
@@ -273,6 +298,7 @@ build_step_detail <- function(battle_df) {
       study,
       experiment,
       dataset,
+      species,
       epoch,
       round,
       step,
@@ -310,6 +336,9 @@ build_ranking_detail <- function(battle_df) {
     step_df10 <- 
       raw_step_df10 %>%
       mutate(
+        species = 1,
+        epoch = 1,
+        round = step,
         validation_score = NA
       )
   } else {
@@ -323,6 +352,9 @@ build_ranking_detail <- function(battle_df) {
     step_df12 <- 
       raw_step_df12 %>%
       mutate(
+        species = 1,
+        epoch = 1,
+        round = step,
         rating_std = rating_sd,
         choice_score = choice_predicted_score,
         choice_score_std = choice_predicted_score_std,
@@ -341,6 +373,8 @@ build_ranking_detail <- function(battle_df) {
     step_df13 <- 
       raw_step_df13 %>%
       mutate(
+        species = 1,
+        epoch = 1,
         rating_std = rating_sd,
         choice_score = CE_score,
         choice_score_std = CE_score_std,
@@ -373,6 +407,26 @@ build_ranking_detail <- function(battle_df) {
   } else {
     step_df14 <- NULL
   }
+
+  raw_step_df15 <-
+    battle_df %>%
+    filter(as.integer(as.character(version)) == 15, final == 1)
+  if (nrow(raw_step_df15) > 0) {
+    step_df15 <- 
+      raw_step_df15 %>%
+      mutate(
+        rating_std = rating_sd,
+        choice_score = CE_score,
+        choice_score_std = CE_score_std,
+        score = SE_score,
+        score_std = SE_score_std,
+        duration = DE_duration,
+        relative_duration = DE_relative_duration,
+        validation_score = VE_score
+      )
+  } else {
+    step_df15 <- NULL
+  }
   
 
   bind_df <- function(step_df, df) {
@@ -387,12 +441,16 @@ build_ranking_detail <- function(battle_df) {
   step_df <- bind_df(step_df, step_df12)
   step_df <- bind_df(step_df, step_df13)
   step_df <- bind_df(step_df, step_df14)
+  step_df <- bind_df(step_df, step_df15)
 
   ranking_df <-
     step_df %>%
+    filter(!is.na(ranking)) %>%
     select(
        study,
        experiment,
+       species,
+       epoch,
        ranking,
        rating, 
        rating_std,

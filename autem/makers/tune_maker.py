@@ -25,6 +25,7 @@ class TuneMaker(Maker, Controller):
         state = specie.get_resource("tune_maker", lambda: TuneSpecieState())
         state.choices = choices
         state.tuning = True
+        state.prototype = prototype_member
 
     def configure_member(self, member):
 
@@ -33,9 +34,6 @@ class TuneMaker(Maker, Controller):
         if not state.tuning:
             return False
 
-        choices = state.choices
-        for component in specie.get_settings().get_hyper_parameters():
-            if isinstance(component, Choice):
-                component.initialize_member(member)
-                component.force_member(member, choices[component.name])
+        prototype = state.prototype
+        member.impersonate(prototype)
         return True

@@ -157,11 +157,7 @@ class Epoch:
         for make_index in range(make_count):
             self.make_member("Population low")
 
-        # If we run out of search space the population can crash.
-        # Make sure we don't get into an infinite loop.
         members = self.list_members(alive = True)
-        if len(members) < 2:
-            raise RuntimeError("Population crash")
 
         # Ensure all members evaluated
         for member_index in range(len(members)):

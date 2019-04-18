@@ -20,13 +20,13 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "TN1"
+    return "LC1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
 
 def get_version():
-    return 14
+    return 15
 
 def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_spotchecks, max_tunes, max_time = None, properties = {}):
     task = openml.tasks.get_task(task_id)
