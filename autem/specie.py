@@ -1,6 +1,7 @@
 from .container import Container
 from .hyper_parameter import HyperParameterContainer
 from .lifecycle import LifecycleContainer
+from .workflows import WorkflowContainer
 
 from .member import Member
 from .epoch import Epoch
@@ -17,14 +18,15 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
 
     """
     Specie of a simulation
     """
-    def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
+    def __init__(self, simulation, specie_id, specie_n, next_epoch_id):
 
         Container.__init__(self)
+        WorkflowContainer.__init__(self)
         LifecycleContainer.__init__(self)
         HyperParameterContainer.__init__(self)
         ScorerContainer.__init__(self)
@@ -32,39 +34,61 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
 
         self._simulation = simulation
         self.id = specie_id
-        self._mode = mode
+        self._specie_n = specie_n
+
+        self._mode = None
+        self._max_league = None
 
         self._event = None
         self._event_reason = None
 
         self._start_time = None
         self._end_time = None
-
         self._alive = None
 
-        self._specie_n = specie_n
-        self._prior_epoch_id = prior_epoch_id
+        self._next_epoch_id = next_epoch_id
         self._current_epoch_id = None
-        self._epochs = None
+        self._epochs = {}
 
-        self._members = None
-        self._graveyard = None
-        self._forms = None
+        self._members = []
+        self._graveyard = []
+        self._forms = {}
 
-    ## Context
+        self._max_reincarnations = None
+        self._max_population = None
+        self._max_league = None
+
+    ## Configuration
 
     def get_simulation(self):
         return self._simulation
 
-    # Properties
-   
     def get_specie_n(self):
         return self._specie_n
 
-    ## Mode
+    def get_max_population(self):
+        return self._max_population
+
+    def set_max_population(self, max_population):
+        self._max_population = max_population
+
+    def get_max_reincarnations(self):
+        return self._max_reincarnations
+
+    def set_max_reincarnations(self, max_reincarnations):
+        self._max_reincarnations = max_reincarnations
+
+    def get_max_league(self):
+        return self._max_league
+
+    def set_max_league(self, max_league):
+        self._max_league = max_league
 
     def get_mode(self):
         return self._mode
+
+    def set_mode(self, mode):
+        self._mode = mode
 
     def is_spotchecking(self):
         return self.get_mode() == "spotcheck"
@@ -74,26 +98,21 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
 
     ## Lifecycle
 
+    def get_alive(self):
+        return self._alive
+
     def should_finish(self):
         """
         Should we finish the species?
         """
-        epoch = self.get_current_epoch()
-        duration = time.time() - self.get_simulation().get_start_time()
-        n_epochs = len(self.list_epochs())
-        max_epochs = self.get_settings().get_max_epochs()
-        max_time = self.get_settings().get_max_time()
-
-        if not epoch.get_progressed():
-            return (True, "No progress")
-
-        if n_epochs == max_epochs:
-            return (True, "Max epochs")
-
-        if max_time is not None and duration >= max_time:
-            return (True, "Max time")
-        
-        return (False, None)
+        finish = None
+        reason = None
+        for workflow in self.list_workflows():
+            finish, reason = workflow.is_specie_finished(self)
+            if not finish is None:
+                break
+        finish = finish if not finish is None else False
+        return (finish, reason)
 
     def run(self):
         """
@@ -105,20 +124,17 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
         self._alive = True
         self._start_time = time.time()
 
-        self._current_epoch_id = self._prior_epoch_id
-        self._epochs = {}
-
-        self._members = []
-        self._graveyard = []
-        self._forms = {}
+        for workflow in self.list_workflows():
+            workflow.configure_specie(self)
 
         for component in self.list_lifecycle_managers():
             component.start_specie(self)
 
         finished = False
         while not finished:
+            next_epoch_id = self._current_epoch_id if not self._current_epoch_id is None else self._next_epoch_id
             n_epochs = len(self._epochs.values())
-            epoch = Epoch(self, self._current_epoch_id+1, n_epochs + 1)
+            epoch = Epoch(self, next_epoch_id, n_epochs + 1)
             self._epochs[epoch.id] = epoch
             self._current_epoch_id = epoch.id
             epoch.run()
@@ -129,9 +145,6 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
 
         self._end_time = time.time()
         self._alive = False
-
-    def get_alive(self):
-        return self._alive
 
     ## Epochs
 
@@ -177,7 +190,7 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
         """
         def include_member(member, is_buried):
             alive_passed = alive is None or member.alive == alive
-            is_top = member.league == self.get_settings().get_max_league()
+            is_top = member.league == self.get_max_league()
             top_passed = top is None or is_top == top
             buried_passed = buried is None or buried == is_buried
             return alive_passed and top_passed and buried_passed

@@ -1,5 +1,5 @@
 from .container import Container
-from .workflows import Workflow
+from .workflows import Workflow, WorkflowContainer
 from .lifecycle import LifecycleContainer
 from .reporting import ReporterContainer, Dataset, Role, Outline
 from .scorers import ScorerContainer
@@ -21,11 +21,10 @@ import datetime
 
 from types import SimpleNamespace
 
-class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
+class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
 
     """Simulation state"""
-    def __init__(self, name, components, properties = {}, seed = 1234, 
-                max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
+    def __init__(self, name, components, properties = {}, n_jobs = -1, seed = 1234, memory = None):
 
         Container.__init__(self)
         LifecycleContainer.__init__(self)
@@ -34,10 +33,10 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         LoaderContainer.__init__(self) 
 
         self.name = name
-        self._settings = SimulationSettings(
-            components  = components, properties = properties, seed = seed, 
-            max_spotchecks = max_spotchecks, max_tunes = max_tunes, max_epochs = max_epochs, max_rounds = max_rounds, max_time = max_time, n_jobs = n_jobs,
-            max_reincarnations = 3, max_population = 20, max_league = 4, memory = memory)
+        self._settings = SimulationSettings(properties = properties, memory = memory)
+
+        self._raw_components = components
+        self._components = None
 
         self.outline = None
 
@@ -51,6 +50,8 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         self._species = None
         self.reports = None
 
+        self._n_jobs = n_jobs
+
     ## Core Environment
 
     def get_simulation(self):
@@ -58,9 +59,6 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
 
     def get_settings(self):
         return self._settings
-
-    def list_components(self):
-        return self.get_settings().get_components()
 
     def generate_id(self):
         id = self._next_id
@@ -73,7 +71,30 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         """
         return self._random_state
 
-    ## Environment
+    ## Properties
+
+    def get_n_jobs(self):
+        return self._n_jobs
+
+    ## Components
+
+    def _build_components(self):
+        raw_components = self._raw_components
+        components = []
+
+        for component in raw_components:
+            components.append(component)
+            is_workflow = isinstance(component, Workflow)
+            extensions = component.list_extensions(self) if is_workflow else []
+            components.extend(extensions)
+        self._components = components
+
+    def list_components(self):
+        if not self._components:
+            raise RuntimeError("No components found")
+        return self._components
+
+    ## Species
 
     def list_species(self, alive = None, mode = None):
         """
@@ -103,23 +124,14 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         """
         Should we finish the simulation?
         """
-        duration = time.time() - self.get_start_time()
-        specie = self.get_current_specie()
-
-        max_spotchecks = self.get_settings().get_max_spotchecks()
-        n_spotchecks = len(self.list_species(mode = "spotcheck" ))
-
-        max_tunes = self.get_settings().get_max_tunes()
-        n_tunes = len(self.list_species(mode = "tune" ))
-
-        if n_spotchecks + n_tunes >= max_spotchecks + max_tunes:
-            return (True, "Reached max species")
-
-        max_time = self.get_settings().get_max_time()
-        if max_time is not None and duration >= max_time:
-            return (True, "Reached max time")
-        
-        return (False, None)
+        finish = None
+        reason = None
+        for workflow in self.list_workflows():
+            finish, reason = workflow.is_simulation_finished(self)
+            if not finish is None:
+                break
+        finish = finish if not finish is None else False
+        return (finish, reason)
 
     def run(self):
 
@@ -131,6 +143,10 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         self._current_specie_id = 0
         self._species = {}
         self.reports = []
+        self._build_components()
+
+        for component in self.list_workflows():
+            component.configure_simulation(self)
 
         self.outline_simulation()
         for component in self.list_lifecycle_managers():
@@ -139,10 +155,11 @@ class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContain
         finished = False
         while not finished:
             prior_specie = self.get_current_specie()
-            prior_epoch_id = prior_specie.get_current_epoch().id if not prior_specie is None else 0
+            next_epoch_id = prior_specie.get_current_epoch_id() + 1 if not prior_specie is None else 1
+            next_specie_id = self._current_specie_id + 1
             n_specie = len(self.list_species())
-            mode = "spotcheck" if n_specie < self.get_settings().get_max_spotchecks() else "tune"
-            specie = Specie(self, self._current_specie_id+1, mode, n_specie, prior_epoch_id)
+
+            specie = Specie(self, next_specie_id, n_specie, next_epoch_id)
             self._species[specie.id] = specie
             self._current_specie_id = specie.id
 

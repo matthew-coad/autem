@@ -1,4 +1,5 @@
 from .container import Container
+from .workflows import WorkflowContainer
 from .lifecycle import LifecycleContainer
 from .hyper_parameter import HyperParameterContainer
 from .scorers import ScorerContainer
@@ -12,7 +13,7 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
     """
     Epoch of a simulation
     """
@@ -36,6 +37,8 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
         self._progressed = None
         self._ranking = None
 
+        self._max_rounds = None
+
     # Context
 
     def get_simulation(self):
@@ -50,24 +53,35 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
         """
         return self._epoch_n
 
+    # Configuration
+
+    def get_max_rounds(self):
+        return self._max_rounds
+
+    def set_max_rounds(self, max_rounds):
+        self._max_rounds = max_rounds
+
     # Lifecycle
+
+    def get_alive(self):
+        return self._alive
 
     def should_finish(self):
         """
         Should we finish the epoch?
         """
-        max_epochs = self.get_settings().get_max_epochs()
-        max_rounds = self.get_settings().get_max_rounds()
-        max_time = self.get_settings().get_max_time()
-        duration = time.time() - self.get_simulation().get_start_time()
+        finish = None
+        reason = None
 
-        if max_time is not None and duration >= max_time:
-            return (True, "Max time")
-
-        if self.get_round() >= max_rounds:
+        if self.get_round() >= self.get_max_rounds():
             return (True, "Max rounds")
-        
-        return (False, None)
+
+        for workflow in self.list_workflows():
+            finish, reason = workflow.is_epoch_finished(self)
+            if not finish is None:
+                break
+        finish = finish if not finish is None else False
+        return (finish, reason)
 
     def run(self):
         """
@@ -84,6 +98,9 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
         ranking = Ranking()
         ranking.inconclusive()
         self._ranking = ranking
+
+        for workflow in self.list_workflows():
+            workflow.configure_epoch(self)
 
         for component in self.list_lifecycle_managers():
             component.start_epoch(self)
@@ -110,11 +127,12 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
 
             # If we should finish the species, finish and bury all alive members
             # before we report
-            finish_specie, reason = self.get_specie().should_finish()
-            if finished and finish_specie:
-                for member in self.list_members(alive=True):
-                    member.finished(reason)
-                    self.bury_member(member)
+            if finished:
+                finish_specie, reason = self.get_specie().should_finish()
+                if finish_specie:
+                    for member in self.list_members(alive=True):
+                        member.finished(reason)
+                        self.bury_member(member)
 
             # Report on what happened
             for member in report_members:
@@ -124,6 +142,11 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
 
         self._end_time = time.time()
         self._alive = False
+
+    ## Round
+
+    def get_round(self):
+        return self._round
 
     def run_round(self):
         """
@@ -136,9 +159,9 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
         mode = specie.get_mode()
         operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self._simulation.name, specie.id, mode, self.id)
         current_round = self.get_round()
-        max_population = self.get_settings().get_max_population()
-        max_rounds = self.get_settings().get_max_rounds()
-        max_league = self.get_settings().get_max_league()
+        max_rounds = self.get_max_rounds()
+        max_population = specie.get_max_population()
+        max_league = specie.get_max_league()
 
         # Prepare for the next round
         members = self.list_members(alive = True)
@@ -173,12 +196,6 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
             self.judge_member(member)
 
         printProgressBar(current_round * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
-
-    def get_alive(self):
-        return self._alive
-
-    def get_round(self):
-        return self._round
 
     # Members
 

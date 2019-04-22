@@ -131,7 +131,7 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         """
         attempts = 0
         max_attempts = 100
-        max_reincarnations = self.get_settings().get_max_reincarnations()
+        max_reincarnations = self.get_specie().get_max_reincarnations()
 
         # Sometimes transmute the first mutation attept
         transmute = self.get_random_state().random_sample() <= self.get_transmutation_rate()

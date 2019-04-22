@@ -24,7 +24,7 @@ class Container:
         return self.get_simulation().get_settings()
 
     def list_components(self):
-        return self.get_settings().get_components()
+        return self.get_simulation().list_components()
 
     def get_random_state(self):
         """

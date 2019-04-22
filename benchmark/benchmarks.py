@@ -2,6 +2,7 @@
 
 import autem
 import autem.scorers as scorers
+import autem.workflows as workflows
 import autem.preprocessors as preprocessors
 import autem.learners.classification as learners
 import autem.loaders as loaders
@@ -46,24 +47,10 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
 
-            evaluators.ScoreEvaluator(),
-            evaluators.ChoiceEvaluator(),
-            evaluators.ValidationEvaluator(),
+            workflows.Snapshot(max_time=max_time),
+            # workflows.Mastery(max_time=max_time, max_spotchecks = max_spotchecks, max_tunes = max_tunes)
+
             baselines.BaselineStats(baseline_name),
-            evaluators.DurationEvaluator(),
-
-            evaluators.ScoreContest(),
-            evaluators.DiverseContest(1.0),
-
-            makers.TopChoiceMaker(),
-            makers.CrossoverMaker(),
-            makers.TuneMaker(),
-
-            evaluators.ContestJudge(),
-            evaluators.EpochProgressJudge(),
-           
-            evaluators.ScoreRater(),
-
             reporters.Path(path),
 
             # Scalers
@@ -118,11 +105,8 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             ]),
         ], 
         seed = seed,
-        max_time = max_time,
-        max_spotchecks = max_spotchecks,
-        max_tunes = max_tunes,
-        properties = properties,
         n_jobs=6,
+        properties = properties,
         memory=memory)
     return simulation
 
