@@ -1,4 +1,5 @@
-from .. import Maker, Member, Choice
+from .maker import Maker
+from ..choice import Choice
 
 class CrossoverMaker(Maker):
     """

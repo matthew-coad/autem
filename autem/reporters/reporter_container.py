@@ -1,7 +1,6 @@
 from .reporter import Reporter
-from ..container import Container
 
-class ReporterContainer(Container):
+class ReporterContainer:
 
     """
     MixIn that adds reporting support to containers

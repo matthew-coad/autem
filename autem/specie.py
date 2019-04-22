@@ -1,3 +1,4 @@
+from .container import Container
 from .hyper_parameter import HyperParameterContainer
 from .lifecycle import LifecycleContainer
 
@@ -16,17 +17,18 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
 
     """
     Specie of a simulation
     """
     def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
 
+        Container.__init__(self)
         LifecycleContainer.__init__(self)
         HyperParameterContainer.__init__(self)
         ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self)
+        LoaderContainer.__init__(self) 
 
         self._simulation = simulation
         self.id = specie_id

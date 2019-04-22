@@ -1,4 +1,5 @@
-from .. import Maker, Member, Controller, Choice
+from .maker import Maker
+from .. import Member, Controller, Choice
 
 class MuationMaker(Maker, Controller):
     """

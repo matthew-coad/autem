@@ -1,14 +1,12 @@
 from .container import Container
-from .lifecycle import LifecycleManager
+from .lifecycle import LifecycleContainer
 from .hyper_parameter import HyperParameterContainer
+from .makers.maker_container import MakerContainer
 from .scorers import ScorerContainer
 from .loaders import LoaderContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .evaluators.score_evaluator import ScoreContainer
-
-from .maker import Maker
-
 
 import time
 
@@ -16,20 +14,18 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, LifecycleManager, HyperParameterContainer, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContainer, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
     """
     Member of a population
     """
     def __init__(self, specie): 
 
         Container.__init__(self)
-        LifecycleManager.__init__(self)
+        LifecycleContainer.__init__(self)
         HyperParameterContainer.__init__(self)
+        MakerContainer.__init__(self)
         ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self)
-        PreprocessorContainer.__init__(self)
-        LearnerContainer.__init__(self)
-        ScoreContainer.__init__(self)
+        LoaderContainer.__init__(self) 
 
         self._specie = specie
 
@@ -173,7 +169,7 @@ class Member(Container, LifecycleManager, HyperParameterContainer, ScorerContain
         """
 
         # Find all makers
-        makers = [ c for c in self.get_settings().get_components() if isinstance(c, Maker)]
+        makers = self.list_makers()
         maker_indexes = self.get_random_state().choice(len(makers), size = len(makers), replace=False)
 
         # Invoke members in random order till one makes the member

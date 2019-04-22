@@ -1,4 +1,6 @@
-from .. import Maker, Member, LifecycleManager, Choice
+from ..lifecycle import LifecycleManager
+from ..choice import Choice
+from .maker import Maker
 
 import pandas as pd
 import numpy as np

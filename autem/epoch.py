@@ -12,16 +12,11 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
     """
     Epoch of a simulation
     """
     def __init__(self, specie, epoch_id, epoch_n):
-
-        LifecycleContainer.__init__(self)
-        HyperParameterContainer.__init__(self)
-        ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self)
 
         self._specie = specie
         self._simulation = specie.get_simulation()

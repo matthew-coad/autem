@@ -1,5 +1,3 @@
-from .container import Container
-
 class LifecycleManager:
 
     ## Member components
@@ -112,7 +110,7 @@ class LifecycleManager:
         """
         pass
 
-class LifecycleContainer(Container):
+class LifecycleContainer:
 
     def list_lifecycle_managers(self):
         managers = [c for c in self.list_components() if isinstance(c, LifecycleManager) ]

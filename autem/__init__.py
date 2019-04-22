@@ -2,16 +2,16 @@
 from .warning_interceptor import WarningInterceptor
 
 from .container import Container
+from .lifecycle import LifecycleManager
+from .reporting import Dataset, Role, Attribute, Outline
+
 
 from .simulation import Simulation 
 from .member import Member
 from .epoch import Epoch
 from .specie import Specie
-from .reporting import Dataset, Role, Attribute, Outline
 
 from .hyper_parameter import HyperParameter
-from .lifecycle import LifecycleManager
-from .maker import Maker
 from .choice import Choice
 from .group import Group
 from .parameter import Parameter

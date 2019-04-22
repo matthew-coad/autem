@@ -1,4 +1,4 @@
-from .. import Maker, Member
+from .maker import Maker
 
 class RandomMaker(Maker):
 

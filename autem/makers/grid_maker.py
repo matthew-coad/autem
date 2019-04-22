@@ -1,4 +1,5 @@
-from .. import Maker, Member, LifecycleManager, Choice
+from .maker import Maker
+from .. import LifecycleManager
 
 class GridMaker(Maker, LifecycleManager):
     """

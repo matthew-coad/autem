@@ -1,3 +1,4 @@
+from .container import Container
 from .workflows import Workflow
 from .lifecycle import LifecycleContainer
 from .reporting import ReporterContainer, Dataset, Role, Outline
@@ -11,7 +12,6 @@ from .specie import Specie
 from .form import Form
 from .ranking import Ranking
 from .feedback import printProgressBar
-from .maker import Maker
 from .choice import Choice
 from .simulation_settings import SimulationSettings
 
@@ -21,16 +21,17 @@ import datetime
 
 from types import SimpleNamespace
 
-class Simulation(LifecycleContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
+class Simulation(Container, LifecycleContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
                 max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
 
+        Container.__init__(self)
         LifecycleContainer.__init__(self)
         ReporterContainer.__init__(self)
         ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self)
+        LoaderContainer.__init__(self) 
 
         self.name = name
         self._settings = SimulationSettings(
