@@ -32,12 +32,10 @@ class VotingContest(Evaluater):
         """
         Calculate the boost that a member gives to the hard voting prediction of a set of stacked members
         """
-        specie = member.get_specie()
-        simulation = specie.get_simulation()
-        scorer = simulation.get_scorer()
-        loader = simulation.get_loader()
+        scorer = member.get_scorer()
+        loader = member.get_loader()
 
-        x,y = loader.load_training_data(simulation)
+        x,y = loader.load_training_data(member)
         base_predictions = self.calculate_voting_predictions(base_members, league)
         base_score = scorer.score(y, base_predictions)
 

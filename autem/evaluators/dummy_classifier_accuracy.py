@@ -18,12 +18,11 @@ class DummyClassifierAccuracy(Evaluater):
         Only famous members get a rating.
         """
 
-        simulation = member.simulation
-        random_state = simulation.random_state
-        scorer = simulation.get_scorer()
-        loader = simulation.get_loader()
+        random_state = member.get_random_State()
+        scorer = member.get_scorer()
+        loader = member.get_loader()
 
-        x,y = loader.load_training_data(simulation)
+        x,y = loader.load_training_data(member)
 
         learner = DummyClassifier(random_state = random_state)
         learner.fit(x, y)

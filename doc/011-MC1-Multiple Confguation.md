@@ -27,3 +27,7 @@ Action - Remove resource from specie and convert all components using it
 Outcome - Converted TuneMaker and TopChoices components.
 
 **done**
+
+## MC1 - Convert Pipeline to an container extension
+
+Action - The member pipeline is frequently used. Convert it into a container extension

@@ -67,22 +67,22 @@ class OpenMLLoader(Loader):
 
         simulation.set_state("openml_loader", state)
 
-    def get_openml_loader_state(self, simulation):
-        return simulation.get_state("openml_loader")
+    def get_openml_loader_state(self, container):
+        return container.get_simulation().get_state("openml_loader")
 
-    def load_divided_data(self, simulation):
-        state = self.get_openml_loader_state(simulation)
+    def load_divided_data(self, container):
+        state = self.get_openml_loader_state(container)
         return (state.x_divided, state.y_divided)
 
-    def load_training_data(self, simulation):
-        state = self.get_openml_loader_state(simulation)
+    def load_training_data(self, container):
+        state = self.get_openml_loader_state(container)
         return (state.x_train, state.y_train)
 
-    def load_validation_data(self, simulation):
-        state = self.get_openml_loader_state(simulation)
+    def load_validation_data(self, container):
+        state = self.get_openml_loader_state(container)
         return (state.x_validation, state.y_validation)
 
-    def get_features(self, simulation):
-        state = self.get_openml_loader_state(simulation)
+    def get_features(self, container):
+        state = self.get_openml_loader_state(container)
         return state.features
 

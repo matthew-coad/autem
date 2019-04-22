@@ -25,8 +25,8 @@ class ValidationAccuracy(Evaluater):
         loader = member.get_loader()
         pipeline = member.get_member_resources().pipeline
 
-        x,y = loader.load_training_data(simulation)
-        x_validation, y_validation = loader.load_validation_data(member.get_simulation())
+        x,y = loader.load_training_data(member)
+        x_validation, y_validation = loader.load_validation_data(member)
 
         with warnings.catch_warnings():
             warnings.simplefilter("error")

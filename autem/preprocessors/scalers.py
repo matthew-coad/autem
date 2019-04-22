@@ -22,12 +22,12 @@ class Scaler(Preprocesssor):
 
     def make_preprocessor(self, member):
         loader = member.get_loader()
-        features = loader.get_features(member.get_specie().get_simulation())
+        features = loader.get_features(member)
 
         categorical_features = features['nominal']
         numeric_features = features['numeric']
 
-        x,y = loader.load_divided_data(member.get_specie().get_simulation())
+        x,y = loader.load_divided_data(member)
 
         categories = []
         for feature in categorical_features:

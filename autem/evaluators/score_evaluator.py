@@ -29,7 +29,7 @@ class ScoreEvaluator(Evaluater):
         random_state = specie.get_random_state()
         loader = specie.get_loader()
 
-        x,y = loader.load_training_data(specie.get_simulation())
+        x,y = loader.load_training_data(specie)
         folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=max_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
         specie.set_state("i_leagues", i_leagues)
@@ -42,7 +42,7 @@ class ScoreEvaluator(Evaluater):
         i_leagues = specie.get_state("i_leagues")
         pipeline = member.get_resources().pipeline
 
-        x,y = loader.load_training_data(member.get_specie().get_simulation())
+        x,y = loader.load_training_data(member)
         scores = []
         durations = []
         predictions = np.empty(len(y))

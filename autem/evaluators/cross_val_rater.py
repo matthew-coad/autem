@@ -27,7 +27,7 @@ class CrossValidationRater(Evaluater):
         scorer = member.get_scorer()
         loader = member.get_loader()
 
-        x,y = loader.load_divided_data(member.get_specie().get_simulation())
+        x,y = loader.load_divided_data(member)
         pipeline = member.get_resources().pipeline
 
         try:

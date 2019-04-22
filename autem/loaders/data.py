@@ -6,6 +6,14 @@ from ..role import Role
 from sklearn.model_selection import train_test_split
 import pandas as pd
 
+class DataState:
+
+    def __init__(self):
+        self.x_train = None
+        self.x_validation = None
+        self.y_train = None
+        self.y_validation = None
+
 class Data(Loader):
     
     def __init__(self, data_name, y, numeric_x = None, nominal_x = None, validation_size = 0.2):
@@ -54,22 +62,24 @@ class Data(Loader):
 
         x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
 
-        resources = simulation.get_simulation_resources()
-        resources.x_train = x_train
-        resources.x_validation = x_validation
-        resources.y_train = y_train
-        resources.y_validation = y_validation
+        state = DataState()
+        state.x_train = x_train
+        state.x_validation = x_validation
+        state.y_train = y_train
+        state.y_validation = y_validation
+        simulation.set_state("data", state)
 
-    def load_divided_data(self, simulation):
+    def load_divided_data(self, container):
         return (self.x, self.y)
 
-    def load_training_data(self, simulation):
-        resources = simulation.get_simulation_resources()
-        return (resources.x_train, resources.y_train)
+    def load_training_data(self, container):
+        state = container.get_simulation().get_state("data")
+        return (state.x_train, state.y_train)
 
-    def load_validation_data(self, simulation):
-        resources = simulation.get_simulation_resources()
-        return (resources.x_validation, resources.y_validation)
+    def load_validation_data(self, container):
+        state = container.get_simulation().get_state("data")
+        return (state.x_validation, state.y_validation)
 
-    def get_features(self, simulation):
+    def get_features(self, container):
         return self.features
+
