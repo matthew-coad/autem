@@ -1,6 +1,6 @@
-from .. import Maker, Member, Controller, Choice
+from .. import Maker, Member, LifecycleManager, Choice
 
-class GridMaker(Maker, Controller):
+class GridMaker(Maker, LifecycleManager):
     """
     Make that generates members from a grid of all possible members
     """

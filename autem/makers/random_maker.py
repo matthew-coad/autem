@@ -9,6 +9,6 @@ class RandomMaker(Maker):
         if not member.get_specie().is_spotchecking():
             return False
             
-        for component in member.get_settings().get_hyper_parameters():
+        for component in member.list_hyper_parameters():
             component.initialize_member(member)
         return True

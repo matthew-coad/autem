@@ -1,5 +1,6 @@
-from .component import Component
 from .container import Container
+from .lifecycle import LifecycleManager
+from .hyper_parameter import HyperParameterContainer
 from .scorers import ScorerContainer
 from .loaders import LoaderContainer
 from .preprocessors import PreprocessorContainer
@@ -15,13 +16,15 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, LifecycleManager, HyperParameterContainer, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
     """
     Member of a population
     """
     def __init__(self, specie): 
 
         Container.__init__(self)
+        LifecycleManager.__init__(self)
+        HyperParameterContainer.__init__(self)
         ScorerContainer.__init__(self)
         LoaderContainer.__init__(self)
         PreprocessorContainer.__init__(self)
@@ -104,7 +107,7 @@ class Member(Container, ScorerContainer, LoaderContainer, PreprocessorContainer,
         self.fault_component = None
         self.fault_message = None
 
-        for component in self.get_settings().get_hyper_parameters():
+        for component in self.list_hyper_parameters():
             component.prepare_member(self)
             if not self.fault is None:
                 break
@@ -121,7 +124,7 @@ class Member(Container, ScorerContainer, LoaderContainer, PreprocessorContainer,
         """
         prior_repr = repr(self.configuration)
         random_state = self.get_random_state()
-        components = self.get_settings().get_hyper_parameters()
+        components = self.list_hyper_parameters()
         n_components = len(components)
 
         # Try each component in a random order until a component claims to have mutated the state

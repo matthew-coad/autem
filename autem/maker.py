@@ -1,6 +1,4 @@
-from .controller import Controller
-
-class Maker(Controller):
+class Maker:
 
     def configure_member(self, member):
         """

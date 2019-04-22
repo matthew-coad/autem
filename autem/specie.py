@@ -1,4 +1,5 @@
-from .container import Container
+from .hyper_parameter import HyperParameterContainer
+from .lifecycle import LifecycleContainer
 
 from .member import Member
 from .epoch import Epoch
@@ -15,14 +16,15 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, ScorerContainer, LoaderContainer):
+class Specie(LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
 
     """
     Specie of a simulation
     """
     def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
 
-        Container.__init__(self)
+        LifecycleContainer.__init__(self)
+        HyperParameterContainer.__init__(self)
         ScorerContainer.__init__(self)
         LoaderContainer.__init__(self)
 
@@ -108,7 +110,7 @@ class Specie(Container, ScorerContainer, LoaderContainer):
         self._graveyard = []
         self._forms = {}
 
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.start_specie(self)
 
         finished = False
@@ -120,7 +122,7 @@ class Specie(Container, ScorerContainer, LoaderContainer):
             epoch.run()
             finished, reason = self.should_finish()
 
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.judge_specie(self)
 
         self._end_time = time.time()

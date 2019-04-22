@@ -1,5 +1,4 @@
-from .dataset import Dataset
-from .role import Role
+from .reporting import Dataset, Role
 from .hyper_parameter import HyperParameter
 
 from types import SimpleNamespace

@@ -35,3 +35,19 @@ Action - The score contests is frequently used. Convert it to use states and act
 Outcome - Converted majority of evaluators
 
 **done**
+
+## MC1 - Introduce lifecycle feature
+
+We need a clearer definition for the models lifecycle events. Creation, Start, Preparation, Burying etc.
+It will ultimately replace controllers so controllers inherit from it to maintain backward compatibiity
+for the time being.
+
+Action - Introduce lifecycle as a global component feature. 
+Outcome - Converted controllers and hyperparameters into MixIn system, multiple components converted.
+
+Action - Convert specie to use lifecycle
+Outcome - Only judge remained to be converted
+
+Action - Remove controllers
+Outcome - Convert all features in controllers to lifecycle
+

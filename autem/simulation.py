@@ -1,16 +1,13 @@
 from .workflows import Workflow
-from .container import Container
-from .record import Record
-
+from .lifecycle import LifecycleContainer
+from .reporting import ReporterContainer, Dataset, Role, Outline
 from .scorers import ScorerContainer
 from .loaders import LoaderContainer
 
+from .record import Record
 from .member import Member
 from .epoch import Epoch
 from .specie import Specie
-from .dataset import Dataset
-from .role import Role
-from .outline import Outline
 from .form import Form
 from .ranking import Ranking
 from .feedback import printProgressBar
@@ -24,14 +21,14 @@ import datetime
 
 from types import SimpleNamespace
 
-
-class Simulation(Container, ScorerContainer, LoaderContainer) :
+class Simulation(LifecycleContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
                 max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
 
-        Container.__init__(self)
+        LifecycleContainer.__init__(self)
+        ReporterContainer.__init__(self)
         ScorerContainer.__init__(self)
         LoaderContainer.__init__(self)
 
@@ -60,6 +57,9 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
 
     def get_settings(self):
         return self._settings
+
+    def list_components(self):
+        return self.get_settings().get_components()
 
     def generate_id(self):
         id = self._next_id
@@ -132,7 +132,7 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
         self.reports = []
 
         self.outline_simulation()
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.start_simulation(self)
 
         finished = False
@@ -147,6 +147,9 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
 
             specie.run()
             finished, reason = self.should_finish()
+
+        for component in self.list_lifecycle_managers():
+            component.finish_simulation(self)
 
         self._end_time = time.time()
         duration = self.get_end_time() - self.get_start_time()
@@ -176,7 +179,7 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
         outline.append_attribute("league", Dataset.Battle, [Role.Property])
         outline.append_attribute("final", Dataset.Battle, [Role.Property])
 
-        for component in self.get_settings().get_components():
+        for component in self.list_reporters():
             component.outline_simulation(self, outline)
         self.outline = outline
 
@@ -221,7 +224,7 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
         record.league = member.league
         record.final = member.final
 
-        for component in self.get_settings().get_components():
+        for component in self.list_reporters():
             component.record_member(member, record)
         return record
 
@@ -229,6 +232,6 @@ class Simulation(Container, ScorerContainer, LoaderContainer) :
         """
         Report on progress of the simulation
         """
-        for component in self.get_settings().get_controllers():
+        for component in self.list_reporters():
             component.report_simulation(self)
         self.reports = []

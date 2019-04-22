@@ -1,10 +1,13 @@
 from .reporter import Reporter
+
 import os
 
 class Path(Reporter):
 
     def __init__(self, path):
         from autem import ReportManager
+
+        Reporter.__init__(self)
         self.path = path
         self.manager = ReportManager(self.path)
 

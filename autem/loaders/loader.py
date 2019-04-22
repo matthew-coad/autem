@@ -1,7 +1,6 @@
-from ..controller import Controller
-from ..container import Container
+from ..lifecycle import LifecycleManager
 
-class Loader(Controller):
+class Loader(LifecycleManager):
 
     def start_simulation(self, simulation):
         simulation.set_state("loader", self)

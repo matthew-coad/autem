@@ -1,19 +1,14 @@
-from .component import Component
-from types import SimpleNamespace
+from .container import Container
 
-class Controller(Component):
+class LifecycleManager:
 
-    def is_hyper_parameter(self):
-        """
-        Is this component a hyper parameter for the simulation
-        """
-        return False
+    ## Member components
 
-    def is_controller(self):
+    def prepare_member(self, member):
         """
-        Is this component responsible for controlling the simulation
+        Notification that a member is being prepared
         """
-        return True
+        pass
 
     def evaluate_member(self, member):
         """
@@ -40,11 +35,34 @@ class Controller(Component):
         """
         pass
 
+    def fail_member(self, member, fault, operation, component):
+        """
+        Notification that a member has failed
+        """
+        pass
+
+    def kill_member(self, member):
+        """
+        Notification that a member is being killed
+        """
+        pass
+
+    def finish_member(self, member):
+        """
+        Notification that a member is finished
+        """
+        pass
+
+    def bury_member(self, member):
+        """
+        Notification that a member is being buried
+        """
+
     ## Epoch components
 
     def start_epoch(self, epoch):
         """
-        Start a simulation epoch
+        Notification that an epoch is being started
         """
         pass
 
@@ -56,7 +74,7 @@ class Controller(Component):
 
     def finish_epoch(self, epoch):
         """
-        Finish an epoch
+        Notification that an epoch is being finished
         """
         pass
 
@@ -76,7 +94,7 @@ class Controller(Component):
 
     def finish_specie(self, specie):
         """
-        Finish an specieepoch
+        Finish an speciee
         """
         pass
 
@@ -88,10 +106,14 @@ class Controller(Component):
         """
         pass
 
-    def report_simulation(self, simulation):
+    def finish_simulation(self, simulation):
         """
-        Report on the progress of a simulation
+        Finish a simulation
         """
         pass
 
+class LifecycleContainer(Container):
 
+    def list_lifecycle_managers(self):
+        managers = [c for c in self.list_components() if isinstance(c, LifecycleManager) ]
+        return managers

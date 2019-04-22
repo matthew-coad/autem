@@ -1,5 +1,6 @@
-from .component import Component
 from .container import Container
+from .lifecycle import LifecycleContainer
+from .hyper_parameter import HyperParameterContainer
 from .scorers import ScorerContainer
 from .loaders import LoaderContainer
 from .ranking import Ranking
@@ -11,13 +12,14 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, ScorerContainer, LoaderContainer):
+class Epoch(LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
     """
     Epoch of a simulation
     """
     def __init__(self, specie, epoch_id, epoch_n):
 
-        Container.__init__(self)
+        LifecycleContainer.__init__(self)
+        HyperParameterContainer.__init__(self)
         ScorerContainer.__init__(self)
         LoaderContainer.__init__(self)
 
@@ -88,7 +90,7 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
         ranking.inconclusive()
         self._ranking = ranking
 
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.start_epoch(self)
 
         members = self.list_members(alive = True)
@@ -108,7 +110,7 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
 
             if finished:
                 self.rank_members()
-                for component in self.get_settings().get_controllers():
+                for component in self.list_lifecycle_managers():
                     component.judge_epoch(self)
 
             # If we should finish the species, finish and bury all alive members
@@ -199,7 +201,7 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
             raise RuntimeError("Member not alive")
 
         start_time = time.time()
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.evaluate_member(member)
             if not member.alive:
                 break
@@ -214,11 +216,11 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
         if not contestant1.alive or not contestant2.alive:
             return None
 
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.contest_members(contestant1, contestant2)
 
     def judge_member(self, member):
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.judge_member(member)
 
     def bury_member(self, member):
@@ -234,7 +236,7 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
         if not member.alive:
             raise RuntimeError("Members is not alive")
 
-        for component in self.get_settings().get_controllers():
+        for component in self.list_lifecycle_managers():
             component.rate_member(member)
 
     def rank_members(self):

@@ -1,8 +1,7 @@
-from .dataset import Dataset
-from .role import Role
-from .component import Component
+from .hyper_parameter import HyperParameter
+from .reporting import Dataset, Role
 
-class Parameter(Component):
+class Parameter(HyperParameter):
 
     def __init__(self, name, label, type, shared = False):
         self.name = name
@@ -14,18 +13,6 @@ class Parameter(Component):
 
         if not type in ["nominal", "numeric"]:
             raise RuntimeError("Type is not valid")
-
-    def is_hyper_parameter(self):
-        """
-        Is this component a hyper parameter for the simulation
-        """
-        return True
-
-    def is_controller(self):
-        """
-        Is this component responsible for controlling the simulation
-        """
-        return False
 
     def set_group_name(self, group_name):
         self.group_name = group_name

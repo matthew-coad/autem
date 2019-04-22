@@ -1,6 +1,6 @@
-from .. import Maker, Member, Controller, Choice
+from .. import Maker, Member, Choice
 
-class CrossoverMaker(Maker, Controller):
+class CrossoverMaker(Maker):
     """
     Makes new members by a cross over operation
     """
@@ -15,6 +15,6 @@ class CrossoverMaker(Maker, Controller):
         parent_indexes = specie.get_random_state().choice(len(candidates), 2, replace = False)
         parent1 = candidates[parent_indexes[0]]
         parent2 = candidates[parent_indexes[1]]
-        for component in specie.get_settings().get_hyper_parameters():
+        for component in specie.list_hyper_parameters():
             component.crossover_member(member, parent1, parent2)
         return True

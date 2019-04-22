@@ -1,6 +1,5 @@
 from ..group import Group
-from ..dataset import Dataset
-from ..role import Role
+from ..reporting import Dataset, Role
 from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
 from .preprocessor import Preprocesssor
 

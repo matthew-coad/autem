@@ -33,7 +33,7 @@ class ParameterEvaluator(Evaluater):
         return combined_members
 
     def get_choice_components(self, specie):
-        choice_components = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
+        choice_components = [ c for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
         return choice_components
 
     def get_parameter_components(self, specie, choices):

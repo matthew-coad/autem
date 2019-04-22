@@ -1,21 +1,7 @@
-from .component import Component
-
-class HyperParameter(Component):
+class HyperParameter:
 
     def __init__(self, name):
         self.name = name
-
-    def is_hyper_parameter(self):
-        """
-        Is this component a hyper parameter for the simulation
-        """
-        return True
-
-    def is_controller(self):
-        """
-        Is this component responsible for controlling the simulation
-        """
-        return False
 
     def set_group_name(self, choice_name):
         raise NotImplementedError()
@@ -56,4 +42,10 @@ class HyperParameter(Component):
         Perform member for running
         """
         pass
+
+class HyperParameterContainer:
+
+    def list_hyper_parameters(self):
+        hyper_parameters = [c for c in self.list_components() if isinstance(c, HyperParameter) ]
+        return hyper_parameters
 

@@ -1,9 +1,24 @@
-from ..controller import Controller
 from .utility import get_report_columns, get_report_frame
 
-import pandas as pd
+class Reporter:
 
-class Reporter(Controller):
+    def outline_simulation(self, simulation, outline):
+        """
+        Outline what information is going to be supplied by a simulation
+        """
+        pass
+
+    def record_member(self, member, record):
+        """
+        Record the state of a member
+        """
+        pass
+
+    def report_simulation(self, simulation):
+        """
+        Report on the progress of a simulation
+        """
+        pass
 
     def get_battle_frame(self, simulation):
         records = simulation.reports
@@ -25,8 +40,3 @@ class Reporter(Controller):
         df = pd.DataFrame(data=d)
         return df
 
-    def report_simulation(self, simulation):
-        """
-        Report on the progress of a simulation
-        """
-        raise NotImplementedError("Report_simulation not implemented")

@@ -1,5 +1,4 @@
-from .dataset import Dataset
-from .role import Role
+from .reporting import Dataset, Role
 
 from .hyper_parameter import HyperParameter
 
@@ -13,7 +12,7 @@ class Choice(HyperParameter):
         HyperParameter.__init__(self, choice_name)
         self.components = components
         for component in components:
-            if component.is_hyper_parameter():
+            if isinstance(component, HyperParameter):
                 component.set_choice_name(choice_name)
 
     def set_group_name(group_name):

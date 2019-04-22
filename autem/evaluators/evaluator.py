@@ -1,4 +1,4 @@
-from .. import Controller
+from ..lifecycle import LifecycleManager
 
-class Evaluater(Controller):
+class Evaluater(LifecycleManager):
     pass

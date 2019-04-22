@@ -25,14 +25,6 @@ class SimulationSettings:
     def get_components(self):
         return self.components
 
-    def get_hyper_parameters(self):
-        hyper_parameters = [c for c in self.components if c.is_hyper_parameter() ]
-        return hyper_parameters
-
-    def get_controllers(self):
-        controllers = [c for c in self.components if c.is_controller() ]
-        return controllers
-
     def get_max_spotchecks(self):
         return self._max_spotchecks
 

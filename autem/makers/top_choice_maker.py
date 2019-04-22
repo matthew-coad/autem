@@ -1,10 +1,10 @@
-from .. import Maker, Member, Controller, Choice
+from .. import Maker, Member, LifecycleManager, Choice
 from ..evaluators.choice_evaluation import ChoiceEvaluation
 
 import pandas as pd
 import numpy as np
 
-class TopChoiceMaker(Maker, Controller):
+class TopChoiceMaker(Maker, LifecycleManager):
     """
     Maker that prioritises the top choices using the choice model
     """
@@ -33,7 +33,7 @@ class TopChoiceMaker(Maker, Controller):
             return output
 
         grid = [ {} ]
-        for component in specie.get_settings().get_hyper_parameters():
+        for component in specie.list_hyper_parameters():
             if isinstance(component, Choice):
                 choice_names = component.get_component_names()
                 grid = cross_values(grid, component.name, choice_names)
@@ -52,7 +52,7 @@ class TopChoiceMaker(Maker, Controller):
             return None
 
         # Build the choices into a dataframe
-        choice_names = [ c.name for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
+        choice_names = [ c.name for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
         x_values = {}
         for choice_name in choice_names:
             x_values[choice_name] = [ i[choice_name] for i in grid ]
@@ -80,7 +80,7 @@ class TopChoiceMaker(Maker, Controller):
         if not grid_pred is None:
             del grid_pred[grid_index]
 
-        for component in specie.get_settings().get_hyper_parameters():
+        for component in specie.list_hyper_parameters():
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
@@ -93,7 +93,7 @@ class TopChoiceMaker(Maker, Controller):
         return self.configure_grid_member(specie, member, grid_index)
 
     def configure_random_member(self, member):
-        for component in member.get_settings().get_hyper_parameters():
+        for component in member.list_hyper_parameters():
             component.initialize_member(member)
         return True
 

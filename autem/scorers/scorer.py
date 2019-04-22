@@ -1,9 +1,9 @@
-from ..controller import Controller
-from ..container import Container
+from ..lifecycle import LifecycleManager
 
-class Scorer(Controller):
+class Scorer(LifecycleManager):
 
     def __init__(self, name, scoring):
+        LifecycleManager.__init__(self)
         self.name = name
         self.scoring = scoring
 

@@ -23,6 +23,9 @@ class Container:
         """
         return self.get_simulation().get_settings()
 
+    def list_components(self):
+        return self.get_settings().get_components()
+
     def get_random_state(self):
         """
         Get shared random state object

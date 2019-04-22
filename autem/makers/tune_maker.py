@@ -1,4 +1,4 @@
-from .. import Maker, Member, Controller, Choice
+from .. import Maker, Member, LifecycleManager, Choice
 
 import pandas as pd
 import numpy as np
@@ -13,7 +13,7 @@ class TuneSpecieState():
         self.choices = None
         self.prototype = None
 
-class TuneMaker(Maker, Controller):
+class TuneMaker(Maker, LifecycleManager):
     """
     Maker that creates the tuning model
     """
@@ -28,7 +28,7 @@ class TuneMaker(Maker, Controller):
         top_members = list(reversed(sorted(top_members, key = lambda m: m.rating)))
         prototype_member = top_members[0]
 
-        choice_components = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
+        choice_components = [ c for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
         choices = dict([ (c.name, c.get_active_component_name(prototype_member)) for c in choice_components])
 
         state = specie.get_state("tune_maker", lambda: TuneSpecieState())
