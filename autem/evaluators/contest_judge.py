@@ -1,10 +1,30 @@
 from .evaluator import Evaluater
 
-from .contest_judgement import ContestJudgement, get_contest_judgement
-
 import numpy as np
 from scipy import stats
- 
+
+class ContestJudgement:
+
+    def __init__(self):
+        self.contests = None
+        self.victories = None
+        self.meaningful = None
+        self.outcome = None
+        
+
+def get_contest_judgement(member):
+    """
+    Get contest judgement for a member
+    """
+    judgment = member.get_state("contest_judgement", lambda: ContestJudgement())
+    return judgment
+
+def reset_contest_judgement(member):
+    """
+    Reset contest judgement for a member
+    """
+    member.set_state("contest_judgement", ContestJudgement())
+
 class ContestJudge(Evaluater):
     """
     Contest judgements
@@ -19,12 +39,12 @@ class ContestJudge(Evaluater):
     def start_epoch(self, epoch):
         members = epoch.list_members()
         for member in members:
-            member.evaluation.survival = None
+            reset_contest_judgement(member)
 
     def judge_member(self, member):
 
-        judgement = ContestJudgement()
-        member.evaluation.contest_judgement = judgement
+        reset_contest_judgement(member)
+        judgement = get_contest_judgement(member)
 
         specie = member.get_specie()
         epoch = specie.get_current_epoch()

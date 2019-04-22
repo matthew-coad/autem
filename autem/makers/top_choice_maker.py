@@ -1,6 +1,6 @@
 from ..lifecycle import LifecycleManager
 from ..choice import Choice
-from ..evaluators.choice_evaluation import ChoiceEvaluation
+from ..evaluators.choice_evaluator import ChoiceState, get_choice_state
 from .maker import Maker
 
 import pandas as pd
@@ -10,12 +10,6 @@ class TopChoiceMaker(Maker, LifecycleManager):
     """
     Maker that prioritises the top choices using the choice model
     """
-
-    def get_choice_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "choice_evaluation"):
-            evaluation.choice_evaluation = ChoiceEvaluation()
-        return evaluation.choice_evaluation
 
     def make_grid(self, specie):
         """

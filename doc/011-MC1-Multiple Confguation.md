@@ -58,3 +58,7 @@ Action - Move maker base into its feature folder
 ## MC1 - Clean up expensive resources
 
 Action - Use lifecycle features to clean up expensive resources
+
+## MC1 - Convert all member evaluations
+
+Action - Complete the conversion of member evaluations to using state

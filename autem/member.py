@@ -46,7 +46,6 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.fault_component = None
         self.fault_message = None
 
-        self.evaluation = SimpleNamespace()
         self.evaluations = 0
         self.evaluation_time = None
         self.evaluation_duration = None
@@ -68,20 +67,6 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
 
     def get_simulation(self):
         return self.get_specie().get_simulation()
-
-    # Evaluations
-
-    def get_evaluations(self):
-        return self.evaluation
-
-    def get_evaluation(self, name, default = lambda: None):
-        if not hasattr(self.evaluation, name):
-            setattr(self.evaluation, name, default())
-        return getattr(self.evaluation, name)
-
-    def set_evaluation(self, name, value):
-        setattr(self.evaluation, name, value)
-
 
     # Forms
 

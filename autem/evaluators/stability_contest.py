@@ -1,5 +1,4 @@
 from .evaluator import Evaluater
-from .stability_contest_evaluation import StabilityContestEvaluation, get_stability_contest_evaluation
 
 import numpy as np
 from scipy import stats
@@ -12,6 +11,21 @@ import warnings
 
 import logging
 import io
+
+class StabilityContestEvaluation:
+    
+    def __init__(self):
+        self.stability_contest = None
+
+def get_stability_contest_evaluation(member):
+    """
+     Get score contest evaluation for a member
+    """
+    evaluation = member.evaluation
+    if not hasattr(evaluation, "stability_contest_evaluation"):
+        evaluation.stability_contest_evaluation = StabilityContestEvaluation()
+    return evaluation.stability_contest_evaluation
+
 
 class StabilityContest(Evaluater):
     """

@@ -1,7 +1,6 @@
 from ..choice import Choice
 from .evaluator import Evaluater
 from .score_evaluator import ScoreState
-from .choice_evaluation import ChoiceEvaluation
 
 import numpy as np
 import pandas as pd
@@ -18,6 +17,16 @@ from sklearn.preprocessing import OneHotEncoder
 import warnings
 import time
 
+class ChoiceState:
+
+    def __init__(self):
+        self.choice_predicted_score = None
+        self.choice_predicted_score_std = None
+
+def get_choice_state(member):
+    state = member.get_state("choice", lambda: ChoiceState())
+    return state
+
 class ChoiceEvaluator(Evaluater):
     """
     Component that performs evaluations related to choices
@@ -25,12 +34,6 @@ class ChoiceEvaluator(Evaluater):
 
     def __init__(self):
         pass
-
-    def get_choice_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "choice_evaluation"):
-            evaluation.choice_evaluation = ChoiceEvaluation()
-        return evaluation.choice_evaluation
 
     def build_member_score_df(self, specie):
         """
@@ -115,7 +118,7 @@ class ChoiceEvaluator(Evaluater):
 
         # Reset the expected score for all members
         for member in specie.list_members():
-            member.evaluation.choice_evaluation = ChoiceEvaluation()
+            member.set_state("choice", ChoiceState())
 
     def build_predicted_score(self, member):
         """
@@ -139,13 +142,13 @@ class ChoiceEvaluator(Evaluater):
 
     def evaluate_member(self, member):
 
-        choice_evaluation = self.get_choice_evaluation(member)
-        if not choice_evaluation.choice_predicted_score is None:
+        choice_state = get_choice_state(member)
+        if not choice_state.choice_predicted_score is None:
             return None
 
         choice_predicted_score, choice_predicted_score_std = self.build_predicted_score(member)
-        choice_evaluation.choice_predicted_score = choice_predicted_score
-        choice_evaluation.choice_predicted_score_std = choice_predicted_score_std
+        choice_state.choice_predicted_score = choice_predicted_score
+        choice_state.choice_predicted_score_std = choice_predicted_score_std
 
     def start_epoch(self, epoch):
         self.evaluate_model(epoch.get_specie())
@@ -153,6 +156,6 @@ class ChoiceEvaluator(Evaluater):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        choice_evaluation = self.get_choice_evaluation(member)
-        record.CE_score = choice_evaluation.choice_predicted_score
-        record.CE_score_std = choice_evaluation.choice_predicted_score_std
+        choice_state = get_choice_state(member)
+        record.CE_score = choice_state.choice_predicted_score
+        record.CE_score_std = choice_state.choice_predicted_score_std

@@ -3,18 +3,26 @@ from .evaluator import Evaluater
 import numpy as np
 from scipy import stats
 
-from .duration_evaluation import DurationEvaluation
+class DurationState:
+
+    """
+    Duration evaluation
+    """
+    def __init__(self):
+        self.duration = None
+        self.duration_std = None
+        self.base_duration = None
+        self.base_duration_std = None
+        self.relative_duration = None
+
+def get_duration_state(member):
+    state = member.get_state("duration", lambda: DurationState())
+    return state
 
 class DurationEvaluator(Evaluater):
     """
     Assesses a members duration
     """
-
-    def get_duration_evaluation(self, member):
-        evaluation = member.evaluation
-        if not hasattr(evaluation, "duration_evaluation"):
-            evaluation.duration_evaluation = DurationEvaluation()
-        return evaluation.duration_evaluation
 
     def evaluate_member(self, member):
         super().evaluate_member(member)
@@ -33,18 +41,17 @@ class DurationEvaluator(Evaluater):
         for candidate in candidates:
             base_durations.append(candidate.get_score_state().score_duration)
 
-        duration_evaluation = self.get_duration_evaluation(member)
-
-        duration_evaluation.duration = score_state.score_duration
-        duration_evaluation.duration_std = score_state.score_duration_std
-        duration_evaluation.base_duration = np.mean(base_durations)
-        duration_evaluation.base_duration_std = np.std(base_durations)
-        duration_evaluation.relative_duration = duration_evaluation.duration / duration_evaluation.base_duration
+        duration_state = get_duration_state(member)
+        duration_state.duration = score_state.score_duration
+        duration_state.duration_std = score_state.score_duration_std
+        duration_state.base_duration = np.mean(base_durations)
+        duration_state.base_duration_std = np.std(base_durations)
+        duration_state.relative_duration = duration_state.duration / duration_state.base_duration
 
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        duration_evaluation = self.get_duration_evaluation(member)
-        record.DE_duration = duration_evaluation.duration
-        record.DE_duration_std = duration_evaluation.duration_std
-        record.DE_relative_duration = duration_evaluation.relative_duration
+        duration_state = get_duration_state(member)
+        record.DE_duration = duration_state.duration
+        record.DE_duration_std = duration_state.duration_std
+        record.DE_relative_duration = duration_state.relative_duration
