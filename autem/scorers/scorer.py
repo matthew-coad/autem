@@ -1,4 +1,5 @@
-from .. import Controller
+from ..controller import Controller
+from ..container import Container
 
 class Scorer(Controller):
 
@@ -10,5 +11,12 @@ class Scorer(Controller):
         raise NotImplementedError("Score function not defined")
 
     def start_simulation(self, simulation):
-        simulation.get_resources().scorer = self
+        simulation.set_state("scorer", self)
 
+class ScorerContainer:
+
+    def __init__(self):
+        self._scorer = None
+
+    def get_scorer(self):
+        return self.get_simulation().get_state("scorer")

@@ -1,6 +1,7 @@
 from .component import Component
+from .container import Container
+from .scorers import ScorerContainer
 from .ranking import Ranking
-
 
 import time
 
@@ -9,11 +10,14 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch:
+class Epoch(Container, ScorerContainer):
     """
     Epoch of a simulation
     """
-    def __init__(self, specie, epoch_id, epoch_n): 
+    def __init__(self, specie, epoch_id, epoch_n):
+        Container.__init__(self)
+        ScorerContainer.__init__(self)
+
         self._specie = specie
         self._simulation = specie.get_simulation()
 

@@ -1,8 +1,11 @@
+from .container import Container
+
 from .member import Member
 from .epoch import Epoch
 from .form import Form
 from .ranking import Ranking
 from .choice import Choice
+from .scorers import ScorerContainer
 
 
 import numpy as np
@@ -11,11 +14,15 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie:
+class Specie(Container, ScorerContainer):
+
     """
     Specie of a simulation
     """
     def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
+        Container.__init__(self)
+        ScorerContainer.__init__(self)
+
         self._simulation = simulation
         self.id = specie_id
         self._mode = mode
@@ -54,9 +61,6 @@ class Specie:
 
     def get_random_state(self):
         return self.get_simulation().get_random_state()
-
-    def get_scorer(self):
-        return self.get_simulation().get_scorer()
 
     def get_loader(self):
         return self.get_simulation().get_loader()

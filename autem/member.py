@@ -1,5 +1,9 @@
 from .component import Component
+from .container import Container
+from .scorers import ScorerContainer
+
 from .maker import Maker
+
 
 import time
 
@@ -7,11 +11,14 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member:
+class Member(Container, ScorerContainer) :
     """
     Member of a population
     """
     def __init__(self, specie): 
+        Container.__init__(self)
+        ScorerContainer.__init__(self)
+
         self._specie = specie
 
         self.id = specie.generate_id()
@@ -53,14 +60,14 @@ class Member:
     def get_specie(self):
         return self._specie
 
+    def get_simulation(self):
+        return self.get_specie().get_simulation()
+
     def get_settings(self):
         return self.get_specie().get_settings()
 
     def get_random_state(self):
         return self.get_specie().get_random_state()
-
-    def get_scorer(self):
-        return self.get_specie().get_scorer()
 
     def get_loader(self):
         return self.get_specie().get_loader()

@@ -3,7 +3,6 @@ from sklearn.metrics import accuracy_score
 
 from .scorer import Scorer
 
-
 def neg_mean_squared_error_scorer(y_true, y_pred):
     return 0 - mean_squared_error(y_true, y_pred)
 

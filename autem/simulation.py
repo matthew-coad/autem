@@ -1,13 +1,17 @@
+from .workflows import Workflow
+from .container import Container
+from .record import Record
+
+from .scorers import ScorerContainer
+
 from .member import Member
 from .epoch import Epoch
 from .specie import Specie
-from .record import Record
 from .dataset import Dataset
 from .role import Role
 from .outline import Outline
 from .form import Form
 from .ranking import Ranking
-from types import SimpleNamespace
 from .feedback import printProgressBar
 from .maker import Maker
 from .choice import Choice
@@ -17,11 +21,17 @@ import numpy
 import time
 import datetime
 
-class Simulation:
+from types import SimpleNamespace
+
+
+class Simulation(Container, ScorerContainer) :
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
                 max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
+        Container.__init__(self)
+        ScorerContainer.__init__(self)
+
         self.name = name
         self._settings = SimulationSettings(
             components  = components, properties = properties, seed = seed, 
@@ -40,6 +50,9 @@ class Simulation:
         self._current_specie_id = None
         self._species = None
         self.reports = None
+
+    def get_simulation(self):
+        return self
 
     def generate_id(self):
         id = self._next_id
@@ -69,12 +82,6 @@ class Simulation:
 
     def get_resources(self):
         return self._resources
-
-    def get_scorer(self):
-        """
-        Get simulation scorer
-        """
-        return self.get_resources().scorer
 
     def get_loader(self):
         """
