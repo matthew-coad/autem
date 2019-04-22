@@ -55,6 +55,7 @@ class LifecycleManager:
         """
         Notification that a member is being buried
         """
+        pass
 
     ## Epoch components
 

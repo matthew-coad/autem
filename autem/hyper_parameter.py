@@ -37,12 +37,6 @@ class HyperParameter:
     def crossover_member(self, member, parent0, parent1):
         raise NotImplementedError()
 
-    def prepare_member(self, member):
-        """
-        Perform member for running
-        """
-        pass
-
 class HyperParameterContainer:
 
     def list_hyper_parameters(self):

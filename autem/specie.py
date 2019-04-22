@@ -203,7 +203,7 @@ class Specie(Container, LifecycleContainer, HyperParameterContainer, ScorerConta
         """
         Remove a member from the active pool
         """
-        member.buried()
+        member.bury()
         self._graveyard.append(member)
         self._members.remove(member)
 

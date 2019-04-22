@@ -1,7 +1,7 @@
 from .hyper_parameter import HyperParameter
-from .reporting import Dataset, Role
+from .reporting import Dataset, Role, Reporter
 
-class Parameter(HyperParameter):
+class Parameter(HyperParameter, Reporter):
 
     def __init__(self, name, label, type, shared = False):
         self.name = name

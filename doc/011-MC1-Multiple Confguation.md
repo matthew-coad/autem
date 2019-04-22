@@ -54,3 +54,7 @@ Outcome - Convert all features in controllers to lifecycle
 ## MC1 - Move maker into folder
 
 Action - Move maker base into its feature folder
+
+## MC1 - Clean up expensive resources
+
+Action - Use lifecycle features to clean up expensive resources

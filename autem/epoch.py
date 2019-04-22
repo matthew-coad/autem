@@ -159,7 +159,7 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
 
         # Ensure all members evaluated
         for member_index in range(len(members)):
-            self.evaluate_member(members[member_index])
+            members[member_index].evaluate()
             printProgressBar(member_index + (current_round - 1) * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
 
         # Have all evaluation survivors contest each other
@@ -187,21 +187,6 @@ class Epoch(Container, LifecycleContainer, HyperParameterContainer, ScorerContai
 
     def make_member(self, reason):        
         return self.get_specie().make_member(reason)
-
-    def evaluate_member(self, member):
-        """
-        Perform a round of member evaluation
-        """
-        if not member.alive:
-            raise RuntimeError("Member not alive")
-
-        start_time = time.time()
-        for component in self.list_lifecycle_managers():
-            component.evaluate_member(member)
-            if not member.alive:
-                break
-        duration = time.time() - start_time
-        member.evaluated(duration)
 
     def contest_members(self, contestant1, contestant2):
 

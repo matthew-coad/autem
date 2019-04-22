@@ -1,8 +1,10 @@
 from .reporting import Dataset, Role
 
 from .hyper_parameter import HyperParameter
+from .lifecycle import LifecycleManager
+from .reporters import Reporter
 
-class Choice(HyperParameter):
+class Choice(HyperParameter, LifecycleManager, Reporter):
 
     """
     Defines a set of components where only one component can be active for a member
@@ -29,7 +31,8 @@ class Choice(HyperParameter):
         """
         outline.append_attribute(self.name, Dataset.Battle, [ Role.Parameter ], self.name)
         for component in self.components:
-            component.outline_simulation(simulation, outline)
+            if isinstance(component, Reporter):
+                component.outline_simulation(simulation, outline)
 
     def record_member(self, member, record):
         """
@@ -37,7 +40,8 @@ class Choice(HyperParameter):
         """
         setattr(record, self.name, self.get_active_component_name(member))
         component = self.get_active_component(member)
-        component.record_member(member, record)
+        if isinstance(component, Reporter):
+            component.record_member(member, record)
 
     # Active component
 
@@ -172,7 +176,18 @@ class Choice(HyperParameter):
         """
         Forward request to active component
         """
-        return self.get_active_component(member).prepare_member(member)
+        component = self.get_active_component(member)
+        if isinstance(component, LifecycleManager):
+            return component.prepare_member(member)
+        else:
+            return None
 
-
-
+    def bury_member(self, member):
+        """
+        Forward request to active component
+        """
+        component = self.get_active_component(member)
+        if isinstance(component, LifecycleManager):
+            return component.bury_member(member)
+        else:
+            return None

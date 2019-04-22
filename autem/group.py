@@ -1,15 +1,17 @@
-from .reporting import Dataset, Role
+from .reporting import Dataset, Role, Reporter
 from .hyper_parameter import HyperParameter
+from .lifecycle import LifecycleManager
 
 from types import SimpleNamespace
 
-class Group(HyperParameter):
+class Group(HyperParameter, LifecycleManager, Reporter):
 
     """
     Defines a group of hyper parameters
     """
     def __init__(self, group_name, parameters):
         HyperParameter.__init__(self, group_name)
+        LifecycleManager.__init__(self)
         self.parameters = parameters
         for parameter in parameters:
             parameter.set_group_name(group_name)
@@ -33,14 +35,16 @@ class Group(HyperParameter):
         Outline what information is going to be supplied by a simulation
         """
         for parameter in self.parameters:
-            parameter.outline_simulation(simulation, outline)
+            if isinstance(parameter, Reporter):
+                parameter.outline_simulation(simulation, outline)
 
     def record_member(self, member, record):
         """
         Record the state of a member
         """
         for parameter in self.parameters:
-            parameter.record_member(member, record)
+            if isinstance(parameter, Reporter):
+                parameter.record_member(member, record)
 
     def initialize_member(self, member):
         """
@@ -86,3 +90,12 @@ class Group(HyperParameter):
             for parameter in self.parameters:
                 parameter.crossover_member(member, parent0, parent1)
 
+    def prepare_member(self, member):
+        for parameter in self.parameters:
+            if isinstance(parameter, LifecycleManager):
+                parameter.prepare_member(member)
+
+    def bury_member(self, member):
+        for parameter in self.parameters:
+            if isinstance(parameter, LifecycleManager):
+                parameter.bury_member(member)

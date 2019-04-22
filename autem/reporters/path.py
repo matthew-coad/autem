@@ -1,8 +1,9 @@
 from .reporter import Reporter
+from ..lifecycle import LifecycleManager
 
 import os
 
-class Path(Reporter):
+class Path(Reporter, LifecycleManager):
 
     def __init__(self, path):
         from autem import ReportManager

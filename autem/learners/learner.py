@@ -74,6 +74,10 @@ class Learner(Group):
         pipeline = Pipeline(steps=steps, memory=memory)
         member.set_state("pipeline", pipeline)
 
+    def bury_member(self, member):
+        member.set_state("pipeline", None)
+        member.set_state("steps", None)
+
 class LearnerContainer:
 
     def get_pipeline(self):

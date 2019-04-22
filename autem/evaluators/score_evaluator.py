@@ -33,7 +33,7 @@ class ScoreState:
 class ScoreContainer:
 
     def get_score_state(self):
-        return self.get_simulation().get_state("scores", lambda: ScoreState())
+        return self.get_state("scores", lambda: ScoreState())
 
 class ScoreEvaluator(Evaluater):
     """

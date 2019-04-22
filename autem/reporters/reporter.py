@@ -1,4 +1,5 @@
 from .utility import get_report_columns, get_report_frame
+import pandas as pd
 
 class Reporter:
 

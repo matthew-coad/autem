@@ -1,4 +1,3 @@
-from .simulation_info import SimulationInfo
 from .reporters.utility import get_report_columns, get_report_frame
 
 import pandas as pd
@@ -19,6 +18,16 @@ def prepare_path(path):
                 shutil.rmtree(os.path.join(root, d))
     if not os.path.isdir(path):
         os.makedirs(path)
+
+class SimulationInfo:
+
+    """
+    Information about a simulation that is useful to reporting
+    """
+
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path        
 
 class ReportManager():
     """

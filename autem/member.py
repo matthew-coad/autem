@@ -103,7 +103,7 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.fault_component = None
         self.fault_message = None
 
-        for component in self.list_hyper_parameters():
+        for component in self.list_lifecycle_managers():
             component.prepare_member(self)
             if not self.fault is None:
                 break
@@ -217,7 +217,20 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.evaluation_time = time.time()
         self.wonlost = []
 
-    def evaluated(self, duration):
+    def evaluate(self):
+        """
+        Perform a round of member evaluation
+        """
+        if not self.alive:
+            raise RuntimeError("Member not alive")
+
+        self.evaluation_duration = None
+        start_time = time.time()
+        for component in self.list_lifecycle_managers():
+            component.evaluate_member(self)
+            if not self.alive:
+                break
+        duration = time.time() - start_time
         self.evaluation_duration = duration
         self.evaluations += 1
 
@@ -289,9 +302,11 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.alive = 0
         self.final = 1
 
-    def buried(self):
+    def bury(self):
         """
         Change this member to the buried state
         """
+        for component in self.list_lifecycle_managers():
+            component.bury_member(self)
         self.form.disembody()
 
