@@ -1,6 +1,10 @@
-from .. import Controller
+from ..controller import Controller
+from ..container import Container
 
 class Loader(Controller):
+
+    def start_simulation(self, simulation):
+        simulation.set_state("loader", self)
 
     def load_divided_data(self, simulation):
         """
@@ -26,5 +30,7 @@ class Loader(Controller):
         """
         raise NotImplementedError()
 
-    def start_simulation(self, simulation):
-        simulation.get_resources().loader = self
+class LoaderContainer:
+
+    def get_loader(self):
+        return self.get_simulation().get_state("loader")

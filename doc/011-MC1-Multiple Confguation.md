@@ -12,3 +12,8 @@ Action - Convert scorers as a prototype
 Outcome - Complete
 
 **done**
+
+## MC1 - Convert Simulation Resources
+
+Action - Their is a single loader available to a simulation. Convert it to use states.
+Action - Remove all remaining simulation resources and remove resources

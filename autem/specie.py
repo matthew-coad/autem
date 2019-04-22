@@ -6,6 +6,7 @@ from .form import Form
 from .ranking import Ranking
 from .choice import Choice
 from .scorers import ScorerContainer
+from .loaders import LoaderContainer
 
 
 import numpy as np
@@ -14,14 +15,16 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, ScorerContainer):
+class Specie(Container, ScorerContainer, LoaderContainer):
 
     """
     Specie of a simulation
     """
     def __init__(self, simulation, specie_id, mode, specie_n, prior_epoch_id):
+
         Container.__init__(self)
         ScorerContainer.__init__(self)
+        LoaderContainer.__init__(self)
 
         self._simulation = simulation
         self.id = specie_id

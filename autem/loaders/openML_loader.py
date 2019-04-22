@@ -1,10 +1,26 @@
 from .loader import Loader
-from .. import Dataset, Role
+
+from ..dataset import Dataset
+from ..role import Role
 
 import openml
 
 from sklearn.model_selection import train_test_split
 import pandas as pd
+
+class OpenMLLoaderState:
+
+    def __init__(self):
+        self.dataset = None
+        self.features = None
+        self.x_divided = None
+        self.y_divided = None
+
+        self.x_train = None
+        self.x_validation = None
+        self.y_train = None
+        self.y_validation = None
+
 
 class OpenMLLoader(Loader):
 
@@ -37,41 +53,36 @@ class OpenMLLoader(Loader):
         else:
             x_train, x_validation, y_train, y_validation = (x, None, y, None)
 
-        resources = simulation.get_resources()
+        state = OpenMLLoaderState()
 
-        resources.dataset = dataset
-        resources.features = features
-        resources.x_divided = x
-        resources.y_divided = y
+        state.dataset = dataset
+        state.features = features
+        state.x_divided = x
+        state.y_divided = y
 
-        resources.x_train = x_train
-        resources.x_validation = x_validation
-        resources.y_train = y_train
-        resources.y_validation = y_validation
+        state.x_train = x_train
+        state.x_validation = x_validation
+        state.y_train = y_train
+        state.y_validation = y_validation
 
+        simulation.set_state("openml_loader", state)
 
-    def outline_simulation(self, simulation, outline):
-        super().outline_simulation(simulation, outline)
-
-        if not outline.has_attribute("data", Dataset.Battle):
-            outline.append_attribute("data", Dataset.Battle, [ Role.Configuration ], "Dataset")
+    def get_openml_loader_state(self, simulation):
+        return simulation.get_state("openml_loader")
 
     def load_divided_data(self, simulation):
-        return (simulation.get_resources().x_divided, simulation.get_resources().y_divided)
+        state = self.get_openml_loader_state(simulation)
+        return (state.x_divided, state.y_divided)
 
     def load_training_data(self, simulation):
-        return (simulation.get_resources().x_train, simulation.get_resources().y_train)
+        state = self.get_openml_loader_state(simulation)
+        return (state.x_train, state.y_train)
 
     def load_validation_data(self, simulation):
-        return (simulation.get_resources().x_validation, simulation.get_resources().y_validation)
+        state = self.get_openml_loader_state(simulation)
+        return (state.x_validation, state.y_validation)
 
     def get_features(self, simulation):
-        return simulation.get_resources().features
+        state = self.get_openml_loader_state(simulation)
+        return state.features
 
-    def record_member(self, member, record):
-        """
-        Record the state of a member
-        """
-        super().record_member(member, record)
-
-        record.data = member.get_specie().get_simulation().get_resources().dataset.name

@@ -3,6 +3,7 @@ from .container import Container
 from .record import Record
 
 from .scorers import ScorerContainer
+from .loaders import LoaderContainer
 
 from .member import Member
 from .epoch import Epoch
@@ -24,13 +25,15 @@ import datetime
 from types import SimpleNamespace
 
 
-class Simulation(Container, ScorerContainer) :
+class Simulation(Container, ScorerContainer, LoaderContainer) :
 
     """Simulation state"""
     def __init__(self, name, components, properties = {}, seed = 1234, 
                 max_spotchecks  = 3, max_tunes = 1, max_epochs = 20, max_rounds = 20, max_time = None, n_jobs = -1, memory = None):
+
         Container.__init__(self)
         ScorerContainer.__init__(self)
+        LoaderContainer.__init__(self)
 
         self.name = name
         self._settings = SimulationSettings(
@@ -39,7 +42,6 @@ class Simulation(Container, ScorerContainer) :
             max_reincarnations = 3, max_population = 20, max_league = 4, memory = memory)
 
         self.outline = None
-        self._resources = SimpleNamespace()
 
         self._random_state = numpy.random.RandomState(seed)
         self._next_id = 1
@@ -51,18 +53,26 @@ class Simulation(Container, ScorerContainer) :
         self._species = None
         self.reports = None
 
+    ## Core Environment
+
     def get_simulation(self):
         return self
+
+    def get_settings(self):
+        return self._settings
 
     def generate_id(self):
         id = self._next_id
         self._next_id += 1
         return id
 
-    ## Environment
+    def get_random_state(self):
+        """
+        Get simulation loader
+        """
+        return self._random_state
 
-    def get_settings(self):
-        return self._settings
+    ## Environment
 
     def list_species(self, alive = None, mode = None):
         """
@@ -79,21 +89,6 @@ class Simulation(Container, ScorerContainer) :
     def get_current_specie(self):
         specie = self._species[self._current_specie_id] if self._current_specie_id else None
         return specie
-
-    def get_resources(self):
-        return self._resources
-
-    def get_loader(self):
-        """
-        Get simulation loader
-        """
-        return self.get_resources().loader
-
-    def get_random_state(self):
-        """
-        Get simulation loader
-        """
-        return self._random_state
 
     def get_start_time(self):
         return self._start_time

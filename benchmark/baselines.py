@@ -83,10 +83,10 @@ class BaselineStats(Evaluater):
 
         baseline_name = self.baseline_name
         stats = get_baseline_stats(baseline_name)
-        simulation.get_resources().baseline_stats = stats
+        simulation.set_state("baseline_stats", stats)
 
     def record_member(self, member, record):
-        stats = member.get_specie().get_simulation().get_resources().baseline_stats
+        stats = member.get_simulation().get_state("baseline_stats")
         record.BL_top_score = stats["max_score"]
         record.BL_top_5p_score = stats["top_5p"]
 

@@ -17,6 +17,24 @@ class Container:
         """
         pass
 
+    def get_settings(self):
+        """
+        Get shared settings object
+        """
+        return self.get_simulation().get_settings()
+
+    def get_random_state(self):
+        """
+        Get shared random state object
+        """
+        return self.get_simulation().get_random_state()
+
+    def generate_id(self):
+        """
+        Generate an ID unique to simulation
+        """
+        return self.get_simulation().generate_id()
+
     # State
     def get_states(self):
         return self._states
