@@ -2,6 +2,9 @@ from .component import Component
 from .container import Container
 from .scorers import ScorerContainer
 from .loaders import LoaderContainer
+from .preprocessors import PreprocessorContainer
+from .learners import LearnerContainer
+from .evaluators.score_evaluator import ScoreContainer
 
 from .maker import Maker
 
@@ -12,7 +15,7 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, ScorerContainer, LoaderContainer) :
+class Member(Container, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
     """
     Member of a population
     """
@@ -21,6 +24,9 @@ class Member(Container, ScorerContainer, LoaderContainer) :
         Container.__init__(self)
         ScorerContainer.__init__(self)
         LoaderContainer.__init__(self)
+        PreprocessorContainer.__init__(self)
+        LearnerContainer.__init__(self)
+        ScoreContainer.__init__(self)
 
         self._specie = specie
 
@@ -35,8 +41,6 @@ class Member(Container, ScorerContainer, LoaderContainer) :
 
         self.alive = 0
         self.final = 0
-
-        self._resources = None
 
         self.fault = None
         self.fault_operation = None
@@ -66,19 +70,6 @@ class Member(Container, ScorerContainer, LoaderContainer) :
     def get_simulation(self):
         return self.get_specie().get_simulation()
 
-    # Resources
-
-    def get_resources(self):
-        return self._resources
-
-    def get_resource(self, name, default = lambda: None):
-        if not hasattr(self._resources, name):
-            setattr(self._resources, name, default())
-        return getattr(self._resources, name)
-
-    def set_resource(self, name, value):
-        setattr(self._resources, name, value)
-
     # Evaluations
 
     def get_evaluations(self):
@@ -107,7 +98,7 @@ class Member(Container, ScorerContainer, LoaderContainer) :
         """
         Perform pre-incarnation preparation
         """
-        self._resources = SimpleNamespace()
+        self.reset_state()
         self.fault = None
         self.fault_operation = None
         self.fault_component = None
@@ -290,7 +281,7 @@ class Member(Container, ScorerContainer, LoaderContainer) :
         """
         self.ranking = ranking
 
-    def finshed(self, reason):
+    def finished(self, reason):
         """
         Notify that this member it is finished with, because the simulation has finished
         """
@@ -299,9 +290,9 @@ class Member(Container, ScorerContainer, LoaderContainer) :
         self.alive = 0
         self.final = 1
 
-    def disembody(self):
+    def buried(self):
         """
-        Disembody the member
+        Change this member to the buried state
         """
-        self.get_form().disembody()
-        self._resources = None
+        self.form.disembody()
+

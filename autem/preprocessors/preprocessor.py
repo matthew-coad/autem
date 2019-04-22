@@ -1,4 +1,7 @@
-from .. import Group, Dataset, Role, ChoicesParameter, make_choice, make_choice_list
+from ..group import Group
+from ..dataset import Dataset
+from ..role import Role
+from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
 
 import numpy as np
 
@@ -52,5 +55,12 @@ class Preprocesssor(Group):
         self.configure_preprocessor(member, preprocessor)
         self.update_parameters(member, preprocessor)
 
-        steps = member.get_resource("steps", lambda: [])
+        steps = member.get_steps()
         steps.append((processor_name, preprocessor))
+
+class PreprocessorContainer:
+
+    def get_steps(self):
+        steps = self.get_state("steps", lambda: [])
+        return steps
+

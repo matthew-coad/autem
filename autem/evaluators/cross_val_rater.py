@@ -1,4 +1,3 @@
-from .. import Dataset, Role
 from .evaluator import Evaluater
 
 import numpy as np
@@ -28,7 +27,7 @@ class CrossValidationRater(Evaluater):
         loader = member.get_loader()
 
         x,y = loader.load_divided_data(member)
-        pipeline = member.get_resources().pipeline
+        pipeline = member.get_pipeline()
 
         try:
             scores = cross_val_score(pipeline, x, y, scoring=scorer.scoring, cv=self.cv, error_score='raise')

@@ -1,5 +1,7 @@
-from .. import Group, Dataset, Role, ChoicesParameter, make_choice_list
-
+from ..group import Group
+from ..dataset import Dataset
+from ..role import Role
+from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
 from .preprocessor import Preprocesssor
 
 import sklearn.impute as impute

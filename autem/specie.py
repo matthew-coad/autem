@@ -199,7 +199,7 @@ class Specie(Container, ScorerContainer, LoaderContainer):
         """
         Remove a member from the active pool
         """
-        member.disembody()
+        member.buried()
         self._graveyard.append(member)
         self._members.remove(member)
 

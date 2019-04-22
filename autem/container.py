@@ -7,7 +7,7 @@ class Container:
     """
 
     def __init__(self):
-        self._states = SimpleNamespace()
+        self._states = {}
 
     # Context
 
@@ -36,14 +36,13 @@ class Container:
         return self.get_simulation().generate_id()
 
     # State
-    def get_states(self):
-        return self._states
-
     def get_state(self, name, default = lambda: None):
-        if not hasattr(self._states, name):
-            setattr(self._states, name, default())
-        return getattr(self._states, name)
+        if not name in self._states:
+            self._states[name] = default()
+        return self._states[name]
 
     def set_state(self, name, value):
-        setattr(self._states, name, value)
+        self._states[name] = value
 
+    def reset_state(self):
+        self._states = {}

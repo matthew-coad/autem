@@ -1,4 +1,7 @@
-from .. import Parameter, Group, Dataset, Role, Controller
+from ..parameter import Parameter
+from ..group import Group
+from ..dataset import Dataset
+from ..role import Role
 
 from types import SimpleNamespace
 
@@ -66,8 +69,13 @@ class Learner(Group):
                 parameter.set_value(member, value)
 
         # Build the pipeline
-        steps = member.get_resource("steps", lambda: [])
+        steps = member.get_steps()
         steps.append((learner_name, model))
         memory = member.get_settings().get_memory()
         pipeline = Pipeline(steps=steps, memory=memory)
-        member.set_resource("pipeline", pipeline)
+        member.set_state("pipeline", pipeline)
+
+class LearnerContainer:
+
+    def get_pipeline(self):
+        return self.get_state("pipeline")

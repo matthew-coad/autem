@@ -1,4 +1,3 @@
-from .. import Dataset, Role
 from .evaluator import Evaluater
 
 import numpy as np

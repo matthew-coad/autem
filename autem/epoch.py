@@ -116,7 +116,7 @@ class Epoch(Container, ScorerContainer, LoaderContainer):
             finish_specie, reason = self.get_specie().should_finish()
             if finished and finish_specie:
                 for member in self.list_members(alive=True):
-                    member.finshed(reason)
+                    member.finished(reason)
                     self.bury_member(member)
 
             # Report on what happened

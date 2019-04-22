@@ -1,6 +1,4 @@
-from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
 
 import numpy as np
 from scipy import stats
@@ -23,8 +21,8 @@ class ScoreContest(Evaluater):
 
         specie = contestant1.get_specie()
 
-        contestant1_score = get_score_evaluation(contestant1).score
-        contestant2_score = get_score_evaluation(contestant2).score
+        contestant1_score = contestant1.get_score_state().score
+        contestant2_score = contestant2.get_score_state().score
 
         if contestant1_score == contestant2_score:
             return None

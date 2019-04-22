@@ -1,6 +1,4 @@
-from .. import Dataset, Role
 from .evaluator import Evaluater
-from .score_evaluation import get_score_evaluation
 
 import numpy as np
 from scipy import stats
@@ -19,6 +17,6 @@ class ScoreRater(Evaluater):
         Only famous members get a rating.
         """
 
-        score_evaluation = get_score_evaluation(member)
+        score_state = member.get_score_state()
 
-        member.rated(score_evaluation.score, score_evaluation.score_std)
+        member.rated(score_state.score, score_state.score_std)

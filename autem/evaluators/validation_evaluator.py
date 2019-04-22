@@ -27,7 +27,7 @@ class ValidationEvaluator(Evaluater):
 
         scorer = member.get_scorer()
         loader = member.get_loader()
-        pipeline = member.get_resources().pipeline
+        pipeline = member.get_pipeline()
 
         x,y = loader.load_training_data(member)
         x_validation, y_validation = loader.load_validation_data(member)

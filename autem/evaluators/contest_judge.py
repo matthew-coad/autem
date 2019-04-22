@@ -1,7 +1,6 @@
-from .. import Dataset, Role
 from .evaluator import Evaluater
 
-from .contest_judgement import ContestJudgement,get_contest_judgement
+from .contest_judgement import ContestJudgement, get_contest_judgement
 
 import numpy as np
 from scipy import stats

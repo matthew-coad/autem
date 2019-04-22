@@ -1,6 +1,4 @@
-from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
 from .stability_contest_evaluation import StabilityContestEvaluation, get_stability_contest_evaluation
 
 import numpy as np

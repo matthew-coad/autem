@@ -1,7 +1,4 @@
-from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
-from .score_resources import ScoreResources, get_score_resources
 
 import numpy as np
 from scipy import stats
@@ -32,15 +29,13 @@ class DiverseContest(Evaluater):
         if max_league == 0:
             return None
 
-        contestant1_score_evaluation = get_score_evaluation(contestant1)
-        contestant1_score_resources = get_score_resources(contestant1)
-        contestant2_score_evaluation = get_score_evaluation(contestant2)
-        contestant2_score_resources = get_score_resources(contestant2)
-        if not max_league in contestant1_score_resources.league_predictions or not max_league in contestant2_score_resources.league_predictions:
+        contestant1_score_state = contestant1.get_score_state()
+        contestant2_score_state = contestant2.get_score_state()
+        if not max_league in contestant1_score_state.league_predictions or not max_league in contestant2_score_state.league_predictions:
             return None
 
-        contestant1_predictions = contestant1_score_resources.league_predictions[max_league]
-        contestant2_predictions = contestant2_score_resources.league_predictions[max_league]
+        contestant1_predictions = contestant1_score_state.league_predictions[max_league]
+        contestant2_predictions = contestant2_score_state.league_predictions[max_league]
         inter_score = scorer.score(contestant1_predictions, contestant2_predictions)
         if inter_score < self.max_score:
             return None

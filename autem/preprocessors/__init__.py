@@ -1,4 +1,4 @@
-from .preprocessor import Preprocesssor
+from .preprocessor import Preprocesssor, PreprocessorContainer
 
 # Engineers
 from .engineers import NoEngineering, PolynomialFeatures

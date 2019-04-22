@@ -1,6 +1,6 @@
-from .. import Dataset, Role, WarningInterceptor, Choice
+from ..choice import Choice
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
+from .score_evaluator import ScoreState
 from .choice_evaluation import ChoiceEvaluation
 
 import numpy as np
@@ -42,7 +42,7 @@ class ChoiceEvaluator(Evaluater):
         simulation = specie.get_simulation()
         combined_members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) ] 
 
-        all_members = [ m for m in combined_members if get_score_evaluation(m).scores ]
+        all_members = [ m for m in combined_members if m.get_score_state().scores ]
 
         if not all_members:
             return None
@@ -62,7 +62,7 @@ class ChoiceEvaluator(Evaluater):
         choice_df = pd.DataFrame(member_choices)
 
         # Build a frame containing fit score for each member
-        scores = [(m.id, get_score_evaluation(m).score) for m in all_members ]
+        scores = [(m.id, m.get_score_state().score) for m in all_members ]
         score_df = pd.DataFrame(scores, columns=['member_id', 'score'])
 
         # Join the frames together

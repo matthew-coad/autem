@@ -1,6 +1,4 @@
-from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
 
 import numpy as np
 from scipy import stats
@@ -23,8 +21,8 @@ class DurationEvaluator(Evaluater):
 
         specie = member.get_specie()
 
-        score_evaluation = get_score_evaluation(member)
-        if not score_evaluation.score_duration:
+        score_state = member.get_score_state()
+        if not score_state.score_duration:
             return None
 
         candidates = [ m for m in specie.list_members() if m.id != member.id and m.league >= 1]
@@ -33,12 +31,12 @@ class DurationEvaluator(Evaluater):
 
         base_durations = []
         for candidate in candidates:
-            base_durations.append(get_score_evaluation(candidate).score_duration)
+            base_durations.append(candidate.get_score_state().score_duration)
 
         duration_evaluation = self.get_duration_evaluation(member)
 
-        duration_evaluation.duration = score_evaluation.score_duration
-        duration_evaluation.duration_std = score_evaluation.score_duration_std
+        duration_evaluation.duration = score_state.score_duration
+        duration_evaluation.duration_std = score_state.score_duration_std
         duration_evaluation.base_duration = np.mean(base_durations)
         duration_evaluation.base_duration_std = np.std(base_durations)
         duration_evaluation.relative_duration = duration_evaluation.duration / duration_evaluation.base_duration

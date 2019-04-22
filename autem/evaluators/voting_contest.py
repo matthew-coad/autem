@@ -1,7 +1,4 @@
-from .. import Dataset, Role, WarningInterceptor
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
-from .score_resources import get_score_resources
 from .voting_evaluation import VotingEvaluation, get_voting_evaluation
 
 import numpy as np

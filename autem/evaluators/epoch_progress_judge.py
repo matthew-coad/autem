@@ -1,5 +1,4 @@
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
 
 import numpy as np
 from scipy import stats
@@ -32,8 +31,8 @@ class EpochProgressJudge(Evaluater):
             epoch.progress(True, "No top member")
             return None            
 
-        prior_top_score_evaluation = get_score_evaluation(prior_top_member)
-        top_score_evaluation = get_score_evaluation(top_member)
+        prior_top_score_evaluation = prior_top_member.get_score_state()
+        top_score_evaluation = top_member.get_score_state()
 
         score_progressed = top_score_evaluation.score > prior_top_score_evaluation.score
 

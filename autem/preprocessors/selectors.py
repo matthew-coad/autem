@@ -1,4 +1,8 @@
-from .. import Group, Dataset, Role, ChoicesParameter
+from ..group import Group
+from ..dataset import Dataset
+from ..role import Role
+from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
+from .preprocessor import Preprocesssor
 
 import sklearn.impute
 import sklearn.preprocessing
@@ -11,7 +15,6 @@ import sklearn.pipeline
 
 import numpy as np
 
-from .preprocessor import Preprocesssor
 
 # Feature Selectors
 

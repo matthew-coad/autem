@@ -1,6 +1,5 @@
-from .. import Dataset, Role, WarningInterceptor, Choice
 from .evaluator import Evaluater
-from .score_evaluation import ScoreEvaluation, get_score_evaluation
+from .score_evaluator import ScoreState
 from .parameter_state import ParameterEvaluation, get_parameter_evaluation, set_parameter_evaluation, ParameterModel, ParameterModelResources, get_parameter_models
 
 import numpy as np

@@ -28,6 +28,10 @@ Outcome - Converted TuneMaker and TopChoices components.
 
 **done**
 
-## MC1 - Convert Pipeline to an container extension
+## MC1 - Convert Pipeline/score evaluation to an container extension
 
 Action - The member pipeline is frequently used. Convert it into a container extension
+Action - The score contests is frequently used. Convert it to use states and act as a container extension.
+Outcome - Converted majority of evaluators
+
+**done**
