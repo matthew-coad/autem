@@ -111,7 +111,7 @@ class ChoiceEvaluator(Evaluater):
 
         # Build the model
         model = self.build_model(specie)
-        specie.get_resources().component_score_model = model
+        specie.set_state("component_score_model", model)
 
         # Reset the expected score for all members
         for member in specie.list_members():
@@ -124,7 +124,7 @@ class ChoiceEvaluator(Evaluater):
 
         # Get the model
         specie = member.get_specie()
-        model = specie.get_resources().component_score_model
+        model = specie.get_state("component_score_model")
         if model is None:
             return (None, None)
 

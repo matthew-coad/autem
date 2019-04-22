@@ -32,13 +32,14 @@ class ScoreEvaluator(Evaluater):
         x,y = loader.load_training_data(specie.get_simulation())
         folds = RepeatedStratifiedKFold(n_splits=self.n_splits, n_repeats=max_league, random_state=random_state)
         i_leagues = [ (i_train, i_test) for i_train, i_test in folds.split(x, y) ]
-        specie.get_resources().i_leagues = i_leagues
+        specie.set_state("i_leagues", i_leagues)
 
     def build_scores(self, member, repeat, start, stop):
 
-        scorer = member.get_scorer()
-        loader = member.get_loader()
-        i_leagues = member.get_specie().get_resources().i_leagues
+        specie = member.get_specie()
+        scorer = specie.get_scorer()
+        loader = specie.get_loader()
+        i_leagues = specie.get_state("i_leagues")
         pipeline = member.get_resources().pipeline
 
         x,y = loader.load_training_data(member.get_specie().get_simulation())

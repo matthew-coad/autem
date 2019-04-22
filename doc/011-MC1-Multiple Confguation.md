@@ -17,3 +17,13 @@ Outcome - Complete
 
 Action - Their is a single loader available to a simulation. Convert it to use states.
 Action - Remove all remaining simulation resources and remove resources
+Outcome - Converted loader and baseline stats
+
+**done**
+
+## MC1 - Convert Specie Resources
+
+Action - Remove resource from specie and convert all components using it
+Outcome - Converted TuneMaker and TopChoices components.
+
+**done**

@@ -37,7 +37,6 @@ class Specie(Container, ScorerContainer, LoaderContainer):
         self._end_time = None
 
         self._alive = None
-        self._resources = SimpleNamespace()
 
         self._specie_n = specie_n
         self._prior_epoch_id = prior_epoch_id
@@ -48,30 +47,17 @@ class Specie(Container, ScorerContainer, LoaderContainer):
         self._graveyard = None
         self._forms = None
 
-    ## Environment
+    ## Context
 
     def get_simulation(self):
         return self._simulation
 
-    def get_settings(self):
-        return self.get_simulation().get_settings()
-
-    def get_resources(self):
-        return self._resources
-    
+    # Properties
+   
     def get_specie_n(self):
         return self._specie_n
 
-    def get_random_state(self):
-        return self.get_simulation().get_random_state()
-
-    def get_loader(self):
-        return self.get_simulation().get_loader()
-
-    def generate_id(self):
-        return self._simulation.generate_id()
-
-    # Mode
+    ## Mode
 
     def get_mode(self):
         return self._mode
@@ -81,19 +67,6 @@ class Specie(Container, ScorerContainer, LoaderContainer):
 
     def is_tuning(self):
         return self.get_mode() == "tune"
-
-    # Resources
-
-    def get_resources(self):
-        return self._resources
-
-    def get_resource(self, name, default = lambda: None):
-        if not hasattr(self._resources, name):
-            setattr(self._resources, name, default())
-        return getattr(self._resources, name)
-
-    def set_resource(self, name, value):
-        setattr(self._resources, name, value)
 
     ## Lifecycle
 

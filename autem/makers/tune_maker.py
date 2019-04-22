@@ -1,12 +1,21 @@
 from .. import Maker, Member, Controller, Choice
-from .tune_state import TuneSpecieState
 
 import pandas as pd
 import numpy as np
 
+class TuneSpecieState():
+
+    """
+    Tune specie state
+    """
+    def __init__(self):
+        self.tuning = False
+        self.choices = None
+        self.prototype = None
+
 class TuneMaker(Maker, Controller):
     """
-    Maker that creates for tuning mode
+    Maker that creates the tuning model
     """
 
     def start_specie(self, specie):
@@ -22,7 +31,7 @@ class TuneMaker(Maker, Controller):
         choice_components = [ c for c in specie.get_settings().get_hyper_parameters() if isinstance(c, Choice) ]
         choices = dict([ (c.name, c.get_active_component_name(prototype_member)) for c in choice_components])
 
-        state = specie.get_resource("tune_maker", lambda: TuneSpecieState())
+        state = specie.get_state("tune_maker", lambda: TuneSpecieState())
         state.choices = choices
         state.tuning = True
         state.prototype = prototype_member
@@ -30,7 +39,7 @@ class TuneMaker(Maker, Controller):
     def configure_member(self, member):
 
         specie = member.get_specie()
-        state = specie.get_resource("tune_maker", lambda: TuneSpecieState())
+        state = specie.get_state("tune_maker", lambda: TuneSpecieState())
         if not state.tuning:
             return False
 
