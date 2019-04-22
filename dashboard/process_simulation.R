@@ -184,7 +184,7 @@ build_step_detail <- function(battle_df) {
       mutate(
         species = 1,
         event_time = lubridate::parse_date_time(time, orders = "amd HMS Y"),
-        event_reason = reason,
+        event_reason = NA,
         choice_score = choice_predicted_score,
         choice_score_std = NA,
         round = NA,
@@ -339,6 +339,7 @@ build_ranking_detail <- function(battle_df) {
         species = 1,
         epoch = 1,
         round = step,
+        rating_std = rating_sd,
         validation_score = NA
       )
   } else {
@@ -546,7 +547,10 @@ build_simulation_summary <- function(configuration_df, step_detail_df, ranking_d
   
   simulation_summary_df <-
     simulation_summary_df %>%
-    right_join(filter(ranking_detail_df, ranking == 1), by = c("study", "experiment"))
+    right_join(
+      ranking_detail_df %>% group_by(study, experiment) %>% arrange(study, experiment, desc(rating)) %>% filter(row_number() == 1) %>% ungroup(),
+      by = c("study", "experiment")
+    )
   
   simulation_summary_df <-
     simulation_summary_df %>%

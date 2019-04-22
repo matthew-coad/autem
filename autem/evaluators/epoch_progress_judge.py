@@ -33,7 +33,7 @@ class EpochProgressJudge(Evaluater):
             return None            
 
         prior_top_score_evaluation = get_score_evaluation(prior_top_member)
-        top_score_evaluation = get_score_evaluation(prior_top_member)
+        top_score_evaluation = get_score_evaluation(top_member)
 
         score_progressed = top_score_evaluation.score > prior_top_score_evaluation.score
 
