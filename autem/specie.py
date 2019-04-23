@@ -91,6 +91,12 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
     def is_tuning(self):
         return self.get_mode() == "tune"
 
+    def get_start_time(self):
+        return self._start_time
+
+    def get_end_time(self):
+        return self._end_time
+
     ## Lifecycle
 
     def get_alive(self):
@@ -102,9 +108,10 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
         """
         finish = None
         reason = None
-        for workflow in self.list_workflows():
+        workflows = self.list_workflows()
+        for workflow in workflows:
             finish, reason = workflow.is_specie_finished(self)
-            if not finish is None:
+            if finish:
                 break
         finish = finish if not finish is None else False
         return (finish, reason)
@@ -126,20 +133,23 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
             component.start_specie(self)
 
         finished = False
+        finish_reason = None
         while not finished:
-            next_epoch_id = self._current_epoch_id if not self._current_epoch_id is None else self._next_epoch_id
+            next_epoch_id = self._current_epoch_id + 1 if not self._current_epoch_id is None else self._next_epoch_id
             n_epochs = len(self._epochs.values())
             epoch = Epoch(self, next_epoch_id, n_epochs + 1)
             self._epochs[epoch.id] = epoch
             self._current_epoch_id = epoch.id
             epoch.run()
-            finished, reason = self.should_finish()
+            finished, finish_reason = self.should_finish()
 
         for component in self.list_lifecycle_managers():
             component.judge_specie(self)
 
         self._end_time = time.time()
         self._alive = False
+        duration = self.get_end_time() - self.get_start_time()
+        print("Specie %s - %s - Duration %s" % (self.id, finish_reason, duration))
 
     ## Epochs
 

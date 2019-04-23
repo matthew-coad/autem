@@ -91,3 +91,4 @@ related to that task. IE the Snapshot hyper learner generates a quick snap shot 
 ensemble hyper learner focuses on ensemble learners. The sparse hyper learner is suitable for wide, sparse data sets.
 
 Action - Introduce the snapshot hyper-learner
+Outcome - Added new hyper-learners namespace. Setup test project

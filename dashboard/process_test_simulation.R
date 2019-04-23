@@ -3,7 +3,7 @@ source("process_simulation.R")
 simulation_paths = c(
   #"D:\\Documents\\autem\\benchmark\\simulations\\gp_comp",
   # "D:\\Documents\\autem\\benchmark\\simulations\\PP1",
-  "D:\\Documents\\autem\\benchmark\\simulations\\LC1"
+  "D:\\Documents\\autem\\benchmark\\simulations\\SN1"
 )
 
 benchmark_path <- "D:\\Documents\\autem\\benchmark"

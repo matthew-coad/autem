@@ -74,9 +74,10 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         if self.get_round() >= self.get_max_rounds():
             return (True, "Max rounds")
 
-        for workflow in self.list_workflows():
+        workflows = self.list_workflows()
+        for workflow in workflows:
             finish, reason = workflow.is_epoch_finished(self)
-            if not finish is None:
+            if finish:
                 break
         finish = finish if not finish is None else False
         return (finish, reason)

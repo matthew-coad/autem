@@ -1,9 +1,4 @@
 from ..simulation_manager import SimulationManager
-from ..evaluators import ScoreEvaluator, ChoiceEvaluator, ValidationEvaluator, DurationEvaluator
-from ..evaluators import ScoreContest, DiverseContest
-from ..evaluators import ContestJudge, EpochProgressJudge
-from ..evaluators import ScoreRater
-from ..makers import TopChoiceMaker, CrossoverMaker, TuneMaker
 
 import time
 
@@ -33,27 +28,6 @@ class Workflow(SimulationManager):
     def get_max_reincarnations(self):
         return 3
 
-    def list_standard_extensions(self):
-        extensions = [
-            ScoreEvaluator(),
-            ChoiceEvaluator(),
-            ValidationEvaluator(),
-            DurationEvaluator(),
-
-            ScoreContest(),
-            DiverseContest(1.0),
-
-            TopChoiceMaker(),
-            CrossoverMaker(),
-            TuneMaker(),
-
-            ContestJudge(),
-            EpochProgressJudge(),
-           
-            ScoreRater(),
-        ]
-        return extensions
-
     # Species
 
     def configure_specie(self, specie):
@@ -82,13 +56,6 @@ class Workflow(SimulationManager):
     def is_epoch_finished(self, epoch):
         """
         Is the epoch finished.
-        Value is the first component that returns a Non-Null value
         """
-        max_time = self.get_max_time()
-        duration = time.time() - epoch.get_simulation().get_start_time()
-
-        if max_time is not None and duration >= max_time:
-            return (True, "Max time")
-        
         return (False, None)
 

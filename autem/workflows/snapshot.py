@@ -1,5 +1,11 @@
 from .workflow import Workflow
 
+from ..evaluators import ScoreEvaluator, ChoiceEvaluator, ValidationEvaluator, DurationEvaluator
+from ..evaluators import ScoreContest, DiverseContest
+from ..evaluators import ContestJudge, EpochProgressJudge
+from ..evaluators import ScoreRater
+from ..makers import TopChoiceMaker, CrossoverMaker, TuneMaker
+
 import time
 
 class Snapshot(Workflow):
@@ -7,19 +13,35 @@ class Snapshot(Workflow):
     The snapshow workflow produces a very quick snapshot simulation that runs one specie with no tuning
     """
 
-    def __init__(self, max_time = None) :
+    def __init__(self, max_epochs = 2, max_time = None) :
         Workflow.__init__(self, max_time = max_time)
+        self._max_epochs = max_epochs
 
-    # Extensions
-
-    def list_extensions(self, simulation):
-        """
-        List extensions component needed by the workflow.
-        These components are added to the master component list,
-        """
-        return self.list_standard_extensions()
+    def get_max_epochs(self):
+        return self._max_epochs
 
     # Simulations
+
+    def list_snapshot_extensions(self):
+        extensions = [
+            ScoreEvaluator(),
+            ChoiceEvaluator(),
+            ValidationEvaluator(),
+            DurationEvaluator(),
+
+            ScoreContest(),
+            DiverseContest(1.0),
+
+            TopChoiceMaker(),
+            CrossoverMaker(),
+            TuneMaker(),
+
+            ContestJudge(),
+           
+            ScoreRater(),
+        ]
+        return extensions
+
 
     def configure_simulation(self, simulation):
         """
@@ -27,7 +49,7 @@ class Snapshot(Workflow):
         """
         components = simulation.list_components()
         snapshot_index = components.index(self)
-        components[snapshot_index+1:snapshot_index+1] = self.list_standard_extensions()
+        components[snapshot_index+1:snapshot_index+1] = self.list_snapshot_extensions()
         simulation.set_components(components)
 
     def is_simulation_finished(self, simulation):
@@ -53,4 +75,16 @@ class Snapshot(Workflow):
         Is the specie finished.
         Value is the first component that returns a Non-Null value
         """
-        return (True, "Reached max epochs")
+        epoch = specie.get_current_epoch()
+        duration = time.time() - specie.get_simulation().get_start_time()
+        n_epochs = len(specie.list_epochs())
+        max_epochs = self.get_max_epochs()
+        max_time = self.get_max_time()
+
+        if n_epochs >= max_epochs:
+            return (True, "Max epochs")
+
+        if max_time is not None and duration >= max_time:
+            return (True, "Max time")
+        
+        return (False, None)

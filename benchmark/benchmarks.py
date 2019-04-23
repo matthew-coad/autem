@@ -6,8 +6,6 @@ import autem.workflows as workflows
 import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
-import autem.evaluators as evaluators
-import autem.makers as makers
 
 import openml
 
@@ -20,7 +18,7 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "LC1"
+    return "SN1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -28,49 +26,61 @@ def get_simulations_path():
 def get_version():
     return 15
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_time = None, properties = {}):
-    task = openml.tasks.get_task(task_id)
-    data_id = task.dataset_id
-    dataset = openml.datasets.get_dataset(data_id)
-    dataset_name = dataset.name
-    version = get_version()
-    simulation_name = "%s_%s_v%d" % (study, experiment, version)
-    properties['study'] = study
-    properties['experiment'] = experiment
-    properties['dataset'] = dataset_name
-    properties['version'] = version
-    
+def get_n_jobs():
+    return 4
+
+def make_snapshot_simulation(study, experiment, baseline_name, data_id, max_time, version, n_jobs, seed):
+    configuration = "snapshot"
+    name = "%s_%s_v%d %s" % (study, experiment, version, configuration)
+    path = get_simulations_path().joinpath(study).joinpath(experiment)
+    memory = str(path.joinpath("cache"))
+
+    identity = {
+        'study': study,
+        'experiment': experiment,
+        'dataset': baseline_name,
+        'version': version,
+        'configuration': configuration,
+    }    
+
     simulation = autem.Simulation(
-        simulation_name,
+        name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-
             workflows.Snapshot(max_time=max_time),
-
             baselines.BaselineStats(baseline_name),
-            reporters.Path(path),
             hyper_learners.ClassificationSnapshot(),
+            reporters.Csv(path),
         ], 
-        seed = seed,
-        n_jobs=6,
-        identity = properties,
-        memory=memory)
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
+
+simulation_builders = {
+    'snapshot': make_snapshot_simulation,
+}
 
 def run_benchmark_simulation(study, baseline_name):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
-    seed = 1
+    task = openml.tasks.get_task(task_id)
+    data_id = task.dataset_id
+    configuration = baseline_configuration["Configuration"]
+    configuration_valid = configuration in simulation_builders
+    if not configuration_valid:
+        print("Baseline %s configuration %s does not exist" % (baseline_name, configuration))
+        return None
+
     max_time = 2 * 60 * 60
-    path = get_simulations_path().joinpath(study).joinpath(experiment)
-    memory = str(path.joinpath("cache"))
+    version = get_version()
+    n_jobs = get_n_jobs()
+    seed = 1
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory=memory)
+    simulation_builder = simulation_builders[configuration]
+    simulation = simulation_builder(study, experiment, baseline_name, data_id, max_time, version, n_jobs, seed)
     simulation.run()
-    autem.ReportManager(path).update_combined_reports()
 
 def run_benchmark_simulations(study = None):
     study = study if study else get_study()
@@ -78,10 +88,3 @@ def run_benchmark_simulations(study = None):
     for baseline_name in baseline_names:
         run_benchmark_simulation(study, baseline_name)
 
-def combine_reports(experiment, baseline):
-    experiment_path = simulations_path().joinpath(experiment).joinpath(baseline)
-    autem.ReportManager(experiment_path).update_combined_reports()
-
-def combine_experiment_reports(experiment):
-    experiment_path = simulations_path().joinpath(experiment)
-    autem.ReportManager(experiment_path).update_combined_reports()
