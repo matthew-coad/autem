@@ -1,5 +1,6 @@
 from ..learner import Learner
-from ... import Dataset, Role, ChoicesParameter, make_choice, make_choice_list
+from ...reporters import Dataset, Role
+from ...choices_parameter import ChoicesParameter, make_choice, make_choice_list
 
 import sklearn.linear_model
 import sklearn.neighbors

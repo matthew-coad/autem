@@ -1,5 +1,5 @@
 from ..group import Group
-from ..reporting import Dataset, Role
+from ..reporters import Dataset, Role
 from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
 
 import numpy as np

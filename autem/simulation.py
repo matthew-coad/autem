@@ -1,15 +1,10 @@
 from .container import Container
 from .simulation_manager import SimulationManagerContainer
-from .reporting import ReporterContainer, Dataset, Role, Outline
-
-from .record import Record
-from .member import Member
-from .epoch import Epoch
+from .reporters import ReporterContainer, Dataset, Role, Outline, Record
 from .specie import Specie
 from .form import Form
 from .ranking import Ranking
 from .feedback import printProgressBar
-from .choice import Choice
 
 import numpy
 import time

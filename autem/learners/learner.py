@@ -1,6 +1,6 @@
 from ..parameter import Parameter
 from ..group import Group
-from ..reporting import Dataset, Role
+from ..reporters import Dataset, Role
 
 from types import SimpleNamespace
 

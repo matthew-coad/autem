@@ -1,6 +1,6 @@
 from .loader import Loader
 
-from ..reporting import Dataset, Role
+from ..reporters import Dataset, Role
 
 import openml
 

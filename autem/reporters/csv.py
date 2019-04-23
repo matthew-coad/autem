@@ -1,13 +1,12 @@
-from .reporter import Reporter
 from ..simulation_manager import SimulationManager
+from .reporter import Reporter
+from .report_manager import ReportManager
 
 import os
 
-class Path(Reporter, SimulationManager):
+class Csv(Reporter, SimulationManager):
 
     def __init__(self, path):
-        from autem import ReportManager
-
         Reporter.__init__(self)
         self.path = path
         self.manager = ReportManager(self.path)
@@ -31,3 +30,6 @@ class Path(Reporter, SimulationManager):
         self.manager.prepare_simulation(simulation_info)
         outline_frame = self.get_outline_frame(simulation)
         self.manager.update_outline_report(simulation_info, outline_frame)
+
+    def finish_simulation(self, simulation):
+        self.manager.update_combined_reports()

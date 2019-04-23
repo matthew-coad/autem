@@ -1,5 +1,5 @@
 from .hyper_parameter import HyperParameter
-from .reporting import Dataset, Role, Reporter
+from .reporters import Dataset, Role, Reporter
 
 class Parameter(HyperParameter, Reporter):
 

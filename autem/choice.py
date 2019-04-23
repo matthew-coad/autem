@@ -1,4 +1,4 @@
-from .reporting import Dataset, Role
+from .reporters import Dataset, Role
 
 from .hyper_parameter import HyperParameter
 from .lifecycle import LifecycleManager

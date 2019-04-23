@@ -1,6 +1,6 @@
 from ..simulation_manager import SimulationManager
 from ..lifecycle import LifecycleManager
-from ..reporting import Reporter
+from ..reporters import Reporter
 
 class Evaluater(SimulationManager, LifecycleManager, Reporter):
 

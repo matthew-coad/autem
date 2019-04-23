@@ -1,5 +1,5 @@
 from .loader import Loader
-from ..reporting import Dataset, Role
+from ..reporters import Dataset, Role
 
 from sklearn.model_selection import train_test_split
 import pandas as pd
