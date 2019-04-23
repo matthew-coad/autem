@@ -27,8 +27,8 @@ class OpenMLLoader(Loader):
         self.did = did
         self.validation_size = validation_size
 
-    def start_simulation(self, simulation):
-        super().start_simulation(simulation)
+    def prepare_simulation(self, simulation):
+        super().prepare_simulation(simulation)
 
         random_state = simulation.get_random_state()
         validation_size = self.validation_size

@@ -1,9 +1,6 @@
 from .container import Container
-from .workflows import Workflow, WorkflowContainer
-from .lifecycle import LifecycleContainer
+from .simulation_manager import SimulationManagerContainer
 from .reporting import ReporterContainer, Dataset, Role, Outline
-from .scorers import ScorerContainer
-from .loaders import LoaderContainer
 
 from .record import Record
 from .member import Member
@@ -13,7 +10,6 @@ from .form import Form
 from .ranking import Ranking
 from .feedback import printProgressBar
 from .choice import Choice
-from .simulation_settings import SimulationSettings
 
 import numpy
 import time
@@ -21,24 +17,21 @@ import datetime
 
 from types import SimpleNamespace
 
-class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterContainer, ScorerContainer, LoaderContainer) :
+class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
     """Simulation state"""
-    def __init__(self, name, components, properties = {}, n_jobs = -1, seed = 1234, memory = None):
+    def __init__(self, name, components, identity = {}, n_jobs = -1, seed = 1234, memory = None):
 
         Container.__init__(self)
-        LifecycleContainer.__init__(self)
+        SimulationManagerContainer.__init__(self)
         ReporterContainer.__init__(self)
-        ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self) 
 
-        self.name = name
-        self._settings = SimulationSettings(properties = properties, memory = memory)
-
-        self._raw_components = components
-        self._components = None
-
-        self.outline = None
+        self._name = name
+        self._components = components
+        self._identity = identity
+        self._n_jobs = n_jobs
+        self._seed = seed
+        self._memory = memory
 
         self._random_state = numpy.random.RandomState(seed)
         self._next_id = 1
@@ -47,52 +40,75 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
         self._end_time = None
 
         self._current_specie_id = None
-        self._species = None
-        self.reports = None
+        self._species = {}
+        self._records = []
 
-        self._n_jobs = n_jobs
+        self._outline = None
 
-    ## Core Environment
+        self._loader = None
+        self._scorer = None
+
+    ## Properties
+
+    def get_name(self):
+        return self._name
 
     def get_simulation(self):
         return self
 
-    def get_settings(self):
-        return self._settings
+    def get_random_state(self):
+        return self._random_state
+
+    def get_n_jobs(self):
+        return self._n_jobs
+
+    def get_seed(self):
+        return self._seed
+
+    def get_memory(self):
+        return self._memory
+
+    def get_identity(self):
+        return self._identity
+
+    def get_start_time(self):
+        return self._start_time
+
+    def get_end_time(self):
+        return self._end_time
+
+    ## Ids
 
     def generate_id(self):
         id = self._next_id
         self._next_id += 1
         return id
 
-    def get_random_state(self):
-        """
-        Get simulation loader
-        """
-        return self._random_state
-
-    ## Properties
-
-    def get_n_jobs(self):
-        return self._n_jobs
-
     ## Components
-
-    def _build_components(self):
-        raw_components = self._raw_components
-        components = []
-
-        for component in raw_components:
-            components.append(component)
-            is_workflow = isinstance(component, Workflow)
-            extensions = component.list_extensions(self) if is_workflow else []
-            components.extend(extensions)
-        self._components = components
 
     def list_components(self):
         if not self._components:
             raise RuntimeError("No components found")
-        return self._components
+        return self._components[:]
+
+    def set_components(self, components):
+        self._components = components
+
+    ## Scorers
+
+    def get_scorer(self):
+        return self._scorer
+
+    def set_scorer(self, scorer):
+        self._scorer = scorer
+
+    ## Loader
+
+    def get_loader(self):
+        return self._loader
+
+    def set_loader(self, loader):
+        self._loader = loader
 
     ## Species
 
@@ -112,74 +128,15 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
         specie = self._species[self._current_specie_id] if self._current_specie_id else None
         return specie
 
-    def get_start_time(self):
-        return self._start_time
+    ## Outline
 
-    def get_end_time(self):
-        return self._end_time
-
-    ## Simulation life-cycle
-
-    def should_finish(self):
+    def _build_outline(self):
         """
-        Should we finish the simulation?
-        """
-        finish = None
-        reason = None
-        for workflow in self.list_workflows():
-            finish, reason = workflow.is_simulation_finished(self)
-            if not finish is None:
-                break
-        finish = finish if not finish is None else False
-        return (finish, reason)
-
-    def run(self):
-
-        print("-----------------------------------------------------")
-        today = datetime.datetime.now()
-        print("Running %s - Started %s" % (self.name, today.strftime("%x %X")))
-
-        self._start_time = time.time()
-        self._current_specie_id = 0
-        self._species = {}
-        self.reports = []
-        self._build_components()
-
-        for component in self.list_workflows():
-            component.configure_simulation(self)
-
-        self.outline_simulation()
-        for component in self.list_lifecycle_managers():
-            component.start_simulation(self)
-
-        finished = False
-        while not finished:
-            prior_specie = self.get_current_specie()
-            next_epoch_id = prior_specie.get_current_epoch_id() + 1 if not prior_specie is None else 1
-            next_specie_id = self._current_specie_id + 1
-            n_specie = len(self.list_species())
-
-            specie = Specie(self, next_specie_id, n_specie, next_epoch_id)
-            self._species[specie.id] = specie
-            self._current_specie_id = specie.id
-
-            specie.run()
-            finished, reason = self.should_finish()
-
-        for component in self.list_lifecycle_managers():
-            component.finish_simulation(self)
-
-        self._end_time = time.time()
-        duration = self.get_end_time() - self.get_start_time()
-        print("%s - %s - Duration %s" % (self.name, reason, duration))
-
-    def outline_simulation(self):
-        """
-        Collect the simulation outline
+        Build the simulation outline
         """
         outline = Outline()
         outline.append_attribute("simulation", Dataset.Battle, [Role.Configuration])
-        for property_key in self.get_settings().get_properties().keys():
+        for property_key in self.get_identity().keys():
             outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
         outline.append_attribute("species", Dataset.Battle, [Role.ID])
         outline.append_attribute("epoch", Dataset.Battle, [Role.ID])
@@ -199,7 +156,109 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
 
         for component in self.list_reporters():
             component.outline_simulation(self, outline)
-        self.outline = outline
+        self._outline = outline
+        return (True, None)
+
+    def get_outline(self):
+        return self._outline
+
+    ## Simulation life-cycle
+
+    def _configure(self):
+        """
+        Perform simulation configuration.
+        """
+        components = self.list_simulation_managers()
+        for component in components:
+            component.configure_simulation(self)
+        return (True, None)
+
+    def _prepare(self):
+        """
+        Perform simulation preparation.
+        """
+        components = self.list_simulation_managers()
+        for component in components:
+            component.prepare_simulation(self)
+        return (True, None)
+
+    def _should_finish(self):
+        """
+        Should we finish the simulation?
+        """
+        finish = None
+        reason = None
+        for component in self.list_simulation_managers():
+            finish, reason = component.is_simulation_finished(self)
+            if finish:
+                break
+        finish = finish if not finish is None else False
+        return (finish, reason)
+
+    def _finish(self):
+        """
+        Perform final tasks.
+        """
+        components = self.list_simulation_managers()
+        for component in components:
+            component.finish_simulation(self)
+
+    def _bury(self):
+        """
+        Bury any expensive resources
+        """
+        components = self.list_simulation_managers()
+        for component in components:
+            component.bury_simulation(self)
+
+    def run(self):
+
+        print("-----------------------------------------------------")
+        today = datetime.datetime.now()
+        print("Running %s - Started %s" % (self.get_name(), today.strftime("%x %X")))
+
+        self._start_time = time.time()
+        self._current_specie_id = 0
+
+        configured, reason = self._configure()
+        if not configured:
+            print("%s - configuration failed - %s" % (self.get_name(), reason))
+            return None
+
+        outlined, reason = self._build_outline()
+        if not outlined:
+            print("%s - outline failed - %s" % (self.get_name(), reason))
+            return None
+
+        prepared, reason = self._prepare()
+        if not prepared:
+            print("%s - prepare failed - %s" % (self.get_name(), reason))
+            return None
+
+        should_finish, finish_reason = self._should_finish()
+        while not should_finish:
+            prior_specie = self.get_current_specie()
+            next_epoch_id = prior_specie.get_current_epoch_id() + 1 if not prior_specie is None else 1
+            next_specie_id = self._current_specie_id + 1
+            n_specie = len(self.list_species())
+
+            specie = Specie(self, next_specie_id, n_specie, next_epoch_id)
+            self._species[specie.id] = specie
+            self._current_specie_id = specie.id
+            specie.run()
+            should_finish, finish_reason = self._should_finish()
+
+        self._finish()
+        self._bury()
+
+        self._end_time = time.time()
+        duration = self.get_end_time() - self.get_start_time()
+        print("%s - %s - Duration %s" % (self.get_name(), finish_reason, duration))
+
+    ## Reporting
+
+    def get_records(self):
+        return self._records
 
     def record_member(self, member):
         """
@@ -217,10 +276,10 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
         step = prior_specie_rounds + prior_epoch_rounds + round
 
         record = Record()
-        record.simulation = self.name
-        properties = self.get_settings().get_properties()
-        for property_key in properties.keys():
-            setattr(record, property_key, properties[property_key])
+        record.simulation = self.get_name()
+        identity = self.get_identity()
+        for key in identity.keys():
+            setattr(record, key, identity[key])
 
         record.species = specie_id
         record.mode = specie.get_mode() 
@@ -244,6 +303,8 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
 
         for component in self.list_reporters():
             component.record_member(member, record)
+       
+        self._records.append(record)
         return record
 
     def report(self):
@@ -252,4 +313,4 @@ class Simulation(Container, LifecycleContainer, WorkflowContainer, ReporterConta
         """
         for component in self.list_reporters():
             component.report_simulation(self)
-        self.reports = []
+        self._records = []

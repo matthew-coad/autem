@@ -2,8 +2,6 @@ from .container import Container
 from .workflows import WorkflowContainer
 from .lifecycle import LifecycleContainer
 from .hyper_parameter import HyperParameterContainer
-from .scorers import ScorerContainer
-from .loaders import LoaderContainer
 from .ranking import Ranking
 
 import time
@@ -13,7 +11,7 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer):
     """
     Epoch of a simulation
     """
@@ -136,9 +134,9 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
 
             # Report on what happened
             for member in report_members:
-                self.record_member(member)
+                self.get_simulation().record_member(member)
 
-        self.report()
+        self.get_simulation().report()
 
         self._end_time = time.time()
         self._alive = False
@@ -157,7 +155,7 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
 
         specie = self.get_specie()
         mode = specie.get_mode()
-        operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self._simulation.name, specie.id, mode, self.id)
+        operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
         current_round = self.get_round()
         max_rounds = self.get_max_rounds()
         max_population = specie.get_max_population()
@@ -244,7 +242,7 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         n_inductees = len(inductees)
         specie = self.get_specie()
         mode = specie.get_mode()
-        progress_prefix = "Rating %s specie %s mode %s epoch %s:" % (self._simulation.name, specie.id, mode, self.id)
+        progress_prefix = "Rating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):
@@ -270,20 +268,6 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
 
     def get_ranking(self):
         return self._ranking
-
-    # Reporting
-
-    def record_member(self, member):
-        """
-        Generate a record on a member
-        """
-        self._simulation.reports.append(self._simulation.record_member(member))
-
-    def report(self):
-        """
-        Report on progress of the simulation
-        """
-        self._simulation.report()
 
     # Progress
 

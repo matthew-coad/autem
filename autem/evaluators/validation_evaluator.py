@@ -36,8 +36,8 @@ class ValidationEvaluator(Evaluater):
         if member.league < required_league:
             return None
 
-        scorer = member.get_scorer()
-        loader = member.get_loader()
+        scorer = member.get_simulation().get_scorer()
+        loader = member.get_simulation().get_loader()
         pipeline = member.get_pipeline()
 
         x,y = loader.load_training_data(member)

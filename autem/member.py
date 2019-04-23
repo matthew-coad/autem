@@ -2,8 +2,6 @@ from .container import Container
 from .lifecycle import LifecycleContainer
 from .hyper_parameter import HyperParameterContainer
 from .makers.maker_container import MakerContainer
-from .scorers import ScorerContainer
-from .loaders import LoaderContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .evaluators.score_evaluator import ScoreContainer
@@ -14,7 +12,7 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContainer, ScorerContainer, LoaderContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
     """
     Member of a population
     """
@@ -24,8 +22,6 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         LifecycleContainer.__init__(self)
         HyperParameterContainer.__init__(self)
         MakerContainer.__init__(self)
-        ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self) 
 
         self._specie = specie
 

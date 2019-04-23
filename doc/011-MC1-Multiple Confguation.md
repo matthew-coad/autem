@@ -66,3 +66,13 @@ Action - Complete the conversion of member evaluations to using state
 ## MC1 - Introduce Workflows
 
 Action - Introduce model initialize workflows
+
+## MC1 - Introduce Model Managers
+
+Events are getting a bit out of control. Move functionality into a series of model management components.
+SimulationManager, SpecieManager, EpochManager and MemberManager.
+
+Events related to one component are located within that manager and in general should be invoked by the model object.
+Standardise the event naming across all models.
+
+Action - Introduce simulation manager

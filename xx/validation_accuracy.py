@@ -21,8 +21,8 @@ class ValidationAccuracy(Evaluater):
         Only famous members get a rating.
         """
 
-        scorer = member.get_scorer()
-        loader = member.get_loader()
+        scorer = member.get_simulation().get_scorer()
+        loader = member.get_simulation().get_loader()
         pipeline = member.get_member_resources().pipeline
 
         x,y = loader.load_training_data(member)

@@ -1,9 +1,9 @@
-from ..lifecycle import LifecycleManager
+from ..simulation_manager import SimulationManager
 
-class Loader(LifecycleManager):
+class Loader(SimulationManager):
 
-    def start_simulation(self, simulation):
-        simulation.set_state("loader", self)
+    def configure_simulation(self, simulation):
+        simulation.set_loader(self)
 
     def load_divided_data(self, container):
         """
@@ -28,8 +28,3 @@ class Loader(LifecycleManager):
         Return dictionary of index of features by type
         """
         raise NotImplementedError()
-
-class LoaderContainer:
-
-    def get_loader(self):
-        return self.get_simulation().get_state("loader")

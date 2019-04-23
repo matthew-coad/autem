@@ -8,9 +8,6 @@ from .epoch import Epoch
 from .form import Form
 from .ranking import Ranking
 from .choice import Choice
-from .scorers import ScorerContainer
-from .loaders import LoaderContainer
-
 
 import numpy as np
 import time
@@ -18,7 +15,7 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer, ScorerContainer, LoaderContainer):
+class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer):
 
     """
     Specie of a simulation
@@ -29,8 +26,6 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
         WorkflowContainer.__init__(self)
         LifecycleContainer.__init__(self)
         HyperParameterContainer.__init__(self)
-        ScorerContainer.__init__(self)
-        LoaderContainer.__init__(self) 
 
         self._simulation = simulation
         self.id = specie_id

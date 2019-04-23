@@ -23,7 +23,7 @@ class DiverseContest(Evaluater):
 
     def contest_members(self, contestant1, contestant2):
 
-        scorer = contestant1.get_specie().get_scorer()
+        scorer = contestant1.get_simulation().get_scorer()
 
         max_league = max(contestant1.league, contestant2.league)
         if max_league == 0:

@@ -50,8 +50,8 @@ class Data(Loader):
         if not outline.has_attribute("data", Dataset.Battle):
             outline.append_attribute("data", Dataset.Battle, [ Role.Configuration ], self.data_name)
 
-    def start_simulation(self, simulation):
-        super().start_simulation(simulation)
+    def prepare_simulation(self, simulation):
+        super().prepare_simulation(simulation)
 
         random_state = simulation.random_state
         validation_size = self.validation_size

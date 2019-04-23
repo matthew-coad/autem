@@ -23,8 +23,8 @@ class CrossValidationRater(Evaluater):
         Only famous members get a rating.
         """
 
-        scorer = member.get_scorer()
-        loader = member.get_loader()
+        scorer = member.get_simulation().get_scorer()
+        loader = member.get_simulation().get_loader()
 
         x,y = loader.load_divided_data(member)
         pipeline = member.get_pipeline()

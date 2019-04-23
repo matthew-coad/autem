@@ -1,3 +1,4 @@
+from ..simulation_manager import SimulationManager
 from ..evaluators import ScoreEvaluator, ChoiceEvaluator, ValidationEvaluator, DurationEvaluator
 from ..evaluators import ScoreContest, DiverseContest
 from ..evaluators import ContestJudge, EpochProgressJudge
@@ -6,7 +7,7 @@ from ..makers import TopChoiceMaker, CrossoverMaker, TuneMaker
 
 import time
 
-class Workflow:
+class Workflow(SimulationManager):
     """
     Base class for simulation workflow controllers.
 
@@ -52,28 +53,6 @@ class Workflow:
             ScoreRater(),
         ]
         return extensions
-
-    def list_extensions(self, simulation):
-        """
-        List extensions component needed by the workflow.
-        These components are added to the master component list,
-        """
-        raise NotImplementedError()
-
-    # Simulations
-
-    def configure_simulation(self, simulation):
-        """
-        Configure the simulation
-        """
-        raise NotImplementedError()
-
-    def is_simulation_finished(self, simulation):
-        """
-        Is the simulation finished.
-        Value is the first component that returns a Non-Null value
-        """
-        raise NotImplementedError()
 
     # Species
 

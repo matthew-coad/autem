@@ -1,9 +1,9 @@
 from .reporter import Reporter
-from ..lifecycle import LifecycleManager
+from ..simulation_manager import SimulationManager
 
 import os
 
-class Path(Reporter, LifecycleManager):
+class Path(Reporter, SimulationManager):
 
     def __init__(self, path):
         from autem import ReportManager
@@ -26,7 +26,7 @@ class Path(Reporter, LifecycleManager):
         if not battle_frame is None:
             self.manager.update_battle_report(simulation_info, report_id, battle_frame)
 
-    def start_simulation(self, simulation):
+    def prepare_simulation(self, simulation):
         simulation_info = self.get_simulation_info(simulation)
         self.manager.prepare_simulation(simulation_info)
         outline_frame = self.get_outline_frame(simulation)

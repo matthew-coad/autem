@@ -70,7 +70,7 @@ class Learner(Group):
         # Build the pipeline
         steps = member.get_steps()
         steps.append((learner_name, model))
-        memory = member.get_settings().get_memory()
+        memory = member.get_simulation().get_memory()
         pipeline = Pipeline(steps=steps, memory=memory)
         member.set_state("pipeline", pipeline)
 

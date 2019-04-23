@@ -97,20 +97,6 @@ class LifecycleManager:
         """
         pass
 
-    ## Simulation components
-
-    def start_simulation(self, simulation):
-        """
-        Start a simulation
-        """
-        pass
-
-    def finish_simulation(self, simulation):
-        """
-        Finish a simulation
-        """
-        pass
-
 class LifecycleContainer:
 
     def list_lifecycle_managers(self):

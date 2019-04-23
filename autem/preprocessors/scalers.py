@@ -22,7 +22,7 @@ class Scaler(Preprocesssor):
         raise NotImplementedError()
 
     def make_preprocessor(self, member):
-        loader = member.get_loader()
+        loader = member.get_simulation().get_loader()
         features = loader.get_features(member)
 
         categorical_features = features['nominal']

@@ -78,8 +78,8 @@ class BaselineStats(Evaluater):
     def __init__(self, baseline_name):
         self.baseline_name = baseline_name
 
-    def start_simulation(self, simulation):
-        super().start_simulation(simulation)
+    def prepare_simulation(self, simulation):
+        super().prepare_simulation(simulation)
 
         baseline_name = self.baseline_name
         stats = get_baseline_stats(baseline_name)

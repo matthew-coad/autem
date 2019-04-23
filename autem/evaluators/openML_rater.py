@@ -15,8 +15,8 @@ class OpenMLRater(Evaluater):
     def __init__(self, task_id):
         self.task_id = task_id
 
-    def start_simulation(self, simulation):
-        super().start_simulation(simulation)
+    def prepare_simulation(self, simulation):
+        super().prepare_simulation(simulation)
         task_id = self.task_id
         task = openml.tasks.get_task(task_id)
         simulation.get_simulation_resources().task = task

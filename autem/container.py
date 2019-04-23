@@ -17,12 +17,6 @@ class Container:
         """
         pass
 
-    def get_settings(self):
-        """
-        Get shared settings object
-        """
-        return self.get_simulation().get_settings()
-
     def list_components(self):
         return self.get_simulation().list_components()
 

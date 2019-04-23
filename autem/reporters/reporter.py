@@ -22,14 +22,14 @@ class Reporter:
         pass
 
     def get_battle_frame(self, simulation):
-        records = simulation.reports
+        records = simulation.get_records()
         if not records:
             return None
         frame = get_report_frame(records)
         return frame
 
     def get_outline_frame(self, simulation):
-        outline = simulation.outline
+        outline = simulation.get_outline()
 
         rows = [(attr.name, attr.dataset.value, role.value, attr.label) for attr in outline.attributes for role in attr.roles]
         d = {

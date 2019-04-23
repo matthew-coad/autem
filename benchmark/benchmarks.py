@@ -106,7 +106,7 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
         ], 
         seed = seed,
         n_jobs=6,
-        properties = properties,
+        identity = properties,
         memory=memory)
     return simulation
 

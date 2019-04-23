@@ -25,14 +25,20 @@ class Snapshot(Workflow):
         """
         Configure the simulation
         """
-        pass
+        components = simulation.list_components()
+        snapshot_index = components.index(self)
+        components[snapshot_index+1:snapshot_index+1] = self.list_standard_extensions()
+        simulation.set_components(components)
 
     def is_simulation_finished(self, simulation):
         """
         Is the simulation finished.
-        Value is the first component that returns a Non-Null value
+        Simulation is finished if any component elects to finish it
         """
-        return (True, "Reached max species")
+        n_species = len(simulation.list_species())
+        if n_species > 0:
+            return (True, "Ran specie")
+        return (False, None)
 
     # Species
 

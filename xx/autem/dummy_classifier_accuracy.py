@@ -18,8 +18,8 @@ class DummyClassifierAccuracy(Evaluater):
         """
 
         random_state = member.get_random_State()
-        scorer = member.get_scorer()
-        loader = member.get_loader()
+        scorer = member.get_simulation().get_scorer()
+        loader = member.get_simulation().get_loader()
 
         x,y = loader.load_training_data(member)
 
