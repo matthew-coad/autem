@@ -76,3 +76,18 @@ Events related to one component are located within that manager and in general s
 Standardise the event naming across all models.
 
 Action - Introduce simulation manager
+
+## MC1 - Switch to reporters folder
+
+Complete move of reporting functionality
+
+Action - Switch to reporters folder
+Outcome - Complete
+
+## MC1 - Introduce Hyper Learners
+
+Hyper learners are a combined set of preprocessors and learners to complete a specific task. A hyper learner adds a set of learning components
+related to that task. IE the Snapshot hyper learner generates a quick snap shot of a set of common, quick learners that gives good result. The 
+ensemble hyper learner focuses on ensemble learners. The sparse hyper learner is suitable for wide, sparse data sets.
+
+Action - Introduce the snapshot hyper-learner

@@ -3,8 +3,7 @@
 import autem
 import autem.scorers as scorers
 import autem.workflows as workflows
-import autem.preprocessors as preprocessors
-import autem.learners.classification as learners
+import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
 import autem.evaluators as evaluators
@@ -29,7 +28,7 @@ def get_simulations_path():
 def get_version():
     return 15
 
-def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_spotchecks, max_tunes, max_time = None, properties = {}):
+def make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory, max_time = None, properties = {}):
     task = openml.tasks.get_task(task_id)
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
@@ -48,61 +47,10 @@ def make_openml_light_classifier_simulation(study, experiment, baseline_name, ta
             scorers.Accuracy(),
 
             workflows.Snapshot(max_time=max_time),
-            # workflows.Mastery(max_time=max_time, max_spotchecks = max_spotchecks, max_tunes = max_tunes)
 
             baselines.BaselineStats(baseline_name),
             reporters.Path(path),
-
-            # Scalers
-            autem.Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.MinMaxScaler(),
-                preprocessors.Normalizer(),
-                preprocessors.RobustScaler(),
-                preprocessors.StandardScaler(),
-                preprocessors.Binarizer(),
-                preprocessors.BoxCoxTransform(),
-                preprocessors.YeoJohnsonTransform()
-            ]),
-
-
-            # Feature Selectors
-            autem.Choice("Selector", [
-                preprocessors.NoSelector(),
-                preprocessors.SelectPercentile(),
-                preprocessors.VarianceThreshold()
-            ]),
-
-            # Feature Reducers
-            autem.Choice("Reducer", [
-                preprocessors.NoReducer(),
-                preprocessors.FastICA(),
-                preprocessors.FeatureAgglomeration(),
-                preprocessors.PCA(),
-            ]),
-
-            # Approximators
-            autem.Choice("Approximator", [
-                preprocessors.NoApproximator(),
-                preprocessors.RBFSampler(),
-                preprocessors.Nystroem(),
-            ]),
-
-            autem.Choice("Learner", [
-                learners.GaussianNB(),
-                learners.BernoulliNB(),
-                learners.MultinomialNB(),
-                learners.DecisionTreeClassifier(),
-                learners.KNeighborsClassifier(),
-                learners.LinearSVC(),
-                #learners.RadialBasisSVC(),
-                #learners.PolySVC(),
-                learners.LogisticRegression(),
-                learners.LinearDiscriminantAnalysis(),
-
-                #learners.RandomForestClassifier(),
-                #learners.ExtraTreesClassifier(),
-            ]),
+            hyper_learners.ClassificationSnapshot(),
         ], 
         seed = seed,
         n_jobs=6,
@@ -115,14 +63,12 @@ def run_benchmark_simulation(study, baseline_name):
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
     seed = 1
-    spotchecks = 3
-    tunes = 1
     max_time = 2 * 60 * 60
     path = get_simulations_path().joinpath(study).joinpath(experiment)
     memory = str(path.joinpath("cache"))
 
     utility.prepare_OpenML()
-    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory=memory, max_spotchecks=spotchecks, max_tunes = tunes)
+    simulation = make_openml_light_classifier_simulation(study, experiment, baseline_name, task_id, seed, path, memory=memory)
     simulation.run()
     autem.ReportManager(path).update_combined_reports()
 
