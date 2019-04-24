@@ -150,7 +150,7 @@ class ChoiceEvaluator(Evaluater):
         choice_state.choice_predicted_score = choice_predicted_score
         choice_state.choice_predicted_score_std = choice_predicted_score_std
 
-    def start_epoch(self, epoch):
+    def prepare_epoch(self, epoch):
         self.evaluate_model(epoch.get_specie())
 
     def record_member(self, member, record):

@@ -1,6 +1,6 @@
-from ..lifecycle import LifecycleManager
+from ..specie_manager import SpecieManager
+from ..member_manager import MemberManager
 from ..choice import Choice
-from .maker import Maker
 
 import pandas as pd
 import numpy as np
@@ -15,12 +15,12 @@ class TuneSpecieState():
         self.choices = None
         self.prototype = None
 
-class TuneMaker(Maker, LifecycleManager):
+class TuneMaker(SpecieManager, MemberManager):
     """
     Maker that creates the tuning model
     """
 
-    def start_specie(self, specie):
+    def prepare_specie(self, specie):
 
         if not specie.is_tuning():
             return None
@@ -43,8 +43,9 @@ class TuneMaker(Maker, LifecycleManager):
         specie = member.get_specie()
         state = specie.get_state("tune_maker", lambda: TuneSpecieState())
         if not state.tuning:
-            return False
+            return (None, None)
 
         prototype = state.prototype
         member.impersonate(prototype)
-        return True
+        specialized, reason = member.specialize()        
+        return (specialized,)

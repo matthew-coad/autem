@@ -1,14 +1,20 @@
-from .workflow import Workflow
+from ..simulation_manager import SimulationManager
+from ..specie_manager import SpecieManager
+from ..epoch_manager import EpochManager
 
 from ..evaluators import ScoreEvaluator, ChoiceEvaluator, ValidationEvaluator, DurationEvaluator
 from ..evaluators import ScoreContest, DiverseContest
 from ..evaluators import ContestJudge, EpochProgressJudge
 from ..evaluators import ScoreRater
-from ..makers import TopChoiceMaker, CrossoverMaker, TuneMaker
+
+from .cross_over_maker import CrossoverMaker
+from .top_choice_maker import TopChoiceMaker
+from .tune_maker import TuneMaker
+
 
 import time
 
-class Mastery(Workflow):
+class Mastery(SimulationManager, SpecieManager, EpochManager):
     """
     The mastery workflow follows the machine learning master workflow
     """

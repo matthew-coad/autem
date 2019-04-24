@@ -1,7 +1,6 @@
 from .container import Container
-from .lifecycle import LifecycleContainer
+from .member_manager import MemberManagerContainer
 from .hyper_parameter import HyperParameterContainer
-from .makers.maker_container import MakerContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .evaluators.score_evaluator import ScoreContainer
@@ -12,24 +11,24 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, MemberManagerContainer, HyperParameterContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
     """
     Member of a population
     """
     def __init__(self, specie): 
 
         Container.__init__(self)
-        LifecycleContainer.__init__(self)
+        MemberManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
-        MakerContainer.__init__(self)
 
         self._specie = specie
-
         self.id = specie.generate_id()
+
         self.configuration = SimpleNamespace()
-        self.form = None
-        self.incarnation = 0
-        self.incarnation_epoch_id = None
+
+        self._form = None
+        self._incarnation = 0
+        self._incarnation_epoch_id = None
 
         self.event = None
         self.event_reason = None
@@ -46,7 +45,7 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.evaluation_time = None
         self.evaluation_duration = None
 
-        self.wonlost = None # Map of wonlost record per epoch
+        self.wonlost = None
 
         self.league = 0
 
@@ -64,19 +63,39 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
     def get_simulation(self):
         return self.get_specie().get_simulation()
 
-    # Forms
+    # Configuration
 
     def get_form(self):
-        """
-        Get this members form
-        """
-        return self.form
+        return self._form
 
-    # Preparation
+    def get_incarnation(self):
+        return self._incarnation
+
+    def get_incarnation_epoch_id(self):
+        return self._incarnation_epoch_id
+
+    # Workflow
+
+    def configure(self):
+        """
+        Configure the member
+        """
+        # Invoke managers in random order till one configures the member
+        managers = self.list_member_managers()
+        manager_indexes = self.get_random_state().choice(len(managers), size = len(managers), replace=False)
+        configured, reason = (False, None)
+        for index in manager_indexes:
+            manager = managers[index]
+            configured, reason = manager.configure_member(self)
+            if not configured is None:
+                break
+        if configured is None:
+            reason = "No configuration attempt"
+        return (configured, reason)
 
     def prepare(self):
         """
-        Perform pre-incarnation preparation
+        Prepare the members initial state
         """
         self.reset_state()
         self.fault = None
@@ -84,10 +103,27 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.fault_component = None
         self.fault_message = None
 
-        for component in self.list_lifecycle_managers():
-            component.prepare_member(self)
+        managers = self.list_member_managers()
+        prepared, reason = (True, None)
+        for manager in managers:
+            manager.prepare_member(self)
             if not self.fault is None:
+                prepared, reason = (False, str(self.fault))
                 break
+        return (prepared, reason)
+
+    def verify(self, max_reincarnations = 1, max_transmutations = 0):
+        """
+        Verify that a member has a valid configuration
+        """
+        form = self.get_specie().get_form(self.configuration)
+        if form.incarnations > 0:
+            return (False, "Currently incarnated")
+
+        if form.reincarnations >= max_reincarnations:
+            return (False, "Too many incarnations")
+
+        return (True, None)
 
     def impersonate(self, other):
         """
@@ -97,7 +133,7 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
 
     def mutate(self, transmute):
         """
-        Mutate the member
+        Mutate the member, making a single random change to its configuration
         """
         prior_repr = repr(self.configuration)
         random_state = self.get_random_state()
@@ -118,54 +154,37 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
                 return True
         return False
 
-    def get_transmutation_rate(self):
-        return 0.0
-
-    def specialize(self):
+    def specialize(self, max_reincarnations = 1, max_transmutations = 0):
         """
-        Make sure that the member has a new unique form
+        Attempt to create a verified form
         """
         attempts = 0
         max_attempts = 100
-        max_reincarnations = self.get_specie().get_max_reincarnations()
 
         # Sometimes transmute the first mutation attept
-        transmute = self.get_random_state().random_sample() <= self.get_transmutation_rate()
-        while True:
-            self.prepare()
-            if self.fault is None:
-                form = self.get_specie().get_form(self.configuration)
-                if form.incarnations == 0 and form.reincarnations < max_reincarnations:
-                    return True
-            mutated = False
-            mutated = self.mutate(transmute)
-            transmute = False
+        transmutations = 0
+        specialized, reason = (False, None)
+        while not specialized and attempts < max_attempts:
             attempts += 1
-            if attempts > max_attempts:
-                return False
+
+            prepared, reason = self.prepare()
+            if prepared:
+                specialized, reason = self.verify(max_reincarnations, max_transmutations)
+            if not specialized:
+                transmute = transmutations < max_transmutations
+                self.mutate(transmute)
+                transmutations = transmutations - 1 if transmute else transmutations
+
+        return (specialized, reason)
 
     def incarnate(self, reason):
         """
         Incarnate a new form
         """
 
-        # Find all makers
-        makers = self.list_makers()
-        maker_indexes = self.get_random_state().choice(len(makers), size = len(makers), replace=False)
-
-        # Invoke members in random order till one makes the member
-        configured = False
-        for maker_index in maker_indexes:
-            configured = makers[maker_index].configure_member(self)
-            if configured:
-                break
-
+        configured, fail_reason = self.configure()
         if not configured:
-            raise RuntimeError("Member not configured")
-
-        specialized = self.specialize()
-        if not specialized:
-            return False
+            return (False, fail_reason)
 
         self.alive = 1
         self.event = "birth"
@@ -177,13 +196,113 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.ranking = None
 
         epoch = self.get_specie().get_current_epoch()
-        self.incarnation_epoch_id = epoch.id
-
         form = self.get_specie().get_form(self.configuration)
         form.incarnate()
-        self.form = form
-        self.incarnation = form.reincarnations
-        return True
+        self._form = form
+        self._incarnation = form.reincarnations
+        self._incarnation_epoch_id = epoch.id
+        return (True, None)
+
+    def evaluate(self):
+        """
+        Perform a round of member evaluation
+        """
+        if not self.alive:
+            raise RuntimeError("Member not alive")
+
+        self.evaluation_duration = None
+        start_time = time.time()
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.evaluate_member(self)
+            if not self.alive:
+                break
+        duration = time.time() - start_time
+        self.evaluation_duration = duration
+        self.evaluations += 1
+
+    def contest(self, other):
+
+        if self.get_form() is other.get_form():
+            raise RuntimeError("Contestants have duplicate forms")
+
+        if not self.alive or not other.alive:
+            return None
+
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.contest_members(self, other)
+
+    def judge(self):
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.judge_member(self)
+
+    def rate(self):
+        """
+        Rate a member
+        """
+        if not self.alive:
+            raise RuntimeError("Member is not alive")
+
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.rate_member(self)
+
+    def kill(self, reason):
+        """
+        Kill this member
+        """
+        self.event = "death"
+        self.event_reason = reason
+        self.finish(reason)
+        self.alive = 0
+        self.final = 1
+
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.finish_member(self)
+
+    def fail(self, fault, operation, component):
+        """
+        Inform this member that it has failed for some reason
+        """
+        self.event = "fail"
+        self.event_reason = str(fault)
+        self.fault = fault
+        self.fault_operation = operation
+        self.fault_component = component
+        self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
+        self.alive = 0
+        self.final = 1
+
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.finish_member(self)
+
+    def finish(self, reason):
+        """
+        Notify that this member it is finished with, because the simulation has finished
+        """
+        self.event = "final"
+        self.event_reason = reason
+        self.alive = 0
+        self.final = 1
+
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.finish_member(self)
+
+    def bury(self):
+        """
+        Change this member to the buried state
+        """
+        managers = self.list_member_managers()
+        for manager in managers:
+            manager.bury_member(self)
+        self.get_form().disembody()
+
+    # State
 
     def prepare_epoch(self, epoch):
         self.event = None
@@ -197,23 +316,6 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         self.event_reason = "Next round"
         self.evaluation_time = time.time()
         self.wonlost = []
-
-    def evaluate(self):
-        """
-        Perform a round of member evaluation
-        """
-        if not self.alive:
-            raise RuntimeError("Member not alive")
-
-        self.evaluation_duration = None
-        start_time = time.time()
-        for component in self.list_lifecycle_managers():
-            component.evaluate_member(self)
-            if not self.alive:
-                break
-        duration = time.time() - start_time
-        self.evaluation_duration = duration
-        self.evaluations += 1
 
     def victory(self):
         """
@@ -239,28 +341,6 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         else:
             self.league = league
 
-    def kill(self, reason):
-        """
-        Kill this member
-        """
-        self.event = "death"
-        self.event_reason = reason
-        self.alive = 0
-        self.final = 1
-
-    def fail(self, fault, operation, component):
-        """
-        Inform this member that it has failed for some reason
-        """
-        self.event = "fail"
-        self.event_reason = str(fault)
-        self.fault = fault
-        self.fault_operation = operation
-        self.fault_component = component
-        self.fault_message = "%s %s - %s" % (operation, str(component), str(fault))
-        self.alive = 0
-        self.final = 1
-
     def rated(self, rating, rating_sd):
         """
         Set the members rating in the hall of fame
@@ -273,21 +353,4 @@ class Member(Container, LifecycleContainer, HyperParameterContainer, MakerContai
         Set the members ranking in the hall of fame
         """
         self.ranking = ranking
-
-    def finished(self, reason):
-        """
-        Notify that this member it is finished with, because the simulation has finished
-        """
-        self.event = "final"
-        self.event_reason = reason
-        self.alive = 0
-        self.final = 1
-
-    def bury(self):
-        """
-        Change this member to the buried state
-        """
-        for component in self.list_lifecycle_managers():
-            component.bury_member(self)
-        self.form.disembody()
 

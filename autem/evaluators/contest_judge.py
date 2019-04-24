@@ -36,7 +36,7 @@ class ContestJudge(Evaluater):
         """
         self.p_value = p_value
 
-    def start_epoch(self, epoch):
+    def prepare_epoch(self, epoch):
         members = epoch.list_members()
         for member in members:
             reset_contest_judgement(member)

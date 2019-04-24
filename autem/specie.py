@@ -1,7 +1,6 @@
 from .container import Container
+from .specie_manager import SpecieManagerContainer
 from .hyper_parameter import HyperParameterContainer
-from .lifecycle import LifecycleContainer
-from .workflows import WorkflowContainer
 
 from .member import Member
 from .epoch import Epoch
@@ -15,7 +14,7 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer):
+class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
 
     """
     Specie of a simulation
@@ -23,8 +22,7 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
     def __init__(self, simulation, specie_id, specie_n, next_epoch_id):
 
         Container.__init__(self)
-        WorkflowContainer.__init__(self)
-        LifecycleContainer.__init__(self)
+        SpecieManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
 
         self._simulation = simulation
@@ -108,9 +106,9 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
         """
         finish = None
         reason = None
-        workflows = self.list_workflows()
-        for workflow in workflows:
-            finish, reason = workflow.is_specie_finished(self)
+        managers = self.list_specie_managers()
+        for manager in managers:
+            finish, reason = manager.is_specie_finished(self)
             if finish:
                 break
         finish = finish if not finish is None else False
@@ -126,11 +124,12 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
         self._alive = True
         self._start_time = time.time()
 
-        for workflow in self.list_workflows():
-            workflow.configure_specie(self)
+        managers = self.list_specie_managers()
+        for manager in managers:
+            manager.configure_specie(self)
 
-        for component in self.list_lifecycle_managers():
-            component.start_specie(self)
+        for manager in managers:
+            manager.prepare_specie(self)
 
         finished = False
         finish_reason = None
@@ -143,8 +142,14 @@ class Specie(Container, WorkflowContainer, LifecycleContainer, HyperParameterCon
             epoch.run()
             finished, finish_reason = self.should_finish()
 
-        for component in self.list_lifecycle_managers():
-            component.judge_specie(self)
+        for manager in managers:
+            manager.judge_specie(self)
+
+        for manager in managers:
+            manager.finish_specie(self)
+
+        for manager in managers:
+            manager.bury_specie(self)
 
         self._end_time = time.time()
         self._alive = False

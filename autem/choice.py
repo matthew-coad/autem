@@ -1,10 +1,10 @@
 from .reporters import Dataset, Role
 
 from .hyper_parameter import HyperParameter
-from .lifecycle import LifecycleManager
+from .member_manager import MemberManager
 from .reporters import Reporter
 
-class Choice(HyperParameter, LifecycleManager, Reporter):
+class Choice(HyperParameter, MemberManager, Reporter):
 
     """
     Defines a set of components where only one component can be active for a member
@@ -12,6 +12,7 @@ class Choice(HyperParameter, LifecycleManager, Reporter):
     """
     def __init__(self, choice_name = None, components = []):
         HyperParameter.__init__(self, choice_name)
+        MemberManager.__init__(self)
         self.components = components
         for component in components:
             if isinstance(component, HyperParameter):
@@ -170,14 +171,14 @@ class Choice(HyperParameter, LifecycleManager, Reporter):
             # Do a copy of the selected parent
             active_component.copy_member(member, parent)
 
-    # Lifecycle
+    # Member management
 
     def prepare_member(self, member):
         """
         Forward request to active component
         """
         component = self.get_active_component(member)
-        if isinstance(component, LifecycleManager):
+        if isinstance(component, MemberManager):
             return component.prepare_member(member)
         else:
             return None
@@ -187,7 +188,7 @@ class Choice(HyperParameter, LifecycleManager, Reporter):
         Forward request to active component
         """
         component = self.get_active_component(member)
-        if isinstance(component, LifecycleManager):
+        if isinstance(component, MemberManager):
             return component.bury_member(member)
         else:
             return None

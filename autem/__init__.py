@@ -2,7 +2,6 @@
 from .warning_interceptor import WarningInterceptor
 
 from .container import Container
-from .lifecycle import LifecycleManager
 
 from .simulation import Simulation 
 from .member import Member

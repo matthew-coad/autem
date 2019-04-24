@@ -195,7 +195,7 @@ class ParameterEvaluator(Evaluater):
         parameter_evaluation = self.build_predicted_score(member, choices)
         set_parameter_evaluation(member, parameter_evaluation)
 
-    def start_epoch(self, epoch):
+    def prepare_epoch(self, epoch):
         # Force all score models to be recalculated at the start of every epoch
         specie = epoch.get_specie()
         get_parameter_models(specie).score_models = {}

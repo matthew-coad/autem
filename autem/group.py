@@ -1,17 +1,17 @@
 from .reporters import Dataset, Role, Reporter
 from .hyper_parameter import HyperParameter
-from .lifecycle import LifecycleManager
+from .member_manager import MemberManager
 
 from types import SimpleNamespace
 
-class Group(HyperParameter, LifecycleManager, Reporter):
+class Group(HyperParameter, MemberManager, Reporter):
 
     """
     Defines a group of hyper parameters
     """
     def __init__(self, group_name, parameters):
         HyperParameter.__init__(self, group_name)
-        LifecycleManager.__init__(self)
+        MemberManager.__init__(self)
         self.parameters = parameters
         for parameter in parameters:
             parameter.set_group_name(group_name)
@@ -92,10 +92,10 @@ class Group(HyperParameter, LifecycleManager, Reporter):
 
     def prepare_member(self, member):
         for parameter in self.parameters:
-            if isinstance(parameter, LifecycleManager):
+            if isinstance(parameter, MemberManager):
                 parameter.prepare_member(member)
 
     def bury_member(self, member):
         for parameter in self.parameters:
-            if isinstance(parameter, LifecycleManager):
+            if isinstance(parameter, MemberManager):
                 parameter.bury_member(member)

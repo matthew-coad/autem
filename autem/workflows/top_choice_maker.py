@@ -1,12 +1,13 @@
-from ..lifecycle import LifecycleManager
+from ..specie_manager import SpecieManager
+from ..epoch_manager import EpochManager
+from ..member_manager import MemberManager
 from ..choice import Choice
 from ..evaluators.choice_evaluator import ChoiceState, get_choice_state
-from .maker import Maker
 
 import pandas as pd
 import numpy as np
 
-class TopChoiceMaker(Maker, LifecycleManager):
+class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
     """
     Maker that prioritises the top choices using the choice model
     """
@@ -59,12 +60,12 @@ class TopChoiceMaker(Maker, LifecycleManager):
 
         specie.set_state("initialization_grid_pred", pred_y.tolist())
 
-    def start_specie(self, specie):
+    def prepare_specie(self, specie):
         grid = self.make_grid(specie)
         specie.set_state("initialization_grid", grid)
         specie.set_state("initialization_grid_pred", None)
 
-    def start_epoch(self, epoch):
+    def prepare_epoch(self, epoch):
         self.evaluate_grid_predicted_scores(epoch.get_specie())
 
     def configure_grid_member(self, specie, member, grid_index):
@@ -80,7 +81,7 @@ class TopChoiceMaker(Maker, LifecycleManager):
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
-        return True
+        return (True, None)
 
     def configure_top_member(self, specie, member):
         grid = specie.get_state("initialization_grid")
@@ -94,12 +95,12 @@ class TopChoiceMaker(Maker, LifecycleManager):
     def configure_random_member(self, member):
         for component in member.list_hyper_parameters():
             component.initialize_member(member)
-        return True
+        return (True, None)
 
     def configure_member(self, member):
         specie = member.get_specie()
         if not specie.is_spotchecking():
-            return False
+            return (None, None)
 
         grid = specie.get_state("initialization_grid")
         grid_pred = specie.get_state("initialization_grid_pred")

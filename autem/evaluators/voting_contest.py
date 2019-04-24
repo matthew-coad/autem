@@ -92,7 +92,7 @@ class VotingContest(Evaluater):
 
         member.evaluation.voting_evaluation = self.calculate_voting_evaluation(member, base_members, 1)
 
-    def start_epoch(self, epoch):
+    def prepare_epoch(self, epoch):
         for member in epoch.list_members(alive = True):
             votes = get_voting_evaluation(member)
             votes.victories = 0

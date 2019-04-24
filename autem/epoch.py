@@ -1,6 +1,5 @@
 from .container import Container
-from .workflows import WorkflowContainer
-from .lifecycle import LifecycleContainer
+from .epoch_manager import EpochManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .ranking import Ranking
 
@@ -11,11 +10,15 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterContainer):
+class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
     """
     Epoch of a simulation
     """
     def __init__(self, specie, epoch_id, epoch_n):
+
+        Container.__init__(self)
+        EpochManagerContainer.__init__(self)
+        HyperParameterContainer.__init__(self)
 
         self._specie = specie
         self._simulation = specie.get_simulation()
@@ -59,7 +62,7 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
     def set_max_rounds(self, max_rounds):
         self._max_rounds = max_rounds
 
-    # Lifecycle
+    # Workflow
 
     def get_alive(self):
         return self._alive
@@ -74,9 +77,9 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         if self.get_round() >= self.get_max_rounds():
             return (True, "Max rounds")
 
-        workflows = self.list_workflows()
-        for workflow in workflows:
-            finish, reason = workflow.is_epoch_finished(self)
+        managers = self.list_epoch_managers()
+        for manager in managers:
+            finish, reason = manager.is_epoch_finished(self)
             if finish:
                 break
         finish = finish if not finish is None else False
@@ -98,11 +101,12 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         ranking.inconclusive()
         self._ranking = ranking
 
-        for workflow in self.list_workflows():
-            workflow.configure_epoch(self)
+        managers = self.list_epoch_managers()
+        for manager in managers:
+            manager.configure_epoch(self)
 
-        for component in self.list_lifecycle_managers():
-            component.start_epoch(self)
+        for manager in managers:
+            manager.prepare_epoch(self)
 
         members = self.list_members(alive = True)
         for member in members:
@@ -117,12 +121,12 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
 
             # Bury dead members
             for member in self.list_members(alive = False):
-                self.bury_member(member)
+                self.get_specie().bury_member(member)
 
             if finished:
                 self.rank_members()
-                for component in self.list_lifecycle_managers():
-                    component.judge_epoch(self)
+                for manager in managers:
+                    manager.judge_epoch(self)
 
             # If we should finish the species, finish and bury all alive members
             # before we report
@@ -130,14 +134,20 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
                 finish_specie, reason = self.get_specie().should_finish()
                 if finish_specie:
                     for member in self.list_members(alive=True):
-                        member.finished(reason)
-                        self.bury_member(member)
+                        member.finish(reason)
+                        self.get_specie().bury_member(member)
 
             # Report on what happened
             for member in report_members:
                 self.get_simulation().record_member(member)
 
+        for manager in managers:
+            manager.finish_epoch(self)
+
         self.get_simulation().report()
+
+        for manager in managers:
+            manager.bury_epoch(self)
 
         self._end_time = time.time()
         self._alive = False
@@ -175,7 +185,7 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         # Repopulate
         make_count = max_population - len(members)
         for make_index in range(make_count):
-            self.make_member("Population low")
+            self.get_specie().make_member("Population low")
 
         members = self.list_members(alive = True)
 
@@ -188,11 +198,11 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         members = self.list_members(alive = True)
         for member1_index in range(len(members)-1):
             for member2_index in range(member1_index+1, len(members)):
-                self.contest_members(members[member1_index], members[member2_index])
+                members[member1_index].contest(members[member2_index])
 
         # Judge all members
         for member in self.list_members():
-            self.judge_member(member)
+            member.judge()
 
         printProgressBar(current_round * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
 
@@ -200,40 +210,6 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
 
     def list_members(self, alive = None, top = None):
         return self.get_specie().list_members(alive = alive, top = top)
-
-    def make_member(self, reason):        
-        return self.get_specie().make_member(reason)
-
-    def contest_members(self, contestant1, contestant2):
-
-        if contestant1.get_form() is contestant2.get_form():
-            raise RuntimeError("Contestants have duplicate forms")
-
-        if not contestant1.alive or not contestant2.alive:
-            return None
-
-        for component in self.list_lifecycle_managers():
-            component.contest_members(contestant1, contestant2)
-
-    def judge_member(self, member):
-        for component in self.list_lifecycle_managers():
-            component.judge_member(member)
-
-    def bury_member(self, member):
-        """
-        Remove a member from the active pool
-        """
-        self.get_specie().bury_member(member)
-
-    def rate_member(self, member):
-        """
-        Rate a member
-        """
-        if not member.alive:
-            raise RuntimeError("Members is not alive")
-
-        for component in self.list_lifecycle_managers():
-            component.rate_member(member)
 
     def rank_members(self):
         """
@@ -248,7 +224,7 @@ class Epoch(Container, WorkflowContainer, LifecycleContainer, HyperParameterCont
         if n_inductees > 0:
             for index in range(n_inductees):
                 printProgressBar(index, n_inductees, prefix = progress_prefix, length = 50)
-                self.rate_member(inductees[index])
+                inductees[index].rate()
             printProgressBar(n_inductees, n_inductees, prefix = progress_prefix, length = 50)
 
         candidates = [m for m in inductees if not m.rating is None]

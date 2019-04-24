@@ -1,14 +1,16 @@
-from .maker import Maker
+from ..member_manager import MemberManager
 
-class RandomMaker(Maker):
+
+class RandomMaker(MemberManager):
 
     """
     Maker that just builds members randomly
     """
     def configure_member(self, member):
         if not member.get_specie().is_spotchecking():
-            return False
+            return (None, None)
             
         for component in member.list_hyper_parameters():
             component.initialize_member(member)
-        return True
+        specialized, reason = member.specialize()
+        return (specialized, reason)

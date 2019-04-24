@@ -1,7 +1,7 @@
-from .maker import Maker
-from .. import LifecycleManager
+from ..member_manager import MemberManager
+from ..specie_manager import SpecieManager
 
-class GridMaker(Maker, LifecycleManager):
+class GridMaker(Maker, SpecieManager, MemberManager):
     """
     Make that generates members from a grid of all possible members
     """
@@ -31,15 +31,15 @@ class GridMaker(Maker, LifecycleManager):
                 grid = cross_values(grid, component.name, choice_names)
         return grid
 
-    def start_specie(self, specie):
+    def prepare_specie(self, specie):
         grid = self.make_grid(specie)
-        specie.resources.initialization_grid = grid
+        specie.set_state("initialization_grid", grid)
 
     def configure_member(self, member):
         raise NotImplementedError()
         
         random_state = simulation.random_state
-        grid = specie.resources.initialization_grid
+        grid = specie.get_state("initialization_grid")
         grid_index = random_state.randint(0, len(grid))
         grid_item = grid[grid_index]
         del grid[grid_index]
@@ -48,4 +48,5 @@ class GridMaker(Maker, LifecycleManager):
             if isinstance(component, Choice):
                 component.initialize_member(member)
                 component.force_member(member, grid_item[component.name])
-        return False
+        specialized, reason = member.specialize()
+        return (specialized, reason)

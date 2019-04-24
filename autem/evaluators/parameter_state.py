@@ -10,7 +10,7 @@ def get_parameter_evaluation(member):
     return parameter_evaluation
 
 def set_parameter_evaluation(member, evaluation):
-    member.set_evaluation("parameter_evaluation", evaluation)
+    member.set_state("parameter_evaluation", evaluation)
 
 class ParameterModel:
 
@@ -24,6 +24,6 @@ class ParameterModelResources:
         self.models = {}
 
 def get_parameter_models(specie):
-    resources = specie.get_resource("parameter_models", lambda: ParameterModelResources())
+    resources = specie.get_state("parameter_models", lambda: ParameterModelResources())
     return resources
 

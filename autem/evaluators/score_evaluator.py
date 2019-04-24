@@ -160,7 +160,7 @@ class ScoreEvaluator(Evaluater):
         score_state.score_duration = np.mean(durations)
         score_state.score_duration_std = np.std(durations)
 
-    def start_specie(self, specie):
+    def prepare_specie(self, specie):
         self.evaluate_folds(specie)
 
     def evaluate_member(self, member):
