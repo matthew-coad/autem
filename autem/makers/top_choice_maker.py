@@ -85,6 +85,9 @@ class TopChoiceMaker(Maker, LifecycleManager):
     def configure_top_member(self, specie, member):
         grid = specie.get_state("initialization_grid")
         grid_pred = specie.get_state("initialization_grid_pred")
+        if not grid_pred:
+            return self.configure_random_member(member)
+
         grid_index = grid_pred.index(max(grid_pred))
         return self.configure_grid_member(specie, member, grid_index)
 
