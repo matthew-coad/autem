@@ -4,6 +4,7 @@ from .hyper_parameter import HyperParameterContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .evaluators.score_evaluator import ScoreContainer
+from .choice import Choice
 
 import time
 
@@ -55,7 +56,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
 
         self.ranking = None
 
-    # Context
+    # Parameters
 
     def get_specie(self):
         return self._specie
@@ -73,6 +74,16 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
 
     def get_incarnation_epoch_id(self):
         return self._incarnation_epoch_id
+
+    # State/Queries
+
+    def get_choices(self):
+        """
+        Member choices query
+        """
+        choice_components = [ c for c in self.list_hyper_parameters() if isinstance(c, Choice) ]
+        choices = dict([ (c.name, c.get_active_component_name(self)) for c in choice_components])
+        return choices
 
     # Workflow
 
@@ -154,14 +165,14 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
                 return True
         return False
 
-    def specialize(self, max_reincarnations = 1, max_transmutations = 0):
+    def specialize(self, max_transmutations = 0):
         """
-        Attempt to create a verified form
+        Specialize the member so its valid, isn't incarnated more than once etc.
         """
         attempts = 0
         max_attempts = 100
+        max_reincarnations = self.get_specie().get_max_reincarnations()
 
-        # Sometimes transmute the first mutation attept
         transmutations = 0
         specialized, reason = (False, None)
         while not specialized and attempts < max_attempts:
@@ -179,7 +190,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
 
     def incarnate(self, reason):
         """
-        Incarnate a new form
+        Incarnate a new prepared, configured, incarnated member
         """
 
         configured, fail_reason = self.configure()
@@ -202,6 +213,19 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
         self._incarnation = form.reincarnations
         self._incarnation_epoch_id = epoch.id
         return (True, None)
+
+    def prepare_epoch(self, epoch):
+        self.event = None
+        self.event_reason = None
+        self.rating = None
+        self.rating_sd = None
+        self.ranking = None
+
+    def prepare_round(self, round):
+        self.event = "survive"
+        self.event_reason = "Next round"
+        self.evaluation_time = time.time()
+        self.wonlost = []
 
     def evaluate(self):
         """
@@ -282,7 +306,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
 
     def finish(self, reason):
         """
-        Notify that this member it is finished with, because the simulation has finished
+        Notify that this member it is finished with for some other reason, typically because the simulation has finished
         """
         self.event = "final"
         self.event_reason = reason
@@ -295,37 +319,24 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
 
     def bury(self):
         """
-        Change this member to the buried state
+        Bury this member, giving components a chance to clean up expensive resources
         """
         managers = self.list_member_managers()
         for manager in managers:
             manager.bury_member(self)
         self.get_form().disembody()
 
-    # State
-
-    def prepare_epoch(self, epoch):
-        self.event = None
-        self.event_reason = None
-        self.rating = None
-        self.rating_sd = None
-        self.ranking = None
-
-    def prepare_round(self, round):
-        self.event = "survive"
-        self.event_reason = "Next round"
-        self.evaluation_time = time.time()
-        self.wonlost = []
+    # Notifications
 
     def victory(self):
         """
-        Record a victory at a given step
+        Record a victory
         """
         self.wonlost.append(1)
 
     def defeat(self):
         """
-        Record a defeat at a given epoch
+        Record a defeat
         """
         self.wonlost.append(0)
 

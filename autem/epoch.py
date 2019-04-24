@@ -20,11 +20,17 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         EpochManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
 
+        # Parameters
         self._specie = specie
         self._simulation = specie.get_simulation()
-
         self.id = epoch_id
         self._epoch_n = epoch_n
+
+        # Configuration
+        self._mode = None
+        self._max_rounds = None
+
+        # Initial State
 
         self._event = None
         self._event_reason = None
@@ -38,9 +44,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         self._progressed = None
         self._ranking = None
 
-        self._max_rounds = None
-
-    # Context
+    # Parameters
 
     def get_simulation(self):
         return self._simulation
@@ -49,9 +53,6 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         return self._specie
 
     def get_epoch_n(self):
-        """
-        Epoch number. Number of the epoch within the specie
-        """
         return self._epoch_n
 
     # Configuration
@@ -62,10 +63,34 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
     def set_max_rounds(self, max_rounds):
         self._max_rounds = max_rounds
 
-    # Workflow
+    def get_mode(self):
+        return self._mode
+
+    def set_mode(self, mode):
+        self._mode = mode
+
+    def is_spotchecking(self):
+        return self.get_mode() == "spotcheck"
+
+    def is_tuning(self):
+        return self.get_mode() == "tune"
+
+    # State/Queries
 
     def get_alive(self):
         return self._alive
+
+    def get_ranking(self):
+        return self._ranking
+
+    def get_prior_epoch(self):
+        if self.get_epoch_n() == 1:
+            return None
+        prior_epoch_id = self.id - 1
+        prior_epoch = self.get_specie().get_epoch(prior_epoch_id)
+        return prior_epoch
+
+    # Workflow
 
     def should_finish(self):
         """
@@ -165,7 +190,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         self._round += 1
 
         specie = self.get_specie()
-        mode = specie.get_mode()
+        mode = self.get_mode()
         operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
         current_round = self.get_round()
         max_rounds = self.get_max_rounds()
@@ -218,7 +243,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
         specie = self.get_specie()
-        mode = specie.get_mode()
+        mode = self.get_mode()
         progress_prefix = "Rating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
         print("")
         if n_inductees > 0:
@@ -242,21 +267,3 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
 
         self._ranking = ranking
         return ranking
-
-    def get_ranking(self):
-        return self._ranking
-
-    # Progress
-
-    def progress(self, progressed, reason):
-        """
-        Inform the epoch of its progress
-        """
-        # When a member gets a promotion its wonlost record is erased
-        self._progressed = progressed
-        self._event = "progress"
-        self._event_reason = reason
-
-    def get_progressed(self):
-        return self._progressed
-

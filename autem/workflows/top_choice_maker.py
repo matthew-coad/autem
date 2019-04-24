@@ -99,12 +99,17 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
 
     def configure_member(self, member):
         specie = member.get_specie()
-        if not specie.is_spotchecking():
+        if specie.get_current_epoch().is_tuning():
             return (None, None)
 
         grid = specie.get_state("initialization_grid")
         grid_pred = specie.get_state("initialization_grid_pred")
+
         if grid is None or grid_pred is None:
-            return self.configure_random_member(member)
+            configured, reason = self.configure_random_member(member)
         else:
-            return self.configure_top_member(specie, member)
+            configured, reason = self.configure_top_member(specie, member)
+        if configured:
+            configured, reason = member.specialize()
+        return (configured, reason)
+

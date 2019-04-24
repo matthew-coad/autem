@@ -1,51 +1,57 @@
-from ..specie_manager import SpecieManager
+from ..epoch_manager import EpochManager
 from ..member_manager import MemberManager
 from ..choice import Choice
 
 import pandas as pd
 import numpy as np
 
-class TuneSpecieState():
+class TuneState():
 
     """
-    Tune specie state
+    Tune state
     """
     def __init__(self):
-        self.tuning = False
         self.choices = None
         self.prototype = None
+        self.tuning = False
 
-class TuneMaker(SpecieManager, MemberManager):
+def get_tune_state(container):
+    return container.get_state("tune", lambda: TuneState())
+
+class TuneMaker(EpochManager, MemberManager):
     """
     Maker that creates the tuning model
     """
 
-    def prepare_specie(self, specie):
+    def prepare_epoch(self, epoch):
 
-        if not specie.is_tuning():
+        if not epoch.is_tuning():
             return None
 
-        simulation = specie.get_simulation()
-        top_members = [ s.get_ranking().get_top_member() for s in simulation.list_species(mode = "spotcheck") if not s.get_ranking().get_top_member() is None ]
-        top_members = list(reversed(sorted(top_members, key = lambda m: m.rating)))
-        prototype_member = top_members[0]
+        prior_epoch = epoch.get_prior_epoch()
+        prototype_member = prior_epoch.get_ranking().get_top_member()
+        choices = prototype_member.get_choices()
 
-        choice_components = [ c for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
-        choices = dict([ (c.name, c.get_active_component_name(prototype_member)) for c in choice_components])
+        # Kill all members who don't share the top members choices!
+        outside_members = [ m for m in epoch.list_members(alive = True) if m.get_choices() != choices ]
+        for member in outside_members:
+            member.kill("outside tune")
 
-        state = specie.get_state("tune_maker", lambda: TuneSpecieState())
+        state = get_tune_state(epoch)
         state.choices = choices
-        state.tuning = True
         state.prototype = prototype_member
+        state.tuning = True
+
+    def configure_mutation(self, member, prototype):
+        member.impersonate(prototype)
+        specialized, reason = member.specialize()
+        return (specialized, reason)
 
     def configure_member(self, member):
-
-        specie = member.get_specie()
-        state = specie.get_state("tune_maker", lambda: TuneSpecieState())
-        if not state.tuning:
+        specie = member.get_specie() 
+        epoch = specie.get_current_epoch() 
+        if not epoch.is_tuning():
             return (None, None)
 
-        prototype = state.prototype
-        member.impersonate(prototype)
-        specialized, reason = member.specialize()        
-        return (specialized,)
+        state = get_tune_state(epoch)
+        return self.configure_mutation(member, state.prototype)

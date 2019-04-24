@@ -29,7 +29,6 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         self.id = specie_id
         self._specie_n = specie_n
 
-        self._mode = None
         self._max_league = None
 
         self._event = None
@@ -51,13 +50,15 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         self._max_population = None
         self._max_league = None
 
-    ## Configuration
+    ## Parameters
 
     def get_simulation(self):
         return self._simulation
 
     def get_specie_n(self):
         return self._specie_n
+
+    ## Configuration
 
     def get_max_population(self):
         return self._max_population
@@ -77,17 +78,7 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
     def set_max_league(self, max_league):
         self._max_league = max_league
 
-    def get_mode(self):
-        return self._mode
-
-    def set_mode(self, mode):
-        self._mode = mode
-
-    def is_spotchecking(self):
-        return self.get_mode() == "spotcheck"
-
-    def is_tuning(self):
-        return self.get_mode() == "tune"
+    ## State
 
     def get_start_time(self):
         return self._start_time
@@ -95,10 +86,22 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
     def get_end_time(self):
         return self._end_time
 
-    ## Lifecycle
-
     def get_alive(self):
         return self._alive
+
+    def get_current_epoch_id(self):
+        return self._current_epoch_id
+
+    def get_current_epoch(self):
+        return self._epochs[self._current_epoch_id]
+
+    def get_epoch(self, id):
+        return self._epochs[id]
+
+    def get_ranking(self):
+        return self.get_current_epoch().get_ranking()
+
+    ## Lifecycle
 
     def should_finish(self):
         """
@@ -158,21 +161,13 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
 
     ## Epochs
 
-    def get_current_epoch_id(self):
-        return self._current_epoch_id
-
-    def get_current_epoch(self):
-        return self._epochs[self._current_epoch_id]
-
-    def get_epoch(self, id):
-        return self._epochs[id]
-
-    def list_epochs(self, alive = None):
+    def list_epochs(self, alive = None, mode = None):
         """
         List epochs
         """
-        def include_epoch(epochs):
-            alive_passed = alive is None or epochs.get_alive() == alive
+        def include_epoch(epoch):
+            alive_passed = alive is None or epoch.get_alive() == alive
+            mode_passed = mode is None or epoch.get_mode() == mode
             return alive_passed
 
         epochs = [ e for e in self._epochs.values() if include_epoch(e) ]
@@ -216,7 +211,7 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         Make a new member
         """
         member = Member(self)
-        incarnated = member.incarnate(reason)
+        incarnated, reason = member.incarnate(reason)
         if not incarnated:
             return None
         self._members.append(member)
@@ -230,7 +225,3 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         self._graveyard.append(member)
         self._members.remove(member)
 
-    ## Ranking
-
-    def get_ranking(self):
-        return self.get_current_epoch().get_ranking()

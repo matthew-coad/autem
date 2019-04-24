@@ -50,10 +50,20 @@ connect-4               try ensemble   X
 ## PP2 - Try ensemble on poor performers
 
 Action - Try ensemble on all poor performers
+Outcome - No real improvement vague non-linear members. Need standard workflows
 
 ## PP2 - Convert everything to containers
 
 Action - Convert everything to containers
+
+## PP2 - Create standard workflows
+
+Standard workflows perform spot-checking until their is no improvement,
+then does tuning till their is no improvement.
+
+Tuning is done under the same species as the spotchecking, but only ever
+inherits from the members with the same choices as the top member. So tuning now flows
+on from spotchecking.
 
 
 

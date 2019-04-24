@@ -107,14 +107,13 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
     ## Species
 
-    def list_species(self, alive = None, mode = None):
+    def list_species(self, alive = None):
         """
         List species
         """
         def include_specie(specie):
             alive_passed = alive is None or specie.get_alive() == alive
-            mode_passed = mode is None or specie.get_mode() == mode
-            return alive_passed and mode_passed
+            return alive_passed
 
         species = [ s for s in self._species.values() if include_specie(s) ]
         return species
@@ -277,7 +276,7 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
             setattr(record, key, identity[key])
 
         record.species = specie_id
-        record.mode = specie.get_mode() 
+        record.mode = epoch.get_mode() 
         record.epoch = epoch_id
         record.round = round
         record.step = step
