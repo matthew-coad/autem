@@ -65,7 +65,9 @@ Tuning is done under the same species as the spotchecking, but only ever
 inherits from the members with the same choices as the top member. So tuning now flows
 on from spotchecking.
 
+## PP2 - Run ensemble+standard poor performers
 
+Action - Run poor performers to assess changes
 
 
 

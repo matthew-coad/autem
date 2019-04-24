@@ -43,6 +43,20 @@ def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, pa
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_standard_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(max_time=max_time),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationSnapshot(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
 def make_ensemble_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
@@ -57,11 +71,12 @@ def make_ensemble_snapshot_simulation(name, identity, data_id, max_time, n_jobs,
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
+    'standard': make_standard_simulation,
     'ensemble_snapshot': make_ensemble_snapshot_simulation,
 }
-
 
 def run_benchmark_simulation(study, baseline_name):
     experiment = baseline_name
