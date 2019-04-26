@@ -68,7 +68,7 @@ class SelectPercentile(Selector):
 class VarianceThreshold(Selector):
 
     def __init__(self):
-        threshold_parameter = ChoicesParameter("threshold", "threshold", "numeric", [0.0, 0.05, 0.1, 0.15, 0.2])
+        threshold_parameter = ChoicesParameter("threshold", "threshold", "numeric", [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5])
         Selector.__init__(self, "LVT", "Variance Threshold", [threshold_parameter])
 
     def make_preprocessor(self, member):

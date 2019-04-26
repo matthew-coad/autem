@@ -51,7 +51,7 @@ def run_monks_problem_2():
             workflows.Snapshot(max_epochs=1),
             baselines.BaselineStats(baseline_name),
 
-            hyper_learners.ClassificationEnsemble(),
+            hyper_learners.ClassificationTrees(),
             reporters.Csv(path),
         ], 
         seed=seed, n_jobs=4, identity=identity, memory=memory)

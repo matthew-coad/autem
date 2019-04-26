@@ -48,7 +48,7 @@ def run_balance_scale():
             workflows.Standard(),
             baselines.BaselineStats(baseline_name),
 
-            hyper_learners.ClassificationSnapshot(),
+            hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
         ], 
         seed=seed, n_jobs=4, identity=identity)

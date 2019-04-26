@@ -43,21 +43,21 @@ def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, pa
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
-def make_standard_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_hammer_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(max_time=max_time),
+            workflows.Standard(max_time=max_time, max_species=3),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationSnapshot(),
+            hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
         ], 
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
-def make_ensemble_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
         [
@@ -65,7 +65,7 @@ def make_ensemble_snapshot_simulation(name, identity, data_id, max_time, n_jobs,
             scorers.Accuracy(),
             workflows.Snapshot(max_time=max_time),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationEnsemble(),
+            hyper_learners.ClassificationTrees(),
             reporters.Csv(path),
         ], 
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
@@ -74,8 +74,8 @@ def make_ensemble_snapshot_simulation(name, identity, data_id, max_time, n_jobs,
 
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
-    'standard': make_standard_simulation,
-    'ensemble_snapshot': make_ensemble_snapshot_simulation,
+    'hammer': make_hammer_simulation,
+    'trees': make_trees_simulation,
 }
 
 def run_benchmark_simulation(study, baseline_name):

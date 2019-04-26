@@ -18,9 +18,10 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
     The standard workflow spotchecks until there is no more improvement, then tunes until their is no more improvement.
     """
 
-    def __init__(self, max_time = None, max_epochs = None) :
+    def __init__(self, max_time = None, max_epochs = None, max_species = None) :
         self._max_time = max_time
         self._max_epochs = max_epochs
+        self._max_species = max_species
 
     def get_max_time(self):
         return self._max_time
@@ -39,6 +40,9 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
 
     def get_max_epochs(self):
         return self._max_epochs
+
+    def get_max_species(self):
+        return self._max_species
 
     # Simulations
 
@@ -77,8 +81,9 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
         Finish the simulation once we have completed one species
         """
         n_species = len(simulation.list_species())
-        if n_species > 0:
-            return (True, "Ran specie")
+        max_species = self.get_max_species() if not self.get_max_species() is None else 1
+        if n_species >= max_species:
+            return (True, "Reached max species")
         return (False, None)
 
     # Species

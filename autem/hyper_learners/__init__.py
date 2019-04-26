@@ -1,3 +1,3 @@
 from .hyperLearner import Hyperlearner
-from .classification_snapshot import ClassificationSnapshot
-from .classification_ensemble import ClassificationEnsemble
+from .classification_baseline import ClassificationBaseline
+from .classification_trees import ClassificationTrees

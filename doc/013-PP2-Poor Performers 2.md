@@ -69,5 +69,60 @@ on from spotchecking.
 
 Action - Run poor performers to assess changes
 
+## PP2 - Introduce Trees and Hammer configurations
+
+Trees benchmark configuration utilizes classification trees hyper learner and Snapshot workflow
+Hammer configration uses the baseline configuration with multiple species. An attempt to solve the
+problem by brute force!
+
+# Poor performers assessments
+
+## Australian
+
+Try hammering it!
+
+Progress .959. Target met.
+
+## balance-scale
+
+openml pipeline is:
+
+sklearn.pipeline.Pipeline(
+    columntransformer=sklearn.compose._column_transformer.ColumnTransformer(
+        numeric=sklearn.pipeline.Pipeline(
+            imputer=sklearn.preprocessing.imputation.Imputer,
+            standardscaler=sklearn.preprocessing.data.StandardScaler),
+        nominal=sklearn.pipeline.Pipeline(
+            simpleimputer=sklearn.impute.SimpleImputer,onehotencoder=sklearn.preprocessing._encoders.OneHotEncoder)
+    ),
+    variancethreshold=sklearn.feature_selection.variance_threshold.VarianceThreshold,
+    svc=sklearn.svm.classes.SVC)
+
+Polynomial support vector machine with standard scaler and with variance threshold feature selection.
+
+# Unvestigated
+
+credit-approval         try standard   X
+credit-g                non linear, try ensemble  X
+mfeat-factors           try standard     X
+electricity             try ensemble     X
+eucalyptus              try ensemble     X
+vowel                   try standard     X
+monks-problems-1        try ensemble    X
+monks-problems-2        ensemble       X
+MagicTelescope          try ensemble, investigate on openml, non-linear? X
+artificial-characters   try ensemble  X
+climate-model-simulation-crashes  try standard  X
+first-order-theorem-proving       try ensemble  X
+one-hundred-plants-margin         unsure, try ensemble, non-linear? X
+one-hundred-plants-shape          unsure, try ensemble, non-linear? X
+GesturePhaseSegmentationProcessed   non-linear, try ensemble  X
+cylinder-bands          used naive bayes, try ensemble  X
+dresses-sales           try standard    X
+bank-marketing          non-linear? try standard  X
+one-hundred-plants-texture   unsure, try ensemble, non-linear?
+connect-4               try ensemble   X
+
+
 
 
