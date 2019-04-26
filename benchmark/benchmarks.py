@@ -6,6 +6,7 @@ import autem.workflows as workflows
 import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
+import autem.validators as validators
 
 import openml
 
@@ -36,6 +37,7 @@ def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, pa
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
             workflows.Snapshot(max_time=max_time),
+            validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
             hyper_learners.ClassificationSnapshot(),
             reporters.Csv(path),
@@ -50,6 +52,7 @@ def make_hammer_simulation(name, identity, data_id, max_time, n_jobs, seed, path
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
             workflows.Standard(max_time=max_time, max_species=3),
+            validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
             hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
@@ -64,6 +67,7 @@ def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path,
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
             workflows.Snapshot(max_time=max_time),
+            validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
             hyper_learners.ClassificationTrees(),
             reporters.Csv(path),
@@ -71,11 +75,41 @@ def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path,
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Snapshot(max_time=max_time),
+            validators.Holdout(0.2),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationSVM(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+def make_short_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(max_time=max_time, max_species=3),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationSVM(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
 
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
     'trees': make_trees_simulation,
+    'svm': make_svm_simulation,
+    'short_svm': make_short_svm_simulation,
 }
 
 def run_benchmark_simulation(study, baseline_name):

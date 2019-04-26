@@ -3,28 +3,12 @@ from ..simulation_manager import SimulationManager
 class Loader(SimulationManager):
 
     def configure_simulation(self, simulation):
-        simulation.set_loader(self)
+        dataset = self.load_dataset(simulation)
+        simulation.set_training_data(dataset)
 
-    def load_divided_data(self, container):
+    def load_dataset(self, simulation):
         """
-        Load data already divided into x,y arrays
-        """
-        raise NotImplementedError()
-    
-    def load_training_data(self, container):
-        """
-        Load training data
+        Load data and return as a dataset
         """
         raise NotImplementedError()
 
-    def load_validation_data(self, container):
-        """
-        Load validation data already divided into x,y arrays
-        """
-        raise NotImplementedError()
-
-    def get_features(self, container):
-        """
-        Return dictionary of index of features by type
-        """
-        raise NotImplementedError()

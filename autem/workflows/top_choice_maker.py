@@ -45,7 +45,7 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
         model = specie.get_state("component_score_model")
         grid = specie.get_state("initialization_grid")
 
-        if model is None or grid is None:
+        if model is None or grid is None or len(grid) == 0:
             return None
 
         # Build the choices into a dataframe

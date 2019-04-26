@@ -1,4 +1,4 @@
-from autem import Dataset, Role
+from autem import DataType, Role
 from autem.evaluators import Evaluater
 
 import numpy as np

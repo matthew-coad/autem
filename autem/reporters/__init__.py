@@ -1,6 +1,6 @@
 from .csv import Csv
 from .attribute import Attribute
-from .dataset import Dataset
+from .datatype import DataType
 from .outline import Outline
 from .reporter import Reporter
 from .role import Role

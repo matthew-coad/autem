@@ -1,4 +1,4 @@
-from .reporters import Dataset, Role
+from .reporters import DataType, Role
 
 from .hyper_parameter import HyperParameter
 from .member_manager import MemberManager
@@ -30,7 +30,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Outline what information is going to be supplied by a simulation
         """
-        outline.append_attribute(self.name, Dataset.Battle, [ Role.Parameter ], self.name)
+        outline.append_attribute(self.name, DataType.Battle, [ Role.Parameter ], self.name)
         for component in self.components:
             if isinstance(component, Reporter):
                 component.outline_simulation(simulation, outline)

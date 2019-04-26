@@ -2,7 +2,7 @@ from ..simulation_manager import SimulationManager
 from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
-from ..evaluators import ScoreEvaluator, ChoiceEvaluator, ValidationEvaluator, DurationEvaluator
+from ..evaluators import ScoreEvaluator, ChoiceEvaluator, DurationEvaluator
 from ..evaluators import ScoreContest, DiverseContest
 from ..evaluators import ContestJudge
 from ..evaluators import ScoreRater
@@ -45,7 +45,6 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
         extensions = [
             ScoreEvaluator(),
             ChoiceEvaluator(),
-            ValidationEvaluator(),
             DurationEvaluator(),
 
             ScoreContest(),

@@ -1,4 +1,5 @@
-from .evaluator import Evaluater
+from ..simulation_manager import SimulationManager
+from ..loaders import Dataset
 
 import numpy as np
 from scipy import stats
@@ -22,10 +23,27 @@ def get_validation_state(member):
     state = member.get_state("validation", lambda: ValidationState())
     return state
 
-class ValidationEvaluator(Evaluater):
+class Holdout(SimulationManager):
     """
-    Validation evaluation component
+    Validate a model using a heldout dataset
     """
+
+    def __init__(self, validation_ratio = 0.2):
+        self._validation_ratio = validation_ratio
+
+    def get_validation_ratio(self):
+        return self._validation_ratio
+
+    def prepare_simulation(self, simulation):
+
+        random_state = simulation.get_random_state()
+        validation_ratio = self.get.validation_size
+        data = simulation.get_full_data()
+
+        x_train, x_validation, y_train, y_validation = train_test_split(data.x, data.y, test_size=validation_ratio, random_state=random_state)
+        train_data = Dataset(x_train, y_train, data.features)
+        validation_data = Dataset(x_validation, y_validation, data.features)
+        simulation.set_split_data(train_data, validation_data)
 
     def validate_member(self, member, required_league):
 
@@ -36,12 +54,17 @@ class ValidationEvaluator(Evaluater):
         if member.league < required_league:
             return None
 
-        scorer = member.get_simulation().get_scorer()
-        loader = member.get_simulation().get_loader()
+        simulation = member.get_simulation()
+        scorer = simulation.get_scorer()
+
+        training_data = simulation.get_training_data()
+        validation_data = simulation.get_validation_data()
         pipeline = member.get_pipeline()
 
-        x,y = loader.load_training_data(member)
-        x_validation, y_validation = loader.load_validation_data(member)
+        x = training_data.x
+        y = training_data.y
+        x_validation = validation_data.x
+        y_validation = validation_data.y
 
         with warnings.catch_warnings():
             warnings.simplefilter("error")

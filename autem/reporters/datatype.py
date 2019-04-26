@@ -1,5 +1,5 @@
 from enum import Enum
 
-class Dataset(Enum):
+class DataType(Enum):
     Battle = "battle"
     Ranking = "ranking"

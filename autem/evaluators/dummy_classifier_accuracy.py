@@ -19,9 +19,11 @@ class DummyClassifierAccuracy(Evaluater):
 
         random_state = member.get_random_State()
         scorer = member.get_simulation().get_scorer()
-        loader = member.get_simulation().get_loader()
 
-        x,y = loader.load_training_data(member)
+        data = member.get_simulation().get_training_data()
+        features = data.features
+        x = data.x
+        y = data.y
 
         learner = DummyClassifier(random_state = random_state)
         learner.fit(x, y)

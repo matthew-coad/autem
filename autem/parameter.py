@@ -1,5 +1,5 @@
 from .hyper_parameter import HyperParameter
-from .reporters import Dataset, Role, Reporter
+from .reporters import DataType, Role, Reporter
 
 class Parameter(HyperParameter, Reporter):
 
@@ -55,8 +55,8 @@ class Parameter(HyperParameter, Reporter):
 
     def outline_simulation(self, simulation, outline):
         record_name = self.get_record_name()
-        if not outline.has_attribute(record_name, Dataset.Battle):
-            outline.append_attribute(self.get_record_name(), Dataset.Battle, [ Role.Parameter ], self.label)
+        if not outline.has_attribute(record_name, DataType.Battle):
+            outline.append_attribute(self.get_record_name(), DataType.Battle, [ Role.Parameter ], self.label)
 
     def record_member(self, member, record):
         if self.has_configuration(member):

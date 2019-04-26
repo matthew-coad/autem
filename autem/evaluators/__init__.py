@@ -9,8 +9,6 @@ from .parameter_state import get_parameter_evaluation
 
 from .duration_evaluator import DurationEvaluator
 
-from .validation_evaluator import ValidationEvaluator
-
 from .score_contest import ScoreContest
 from .diverse_contest import DiverseContest
 

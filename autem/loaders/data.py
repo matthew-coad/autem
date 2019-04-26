@@ -1,25 +1,14 @@
 from .loader import Loader
-from ..reporters import Dataset, Role
+from .dataset import Dataset
+from ..simulation_manager import SimulationManager
 
 from sklearn.model_selection import train_test_split
 import pandas as pd
 
-class DataState:
-
-    def __init__(self):
-        self.x_train = None
-        self.x_validation = None
-        self.y_train = None
-        self.y_validation = None
-
-class Data(Loader):
+class Data(SimulationManager):
     
-    def __init__(self, data_name, y, numeric_x = None, nominal_x = None, validation_size = 0.2):
+    def __init__(self, data_name, y, numeric_x = None, nominal_x = None):
         self.data_name = data_name
-        self.y = y
-        self.numeric_x = numeric_x
-        self.nominal_x = nominal_x
-        self.validation_size = validation_size
 
         x = None
         numeric_cols = 0
@@ -41,43 +30,10 @@ class Data(Loader):
             "date": [],
             "string": []
         }
-        self.x = x
-        self.features = features
 
-    def outline_simulation(self, simulation, outline):
-        super().outline_simulation(simulation, outline)
+        dataset = Dataset(x, y, features)
+        self._dataset = dataset
 
-        if not outline.has_attribute("data", Dataset.Battle):
-            outline.append_attribute("data", Dataset.Battle, [ Role.Configuration ], self.data_name)
-
-    def prepare_simulation(self, simulation):
-        super().prepare_simulation(simulation)
-
-        random_state = simulation.random_state
-        validation_size = self.validation_size
-        y = self.y
-        x = self.x
-
-        x_train, x_validation, y_train, y_validation = train_test_split(x, y, test_size=validation_size, random_state=random_state)
-
-        state = DataState()
-        state.x_train = x_train
-        state.x_validation = x_validation
-        state.y_train = y_train
-        state.y_validation = y_validation
-        simulation.set_state("data", state)
-
-    def load_divided_data(self, container):
-        return (self.x, self.y)
-
-    def load_training_data(self, container):
-        state = container.get_simulation().get_state("data")
-        return (state.x_train, state.y_train)
-
-    def load_validation_data(self, container):
-        state = container.get_simulation().get_state("data")
-        return (state.x_validation, state.y_validation)
-
-    def get_features(self, container):
-        return self.features
+    def configure_simulation(self, simulation):
+        simulation.set_full_data(self._dataset)
 

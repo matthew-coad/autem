@@ -22,11 +22,13 @@ class CrossValidationRater(Evaluater):
         Evaluate the rating for a member.
         Only famous members get a rating.
         """
+        raise NotImplementedError()
 
         scorer = member.get_simulation().get_scorer()
-        loader = member.get_simulation().get_loader()
 
-        x,y = loader.load_divided_data(member)
+        data = member.get_simulation().get_training_data()
+        x = data.x
+        y = data.y
         pipeline = member.get_pipeline()
 
         try:

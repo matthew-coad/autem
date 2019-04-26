@@ -4,6 +4,7 @@ if __name__ == '__main__':
 import autem
 import autem.scorers as scorers
 import autem.workflows as workflows
+import autem.validators as validators
 import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
@@ -15,12 +16,12 @@ import benchmark.utility as utility
 import os
 import openml
 
-def run_balance_scale():
-    baseline_name = "balance-scale"
-    experiment = baseline_name
+def run_balance_scale(seed):
     study = "DEV"
-    seed = 1
+    baseline_name = "balance-scale"
+    experiment = "svm_%s_s%d" % (baseline_name, seed)
     version = benchmark.get_version()
+    simulation_name = "%s_%s_v%d" % (study, experiment, version)
 
     configuration = baselines.get_baseline_configuration(baseline_name)
     path = benchmark.get_simulations_path().joinpath(study).joinpath(experiment)
@@ -31,7 +32,6 @@ def run_balance_scale():
     data_id = task.dataset_id
     dataset = openml.datasets.get_dataset(data_id)
     dataset_name = dataset.name
-    simulation_name = "%s_%s_v%d" % (study, experiment, version)
 
     identity = {
         'study': study,
@@ -45,9 +45,45 @@ def run_balance_scale():
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(),
+            workflows.Snapshot(),
             baselines.BaselineStats(baseline_name),
+            hyper_learners.ClassificationSVM(),
+            reporters.Csv(path),
+        ], 
+        seed=seed, n_jobs=4, identity=identity)
+    simulation.run()
 
+def run_balance_scale_baseline(seed):
+    baseline_name = "balance-scale"
+    experiment = "base_%s_s%d" % (baseline_name, seed)
+    study = "DEV"
+    version = benchmark.get_version()
+    simulation_name = "%s_%s_v%d" % (study, experiment, version)
+
+    configuration = baselines.get_baseline_configuration(baseline_name)
+    path = benchmark.get_simulations_path().joinpath(study).joinpath(experiment)
+
+    utility.prepare_OpenML()
+    task_id = configuration["task_id"]
+    task = openml.tasks.get_task(task_id)
+    data_id = task.dataset_id
+    dataset = openml.datasets.get_dataset(data_id)
+    dataset_name = dataset.name
+
+    identity = {
+        'study': study,
+        'experiment': experiment,
+        'dataset': dataset_name,
+        'version': version
+    }    
+    
+    simulation = autem.Simulation(
+        simulation_name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Snapshot(),
+            baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
         ], 
@@ -55,4 +91,13 @@ def run_balance_scale():
     simulation.run()
 
 if __name__ == '__main__':
-    run_balance_scale()
+    run_balance_scale(1)
+    run_balance_scale(2)
+    run_balance_scale(3)
+    run_balance_scale(4)
+    run_balance_scale(5)
+    run_balance_scale_baseline(1)
+    run_balance_scale_baseline(2)
+    run_balance_scale_baseline(3)
+    run_balance_scale_baseline(4)
+    run_balance_scale_baseline(5)

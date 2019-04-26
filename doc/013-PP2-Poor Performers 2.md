@@ -77,13 +77,13 @@ problem by brute force!
 
 # Poor performers assessments
 
-## Australian
+## PP2-Australian
 
 Try hammering it!
 
 Progress .959. Target met.
 
-## balance-scale
+## PP2-balance-scale
 
 openml pipeline is:
 
@@ -99,6 +99,14 @@ sklearn.pipeline.Pipeline(
     svc=sklearn.svm.classes.SVC)
 
 Polynomial support vector machine with standard scaler and with variance threshold feature selection.
+
+Action - Add a support vector machine hyper learner that includes Poly, Radial cores.
+Outcome - Seems to max out
+
+Action - Try moving validation.
+Outcome - Bingo! Datasets is solved. Added a short_svm configuration.
+
+Short configuration don't do validation (impacts the baseline too much) and do a hammer workflow (cos why not)
 
 # Unvestigated
 

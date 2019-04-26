@@ -1,6 +1,6 @@
 from .container import Container
 from .simulation_manager import SimulationManagerContainer
-from .reporters import ReporterContainer, Dataset, Role, Outline, Record
+from .reporters import ReporterContainer, DataType, Role, Outline, Record
 from .specie import Specie
 from .form import Form
 from .ranking import Ranking
@@ -40,8 +40,11 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
         self._outline = None
 
-        self._loader = None
         self._scorer = None
+
+        self._full_data = None
+        self._training_data = None
+        self._validation_data = None
 
     ## Properties
 
@@ -97,13 +100,25 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
     def set_scorer(self, scorer):
         self._scorer = scorer
 
-    ## Loader
+    ## Data
 
-    def get_loader(self):
-        return self._loader
+    def get_full_data(self):
+        return self._full_data
 
-    def set_loader(self, loader):
-        self._loader = loader
+    def set_full_data(self, full_data):
+        self._full_data = full_data
+        self._training_data = full_data
+        self._validation_data = None
+
+    def set_split_data(self, training_data, validation_data):
+        self._training_data = training_data
+        self._validation_data = validation_data
+
+    def get_training_data(self):
+        return self._training_data
+
+    def get_validation_data(self):
+        return self._validation_data
 
     ## Species
 
@@ -129,24 +144,24 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
         Build the simulation outline
         """
         outline = Outline()
-        outline.append_attribute("simulation", Dataset.Battle, [Role.Configuration])
+        outline.append_attribute("simulation", DataType.Battle, [Role.Configuration])
         for property_key in self.get_identity().keys():
-            outline.append_attribute(property_key, Dataset.Battle, [Role.Configuration])
-        outline.append_attribute("species", Dataset.Battle, [Role.ID])
-        outline.append_attribute("epoch", Dataset.Battle, [Role.ID])
-        outline.append_attribute("round", Dataset.Battle, [Role.ID])
-        outline.append_attribute("step", Dataset.Battle, [Role.ID])
-        outline.append_attribute("member_id", Dataset.Battle, [Role.ID])
-        outline.append_attribute("form_id", Dataset.Battle, [Role.ID])
-        outline.append_attribute("incarnation", Dataset.Battle, [Role.Property])
-        outline.append_attribute("event", Dataset.Battle, [Role.Property])
-        outline.append_attribute("fault", Dataset.Battle, [Role.Property])
+            outline.append_attribute(property_key, DataType.Battle, [Role.Configuration])
+        outline.append_attribute("species", DataType.Battle, [Role.ID])
+        outline.append_attribute("epoch", DataType.Battle, [Role.ID])
+        outline.append_attribute("round", DataType.Battle, [Role.ID])
+        outline.append_attribute("step", DataType.Battle, [Role.ID])
+        outline.append_attribute("member_id", DataType.Battle, [Role.ID])
+        outline.append_attribute("form_id", DataType.Battle, [Role.ID])
+        outline.append_attribute("incarnation", DataType.Battle, [Role.Property])
+        outline.append_attribute("event", DataType.Battle, [Role.Property])
+        outline.append_attribute("fault", DataType.Battle, [Role.Property])
 
-        outline.append_attribute("ranking", Dataset.Battle, [ Role.KPI ])
-        outline.append_attribute("incarnation_epoch", Dataset.Battle, [ Role.Property ])
+        outline.append_attribute("ranking", DataType.Battle, [ Role.KPI ])
+        outline.append_attribute("incarnation_epoch", DataType.Battle, [ Role.Property ])
 
-        outline.append_attribute("league", Dataset.Battle, [Role.Property])
-        outline.append_attribute("final", Dataset.Battle, [Role.Property])
+        outline.append_attribute("league", DataType.Battle, [Role.Property])
+        outline.append_attribute("final", DataType.Battle, [Role.Property])
 
         for component in self.list_reporters():
             component.outline_simulation(self, outline)

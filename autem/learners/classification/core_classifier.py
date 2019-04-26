@@ -1,5 +1,5 @@
 from ..learner import Learner
-from ...reporters import Dataset, Role
+from ...reporters import DataType, Role
 from ...choices_parameter import ChoicesParameter, make_choice, make_choice_list
 
 import sklearn.linear_model

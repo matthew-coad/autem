@@ -1,5 +1,5 @@
 from ..group import Group
-from ..reporters import Dataset, Role
+from ..reporters import DataType, Role
 from ..choices_parameter import ChoicesParameter, make_choice, make_choice_list
 from .preprocessor import Preprocesssor
 
@@ -22,13 +22,13 @@ class Scaler(Preprocesssor):
         raise NotImplementedError()
 
     def make_preprocessor(self, member):
-        loader = member.get_simulation().get_loader()
-        features = loader.get_features(member)
+        data = member.get_simulation().get_full_data()
+        features = data.features
+        x = data.x
+        y = data.y
 
         categorical_features = features['nominal']
         numeric_features = features['numeric']
-
-        x,y = loader.load_divided_data(member)
 
         categories = []
         for feature in categorical_features:
