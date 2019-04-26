@@ -60,6 +60,36 @@ def make_hammer_simulation(name, identity, data_id, max_time, n_jobs, seed, path
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Snapshot(max_time=max_time),
+            validators.Holdout(0.2),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationLinear(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+def make_short_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(max_time=max_time, max_species=3),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationLinear(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+
 def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
@@ -107,6 +137,8 @@ def make_short_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, p
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
+    'linear': make_linear_simulation,
+    'short_linear': make_short_linear_simulation,
     'trees': make_trees_simulation,
     'svm': make_svm_simulation,
     'short_svm': make_short_svm_simulation,

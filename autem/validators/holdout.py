@@ -37,7 +37,7 @@ class Holdout(SimulationManager):
     def prepare_simulation(self, simulation):
 
         random_state = simulation.get_random_state()
-        validation_ratio = self.get.validation_size
+        validation_ratio = self.get_validation_ratio()
         data = simulation.get_full_data()
 
         x_train, x_validation, y_train, y_validation = train_test_split(data.x, data.y, test_size=validation_ratio, random_state=random_state)

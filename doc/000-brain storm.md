@@ -18,6 +18,8 @@ Seperate models from contests
 
 Replable prediction models
 
+Add polynomial features. Must only use on narrow features
+
 # Accuracy
 
 Accuracy inaccurate at low league levels. Take into account Std of higher league level

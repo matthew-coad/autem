@@ -108,9 +108,17 @@ Outcome - Bingo! Datasets is solved. Added a short_svm configuration.
 
 Short configuration don't do validation (impacts the baseline too much) and do a hammer workflow (cos why not)
 
+## PP2-credit-approval
+
+If pushed it will get a solution. But it seems to prefer linear solutions.
+
+Action - Add linear and short_linear configurations
+Action - Set credit-approval to use short linear
+
+Outcome - Target met in snapshot mode. But will use a standard hammer workflow.
+
 # Unvestigated
 
-credit-approval         try standard   X
 credit-g                non linear, try ensemble  X
 mfeat-factors           try standard     X
 electricity             try ensemble     X
