@@ -1,5 +1,7 @@
 from ..choice import Choice
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
+from ..epoch_manager import EpochManager
+from ..reporters import Reporter
 from .score_evaluator import ScoreState
 
 import numpy as np
@@ -27,7 +29,7 @@ def get_choice_state(member):
     state = member.get_state("choice", lambda: ChoiceState())
     return state
 
-class ChoiceEvaluator(Evaluater):
+class ChoiceEvaluator(MemberManager, EpochManager, Reporter):
     """
     Component that performs evaluations related to choices
     """

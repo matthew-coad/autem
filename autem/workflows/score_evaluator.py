@@ -1,4 +1,6 @@
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
+from ..specie_manager import SpecieManager
+from ..reporters import Reporter
 
 import numpy as np
 from scipy import stats
@@ -32,10 +34,13 @@ class ScoreState:
 
 class ScoreContainer:
 
-    def get_score_state(self):
+    def get_scores(self):
         return self.get_state("scores", lambda: ScoreState())
 
-class ScoreEvaluator(Evaluater):
+    def get_score_state(self):
+        return self.get_scores()
+
+class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
     """
     Component that evaluates scores for other components
     """

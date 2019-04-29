@@ -1,4 +1,4 @@
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
 
 import numpy as np
 from scipy import stats
@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 import time
 import warnings
 
-class DiverseContest(Evaluater):
+class DiverseContest(MemberManager):
     """
     Verify that there is notable difference between contesting members
     """

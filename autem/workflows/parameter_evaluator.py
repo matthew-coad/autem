@@ -1,6 +1,8 @@
-from .evaluator import Evaluater
+from ..choice import Choice
+from ..member_manager import MemberManager
+from ..epoch_manager import EpochManager
+from ..reporters import Reporter
 from .score_evaluator import ScoreState
-from .parameter_state import ParameterEvaluation, get_parameter_evaluation, set_parameter_evaluation, ParameterModel, ParameterModelResources, get_parameter_models
 
 import numpy as np
 import pandas as pd
@@ -18,7 +20,36 @@ from sklearn.compose import ColumnTransformer
 import warnings
 import time
 
-class ParameterEvaluator(Evaluater):
+class ParameterEvaluation:
+
+    def __init__(self):
+        self.predicted_score = None
+        self.predicted_score_std = None
+        self.contribution_count = None
+
+def get_parameter_evaluation(member):
+    parameter_evaluation = member.get_evaluation("parameter_evaluation", lambda: ParameterEvaluation())
+    return parameter_evaluation
+
+def set_parameter_evaluation(member, evaluation):
+    member.set_state("parameter_evaluation", evaluation)
+
+class ParameterModel:
+
+    def __init__(self, model, contribution_count):
+        self.model = model
+        self.contribution_count = contribution_count
+
+class ParameterModelResources:
+
+    def __init__(self):
+        self.models = {}
+
+def get_parameter_models(specie):
+    resources = specie.get_state("parameter_models", lambda: ParameterModelResources())
+    return resources
+
+class ParameterEvaluator(MemberManager, EpochManager, Reporter):
     """
     Component that performs predictions related to hyperparameters
     """

@@ -1,7 +1,7 @@
-from .evaluator import Evaluater
-
 import numpy as np
 from scipy import stats
+
+from ..member_manager import MemberManager
 
 from sklearn.model_selection import cross_val_score, train_test_split, cross_val_predict
 from sklearn.pipeline import Pipeline
@@ -12,7 +12,7 @@ import warnings
 import logging
 import io
 
-class ScoreContest(Evaluater):
+class ScoreContest(MemberManager):
     """
     Determines fitness by comparing model scores 
     """
@@ -21,13 +21,13 @@ class ScoreContest(Evaluater):
 
         specie = contestant1.get_specie()
 
-        contestant1_score = contestant1.get_score_state().score
-        contestant2_score = contestant2.get_score_state().score
+        contestant1_scores = contestant1.get_scores()
+        contestant2_scores = contestant2.get_scores()
 
-        if contestant1_score == contestant2_score:
+        if contestant1_scores.score == contestant2_scores.score:
             return None
 
-        if contestant1_score > contestant2_score:
+        if contestant1_scores.score > contestant2_scores.score:
             winner = contestant1
             loser = contestant2
         else:

@@ -3,7 +3,7 @@ from .member_manager import MemberManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
-from .evaluators.score_evaluator import ScoreContainer
+from .workflows.score_evaluator import ScoreContainer
 from .choice import Choice
 
 import time

@@ -2,10 +2,15 @@ from ..simulation_manager import SimulationManager
 from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
-from ..evaluators import ScoreEvaluator, ChoiceEvaluator, DurationEvaluator
-from ..evaluators import ScoreContest, DiverseContest
-from ..evaluators import ContestJudge
-from ..evaluators import ScoreRater
+from .score_evaluator import ScoreEvaluator
+from .choice_evaluator import ChoiceEvaluator
+from .duration_evaluator import DurationEvaluator
+
+from .score_contest import ScoreContest
+from .diverse_contest import DiverseContest
+
+from .contest_judge import ContestJudge
+from .score_rater import ScoreRater
 
 from .cross_over_maker import CrossoverMaker
 from .top_choice_maker import TopChoiceMaker

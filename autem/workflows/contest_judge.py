@@ -1,4 +1,6 @@
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
+from ..epoch_manager import EpochManager
+from ..reporters import Reporter
 
 import numpy as np
 from scipy import stats
@@ -25,7 +27,7 @@ def reset_contest_judgement(member):
     """
     member.set_state("contest_judgement", ContestJudgement())
 
-class ContestJudge(Evaluater):
+class ContestJudge(MemberManager, EpochManager, Reporter):
     """
     Contest judgements
     """

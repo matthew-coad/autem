@@ -2,7 +2,7 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 from ..member_manager import MemberManager
 from ..choice import Choice
-from ..evaluators.choice_evaluator import ChoiceState, get_choice_state
+from .choice_evaluator import ChoiceState, get_choice_state
 
 import pandas as pd
 import numpy as np

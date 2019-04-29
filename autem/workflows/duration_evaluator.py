@@ -1,4 +1,5 @@
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
+from ..reporters import Reporter
 
 import numpy as np
 from scipy import stats
@@ -19,7 +20,7 @@ def get_duration_state(member):
     state = member.get_state("duration", lambda: DurationState())
     return state
 
-class DurationEvaluator(Evaluater):
+class DurationEvaluator(MemberManager, Reporter):
     """
     Assesses a members duration
     """

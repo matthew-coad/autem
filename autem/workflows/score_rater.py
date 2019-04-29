@@ -1,4 +1,4 @@
-from .evaluator import Evaluater
+from ..member_manager import MemberManager
 
 import numpy as np
 from scipy import stats
@@ -6,7 +6,7 @@ from scipy import stats
 from sklearn.model_selection import cross_val_score
 import warnings
 
-class ScoreRater(Evaluater):
+class ScoreRater(MemberManager):
     """
     Uses the score to rate a model
     """
