@@ -3,6 +3,8 @@
 import autem
 import autem.scorers as scorers
 import autem.workflows as workflows
+import autem.learners.classification as learners
+import autem.preprocessors as preprocessors
 import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
@@ -134,6 +136,50 @@ def make_short_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, p
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_xgb_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Snapshot(max_time=max_time),
+            baselines.BaselineStats(identity['dataset']),
+
+            # Scalers
+            autem.Choice("Scaler", [
+                preprocessors.MaxAbsScaler(),
+                preprocessors.RobustScaler(),
+                preprocessors.StandardScaler(),
+                preprocessors.BoxCoxTransform(),
+                preprocessors.YeoJohnsonTransform(),
+            ]),
+
+            # Feature Selectors
+            autem.Choice("Selector", [
+                preprocessors.NoSelector(),
+            ]),
+
+            # Feature Reducers
+            autem.Choice("Reducer", [
+                preprocessors.NoReducer(),
+                preprocessors.FastICA(),
+                preprocessors.PCA(),
+            ]),
+
+            # Approximators
+            autem.Choice("Approximator", [
+                preprocessors.NoApproximator(),
+            ]),
+
+            autem.Choice("Learner", [
+                learners.XGBClassifier(),
+            ]),
+
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
@@ -142,6 +188,7 @@ simulation_builders = {
     'trees': make_trees_simulation,
     'svm': make_svm_simulation,
     'short_svm': make_short_svm_simulation,
+    'xgb': make_xgb_simulation
 }
 
 def run_benchmark_simulation(study, baseline_name):

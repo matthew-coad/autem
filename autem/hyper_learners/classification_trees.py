@@ -43,6 +43,7 @@ class ClassificationTrees(Hyperlearner):
                 learners.RandomForestClassifier(),
                 learners.ExtraTreesClassifier(),
                 learners.GradientBoostingClassifier(),
+                learners.XGBClassifier(),
             ])
         ]
         return components

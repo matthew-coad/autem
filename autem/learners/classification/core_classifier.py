@@ -9,7 +9,7 @@ import sklearn.svm
 import sklearn.naive_bayes
 import sklearn.tree
 import sklearn.ensemble
-# import sklearn.xgboost
+import xgboost
 
 import numpy as np
 
@@ -102,20 +102,6 @@ classifier_config_dict = {
             'dual': [True, False],
         },
     },
-
-    'xgboost.XGBClassifier': {
-        'numeric' : {
-            'max_depth': range(1, 11),
-            'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
-            'subsample': np.arange(0.05, 1.01, 0.05),
-            'min_child_weight': range(1, 21),
-        },
-        'nominal': {
-            'n_estimators': [100],
-            'nthread': [1]
-
-        },
-    }
 
 }
 
@@ -268,4 +254,21 @@ class LinearDiscriminantAnalysis(Learner):
 
     def make_model(self):
         return sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
+
+class XGBClassifier(Learner):
+
+    config_dict = { 
+        'numeric' : {
+            'max_depth': range(1, 11),
+            'learning_rate': [1e-3, 1e-2, 1e-1, 0.5, 1.],
+            'subsample': np.arange(0.05, 1.01, 0.05),
+            'min_child_weight': range(1, 21),
+        }
+    }
+
+    def __init__(self, parameters = None):
+        Learner.__init__(self, "XGB", "Xtreme Gradient Boosting", convert_parameters(self.config_dict, parameters))
+
+    def make_model(self):
+        return xgboost.XGBClassifier(n_estimators = 100)
 
