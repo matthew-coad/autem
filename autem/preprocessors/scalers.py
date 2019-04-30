@@ -73,7 +73,7 @@ class Scaler(Preprocesssor):
 #        return sklearn.impute.SimpleImputer()
 
 #    def make_preprocessor(self, member):
-#        strategy_param = [p for p in self.parameters if p.name == "strategy" ][0]
+#        strategy_param = [p for p in self.parameters if p.get_name() == "strategy" ][0]
 #        strategy = strategy_param.get_value(member)
 
 #        transformer = sklearn.pipeline.FeatureUnion(

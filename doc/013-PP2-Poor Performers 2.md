@@ -108,6 +108,8 @@ Outcome - Bingo! Datasets is solved. Added a short_svm configuration.
 
 Short configuration don't do validation (impacts the baseline too much) and do a hammer workflow (cos why not)
 
+.99 Target met
+
 ## PP2-credit-approval
 
 If pushed it will get a solution. But it seems to prefer linear solutions.
@@ -117,11 +119,49 @@ Action - Set credit-approval to use short linear
 
 Outcome - Target met in snapshot mode. But will use a standard hammer workflow.
 
+.973 Target met
+
+## PP2-credit-g
+
+Likes linear solutions. 1000 rows.
+
+Action - Try short_linear configuration
+
+.969 Target met
+
+## PP2-mfeat-factors
+
+Met target, but tuning failed. Reason seems to be that we had very few survivors. 
+
+.99 Target met
+
+## PP2-electricity
+
+Looks like it likes trees, but the existing methods didn't cut it.
+
+On openml it looks like a weighted ada boost thing won!
+However it looks like XGBoost does well. 
+
+Action - Lets add that to our ensemble hyper learner and see what happens.
+
+This will probably take a while.
+
+Outcome - Terminated for excessive runtime
+
+Action - Try just XGBoost
+Outcome - XGBoost is quick for an ensemble. Benchmark acheived
+
+## PP2-cylinder-bands
+
+On snapshot seems to vary a bit. Uses Naive-bayes, KNN.
+
+Action - Try SVM snapshot
+Outcome - Improved a bit. Looks like it might have been still tuning.
+
+Action - Try SVM standard.
+
 # Unvestigated
 
-credit-g                non linear, try ensemble  X
-mfeat-factors           try standard     X
-electricity             try ensemble     X
 eucalyptus              try ensemble     X
 vowel                   try standard     X
 monks-problems-1        try ensemble    X
@@ -133,7 +173,6 @@ first-order-theorem-proving       try ensemble  X
 one-hundred-plants-margin         unsure, try ensemble, non-linear? X
 one-hundred-plants-shape          unsure, try ensemble, non-linear? X
 GesturePhaseSegmentationProcessed   non-linear, try ensemble  X
-cylinder-bands          used naive bayes, try ensemble  X
 dresses-sales           try standard    X
 bank-marketing          non-linear? try standard  X
 one-hundred-plants-texture   unsure, try ensemble, non-linear?

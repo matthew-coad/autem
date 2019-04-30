@@ -30,7 +30,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Outline what information is going to be supplied by a simulation
         """
-        outline.append_attribute(self.name, DataType.Battle, [ Role.Parameter ], self.name)
+        outline.append_attribute(self.get_name(), DataType.Battle, [ Role.Parameter ], self.get_name())
         for component in self.components:
             if isinstance(component, Reporter):
                 component.outline_simulation(simulation, outline)
@@ -39,7 +39,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Record the state of a member
         """
-        setattr(record, self.name, self.get_active_component_name(member))
+        setattr(record, self.get_name(), self.get_active_component_name(member))
         component = self.get_active_component(member)
         if isinstance(component, Reporter):
             component.record_member(member, record)
@@ -50,24 +50,34 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Get all component names
         """
-        component_names = [ c.name for c in self.components ]
+        component_names = [ c.get_name() for c in self.components ]
+        return component_names
+
+    def get_active_component_names(self, member):
+        """
+        Get the names of components that are currently available for the given member
+        """
+        component_names = self.get_component_names()
+        override_component_names = member.get_component_override().get_component_choices(self.get_name())
+        if override_component_names:
+            component_names = list(set(component_names).intersection(override_component_names))
         return component_names
 
     def get_active_component_name(self, member):
         """
         Get the name of the component that is active for the member
         """
-        active_name = getattr(member.configuration, self.name)
+        active_name = getattr(member.configuration, self.get_name())
         return active_name
 
     def set_active_component_name(self, member, component_name):
         """
         Set the name of the component that is active for the member
         """
-        setattr(member.configuration, self.name, component_name)
+        setattr(member.configuration, self.get_name(), component_name)
 
     def get_component(self, component_name):
-        candidates = [c for c in self.components if c.name == component_name]
+        candidates = [c for c in self.components if c.get_name() == component_name]
         if len(candidates) != 1:
             raise RuntimeError("Cannot find component")
         return candidates[0]
@@ -82,11 +92,11 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         To start a member set a component as active and start it
         """
-        components = self.components
+        component_names = self.get_active_component_names(member)
         random_state = member.get_random_state()
-        component_index = random_state.randint(0, len(components))
-        component = components[component_index]
-        self.set_active_component_name(member, component.name)
+        component_name = component_names[random_state.randint(0, len(component_names))]
+        component = self.get_component(component_name)
+        self.set_active_component_name(member, component_name)
         component.initialize_member(member)
 
     def copy_member(self, member, prior):
@@ -122,8 +132,8 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         random_state = member.get_random_state()
         current_active_component_name = self.get_active_component_name(member)
-        components = self.components
-        if len(components) < 2:
+        component_names = self.get_active_component_names()
+        if len(component_names) < 2:
             return False
 
         attempts = 0
@@ -131,9 +141,9 @@ class Choice(HyperParameter, MemberManager, Reporter):
         mutated = False
         component_name = None
         while component_name is None:
-            component_index = random_state.randint(0, len(components))
-            if components[component_index].name != current_active_component_name:
-                component_name = components[component_index].name
+            component_index = random_state.randint(0, len(component_names))
+            if component_names[component_index] != current_active_component_name:
+                component_name = component_names[component_index]
             else:
                 # We expect things to mutate quickly
                 # But make sure we don't get stuck in an infinite loop

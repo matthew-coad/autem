@@ -4,21 +4,13 @@ from .reporters import DataType, Role, Reporter
 class Parameter(HyperParameter, Reporter):
 
     def __init__(self, name, label, type, shared = False):
-        self.name = name
+        HyperParameter.__init__(self, name)
         self.label = label
         self.type = type
-        self.group_name = None
-        self.choice_name = None
         self.shared = shared
 
         if not type in ["nominal", "numeric"]:
             raise RuntimeError("Type is not valid")
-
-    def set_group_name(self, group_name):
-        self.group_name = group_name
-
-    def set_choice_name(self, choice_name):
-        self.choice_name = choice_name
 
     def get_initial_value(self, member):
         raise NotImplementedError()
@@ -27,30 +19,30 @@ class Parameter(HyperParameter, Reporter):
         raise NotImplementedError()
 
     def get_configuration(self, member):
-        if not self.group_name:
+        if not self.get_group_name():
             raise RuntimeError("Group not selected")
-        return getattr(member.configuration, self.group_name)
+        return getattr(member.configuration, self.get_group_name())
 
     def has_configuration(self, member):
-        if not self.group_name:
+        if not self.get_group_name():
             raise RuntimeError("Group not selected")
-        return hasattr(member.configuration, self.group_name)
+        return hasattr(member.configuration, self.get_group_name())
 
     def get_value(self, member):
-        return getattr(self.get_configuration(member), self.name)
+        return getattr(self.get_configuration(member), self.get_name())
 
     def set_value(self, member, value):
-        return setattr(self.get_configuration(member), self.name, value)
+        return setattr(self.get_configuration(member), self.get_name(), value)
 
     def get_record_name(self):
         if not self.shared:
-            if not self.group_name:
+            if not self.get_group_name():
                 raise RuntimeError("Group not selected")
-            record_name = "%s_%s" % (self.group_name, self.name)
+            record_name = "%s_%s" % (self.get_group_name(), self.get_name())
         else:
-            if not self.choice_name:
+            if not self.get_choice_name():
                 raise RuntimeError("Choice not selected")
-            record_name = "%s_%s" % (self.choice_name, self.name)
+            record_name = "%s_%s" % (self.get_choice_name(), self.get_name())
         return record_name
 
     def outline_simulation(self, simulation, outline):

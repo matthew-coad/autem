@@ -1,13 +1,34 @@
 class HyperParameter:
 
     def __init__(self, name):
-        self.name = name
+        self._name = name
+        self._group_name = None
+        self._choice_name = None
 
-    def set_group_name(self, choice_name):
-        raise NotImplementedError()
+    # Properties
+
+    ## Name
+
+    def get_name(self):
+        return self._name
+
+    ## Group name
+
+    def get_group_name(self):
+        return self._group_name
+
+    def set_group_name(self, group_name):
+        self._group_name = group_name
+
+    ## Choice name
+
+    def get_choice_name(self):
+        return self._choice_name
 
     def set_choice_name(self, choice_name):
-        raise NotImplementedError()
+        self._choice_name = choice_name
+
+    # Workflow
 
     def initialize_member(self, member):
         """

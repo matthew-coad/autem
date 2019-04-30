@@ -41,7 +41,7 @@ def download_flows(flow_list, file_name):
       print('Failed to load : '+ str(flow_id))
  
 def list_parameters(flow, component):
-  return [ (flow.flow_id, component.name, k, v ) for k,v in component.parameters.items() ]
+  return [ (flow.flow_id, component.get_name(), k, v ) for k,v in component.parameters.items() ]
 
 def flatten_flow(parent):
   r = [parent]

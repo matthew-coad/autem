@@ -126,7 +126,7 @@ def run_simulation(simulation, steps, epochs, max_time = None):
     print("-----------------------------------------------------")
     start_time = time.time()
     today = datetime.datetime.now()
-    print("Running %s - Started %s" % (simulation.name, today.strftime("%x %X")))
+    print("Running %s - Started %s" % (simulation.get_name(), today.strftime("%x %X")))
     simulation.start()
 
     finished = False
@@ -137,7 +137,7 @@ def run_simulation(simulation, steps, epochs, max_time = None):
             simulation.finish()
         simulation.report()
     duration = time.time() - start_time
-    print("%s finished - Duration %s" % (simulation.name, duration))
+    print("%s finished - Duration %s" % (simulation.get_name(), duration))
 
 def run_benchmark_simulation(study, baseline_name):
     experiment = baseline_name

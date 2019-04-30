@@ -14,7 +14,8 @@ from .score_rater import ScoreRater
 
 from .cross_over_maker import CrossoverMaker
 from .top_choice_maker import TopChoiceMaker
-from .tune_maker import TuneMaker, TuneState, get_tune_state
+from .tune_maker import TuneMaker
+from .tune_state import TuneState
 
 import time
 
@@ -103,7 +104,7 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
         Value is the first component that returns a Non-Null value
         """
         epoch = specie.get_current_epoch()
-        is_tuning = epoch.is_tuning()
+        is_tuning = TuneState.get(epoch).get_tuning()
         duration = time.time() - specie.get_simulation().get_start_time()
         n_epochs = len(specie.list_epochs())
         max_epochs = self.get_max_epochs()
@@ -148,10 +149,11 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
     def configure_epoch(self, epoch):
         prior_epoch = epoch.get_prior_epoch()
         progressed, reason = self.has_epoch_progressed(prior_epoch) if prior_epoch else (None, None)
-        mode = "tune" if (prior_epoch and prior_epoch.is_tuning()) or progressed == False else "spotcheck"
 
+        prior_is_tuning = TuneState.get(prior_epoch).get_tuning() if prior_epoch else None
+        tuning = (prior_epoch and prior_is_tuning) or progressed == False
         epoch.set_max_rounds(self.get_max_rounds())
-        epoch.set_mode(mode)
+        TuneState.get(epoch).set_tuning(tuning)
 
     def is_epoch_finished(self, epoch):
         return (False, None)

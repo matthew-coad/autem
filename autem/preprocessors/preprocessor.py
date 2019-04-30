@@ -17,7 +17,7 @@ class Preprocesssor(Group):
         pre_processor_params = pre_processor.get_params().keys()
         params = {}
         if len(self.parameters) > 0:
-            pairs = [(p.name, p.get_value(member)) for p in self.parameters]
+            pairs = [(p.get_name(), p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
             pre_processor.set_params(**params)
 
@@ -28,7 +28,7 @@ class Preprocesssor(Group):
         """
         params = pre_processor.get_params()
         result = {}
-        parameter_names = [ p.name for p in self.parameters ]
+        parameter_names = [ p.get_name() for p in self.parameters ]
         for key in parameter_names:
             value = params[key]
             result[key] = value
@@ -46,7 +46,7 @@ class Preprocesssor(Group):
     def prepare_member(self, member):
         super().prepare_member(member)
 
-        processor_name = self.name
+        processor_name = self.get_name()
         preprocessor = self.make_preprocessor(member)
         if preprocessor is None:
             return None

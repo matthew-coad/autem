@@ -63,7 +63,7 @@ class ChoiceEvaluator(MemberManager, EpochManager, Reporter):
             "member_id": [ m.id for m in all_members ]
         }
         for choice in choices:
-            member_choices[choice.name] = get_choice_values(choice)
+            member_choices[choice.get_name()] = get_choice_values(choice)
         choice_df = pd.DataFrame(member_choices)
 
         # Build a frame containing fit score for each member
@@ -74,7 +74,7 @@ class ChoiceEvaluator(MemberManager, EpochManager, Reporter):
         member_score_df = pd.merge(choice_df, score_df, on='member_id', how='inner')
 
         # Determine max score per component group
-        choice_names = [ c.name for c in choices ]
+        choice_names = [ c.get_name() for c in choices ]
         member_score_df = member_score_df.groupby(choice_names, as_index=False).agg({"score": "max"})
         return member_score_df
 
@@ -87,7 +87,7 @@ class ChoiceEvaluator(MemberManager, EpochManager, Reporter):
 
         # Extract the choices as the response variables
         choices = [ c for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
-        choice_names = [ c.name for c in choices ]
+        choice_names = [ c.get_name() for c in choices ]
         x = df.loc[:, choice_names]
 
         # Extract the scores as the dependant variables
@@ -135,7 +135,7 @@ class ChoiceEvaluator(MemberManager, EpochManager, Reporter):
 
         # Build the choices into a dataframe
         choices = [ c for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
-        choice_values = dict([ (c.name, [c.get_active_component_name(member)]) for c in choices])
+        choice_values = dict([ (c.get_name(), [c.get_active_component_name(member)]) for c in choices])
         x = pd.DataFrame(choice_values)
 
         # And do the prediction

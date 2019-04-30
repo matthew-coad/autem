@@ -116,7 +116,6 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
         Value is the first component that returns a Non-Null value
         """
         epoch.set_max_rounds(self.get_max_rounds())
-        epoch.set_mode("spotcheck")
 
     def is_epoch_finished(self, epoch):
         return (False, None)

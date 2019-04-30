@@ -15,7 +15,13 @@ class Container:
         """
         Required override that fetches the root simulation
         """
-        pass
+        raise NotImplementedError()
+
+    def get_parent(self):
+        """
+        Required override that fetches the parent container
+        """
+        raise NotImplementedError()
 
     def list_components(self):
         return self.get_simulation().list_components()

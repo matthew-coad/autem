@@ -2,21 +2,10 @@ from ..epoch_manager import EpochManager
 from ..member_manager import MemberManager
 from ..choice import Choice
 
+from .tune_state import TuneState
+
 import pandas as pd
 import numpy as np
-
-class TuneState():
-
-    """
-    Tune state
-    """
-    def __init__(self):
-        self.choices = None
-        self.prototype = None
-        self.tuning = False
-
-def get_tune_state(container):
-    return container.get_state("tune", lambda: TuneState())
 
 class TuneMaker(EpochManager, MemberManager):
     """
@@ -25,7 +14,8 @@ class TuneMaker(EpochManager, MemberManager):
 
     def prepare_epoch(self, epoch):
 
-        if not epoch.is_tuning():
+        tuning_state = TuneState.get(epoch)
+        if not tuning_state.get_tuning():
             return None
 
         prior_epoch = epoch.get_prior_epoch()
@@ -37,10 +27,7 @@ class TuneMaker(EpochManager, MemberManager):
         for member in outside_members:
             member.kill("outside tune")
 
-        state = get_tune_state(epoch)
-        state.choices = choices
-        state.prototype = prototype_member
-        state.tuning = True
+        tuning_state.set_prototype(prototype_member)
 
     def configure_mutation(self, member, prototype):
         member.impersonate(prototype)
@@ -50,8 +37,8 @@ class TuneMaker(EpochManager, MemberManager):
     def configure_member(self, member):
         specie = member.get_specie() 
         epoch = specie.get_current_epoch() 
-        if not epoch.is_tuning():
+        tuning_state = TuneState.get(epoch)
+        if not tuning_state.get_tuning():
             return (None, None)
 
-        state = get_tune_state(epoch)
-        return self.configure_mutation(member, state.prototype)
+        return self.configure_mutation(member, tuning_state.get_prototype())

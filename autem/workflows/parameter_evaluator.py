@@ -68,7 +68,7 @@ class ParameterEvaluator(MemberManager, EpochManager, Reporter):
         return choice_components
 
     def get_parameter_components(self, specie, choices):
-        parameter_components = [ p for c in self.get_choice_components(specie) for p in c.get_component(choices[c.name]).parameters ]
+        parameter_components = [ p for c in self.get_choice_components(specie) for p in c.get_component(choices[c.get_name()]).parameters ]
         return parameter_components
 
     def build_member_score_df(self, specie, choices):
@@ -88,7 +88,7 @@ class ParameterEvaluator(MemberManager, EpochManager, Reporter):
         def choices_match(member):
             match = True
             for component in choice_components:
-                match = match and component.get_active_component_name(member) == choices[component.name]
+                match = match and component.get_active_component_name(member) == choices[component.get_name()]
             return match
         members = [ m for m in members if choices_match(m) ]
         if not members:
@@ -221,7 +221,7 @@ class ParameterEvaluator(MemberManager, EpochManager, Reporter):
 
         specie = member.get_specie()
         choice_components = self.get_choice_components(specie)
-        choices = dict([ (c.name, c.get_active_component_name(member)) for c in choice_components])
+        choices = dict([ (c.get_name(), c.get_active_component_name(member)) for c in choice_components])
 
         parameter_evaluation = self.build_predicted_score(member, choices)
         set_parameter_evaluation(member, parameter_evaluation)

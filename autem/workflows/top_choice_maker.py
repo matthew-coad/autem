@@ -3,6 +3,7 @@ from ..epoch_manager import EpochManager
 from ..member_manager import MemberManager
 from ..choice import Choice
 from .choice_evaluator import ChoiceState, get_choice_state
+from .tune_state import TuneState
 
 import pandas as pd
 import numpy as np
@@ -11,6 +12,8 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
     """
     Maker that prioritises the top choices using the choice model
     """
+
+    name = "TopChoiceMaker"
 
     def make_grid(self, specie):
         """
@@ -33,7 +36,7 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
         for component in specie.list_hyper_parameters():
             if isinstance(component, Choice):
                 choice_names = component.get_component_names()
-                grid = cross_values(grid, component.name, choice_names)
+                grid = cross_values(grid, component.get_name(), choice_names)
         return grid
 
     def evaluate_grid_predicted_scores(self, specie):
@@ -49,7 +52,7 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
             return None
 
         # Build the choices into a dataframe
-        choice_names = [ c.name for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
+        choice_names = [ c.get_name() for c in specie.list_hyper_parameters() if isinstance(c, Choice) ]
         x_values = {}
         for choice_name in choice_names:
             x_values[choice_name] = [ i[choice_name] for i in grid ]
@@ -66,6 +69,9 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
         specie.set_state("initialization_grid_pred", None)
 
     def prepare_epoch(self, epoch):
+        if TuneState.get(epoch).get_tuning():
+            return None
+
         self.evaluate_grid_predicted_scores(epoch.get_specie())
 
     def configure_grid_member(self, specie, member, grid_index):
@@ -77,10 +83,12 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
         if not grid_pred is None:
             del grid_pred[grid_index]
 
+        component_override = member.get_component_override()
         for component in specie.list_hyper_parameters():
             if isinstance(component, Choice):
+                override_choices = [ grid_item[component.get_name()] ]
+                component_override.set_component_choices(component.get_name(), override_choices)
                 component.initialize_member(member)
-                component.force_member(member, grid_item[component.name])
         return (True, None)
 
     def configure_top_member(self, specie, member):
@@ -98,10 +106,10 @@ class TopChoiceMaker(SpecieManager, EpochManager, MemberManager):
         return (True, None)
 
     def configure_member(self, member):
-        specie = member.get_specie()
-        if specie.get_current_epoch().is_tuning():
+        if TuneState.get(member.get_epoch()).get_tuning():
             return (None, None)
 
+        specie = member.get_specie()
         grid = specie.get_state("initialization_grid")
         grid_pred = specie.get_state("initialization_grid_pred")
 

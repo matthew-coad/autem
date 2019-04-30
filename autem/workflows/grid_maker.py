@@ -28,7 +28,7 @@ class GridMaker(Maker, SpecieManager, MemberManager):
         for component in simulation.hyper_parameters:
             if isinstance(component, Choice):
                 choice_names = component.get_component_names()
-                grid = cross_values(grid, component.name, choice_names)
+                grid = cross_values(grid, component.get_name(), choice_names)
         return grid
 
     def prepare_specie(self, specie):
@@ -44,9 +44,11 @@ class GridMaker(Maker, SpecieManager, MemberManager):
         grid_item = grid[grid_index]
         del grid[grid_index]
 
+        member_override = member.get_component_override()
         for component in simulation.hyper_parameters:
             if isinstance(component, Choice):
+                choices_override = [grid_item[component.get_name()]]
+                member_override.set_component_choices(component.get_name(), choices_override)
                 component.initialize_member(member)
-                component.force_member(member, grid_item[component.name])
         specialized, reason = member.specialize()
         return (specialized, reason)

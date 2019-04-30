@@ -1,6 +1,7 @@
 from .container import Container
 from .simulation_manager import SimulationManagerContainer
 from .reporters import ReporterContainer, DataType, Role, Outline, Record
+from .component_override import ComponentOverrideContainer
 from .specie import Specie
 from .form import Form
 from .ranking import Ranking
@@ -12,13 +13,14 @@ import datetime
 
 from types import SimpleNamespace
 
-class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
+class Simulation(Container, SimulationManagerContainer, ComponentOverrideContainer, ReporterContainer) :
 
     """Simulation state"""
     def __init__(self, name, components, identity = {}, n_jobs = -1, seed = 1234, memory = None):
 
         Container.__init__(self)
         SimulationManagerContainer.__init__(self)
+        ComponentOverrideContainer.__init__(self)
         ReporterContainer.__init__(self)
 
         self._name = name
@@ -53,6 +55,9 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
     def get_simulation(self):
         return self
+
+    def get_parent(self):
+        return None
 
     def get_random_state(self):
         return self._random_state
@@ -291,7 +296,6 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
             setattr(record, key, identity[key])
 
         record.species = specie_id
-        record.mode = epoch.get_mode() 
         record.epoch = epoch_id
         record.round = round
         record.step = step

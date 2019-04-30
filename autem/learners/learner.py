@@ -28,7 +28,7 @@ class Learner(Group):
         """
         params = pre_processor.get_params()
         result = {}
-        parameter_names = [ p.name for p in self.parameters ]
+        parameter_names = [ p.get_name() for p in self.parameters ]
         for key in params.keys():
             value = params[key]
             if key in parameter_names and not value is None:
@@ -46,15 +46,15 @@ class Learner(Group):
 
 
     def prepare_member(self, member):
-        learner_name = self.name
+        learner_name = self.get_name()
 
         # Initialize the model parameters
         model = self.make_model()
         model_params = model.get_params().keys()
-        learner_name = self.name
+        learner_name = self.get_name()
         params = {}
         if len(self.parameters) > 0:
-            pairs = [(p.name, p.get_value(member)) for p in self.parameters]
+            pairs = [(p.get_name(), p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
         if 'n_jobs' in model_params:
             params['n_jobs'] = member.get_simulation().get_n_jobs()
@@ -63,8 +63,8 @@ class Learner(Group):
         # Read the final model parameters 
         final_params = model.get_params()
         for parameter in self.parameters:
-            if parameter.name in final_params:
-                value = final_params[parameter.name]
+            if parameter.get_name() in final_params:
+                value = final_params[parameter.get_name()]
                 parameter.set_value(member, value)
 
         # Build the pipeline

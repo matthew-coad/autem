@@ -1,6 +1,7 @@
 from .container import Container
 from .member_manager import MemberManagerContainer
 from .hyper_parameter import HyperParameterContainer
+from .component_override import ComponentOverrideContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .workflows.score_evaluator import ScoreContainer
@@ -12,7 +13,8 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, MemberManagerContainer, HyperParameterContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, MemberManagerContainer, HyperParameterContainer, ComponentOverrideContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+    
     """
     Member of a population
     """
@@ -21,6 +23,10 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
         Container.__init__(self)
         MemberManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
+        ComponentOverrideContainer.__init__(self)
+        PreprocessorContainer.__init__(self)
+        LearnerContainer.__init__(self)
+        ScoreContainer.__init__(self)
 
         self._specie = specie
         self.id = specie.generate_id()
@@ -64,6 +70,12 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
     def get_simulation(self):
         return self.get_specie().get_simulation()
 
+    def get_epoch(self):
+        return self.get_specie().get_current_epoch()
+
+    def get_parent(self):
+        return self.get_epoch()
+
     # Configuration
 
     def get_form(self):
@@ -82,7 +94,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Preproc
         Member choices query
         """
         choice_components = [ c for c in self.list_hyper_parameters() if isinstance(c, Choice) ]
-        choices = dict([ (c.name, c.get_active_component_name(self)) for c in choice_components])
+        choices = dict([ (c.get_name(), c.get_active_component_name(self)) for c in choice_components])
         return choices
 
     # Workflow

@@ -20,12 +20,12 @@ class Group(HyperParameter, MemberManager, Reporter):
         raise RuntimeError("Cannot change name of a group")
 
     def set_choice_name(self, choice_name):
-        self.choice_name = choice_name
+        super().set_choice_name(choice_name)
         for parameter in self.parameters:
             parameter.set_choice_name(choice_name)
 
     def get_parameter(self, name):
-        params = [p for p in self.parameters if p.name == name ]
+        params = [p for p in self.parameters if p.get_name() == name ]
         if len(params) != 1:
             raise RuntimeError("Parameter not found")
         return params[0]
@@ -51,7 +51,7 @@ class Group(HyperParameter, MemberManager, Reporter):
         Initialize a member
         """
         if self.parameters:
-            setattr(member.configuration, self.name, SimpleNamespace())
+            setattr(member.configuration, self.get_name(), SimpleNamespace())
             for parameter in self.parameters:
                 parameter.initialize_member(member)
 
@@ -60,7 +60,7 @@ class Group(HyperParameter, MemberManager, Reporter):
         Copy the component configuration
         """
         if self.parameters:
-            setattr(member.configuration, self.name, SimpleNamespace())
+            setattr(member.configuration, self.get_name(), SimpleNamespace())
             for parameter in self.parameters:
                 parameter.copy_member(member, prior)
 
@@ -86,7 +86,7 @@ class Group(HyperParameter, MemberManager, Reporter):
     def crossover_member(self, member, parent0, parent1):
         if self.parameters:
             random_state = member.get_random_state()
-            setattr(member.configuration, self.name, SimpleNamespace())
+            setattr(member.configuration, self.get_name(), SimpleNamespace())
             for parameter in self.parameters:
                 parameter.crossover_member(member, parent0, parent1)
 

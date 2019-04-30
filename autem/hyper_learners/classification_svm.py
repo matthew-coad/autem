@@ -8,6 +8,7 @@ class ClassificationSVM(Hyperlearner):
 
     def list_components(self):
         components = [
+            
             # Scalers
             Choice("Scaler", [
                 preprocessors.RobustScaler(),

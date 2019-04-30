@@ -3,6 +3,8 @@ from .epoch_manager import EpochManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .ranking import Ranking
 
+from .component_override import ComponentOverrideContainer
+
 import time
 
 from types import SimpleNamespace
@@ -10,7 +12,7 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
+class Epoch(Container, EpochManagerContainer, HyperParameterContainer, ComponentOverrideContainer):
     """
     Epoch of a simulation
     """
@@ -19,12 +21,14 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         Container.__init__(self)
         EpochManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
+        ComponentOverrideContainer.__init__(self)
 
         # Parameters
         self._specie = specie
         self._simulation = specie.get_simulation()
         self.id = epoch_id
         self._epoch_n = epoch_n
+        self._name = str(epoch_id)
 
         # Configuration
         self._mode = None
@@ -52,28 +56,25 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
     def get_specie(self):
         return self._specie
 
+    def get_parent(self):
+        return self.get_specie()
+
     def get_epoch_n(self):
         return self._epoch_n
 
     # Configuration
+
+    def get_name(self):
+        return self._name
+
+    def set_name(self, name):
+        self._name = name
 
     def get_max_rounds(self):
         return self._max_rounds
 
     def set_max_rounds(self, max_rounds):
         self._max_rounds = max_rounds
-
-    def get_mode(self):
-        return self._mode
-
-    def set_mode(self, mode):
-        self._mode = mode
-
-    def is_spotchecking(self):
-        return self.get_mode() == "spotcheck"
-
-    def is_tuning(self):
-        return self.get_mode() == "tune"
 
     # State/Queries
 
@@ -190,8 +191,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         self._round += 1
 
         specie = self.get_specie()
-        mode = self.get_mode()
-        operation_name = "Evaluating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
+        operation_name = "Evaluating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())
         current_round = self.get_round()
         max_rounds = self.get_max_rounds()
         max_population = specie.get_max_population()
@@ -243,8 +243,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         inductees = self.list_members(alive = True, top = True)
         n_inductees = len(inductees)
         specie = self.get_specie()
-        mode = self.get_mode()
-        progress_prefix = "Rating %s specie %s mode %s epoch %s:" % (self.get_simulation().get_name(), specie.id, mode, self.id)
+        progress_prefix = "Rating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())
         print("")
         if n_inductees > 0:
             for index in range(n_inductees):

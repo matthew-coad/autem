@@ -1,6 +1,7 @@
 from .container import Container
 from .specie_manager import SpecieManagerContainer
 from .hyper_parameter import HyperParameterContainer
+from .component_override import ComponentOverrideContainer
 
 from .member import Member
 from .epoch import Epoch
@@ -14,7 +15,7 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
+class Specie(Container, SpecieManagerContainer, HyperParameterContainer, ComponentOverrideContainer):
 
     """
     Specie of a simulation
@@ -24,9 +25,11 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         Container.__init__(self)
         SpecieManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
+        ComponentOverrideContainer.__init__(self)
 
         self._simulation = simulation
         self.id = specie_id
+        self._name = str(specie_id)
         self._specie_n = specie_n
 
         self._max_league = None
@@ -55,10 +58,19 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
     def get_simulation(self):
         return self._simulation
 
+    def get_parent(self):
+        return self.get_simulation()
+
     def get_specie_n(self):
         return self._specie_n
 
     ## Configuration
+
+    def get_name(self):
+        return self._name
+
+    def set_name(self, name):
+        self._name = name
 
     def get_max_population(self):
         return self._max_population
@@ -161,13 +173,12 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
 
     ## Epochs
 
-    def list_epochs(self, alive = None, mode = None):
+    def list_epochs(self, alive = None):
         """
         List epochs
         """
         def include_epoch(epoch):
             alive_passed = alive is None or epoch.get_alive() == alive
-            mode_passed = mode is None or epoch.get_mode() == mode
             return alive_passed
 
         epochs = [ e for e in self._epochs.values() if include_epoch(e) ]
@@ -224,4 +235,3 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         member.bury()
         self._graveyard.append(member)
         self._members.remove(member)
-
