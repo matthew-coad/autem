@@ -7,7 +7,6 @@ from ..scorers import MemberScoreManager, MemberScoreState
 from .choice_evaluator import ChoiceEvaluator
 from .duration_evaluator import DurationEvaluator
 
-from .score_contest import ScoreContest
 from .diverse_contest import DiverseContest
 
 from .contest_judge import ContestJudge
@@ -55,11 +54,10 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
 
     def list_snapshot_extensions(self):
         extensions = [
-            ScoreEvaluator(),
+            MemberScoreManager(),
             ChoiceEvaluator(),
             DurationEvaluator(),
 
-            ScoreContest(),
             DiverseContest(1.0),
 
             TopChoiceMaker(),

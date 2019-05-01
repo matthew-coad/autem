@@ -3,6 +3,7 @@ from ..specie_manager import SpecieManager
 from ..reporters import Reporter
 
 from .member_score_state import MemberScoreState
+from .member_league_state import MemberLeagueState
 
 import numpy as np
 #from scipy import stats
@@ -166,6 +167,104 @@ class MemberScoreManager(MemberManager, SpecieManager, Reporter):
 
         if evaluated:
             self.evaluate_scores(member)
+
+    def contest_veterans(self, contestant1, contestant2):
+        """
+        Evaluate a contest between two veterans
+        """
+
+        contestant1_scores = MemberScoreState.get(contestant1)
+        contestant2_scores = MemberScoreState.get(contestant2)
+
+        # If scores are equal there is no outcome
+        if contestant1_scores.get_score() == contestant2_scores.get_score():
+            return
+        winner = contestant1 if contestant1_scores.get_score() > contestant2_scores.get_score() else contestant2
+        loser = contestant1 if contestant1_scores.get_score() < contestant2_scores.get_score() else contestant2
+        winner.victory()
+        loser.defeat()
+
+    def contest_peers(self, contestant1, contestant2):
+        """
+        Evaluate a contest between peers, IE are at the same league but not veterans or rookies
+        """
+
+        contestant1_scores = MemberScoreState.get(contestant1)
+        contestant2_scores = MemberScoreState.get(contestant2)
+
+        # If scores are equal there is no outcome
+        if contestant1_scores.get_score() == contestant2_scores.get_score():
+            return
+
+        pros = MemberLeagueState.get(contestant1).is_pro()
+        # If the score of one contestant is inside the 60% confidence interval of the other then their is no outcome
+        if pros and contestant1_scores.get_low_score() <= contestant2_scores.get_score() <= contestant1_scores.get_high_score():
+            return
+
+        # If the score of one contestant is inside the 95% confidence interval of the other then their is no outcome
+        if not pros and contestant1_scores.get_lower_score() <= contestant2_scores.get_score() <= contestant1_scores.get_upper_score():
+            return
+
+        # Their is clear seperation so we can determine an outcome
+        winner = contestant1 if contestant1_scores.get_score() > contestant2_scores.get_score() else contestant2
+        loser = contestant1 if contestant1_scores.get_score() < contestant2_scores.get_score() else contestant2
+        winner.victory()
+        loser.defeat()
+
+    def contest_mismatch(self, contestant1, contestant2):
+        """
+        Evaluate a mismatch, where the contestants are at different league levels
+        """
+
+        contestant1_leagues = MemberLeagueState.get(contestant1)
+        contestant2_leagues = MemberLeagueState.get(contestant2)
+
+        # Determine who is the senior and who is the junior
+        senior = contestant1 if contestant1_leagues.get_league() > contestant2_leagues.get_league() else contestant2
+        junior = contestant1 if contestant1_leagues.get_league() < contestant2_leagues.get_league() else contestant2
+        pros = MemberLeagueState.get(junior).is_pro()
+
+        # If scores are equal there is no outcome
+        senior_scores = MemberScoreState.get(senior)
+        junior_scores = MemberScoreState.get(junior)
+
+        # If they are pros and the score of the junior is inside the 60% confidence interval of the senior then their is no outcome
+        if pros and senior_scores.get_low_score() <= junior_scores.get_score() <= senior_scores.get_high_score():
+            return
+
+        # If they are not both pros and the score of the junior is inside the 95% confidence interval of the senior then their is no outcome
+        if not pros and senior_scores.get_lower_score() <= junior_scores.get_score() <= senior_scores.get_upper_score():
+            return
+
+        # Their is clear seperation so we can determine an outcome
+        winner = senior if senior_scores.get_score() > junior_scores.get_score() else junior
+        loser = senior if senior_scores.get_score() < junior_scores.get_score() else junior
+        winner.victory()
+        loser.defeat()        
+
+    def contest_members(self, contestant1, contestant2):
+
+        specie = contestant1.get_specie()
+
+        contestant1_leagues = MemberLeagueState.get(contestant1)
+        contestant2_leagues = MemberLeagueState.get(contestant2)
+
+        # If both members are rookies then the scores are too inaccurate to make a judgement
+        if contestant1_leagues.is_rookie() and contestant2_leagues.is_rookie():
+            return
+
+        # If both members are veterans then we can use the veteran test
+        if contestant1_leagues.is_veteran() and contestant2_leagues.is_veteran():
+            self.contest_veterans(contestant1, contestant2)
+            return
+
+        # If both members are on the same league then we can use the peers test
+        if contestant1_leagues.get_league() == contestant2_leagues.get_league():            
+            self.contest_peers(contestant1, contestant2)
+            return
+
+        # Otherwise make the mismatch test
+        self.contest_mismatch(contestant1, contestant2)
 
     def record_member(self, member, record):
         super().record_member(member, record)

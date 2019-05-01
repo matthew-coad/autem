@@ -6,7 +6,6 @@ from ..scorers import MemberScoreManager
 from .choice_evaluator import ChoiceEvaluator
 from .duration_evaluator import DurationEvaluator
 
-from .score_contest import ScoreContest
 from .diverse_contest import DiverseContest
 
 from .contest_judge import ContestJudge
@@ -52,7 +51,6 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
             ChoiceEvaluator(),
             DurationEvaluator(),
 
-            ScoreContest(),
             DiverseContest(1.0),
 
             TopChoiceMaker(),
