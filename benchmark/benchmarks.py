@@ -32,6 +32,8 @@ def get_version():
 def get_n_jobs():
     return 4
 
+# Baseline configurations
+
 def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
@@ -62,6 +64,23 @@ def make_hammer_simulation(name, identity, data_id, max_time, n_jobs, seed, path
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Mastery([ "Learner" ]),
+            validators.Holdout(0.2),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationBaseline(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+# Linear configurations
+
 def make_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
@@ -77,13 +96,13 @@ def make_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
-def make_short_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_linear_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(max_time=max_time, max_species=3),
+            workflows.Standard(max_time=max_time),
             baselines.BaselineStats(identity['dataset']),
             hyper_learners.ClassificationLinear(),
             reporters.Csv(path),
@@ -91,6 +110,22 @@ def make_short_linear_simulation(name, identity, data_id, max_time, n_jobs, seed
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_linear_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Mastery([ "Learner" ]),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationLinear(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+
+# Trees configurations
 
 def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
@@ -107,6 +142,37 @@ def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path,
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
+def make_trees_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(max_time=max_time),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationTrees(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+
+def make_trees_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Mastery([ "Learner" ]),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationTrees(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+# SVM configurations    
+
 def make_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
@@ -122,13 +188,27 @@ def make_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, m
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
     return simulation
 
-def make_short_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_svm_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(max_time=max_time, max_species=3),
+            workflows.Standard(max_time=max_time),
+            baselines.BaselineStats(identity['dataset']),
+            hyper_learners.ClassificationSVM(),
+            reporters.Csv(path),
+        ], 
+        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+    return simulation
+
+def make_svm_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Mastery([ "Learner" ]),
             baselines.BaselineStats(identity['dataset']),
             hyper_learners.ClassificationSVM(),
             reporters.Csv(path),
@@ -183,12 +263,21 @@ def make_xgb_simulation(name, identity, data_id, max_time, n_jobs, seed, path, m
 simulation_builders = {
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
+    'mastery': make_mastery_simulation,
+
     'linear': make_linear_simulation,
     'short_linear': make_short_linear_simulation,
+
     'trees': make_trees_simulation,
+    'trees_short': make_trees_short_simulation,
+    'trees_mastery': make_trees_mastery_simulation,
+
     'svm': make_svm_simulation,
-    'short_svm': make_short_svm_simulation,
-    'xgb': make_xgb_simulation
+    'svm_short': make_svm_short_simulation,
+    'svm_mastery': make_svm_mastery_simulation,
+
+    'xgb': make_xgb_simulation,
+
 }
 
 def run_benchmark_simulation(study, baseline_name):

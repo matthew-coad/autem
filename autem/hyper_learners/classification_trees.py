@@ -42,7 +42,6 @@ class ClassificationTrees(Hyperlearner):
                 learners.DecisionTreeClassifier(),
                 learners.RandomForestClassifier(),
                 learners.ExtraTreesClassifier(),
-                learners.GradientBoostingClassifier(),
                 learners.XGBClassifier(),
             ])
         ]

@@ -40,7 +40,7 @@ class MemberLeagueState:
         """
         Is the member a pro?
 
-        Pros are in the upper levels. Have reasonable accurate scores.
+        Pros are in the upper levels. Have reasonably accurate scores.
         """
         return self.get_league() >= 2
 

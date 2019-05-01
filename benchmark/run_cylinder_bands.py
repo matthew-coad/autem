@@ -86,9 +86,45 @@ def run_cylinder_bands_mastery():
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Snapshot(max_epochs=1),
-            # workflows.Standard(),
-            # workflows.Mastery([ "Learner" ]),
+            workflows.Mastery([ "Learner" ]),
+            baselines.BaselineStats(baseline_name),
+            hyper_learners.ClassificationSVM(),
+            reporters.Csv(path),
+        ], 
+        seed=seed, n_jobs=4, identity=identity)
+    simulation.run()
+
+def run_cylinder_bands_custom():
+    seed = 1
+    study = "DEV"
+    baseline_name = "cylinder-bands"
+    experiment = baseline_name
+    version = benchmark.get_version()
+    simulation_name = "%s_%s_v%d" % (study, experiment, version)
+
+    configuration = baselines.get_baseline_configuration(baseline_name)
+    path = benchmark.get_simulations_path().joinpath(study).joinpath(experiment)
+
+    utility.prepare_OpenML()
+    task_id = configuration["task_id"]
+    task = openml.tasks.get_task(task_id)
+    data_id = task.dataset_id
+    dataset = openml.datasets.get_dataset(data_id)
+    dataset_name = dataset.name
+
+    identity = {
+        'study': study,
+        'experiment': experiment,
+        'dataset': dataset_name,
+        'version': version
+    }    
+    
+    simulation = autem.Simulation(
+        simulation_name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(),
             baselines.BaselineStats(baseline_name),
 
             # Scalers
@@ -102,17 +138,17 @@ def run_cylinder_bands_mastery():
 
             # Feature Selectors
             autem.Choice("Selector", [
-                preprocessors.NoSelector(),
-                preprocessors.SelectPercentile(),
+                #preprocessors.NoSelector(),
+                #preprocessors.SelectPercentile(),
                 preprocessors.VarianceThreshold()
             ]),
 
             # Feature Reducers
             autem.Choice("Reducer", [
                 preprocessors.NoReducer(),
-                preprocessors.FastICA(),
-                preprocessors.FeatureAgglomeration(),
-                preprocessors.PCA(),
+                #preprocessors.FastICA(),
+                #preprocessors.FeatureAgglomeration(),
+                #preprocessors.PCA(),
             ]),
 
             # Approximators
@@ -121,9 +157,9 @@ def run_cylinder_bands_mastery():
             ]),
 
             autem.Choice("Learner", [
-                learners.LinearSVC(),
+                # learners.LinearSVC(),
                 learners.PolySVC(),
-                learners.RadialBasisSVC(),
+                # learners.RadialBasisSVC(),
             ]),
 
             reporters.Csv(path),
@@ -132,4 +168,4 @@ def run_cylinder_bands_mastery():
     simulation.run()
 
 if __name__ == '__main__':
-    run_cylinder_bands_mastery()
+    run_cylinder_bands_custom()
