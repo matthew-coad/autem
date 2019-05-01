@@ -4,7 +4,6 @@ from .hyper_parameter import HyperParameterContainer
 from .component_override import ComponentOverrideContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
-from .workflows.score_evaluator import ScoreContainer
 from .choice import Choice
 
 import time
@@ -13,7 +12,7 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, MemberManagerContainer, HyperParameterContainer, ComponentOverrideContainer, PreprocessorContainer, LearnerContainer, ScoreContainer) :
+class Member(Container, MemberManagerContainer, HyperParameterContainer, ComponentOverrideContainer, PreprocessorContainer, LearnerContainer) :
     
     """
     Member of a population
@@ -26,7 +25,6 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         ComponentOverrideContainer.__init__(self)
         PreprocessorContainer.__init__(self)
         LearnerContainer.__init__(self)
-        ScoreContainer.__init__(self)
 
         self._specie = specie
         self.id = specie.generate_id()

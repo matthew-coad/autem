@@ -86,9 +86,9 @@ def run_cylinder_bands_mastery():
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            # workflows.Snapshot(max_epochs=1),
+            workflows.Snapshot(max_epochs=1),
             # workflows.Standard(),
-            workflows.Mastery([ "Learner" ]),
+            # workflows.Mastery([ "Learner" ]),
             baselines.BaselineStats(baseline_name),
 
             # Scalers

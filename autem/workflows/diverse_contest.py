@@ -1,4 +1,5 @@
 from ..member_manager import MemberManager
+from ..scorers import MemberScoreState
 
 import numpy as np
 from scipy import stats
@@ -29,8 +30,8 @@ class DiverseContest(MemberManager):
         if max_league == 0:
             return None
 
-        contestant1_score_state = contestant1.get_score_state()
-        contestant2_score_state = contestant2.get_score_state()
+        contestant1_score_state = MemberScoreState.get(contestant1)
+        contestant2_score_state = MemberScoreState.get(contestant2)
         if not max_league in contestant1_score_state.league_predictions or not max_league in contestant2_score_state.league_predictions:
             return None
 

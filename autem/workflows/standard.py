@@ -2,7 +2,8 @@ from ..simulation_manager import SimulationManager
 from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
-from .score_evaluator import ScoreEvaluator
+from ..scorers import MemberScoreManager, MemberScoreState
+
 from .choice_evaluator import ChoiceEvaluator
 from .duration_evaluator import DurationEvaluator
 
@@ -137,8 +138,8 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
         if not top_member:
             return (None, "No top member")
 
-        prior_top_score_evaluation = prior_top_member.get_score_state()
-        top_score_evaluation = top_member.get_score_state()
+        prior_top_score_evaluation = MemberScoreState.get(prior_top_member)
+        top_score_evaluation = MemberScoreState.get(top_member)
 
         score_progressed = top_score_evaluation.score > prior_top_score_evaluation.score
         if score_progressed:

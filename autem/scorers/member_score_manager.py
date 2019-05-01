@@ -2,8 +2,10 @@ from ..member_manager import MemberManager
 from ..specie_manager import SpecieManager
 from ..reporters import Reporter
 
+from .member_score_state import MemberScoreState
+
 import numpy as np
-from scipy import stats
+#from scipy import stats
 
 from sklearn.model_selection import cross_val_score, train_test_split, cross_val_predict
 from sklearn.pipeline import Pipeline
@@ -12,40 +14,11 @@ from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold, Re
 import warnings
 import time
 
-class ScoreState:
+
+class MemberScoreManager(MemberManager, SpecieManager, Reporter):
 
     def __init__(self):
-        self.quick_score = None
-        self.quick_duration = None
-        self.quick_predictions = None
-
-        self.league_scores = {}
-        self.league_durations = {}
-        self.league_predictions = {}
-        self.league_predictions = {}
-
-        self.scores = []
-        self.score = None
-        self.score_std = None
-
-        self.score_durations = []
-        self.score_duration = None
-        self.score_duration_std = None
-
-class ScoreContainer:
-
-    def get_scores(self):
-        return self.get_state("scores", lambda: ScoreState())
-
-    def get_score_state(self):
-        return self.get_scores()
-
-class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
-    """
-    Component that evaluates scores for other components
-    """
-
-    def __init__(self):
+        MemberManager.__init__(self)
         self.n_splits = 5
 
     def evaluate_folds(self, specie):
@@ -116,7 +89,7 @@ class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
         quick_score = scores[0]
         quick_duration = durations[0]
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
 
         score_state.quick_score = quick_score
         score_state.quick_duration = quick_duration
@@ -140,7 +113,7 @@ class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
         if scores is None:
             return False
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
         score_state.league_scores[1] = [ score_state.quick_score ] + scores
         score_state.league_durations[1] = [ score_state.quick_duration ] + durations
         quick_predictions = score_state.quick_predictions
@@ -153,14 +126,14 @@ class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
         if scores is None:
             return False
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
         score_state.league_scores[league] = scores
         score_state.league_durations[league] = durations
         score_state.league_predictions[league] = predictions
         return True
 
     def evaluate_scores(self, member):
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
         scores = np.concatenate([ score_state.league_scores[l] for l in score_state.league_scores ])
         score_state.scores = scores.tolist()
         score_state.score = np.mean(scores)
@@ -177,7 +150,7 @@ class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
         if member.league == 0 and score_state.quick_score is None:
             self.evaluate_quick_score(member)
             return None
@@ -197,6 +170,6 @@ class ScoreEvaluator(MemberManager, SpecieManager, Reporter):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
         record.SE_score = score_state.score
         record.SE_score_std = score_state.score_std

@@ -1,4 +1,5 @@
 from ..member_manager import MemberManager
+from ..scorers import MemberScoreState
 
 import numpy as np
 from scipy import stats
@@ -17,6 +18,6 @@ class ScoreRater(MemberManager):
         Only famous members get a rating.
         """
 
-        score_state = member.get_score_state()
+        score_state = MemberScoreState.get(member)
 
         member.rated(score_state.score, score_state.score_std)
