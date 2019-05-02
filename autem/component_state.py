@@ -1,3 +1,5 @@
+from .choice import Choice
+
 class ComponentState:
 
     def __init__(self, container):
@@ -9,8 +11,19 @@ class ComponentState:
         """
         return self._container
 
-    def get_components(self):
+    def list(self):
         """
-        Get the components
+        List all available components
         """
-        return self.get_container().get_simulation()._components
+        return self.get_container().get_simulation()._components[:]
+
+    def list_choices(self):
+        """
+        List all available choices
+        """
+        components = self.get_container().get_simulation()._components
+        choices = [ c for c in components if isinstance(c, Choice) ]
+        return choices
+
+    def get(container):
+        return ComponentState(container)

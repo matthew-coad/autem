@@ -31,16 +31,36 @@ Settings should be set once during configuration and not really mutated after th
 Action - Add setting state class. **done**
 Action - Add set member that sets a value in the local setting, **done**
 Action - Add get member that retrieves a value with a default **done**
-Action - Add settings to containers **done**
 
 ### DM2-Introduce Component State
 
 Component state provides services for querying components, taking into account
-settings.
+settings. Components are a core concern so add to root folder.
 
 Action - Add component state class **done**
 Action - Add ability to get components **done**
-Action - Add state to containers. **done**
+
+### DM2-Introduce Decision Models
+
+Decision models will have a state and managers.
+
+Their may be multiple decision model managers, each running a different type of
+model. The initial implementation should port the existing ChoiceEvaluator.
+
+Decisions are closely related to makers. Could add to workflow.
+
+MLM calls it spotchecking. Selectors. Decisions.
+
+Their are multiple reasons for making members a certain way. Its a seperate concern.
+
+Name the overarching feature spotchecks
+
+Action - Introduce Decision Model Manager **done**
+Action - Introduce Decision Model State **done**
+Action - Introduce Gaussian process spotchecker
+Action - Test building using a snapshot **done**
+
+
 
 
 

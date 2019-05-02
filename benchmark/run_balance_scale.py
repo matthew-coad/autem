@@ -91,13 +91,4 @@ def run_balance_scale_baseline(seed):
     simulation.run()
 
 if __name__ == '__main__':
-    run_balance_scale(1)
-    run_balance_scale(2)
-    run_balance_scale(3)
-    run_balance_scale(4)
-    run_balance_scale(5)
     run_balance_scale_baseline(1)
-    run_balance_scale_baseline(2)
-    run_balance_scale_baseline(3)
-    run_balance_scale_baseline(4)
-    run_balance_scale_baseline(5)

@@ -3,6 +3,7 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
 from ..scorers import MemberScoreManager
+from .. import spotchecks
 from .choice_evaluator import ChoiceEvaluator
 from .duration_evaluator import DurationEvaluator
 
@@ -49,6 +50,7 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
         extensions = [
             MemberScoreManager(),
             ChoiceEvaluator(),
+            spotchecks.GP(),
             DurationEvaluator(),
 
             DiverseContest(1.0),

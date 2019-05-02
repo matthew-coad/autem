@@ -168,4 +168,4 @@ def run_cylinder_bands_custom():
     simulation.run()
 
 if __name__ == '__main__':
-    run_cylinder_bands_custom()
+    run_cylinder_bands_snapshot(1)
