@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from .setting_state import SettingState
+from .component_state import ComponentState
 
 class Container:
     """
@@ -8,7 +9,8 @@ class Container:
     """
 
     def __init__(self):
-        self._settings = SettingState(self)
+        self._setting_state = SettingState(self)
+        self._component_state = ComponentState(self)
         self._states = {}
 
     # Context
@@ -25,11 +27,19 @@ class Container:
         """
         raise NotImplementedError()
 
-    def get_settings(self):
+    # States
+
+    def settings(self):
         """
-        Get the containers settings
+        Get the containers settings state
         """
-        return self._settings
+        return self._setting_state
+
+    def components(self):
+        """
+        Get the containers components state
+        """
+        return self._component_state
 
     def list_components(self):
         return self.get_simulation().list_components()
