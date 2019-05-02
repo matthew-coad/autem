@@ -43,7 +43,7 @@ def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, pa
             workflows.Snapshot(max_time=max_time),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationSnapshot(),
+            hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
         ], 
         seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
@@ -266,7 +266,8 @@ simulation_builders = {
     'mastery': make_mastery_simulation,
 
     'linear': make_linear_simulation,
-    'short_linear': make_short_linear_simulation,
+    'linear_short': make_linear_short_simulation,
+    'linear_mastery': make_linear_mastery_simulation,
 
     'trees': make_trees_simulation,
     'trees_short': make_trees_short_simulation,
