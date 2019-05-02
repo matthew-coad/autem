@@ -57,13 +57,26 @@ Name the overarching feature spotchecks
 
 Action - Introduce Decision Model Manager **done**
 Action - Introduce Decision Model State **done**
-Action - Introduce Gaussian process spotchecker
+Action - Introduce Gaussian process spotchecker **done**
 Action - Test building using a snapshot **done**
 
 ### DM2-Introduce Decision Predictions
 
 Member Decision predictions is a state object that contains the decision predictions for a single member. Its primary use is for reporting and 
 assessment of a decision models quality.
+
+### DM2-Introduce Decision Grids
+
+The decision grid is a grid of all possible decisions. Its used to keep
+track of which decisions have been introduced to a species.
+
+Its used to make sure that all decisions are introduced in a timely manner and also to prioritize introduction for decisions with high likiehood of having a high score.
+
+Decision grids replace functionality in TopChoiceMaker etc.
+
+Action - Introduce Grid Manager **done**
+Action - Initialize grid on specie startup **done**
+
 
 
 

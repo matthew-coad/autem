@@ -50,7 +50,10 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
         extensions = [
             MemberScoreManager(),
             ChoiceEvaluator(),
-            spotchecks.GP(),
+
+            spotchecks.DecisionGridManager(),
+            spotchecks.GPDecisionModel(),
+
             DurationEvaluator(),
 
             DiverseContest(1.0),

@@ -9,7 +9,7 @@ import sklearn.gaussian_process.kernels as kernels
 from sklearn.preprocessing import OneHotEncoder
 
 
-class GP(DecisionModelManager):
+class GPDecisionModel(DecisionModelManager):
     """
     Spotchecker that uses gaussian processes model
     """
