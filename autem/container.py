@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from .setting_state import SettingState
 
 class Container:
     """
@@ -7,6 +8,7 @@ class Container:
     """
 
     def __init__(self):
+        self._settings = SettingState(self)
         self._states = {}
 
     # Context
@@ -22,6 +24,12 @@ class Container:
         Required override that fetches the parent container
         """
         raise NotImplementedError()
+
+    def get_settings(self):
+        """
+        Get the containers settings
+        """
+        return self._settings
 
     def list_components(self):
         return self.get_simulation().list_components()
@@ -49,3 +57,6 @@ class Container:
 
     def reset_state(self):
         self._states = {}
+
+    # Settings
+
