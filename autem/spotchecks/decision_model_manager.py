@@ -7,6 +7,7 @@ from ..scorers import MemberScoreState
 from ..component_state import ComponentState
 from .decision_model_state import DecisionModelState
 from .member_decision_state import MemberDecisionState
+from .decision_grid_state import DecisionGridState
 
 import numpy as np
 import pandas as pd
@@ -32,7 +33,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) if MemberLeagueState.get(m).is_pro() ]
         return members
 
-    def build_decision_df(self, specie, members):
+    def build_member_decision_df(self, specie, members):
         """
         Build a decision df for a list of members.
         """
@@ -49,13 +50,28 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         decision_df = pd.DataFrame(member_decisions)
         return decision_df
 
-    def build_decision_score_df(self, specie, members):
+    def build_decision_grid_df(self, specie, decision_grid):
+
+        choices = ComponentState.get(specie).list_choices()
+        x_values = {}
+        for choice in choices:
+            x_values[choice.get_name()] = [ i.get_decision()[choice.get_name()] for i in decision_grid ]
+        decision_grid_df = pd.DataFrame(data = x_values)
+        return decision_grid_df
+
+        # And do the prediction
+        pred_y = model.predict(x)
+
+        specie.set_state("initialization_grid_pred", pred_y.tolist())
+
+
+    def build_member_decision_score_df(self, specie, members):
         """
-        Build a dataframe of all decisions made during a simulation
+        Build a decision score df for a list of members
         """
 
         assert members
-        decision_df = self.build_decision_df(specie, members)
+        decision_df = self.build_member_decision_df(specie, members)
 
         # Build a frame containing fit score for each member
         scores = [(m.id, MemberScoreState.get(m).get_score()) for m in members ]
@@ -77,16 +93,32 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         raise NotImplementedError()
 
     def evaluate_model(self, specie):
-
         # Build the model
         simulation = specie.get_simulation()
         members = self.list_authorative_members(simulation)
         model = self.build_model(specie, members) if members else None
         DecisionModelState.get(specie).evaluated(model)
 
+    def evaluate_decision_priority(self, specie):
+        """
+        Evaluate the decision priorities for the decision grid
+        """
+        decision_model = DecisionModelState.get(specie).get_decision_model()
+        decision_grid = DecisionGridState.get(specie).get_decision_grid()
+
+        if decision_model is None or decision_grid is None or len(decision_grid) == 0:
+            return
+
+        decision_grid_df = self.build_decision_grid_df(specie, decision_grid)
+        pred_y = decision_model.predict(decision_grid_df).tolist()
+
+        for pred, decision in zip(pred_y, decision_grid):
+            decision.prioritise(pred)
+
     def prepare_epoch(self, epoch):
         specie = epoch.get_specie()
         self.evaluate_model(specie)
+        self.evaluate_decision_priority(specie)
 
         # Reset the expected score for all members
         for member in specie.list_members():
@@ -100,7 +132,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
             return None
 
         # Get the data
-        decision_df = self.build_decision_df(member.get_specie(), [ member ])
+        decision_df = self.build_member_decision_df(member.get_specie(), [ member ])
         x = decision_df.drop(columns="member_id")
 
         # And do the prediction

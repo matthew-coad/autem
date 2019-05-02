@@ -77,7 +77,9 @@ Decision grids replace functionality in TopChoiceMaker etc.
 Action - Introduce Grid Manager **done**
 Action - Initialize grid on specie startup **done**
 
+### DM2-Assign decision grid priority
 
+Use the decision model to initialize the decision grid priority
 
 
 

@@ -23,7 +23,7 @@ class GPDecisionModel(DecisionModelManager):
         """
 
         # Get the data
-        decisions_df = self.build_decision_score_df(specie, members)
+        decisions_df = self.build_member_decision_score_df(specie, members)
 
         # Extract the choices as the response variables
         choices = ComponentState.get(specie).list_choices()
