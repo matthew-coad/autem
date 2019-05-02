@@ -60,6 +60,11 @@ Action - Introduce Decision Model State **done**
 Action - Introduce Gaussian process spotchecker
 Action - Test building using a snapshot **done**
 
+### DM2-Introduce Decision Predictions
+
+Member Decision predictions is a state object that contains the decision predictions for a single member. Its primary use is for reporting and 
+assessment of a decision models quality.
+
 
 
 

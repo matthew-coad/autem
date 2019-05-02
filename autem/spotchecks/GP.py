@@ -17,15 +17,16 @@ class GP(DecisionModelManager):
     def __init__(self):
         DecisionModelManager.__init__(self)
 
-    def build_model(self, simulation, decisions_df):
+    def build_model(self, specie, members):
         """
         Build the model using GP
         """
 
         # Get the data
+        decisions_df = self.build_decision_score_df(specie, members)
 
         # Extract the choices as the response variables
-        choices = ComponentState.get(simulation).list_choices()
+        choices = ComponentState.get(specie).list_choices()
         choice_names = [ c.get_name() for c in choices ]
         x = decisions_df.loc[:, choice_names]
 
