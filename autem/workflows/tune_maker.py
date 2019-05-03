@@ -20,10 +20,10 @@ class TuneMaker(EpochManager, MemberManager):
 
         prior_epoch = epoch.get_prior_epoch()
         prototype_member = prior_epoch.get_ranking().get_top_member()
-        choices = prototype_member.get_choices()
+        decision = prototype_member.get_decision()
 
         # Kill all members who don't share the top members choices!
-        outside_members = [ m for m in epoch.list_members(alive = True) if m.get_choices() != choices ]
+        outside_members = [ m for m in epoch.list_members(alive = True) if m.get_decision() != decision ]
         for member in outside_members:
             member.kill("outside tune")
 

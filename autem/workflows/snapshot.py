@@ -51,6 +51,7 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
 
             spotchecks.RandomSpotcheck(),
             spotchecks.CrossoverSpotcheck(),
+            spotchecks.PrioritySpotcheck(),
             tuners.CrossoverTuner(),
 
             DurationEvaluator(),

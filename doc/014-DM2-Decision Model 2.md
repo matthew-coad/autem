@@ -101,7 +101,15 @@ randomly.
 Action - Introduce CrossOver Tuner. **done**
 Action - Test with snapshot **done**
 
+### DM2-Introduce Priority Spotchecker
 
+The priority spotcheck introduces members in order or their priority.
 
+Action - Introduce CrossOver Tuner. **done**
+Action - Test with snapshot **done**
 
+Outcome - Priority scores are identical. Needs evaluation.
+
+Action - Include all members with scores in decision model.
+Outcome - Seems better.
 

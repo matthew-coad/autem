@@ -9,6 +9,7 @@ class DecisionGridState:
     def __init__(self):
         self._decision_grid = None
         self._initialized = False
+        self._prioritised  = False
 
     def initialize(self, decision_grid):
         """
@@ -17,6 +18,7 @@ class DecisionGridState:
         self._decision_grid = decision_grid
         self._decision_dict = dict((d.get_decision(), d) for d in decision_grid)
         self._initialized = True
+        self._prioritised  = False
 
     def get_decision_grid(self):
         """
@@ -29,6 +31,22 @@ class DecisionGridState:
         Has the decision grid been initialized
         """
         return self._initialized
+
+    def get_prioritised(self):
+        """
+        Has the decision grid been prioritised
+        """
+        return self._prioritised
+
+    def prioritise_decision(self, decision, priority):
+        """
+        Track that a decision has been introduced to the simulation
+        """
+        self._decision_dict[decision].prioritise(priority)
+        self._prioritised = True
+
+    def get_decision_priority(self, decision):
+        return self._decision_dict[decision].get_priority()
 
     def introduce_decision(self, decision):
         """

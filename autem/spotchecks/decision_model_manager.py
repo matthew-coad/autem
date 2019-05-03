@@ -30,7 +30,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         """
         List members who are considered an "authority" on decision models
         """
-        members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) if MemberLeagueState.get(m).is_pro() ]
+        members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) if MemberScoreState.get(m).get_score() ]
         return members
 
     def build_member_decision_df(self, specie, members):
@@ -58,12 +58,6 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
             x_values[choice.get_name()] = [ i.get_decision()[index] for i in decision_grid ]
         decision_grid_df = pd.DataFrame(data = x_values)
         return decision_grid_df
-
-        # And do the prediction
-        #pred_y = model.predict(x)
-
-        #specie.set_state("initialization_grid_pred", pred_y.tolist())
-
 
     def build_member_decision_score_df(self, specie, members):
         """
@@ -104,7 +98,8 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         Evaluate the decision priorities for the decision grid
         """
         decision_model = DecisionModelState.get(specie).get_decision_model()
-        decision_grid = DecisionGridState.get(specie).get_decision_grid()
+        decision_grid_state = DecisionGridState.get(specie)
+        decision_grid = decision_grid_state.get_decision_grid()
 
         if decision_model is None or decision_grid is None or len(decision_grid) == 0:
             return
@@ -113,7 +108,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         pred_y = decision_model.predict(decision_grid_df).tolist()
 
         for pred, decision in zip(pred_y, decision_grid):
-            decision.prioritise(pred)
+            decision_grid_state.prioritise_decision(decision.get_decision(), pred)
 
     def prepare_epoch(self, epoch):
         specie = epoch.get_specie()
@@ -124,28 +119,18 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         for member in specie.list_members():
             MemberDecisionState.get(member).reset()
 
-    def build_decision_score(self, member):
-        # Get the model
-        specie = member.get_specie()
-        model = DecisionModelState.get(specie).get_decision_model()
-        if model is None:
-            return None
-
-        # Get the data
-        decision_df = self.build_member_decision_df(member.get_specie(), [ member ])
-        x = decision_df.drop(columns="member_id")
-
-        # And do the prediction
-        pred_y = model.predict(x)
-        return pred_y[0]
-
     def evaluate_member(self, member):
 
         member_decision = MemberDecisionState.get(member)
         if member_decision.get_evaluated():
             return
 
-        decision_score = self.build_decision_score(member)
+        decision_grid_state = DecisionGridState.get(member.get_specie())
+        if not decision_grid_state.get_prioritised():
+            member_decision.evaluated(None)
+            return
+
+        decision_score = decision_grid_state.get_decision_priority(member.get_decision())
         member_decision.evaluated(decision_score)
 
     def record_member(self, member, record):

@@ -89,14 +89,6 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
 
     # Decisions
 
-    def get_choices(self):
-        """
-        Member choices query
-        """
-        choice_components = [ c for c in self.list_hyper_parameters() if isinstance(c, Choice) ]
-        choices = dict([ (c.get_name(), c.get_active_component_name(self)) for c in choice_components])
-        return choices
-
     def get_decision(self):
         """
         Get the decision on the members choices
