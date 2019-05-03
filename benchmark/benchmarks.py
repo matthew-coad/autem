@@ -21,7 +21,7 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "PP2"
+    return "SN1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")

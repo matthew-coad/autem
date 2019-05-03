@@ -3,7 +3,6 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
 from .. import scorers
-from .. import spotchecks
 from .. import tuners
 
 from .duration_evaluator import DurationEvaluator
@@ -46,12 +45,10 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
         extensions = [
             scorers.MemberScoreManager(),
 
-            spotchecks.DecisionGridManager(),
-            spotchecks.GPDecisionModel(),
-
-            spotchecks.RandomSpotcheck(),
-            spotchecks.CrossoverSpotcheck(),
-            spotchecks.PrioritySpotcheck(),
+            tuners.DecisionGridManager(),
+            tuners.GPDecisionModel(),
+            tuners.PrioritySpotcheck(),
+            tuners.CrossoverSpotcheck(),
             tuners.CrossoverTuner(),
 
             DurationEvaluator(),
