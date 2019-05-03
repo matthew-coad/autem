@@ -83,11 +83,15 @@ Use the decision model to initialize the decision grid priority
 
 ### DM2-Introduce Random Spotchecker
 
-The random spotchecker introduces simply introduces members
+The random spotchecker simply introduces members
 from the decision grid randomly. Needed to get things started.
 
+### DM2-Introduce CrossOver  Spotchecker
 
+The crossover spotchecker introduces members by crossing over two existing members.
 
+Action - Introduce Cross over spotchecker. **done**
+Action - Test with snapshot **done**
 
 
 

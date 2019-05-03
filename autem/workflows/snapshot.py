@@ -52,8 +52,10 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
             ChoiceEvaluator(),
 
             spotchecks.DecisionGridManager(),
-            spotchecks.GPDecisionModel(),
             spotchecks.RandomSpotcheck(),
+            spotchecks.CrossoverSpotcheck(),
+
+            spotchecks.GPDecisionModel(),
 
             DurationEvaluator(),
 
