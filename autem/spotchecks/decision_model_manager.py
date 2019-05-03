@@ -54,15 +54,15 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
 
         choices = ComponentState.get(specie).list_choices()
         x_values = {}
-        for choice in choices:
-            x_values[choice.get_name()] = [ i.get_decision()[choice.get_name()] for i in decision_grid ]
+        for index, choice in enumerate(choices):
+            x_values[choice.get_name()] = [ i.get_decision()[index] for i in decision_grid ]
         decision_grid_df = pd.DataFrame(data = x_values)
         return decision_grid_df
 
         # And do the prediction
-        pred_y = model.predict(x)
+        #pred_y = model.predict(x)
 
-        specie.set_state("initialization_grid_pred", pred_y.tolist())
+        #specie.set_state("initialization_grid_pred", pred_y.tolist())
 
 
     def build_member_decision_score_df(self, specie, members):

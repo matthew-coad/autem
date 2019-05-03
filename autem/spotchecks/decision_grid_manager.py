@@ -23,23 +23,21 @@ class DecisionGridManager(SpecieManager, EpochManager, MemberManager):
         def cross_values(grid, name, values):
             output = []
             for base in grid:
-                base_decision = base.get_decision()
                 for value in values:
-                    decision = {}
-                    for key in base_decision:
-                        decision[key] = base_decision[key]
-                    decision[name] = value
-                    output.append(DecisionState(decision))
+                    decision = base[:]
+                    decision.append(value)
+                    output.append(decision)
             return output
 
-        grid = [ DecisionState({}) ]
+        grid = [ [] ]
         components = ComponentState.get(specie)
         choices = components.list_choices()
         for choice in choices:
             options = components.list_options(choice)
             option_values = [ o.get_name() for o in options ]
             grid = cross_values(grid, choice.get_name(), option_values)
-        return grid
+        decision_grid = [ DecisionState(tuple(d)) for d in grid ]
+        return decision_grid
 
     def prepare_specie(self, specie):
         grid = self.build_decision_grid(specie)

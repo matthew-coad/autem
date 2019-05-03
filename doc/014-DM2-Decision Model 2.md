@@ -81,6 +81,12 @@ Action - Initialize grid on specie startup **done**
 
 Use the decision model to initialize the decision grid priority
 
+### DM2-Introduce Random Spotchecker
+
+The random spotchecker introduces simply introduces members
+from the decision grid randomly. Needed to get things started.
+
+
 
 
 

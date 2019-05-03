@@ -116,7 +116,7 @@ read_battle_file <- function(file_name) {
     PSV_tol = col_double(),
     PSV_degree = col_double(),
     XGB_max_depth = col_double(),
-    
+    XGB_learning_rate = col_double(),
     irrelevants = col_double(),
     Imputer_importance = col_double(),
     Engineer_importance = col_double(),

@@ -6,6 +6,8 @@ from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .choice import Choice
 
+from .component_state import ComponentState
+
 import time
 
 from types import SimpleNamespace
@@ -85,7 +87,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
     def get_incarnation_epoch_id(self):
         return self._incarnation_epoch_id
 
-    # State/Queries
+    # Decisions
 
     def get_choices(self):
         """
@@ -94,6 +96,23 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         choice_components = [ c for c in self.list_hyper_parameters() if isinstance(c, Choice) ]
         choices = dict([ (c.get_name(), c.get_active_component_name(self)) for c in choice_components])
         return choices
+
+    def get_decision(self):
+        """
+        Get the decision on the members choices
+        """
+        choices = ComponentState.get(self).list_choices()
+        decision = tuple(c.get_active_component_name(self) for c in choices)
+        return decision
+
+    def set_decision(self, decision):
+        """
+        Set the decision on the members choices
+        """
+        choices = ComponentState.get(self).list_choices()
+        for i, choice in enumerate(choices):
+            choice.initialize_member(self)
+            choice.force_member(self, decision[i])
 
     # Workflow
 
