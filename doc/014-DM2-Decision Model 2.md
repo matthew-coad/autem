@@ -93,5 +93,15 @@ The crossover spotchecker introduces members by crossing over two existing membe
 Action - Introduce Cross over spotchecker. **done**
 Action - Test with snapshot **done**
 
+### DM2-Introduce CrossOver Tuner
+
+The cross over tuner tunes members by crossing them over
+randomly.
+
+Action - Introduce CrossOver Tuner. **done**
+Action - Test with snapshot **done**
+
+
+
 
 

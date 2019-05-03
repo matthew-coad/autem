@@ -36,6 +36,9 @@ class DecisionGridState:
         """
         self._decision_dict[decision].introduce()
 
+    def get_decision_introductions(self, decision):
+        return self._decision_dict[decision].get_introductions()
+
     def list_outstanding_decisions(self, max_introductions = 0):
         """
         List decisions that have yet to be introduced

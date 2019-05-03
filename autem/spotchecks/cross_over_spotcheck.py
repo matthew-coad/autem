@@ -16,10 +16,17 @@ class CrossoverSpotcheck(MemberManager):
             return (None, None)
         parent_indexes = specie.get_random_state().choice(len(candidates), 2, replace = False)
         parent1 = candidates[parent_indexes[0]]
+        parent1_decision = parent1.get_decision()
         parent2 = candidates[parent_indexes[1]]
+        parent2_decision = parent2.get_decision()
         parent_decisions = list(zip(parent1.get_decision(), parent2.get_decision()))
         indices = member.get_random_state().choice(2, len(parent_decisions), replace = True)
         decision = tuple(parent_decisions[i][indices[i]] for i in range(len(parent_decisions)))
+        introductions = DecisionGridState.get(specie).get_decision_introductions(decision)
+
+        if introductions > 0:
+            return (None, None)
+
         member.set_decision(decision)
         DecisionGridState.get(specie).introduce_decision(decision)
         specialized, reason = member.specialize()

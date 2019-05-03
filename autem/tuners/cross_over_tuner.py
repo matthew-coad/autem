@@ -1,19 +1,21 @@
 from ..member_manager import MemberManager
 from ..choice import Choice
+from ..scorers import MemberLeagueState
 
-class CrossoverMaker(MemberManager):
+class CrossoverTuner(MemberManager):
     """
     Makes new members by a cross over operation
     """
 
     def configure_member(self, member):
+
         specie = member.get_specie()
-        candidates = specie.list_members(alive = True, top = True)
-        if len(candidates) < 2:
-            candidates = specie.list_members(alive = True)
+        members = specie.list_members(alive = True)
+        candidates = [ m for m in members if MemberLeagueState.get(m).is_pro() ]
         if len(candidates) < 2:
             return (None, None)
-        parent_indexes = specie.get_random_state().choice(len(candidates), 2, replace = False)
+
+        parent_indexes = member.get_random_state().choice(len(candidates), 2, replace = False)
         parent1 = candidates[parent_indexes[0]]
         parent2 = candidates[parent_indexes[1]]
         for component in specie.list_hyper_parameters():

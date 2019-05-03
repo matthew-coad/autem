@@ -2,18 +2,14 @@ from ..simulation_manager import SimulationManager
 from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 
-from ..scorers import MemberScoreManager
+from .. import scorers
 from .. import spotchecks
-from .choice_evaluator import ChoiceEvaluator
+from .. import tuners
+
 from .duration_evaluator import DurationEvaluator
-
 from .diverse_contest import DiverseContest
-
 from .contest_judge import ContestJudge
 from .score_rater import ScoreRater
-
-from .cross_over_maker import CrossoverMaker
-from .top_choice_maker import TopChoiceMaker
 
 import time
 
@@ -48,24 +44,18 @@ class Snapshot(SimulationManager, SpecieManager, EpochManager):
 
     def list_snapshot_extensions(self):
         extensions = [
-            MemberScoreManager(),
-            ChoiceEvaluator(),
+            scorers.MemberScoreManager(),
 
             spotchecks.DecisionGridManager(),
-            spotchecks.RandomSpotcheck(),
-            spotchecks.CrossoverSpotcheck(),
-
             spotchecks.GPDecisionModel(),
 
+            spotchecks.RandomSpotcheck(),
+            spotchecks.CrossoverSpotcheck(),
+            tuners.CrossoverTuner(),
+
             DurationEvaluator(),
-
             DiverseContest(1.0),
-
-            # TopChoiceMaker(),
-            # CrossoverMaker(),
-
             ContestJudge(),
-           
             ScoreRater(),
         ]
         return extensions
