@@ -1,4 +1,5 @@
 from ..member import Member
+from ..simulation_settings import SimulationSettings
 
 class MemberLeagueState:
 
@@ -46,4 +47,4 @@ class MemberLeagueState:
 
     def get(member):
         assert isinstance(member, Member)
-        return MemberLeagueState(member.league, member.get_specie().get_max_league())
+        return MemberLeagueState(member.league, SimulationSettings(member).get_max_league())

@@ -1,6 +1,7 @@
 from ..parameter import Parameter
 from ..group import Group
 from ..reporters import DataType, Role
+from ..simulation_settings import SimulationSettings
 
 from types import SimpleNamespace
 
@@ -52,12 +53,14 @@ class Learner(Group):
         model = self.make_model()
         model_params = model.get_params().keys()
         learner_name = self.get_name()
+        settings = SimulationSettings(member)
+
         params = {}
         if len(self.parameters) > 0:
             pairs = [(p.get_name(), p.get_value(member)) for p in self.parameters]
             params = dict(p for p in pairs if not p[1] is None)
         if 'n_jobs' in model_params:
-            params['n_jobs'] = member.get_simulation().get_n_jobs()
+            params['n_jobs'] = settings.get_n_jobs()
         model.set_params(**params)
 
         # Read the final model parameters 
@@ -70,7 +73,7 @@ class Learner(Group):
         # Build the pipeline
         steps = member.get_steps()
         steps.append((learner_name, model))
-        memory = member.get_simulation().get_memory()
+        memory = settings.get_memory()
         pipeline = Pipeline(steps=steps, memory=memory)
         member.set_state("pipeline", pipeline)
 

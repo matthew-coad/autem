@@ -4,6 +4,7 @@ from .warning_interceptor import WarningInterceptor
 from .container import Container
 
 from .simulation import Simulation 
+from .simulation_settings import SimulationSettings
 from .member import Member
 from .epoch import Epoch
 from .specie import Specie

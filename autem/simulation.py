@@ -2,6 +2,7 @@ from .container import Container
 from .simulation_manager import SimulationManagerContainer
 from .reporters import ReporterContainer, DataType, Role, Outline, Record
 from .component_override import ComponentOverrideContainer
+from .simulation_settings import SimulationSettings
 from .specie import Specie
 from .form import Form
 from .ranking import Ranking
@@ -16,7 +17,7 @@ from types import SimpleNamespace
 class Simulation(Container, SimulationManagerContainer, ComponentOverrideContainer, ReporterContainer) :
 
     """Simulation state"""
-    def __init__(self, name, components, identity = {}, n_jobs = -1, seed = 1234, memory = None):
+    def __init__(self, name, seed, components):
 
         Container.__init__(self)
         SimulationManagerContainer.__init__(self)
@@ -25,12 +26,9 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
 
         self._name = name
         self._components = components
-        self._identity = identity
-        self._n_jobs = n_jobs
         self._seed = seed
-        self._memory = memory
-
         self._random_state = numpy.random.RandomState(seed)
+
         self._next_id = 1
 
         self._start_time = None
@@ -62,17 +60,8 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
     def get_random_state(self):
         return self._random_state
 
-    def get_n_jobs(self):
-        return self._n_jobs
-
     def get_seed(self):
         return self._seed
-
-    def get_memory(self):
-        return self._memory
-
-    def get_identity(self):
-        return self._identity
 
     def get_start_time(self):
         return self._start_time
@@ -150,7 +139,8 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
         """
         outline = Outline()
         outline.append_attribute("simulation", DataType.Battle, [Role.Configuration])
-        for property_key in self.get_identity().keys():
+        settings = SimulationSettings(self)
+        for property_key in settings.get_identity().keys():
             outline.append_attribute(property_key, DataType.Battle, [Role.Configuration])
         outline.append_attribute("species", DataType.Battle, [Role.ID])
         outline.append_attribute("epoch", DataType.Battle, [Role.ID])
@@ -284,6 +274,7 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
         specie_id = specie.id
         epoch_id = epoch.id
         round = epoch.get_round()
+        settings = SimulationSettings(self)
 
         prior_specie_rounds = sum(e.get_round() for s in self.list_species(alive = False) for e in s.list_epochs())
         prior_epoch_rounds = sum(e.get_round() for e in specie.list_epochs(alive = False) )
@@ -291,7 +282,7 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
 
         record = Record()
         record.simulation = self.get_name()
-        identity = self.get_identity()
+        identity = settings.get_identity()
         for key in identity.keys():
             setattr(record, key, identity[key])
 

@@ -4,6 +4,8 @@ from .hyper_parameter import HyperParameterContainer
 from .ranking import Ranking
 
 from .component_override import ComponentOverrideContainer
+from .scorers import MemberLeagueState
+from .simulation_settings import SimulationSettings
 
 import time
 
@@ -29,10 +31,6 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
         self.id = epoch_id
         self._epoch_n = epoch_n
         self._name = str(epoch_id)
-
-        # Configuration
-        self._mode = None
-        self._max_rounds = None
 
         # Initial State
 
@@ -62,21 +60,13 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
     def get_epoch_n(self):
         return self._epoch_n
 
-    # Configuration
-
     def get_name(self):
         return self._name
 
     def set_name(self, name):
         self._name = name
 
-    def get_max_rounds(self):
-        return self._max_rounds
-
-    def set_max_rounds(self, max_rounds):
-        self._max_rounds = max_rounds
-
-    # State/Queries
+    # State
 
     def get_alive(self):
         return self._alive
@@ -91,6 +81,9 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
         prior_epoch = self.get_specie().get_epoch(prior_epoch_id)
         return prior_epoch
 
+    def get_round(self):
+        return self._round
+
     # Workflow
 
     def should_finish(self):
@@ -100,7 +93,8 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
         finish = None
         reason = None
 
-        if self.get_round() >= self.get_max_rounds():
+        settings = SimulationSettings(self)
+        if self.get_round() >= settings.get_max_rounds():
             return (True, "Max rounds")
 
         managers = self.list_epoch_managers()
@@ -180,9 +174,6 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
 
     ## Round
 
-    def get_round(self):
-        return self._round
-
     def run_round(self):
         """
         Run a round of the simulation
@@ -193,9 +184,10 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
         specie = self.get_specie()
         operation_name = "Evaluating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())
         current_round = self.get_round()
-        max_rounds = self.get_max_rounds()
-        max_population = specie.get_max_population()
-        max_league = specie.get_max_league()
+        settings = SimulationSettings(self)
+        max_rounds = settings.get_max_rounds()
+        max_population = settings.get_max_population()
+        max_league = settings.get_max_league()
 
         # Prepare for the next round
         members = self.list_members(alive = True)
@@ -233,14 +225,14 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
 
     # Members
 
-    def list_members(self, alive = None, top = None):
-        return self.get_specie().list_members(alive = alive, top = top)
+    def list_members(self, alive = None):
+        return self.get_specie().list_members(alive = alive)
 
     def rank_members(self):
         """
         Rank all members
         """
-        inductees = self.list_members(alive = True, top = True)
+        inductees = [ m for m in self.list_members(alive = True) if MemberLeagueState.get(m).is_veteran() ]
         n_inductees = len(inductees)
         specie = self.get_specie()
         progress_prefix = "Rating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())

@@ -77,17 +77,18 @@ def run_balance_scale_baseline(seed):
         'version': version
     }    
     
-    simulation = autem.Simulation(
-        simulation_name,
+    simulation = autem.Simulation(simulation_name, seed,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Snapshot(),
+            workflows.SnapshotWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
-        ], 
-        seed=seed, n_jobs=4, identity=identity)
+        ])
+    settings = autem.SimulationSettings(simulation)
+    settings.set_identity(identity)
+    settings.set_n_jobs(4)
     simulation.run()
 
 if __name__ == '__main__':

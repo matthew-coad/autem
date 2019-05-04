@@ -7,6 +7,7 @@ from .learners import LearnerContainer
 from .choice import Choice
 
 from .component_state import ComponentState
+from .simulation_settings import SimulationSettings
 
 import time
 
@@ -192,7 +193,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         """
         attempts = 0
         max_attempts = 100
-        max_reincarnations = self.get_specie().get_max_reincarnations()
+        max_reincarnations = SimulationSettings(self).get_max_reincarnations()
 
         transmutations = 0
         specialized, reason = (False, None)

@@ -4,6 +4,7 @@ from ..reporters import Reporter
 
 from .member_score_state import MemberScoreState
 from .member_league_state import MemberLeagueState
+from ..simulation_settings import SimulationSettings
 
 import numpy as np
 #from scipy import stats
@@ -26,7 +27,7 @@ class MemberScoreManager(MemberManager, SpecieManager, Reporter):
         """
         Evaluate folds for the specie
         """
-        max_league = specie.get_max_league()
+        max_league = SimulationSettings(specie).get_max_league()
         random_state = specie.get_random_state()
 
         data = specie.get_simulation().get_training_data()

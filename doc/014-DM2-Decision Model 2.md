@@ -40,6 +40,8 @@ settings. Components are a core concern so add to root folder.
 Action - Add component state class **done**
 Action - Add ability to get components **done**
 
+## Decision Models
+
 ### DM2-Introduce Decision Models
 
 Decision models will have a state and managers.
@@ -65,6 +67,8 @@ Action - Test building using a snapshot **done**
 Member Decision predictions is a state object that contains the decision predictions for a single member. Its primary use is for reporting and 
 assessment of a decision models quality.
 
+## Decision Grids
+
 ### DM2-Introduce Decision Grids
 
 The decision grid is a grid of all possible decisions. Its used to keep
@@ -80,6 +84,8 @@ Action - Initialize grid on specie startup **done**
 ### DM2-Assign decision grid priority
 
 Use the decision model to initialize the decision grid priority
+
+## Tuners
 
 ### DM2-Introduce Random Spotchecker
 
@@ -113,3 +119,7 @@ Outcome - Priority scores are identical. Needs evaluation.
 Action - Include all members with scores in decision model.
 Outcome - Seems better.
 
+### DM2-Move spotchecks into tuners
+
+Spotchecks are a type of tuning. We'll move it all into
+tuning but still know as spotchecks

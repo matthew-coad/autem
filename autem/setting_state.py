@@ -1,16 +1,15 @@
 class SettingState:
 
     def __init__(self, container):
-        assert isinstance(container, Container)
         self._container = container
 
-    def set_value(key, value):
+    def set_value(self, key, value):
         """
         Assign a settings value
         """
         self._container._setting_data[key] = value
 
-    def get_value(key, default = lambda: None):
+    def get_value(self, key, default = lambda: None):
         setting_data = self._container._setting_data
         if key in setting_data:
             return setting_data[key]

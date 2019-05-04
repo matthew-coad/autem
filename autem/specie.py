@@ -2,6 +2,7 @@ from .container import Container
 from .specie_manager import SpecieManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .component_override import ComponentOverrideContainer
+from .simulation_settings import SimulationSettings
 
 from .member import Member
 from .epoch import Epoch
@@ -32,8 +33,6 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer, Compone
         self._name = str(specie_id)
         self._specie_n = specie_n
 
-        self._max_league = None
-
         self._event = None
         self._event_reason = None
 
@@ -48,10 +47,6 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer, Compone
         self._members = []
         self._graveyard = []
         self._forms = {}
-
-        self._max_reincarnations = None
-        self._max_population = None
-        self._max_league = None
 
     ## Parameters
 
@@ -71,24 +66,6 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer, Compone
 
     def set_name(self, name):
         self._name = name
-
-    def get_max_population(self):
-        return self._max_population
-
-    def set_max_population(self, max_population):
-        self._max_population = max_population
-
-    def get_max_reincarnations(self):
-        return self._max_reincarnations
-
-    def set_max_reincarnations(self, max_reincarnations):
-        self._max_reincarnations = max_reincarnations
-
-    def get_max_league(self):
-        return self._max_league
-
-    def set_max_league(self, max_league):
-        self._max_league = max_league
 
     ## State
 
@@ -200,16 +177,14 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer, Compone
 
     ## Members
 
-    def list_members(self, alive = None, top = None, buried = False):
+    def list_members(self, alive = None, buried = False):
         """
         List members
         """
         def include_member(member, is_buried):
             alive_passed = alive is None or member.alive == alive
-            is_top = member.league == self.get_max_league()
-            top_passed = top is None or is_top == top
             buried_passed = buried is None or buried == is_buried
-            return alive_passed and top_passed and buried_passed
+            return alive_passed and buried_passed
 
         members = [ m for m in self._members if include_member(m, False) ]
         if buried is None or buried:
