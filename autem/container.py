@@ -1,5 +1,4 @@
 from types import SimpleNamespace
-from .setting_state import SettingState
 from .component_state import ComponentState
 
 class Container:
@@ -9,7 +8,6 @@ class Container:
     """
 
     def __init__(self):
-        self._setting_data = {}
         self._states = {}
 
     # Context

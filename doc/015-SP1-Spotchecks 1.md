@@ -31,7 +31,8 @@ Also decision scores should match the scores.
 
 Move settings to new hierachical system
 
-## SP1-Seperate learner from configuration in benchmarks
+## Sp1 - Run study
 
-Have learner config seperate
+Run study.
+Outcome - successul.
 

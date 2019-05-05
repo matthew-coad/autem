@@ -9,8 +9,6 @@ from .duration_evaluator import DurationEvaluator
 from .diverse_contest import DiverseContest
 from .contest_judge import ContestJudge
 from .score_rater import ScoreRater
-from .tune_maker import TuneMaker
-from .tune_state import TuneState
 
 import time
 
