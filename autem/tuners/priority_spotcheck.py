@@ -1,6 +1,7 @@
 from ..member_manager import MemberManager
 from .decision_grid_state import DecisionGridState
 from ..simulation_settings import SimulationSettings
+from .tune_settings import TuneSettings
 
 class PrioritySpotcheck(MemberManager):
     """
@@ -27,6 +28,11 @@ class PrioritySpotcheck(MemberManager):
         return (specialized, reason)
 
     def configure_member(self, member):
+
+        tuning = TuneSettings(member).get_tuning()
+        if tuning is not None and tuning:
+            return (None, None)
+
         specie = member.get_specie()
         decision_grid_state = DecisionGridState.get(specie)
         if not decision_grid_state.get_prioritised():

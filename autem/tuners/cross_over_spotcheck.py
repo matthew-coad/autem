@@ -2,6 +2,9 @@ from ..member_manager import MemberManager
 from ..choice import Choice
 from ..scorers import MemberLeagueState
 from .decision_grid_state import DecisionGridState
+from ..simulation_settings import SimulationSettings
+
+from .tune_settings import TuneSettings
 
 class CrossoverSpotcheck(MemberManager):
     """
@@ -9,6 +12,11 @@ class CrossoverSpotcheck(MemberManager):
     """
 
     def configure_member(self, member):
+
+        tuning = TuneSettings(member).get_tuning()
+        if tuning is not None and tuning:
+            return (None, None)
+
         settings = SimulationSettings(member)
         specie = member.get_specie()
         members = specie.list_members(alive = True)

@@ -28,7 +28,10 @@ class SimulationSettings(Settings):
         return self.set_value("seed", seed)
 
     def get_random_state(self):
-        return self.get_value("random_state", lambda: np.random.RandomState(self.get_seed()))
+        return self.get_value("random_state", lambda: None)
+
+    def set_random_state(self, random_state):
+        self.set_value("random_state", random_state)
 
     def set_seed(self, seed):
         return self.set_value("seed", seed)
@@ -68,6 +71,12 @@ class SimulationSettings(Settings):
 
     def set_max_epochs(self, max_epochs):
         return self.set_value("max_epochs", max_epochs)
+
+    def get_max_species(self):
+        return self.get_value("max_species", lambda: 1)
+
+    def set_max_species(self, max_species):
+        return self.set_value("max_species", max_species)
 
     def get_max_league(self):
         # Not really changeable anymore, so read-only

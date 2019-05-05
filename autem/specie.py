@@ -1,7 +1,6 @@
 from .container import Container
 from .specie_manager import SpecieManagerContainer
 from .hyper_parameter import HyperParameterContainer
-from .component_override import ComponentOverrideContainer
 from .simulation_settings import SimulationSettings
 
 from .member import Member
@@ -16,7 +15,7 @@ import datetime
 
 from types import SimpleNamespace
 
-class Specie(Container, SpecieManagerContainer, HyperParameterContainer, ComponentOverrideContainer):
+class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
 
     """
     Specie of a simulation
@@ -26,7 +25,6 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer, Compone
         Container.__init__(self)
         SpecieManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
-        ComponentOverrideContainer.__init__(self)
 
         self._simulation = simulation
         self.id = specie_id

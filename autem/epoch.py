@@ -3,7 +3,6 @@ from .epoch_manager import EpochManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .ranking import Ranking
 
-from .component_override import ComponentOverrideContainer
 from .scorers import MemberLeagueState
 from .simulation_settings import SimulationSettings
 
@@ -14,7 +13,7 @@ import numpy as np
 
 from .feedback import printProgressBar
 
-class Epoch(Container, EpochManagerContainer, HyperParameterContainer, ComponentOverrideContainer):
+class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
     """
     Epoch of a simulation
     """
@@ -23,7 +22,6 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer, Component
         Container.__init__(self)
         EpochManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
-        ComponentOverrideContainer.__init__(self)
 
         # Parameters
         self._specie = specie

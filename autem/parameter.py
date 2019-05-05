@@ -1,5 +1,6 @@
 from .hyper_parameter import HyperParameter
 from .reporters import DataType, Role, Reporter
+from .simulation_settings import SimulationSettings
 
 class Parameter(HyperParameter, Reporter):
 

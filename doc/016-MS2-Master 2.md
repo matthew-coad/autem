@@ -11,3 +11,7 @@ set something up quickly.
 # MS2 - Upgrade tuning state to a setting
 
 Upgrage tuning state to a setting
+
+# MS2 - Reintroduce mastery workflow
+
+Reintroduce mastery settings, upgrading to the latest design

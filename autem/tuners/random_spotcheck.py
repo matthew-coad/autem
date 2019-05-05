@@ -1,6 +1,6 @@
 from ..member_manager import MemberManager
-
 from .decision_grid_state import DecisionGridState
+from .tune_settings import TuneSettings
 
 class RandomSpotcheck(MemberManager):
     """
@@ -13,6 +13,10 @@ class RandomSpotcheck(MemberManager):
         """
         Configure new members by setting them to outstanding decisions
         """
+
+        tuning = TuneSettings(member).get_tuning()
+        if tuning is not None and tuning:
+            return (None, None)
 
         settings = SimulationSettings(member)
         specie = member.get_specie()

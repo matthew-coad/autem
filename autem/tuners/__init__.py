@@ -4,5 +4,5 @@ from .decision_grid_state import DecisionGridState
 from .random_spotcheck import RandomSpotcheck
 from .cross_over_spotcheck import CrossoverSpotcheck
 from .priority_spotcheck import PrioritySpotcheck
-
 from .cross_over_tuner import CrossoverTuner
+from .tune_settings import TuneSettings

@@ -1,7 +1,6 @@
 from .container import Container
 from .member_manager import MemberManagerContainer
 from .hyper_parameter import HyperParameterContainer
-from .component_override import ComponentOverrideContainer
 from .preprocessors import PreprocessorContainer
 from .learners import LearnerContainer
 from .choice import Choice
@@ -15,7 +14,7 @@ from types import SimpleNamespace
 import numpy as np
 import copy
 
-class Member(Container, MemberManagerContainer, HyperParameterContainer, ComponentOverrideContainer, PreprocessorContainer, LearnerContainer) :
+class Member(Container, MemberManagerContainer, HyperParameterContainer, PreprocessorContainer, LearnerContainer) :
     
     """
     Member of a population
@@ -25,7 +24,6 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         Container.__init__(self)
         MemberManagerContainer.__init__(self)
         HyperParameterContainer.__init__(self)
-        ComponentOverrideContainer.__init__(self)
         PreprocessorContainer.__init__(self)
         LearnerContainer.__init__(self)
 

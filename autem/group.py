@@ -1,6 +1,7 @@
 from .reporters import DataType, Role, Reporter
 from .hyper_parameter import HyperParameter
 from .member_manager import MemberManager
+from .simulation_settings import SimulationSettings
 
 from types import SimpleNamespace
 

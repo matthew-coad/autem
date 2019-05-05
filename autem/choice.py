@@ -59,9 +59,6 @@ class Choice(HyperParameter, MemberManager, Reporter):
         Get the names of components that are currently available for the given member
         """
         component_names = self.get_component_names()
-        override_component_names = member.get_component_override().get_component_choices(self.get_name())
-        if override_component_names:
-            component_names = list(set(component_names).intersection(override_component_names))
         return component_names
 
     def get_active_component_name(self, member):

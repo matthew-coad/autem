@@ -3,7 +3,7 @@ from ..settings import Settings
 class TuneSettings(Settings):
 
     def __init__(self, container):
-        Settings.__init__(container)
+        Settings.__init__(self, container)
 
     def get_tuning(self):
         return self.get_value("tuning", lambda: None)

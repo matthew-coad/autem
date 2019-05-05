@@ -1,6 +1,8 @@
 from ..member_manager import MemberManager
 from ..choice import Choice
 from ..scorers import MemberLeagueState
+from .tune_settings import TuneSettings
+from ..simulation_settings import SimulationSettings
 
 class CrossoverTuner(MemberManager):
     """
@@ -8,6 +10,10 @@ class CrossoverTuner(MemberManager):
     """
 
     def configure_member(self, member):
+
+        tuning = TuneSettings(member).get_tuning()
+        if tuning is not None and not tuning:
+            return (None, None)
 
         settings = SimulationSettings(member)
         specie = member.get_specie()

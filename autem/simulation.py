@@ -1,7 +1,6 @@
 from .container import Container
 from .simulation_manager import SimulationManagerContainer
 from .reporters import ReporterContainer, DataType, Role, Outline, Record
-from .component_override import ComponentOverrideContainer
 from .simulation_settings import SimulationSettings
 from .specie import Specie
 from .form import Form
@@ -14,14 +13,13 @@ import datetime
 
 from types import SimpleNamespace
 
-class Simulation(Container, SimulationManagerContainer, ComponentOverrideContainer, ReporterContainer) :
+class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
     """Simulation state"""
     def __init__(self, name, components):
 
         Container.__init__(self)
         SimulationManagerContainer.__init__(self)
-        ComponentOverrideContainer.__init__(self)
         ReporterContainer.__init__(self)
 
         self._name = name
@@ -173,6 +171,10 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
         """
         Perform simulation preparation.
         """
+
+        settings = SimulationSettings(self)
+        settings.set_random_state(numpy.random.RandomState(settings.get_seed()))
+
         components = self.list_simulation_managers()
         for component in components:
             component.prepare_simulation(self)
