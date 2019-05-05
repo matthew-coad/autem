@@ -15,3 +15,8 @@ Upgrage tuning state to a setting
 # MS2 - Reintroduce mastery workflow
 
 Reintroduce mastery settings, upgrading to the latest design
+
+# MS2 - Run each dataset in seperate proceiss
+
+Run each dataset in its own process to manage the thread leaking issue,
+manage memory etc.

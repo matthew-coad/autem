@@ -17,11 +17,12 @@ import benchmark.baselines as baselines
 
 import time
 import datetime
+import multiprocessing
 
 from pathlib import Path
 
 def get_study():
-    return "SP1"
+    return "MA2"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -107,7 +108,7 @@ def make_mastery_simulation(name, identity, data_id, learner, path):
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Mastery([ "Learner" ]),
+            workflows.MasteryWorkflow(),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
@@ -123,7 +124,7 @@ simulation_builders = {
     'mastery': make_mastery_simulation,
 }
 
-def run_benchmark_simulation(study, baseline_name, configuration = None, learner = None):
+def run_benchmark_simulation(study, baseline_name, configuration, learner):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
@@ -169,4 +170,8 @@ def run_benchmark_simulations(study = None, configuration = None, learner = None
     study = study if study else get_study()
     baseline_names = baselines.get_baseline_names(study)
     for baseline_name in baseline_names:
-        run_benchmark_simulation(study, baseline_name, configuration, learner)
+        args = (study, baseline_name, configuration, learner)
+        benchmark_process = multiprocessing.Process(target=run_benchmark_simulation, args=args)
+        benchmark_process.start()
+        benchmark_process.join()
+

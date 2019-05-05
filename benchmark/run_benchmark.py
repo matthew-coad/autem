@@ -7,5 +7,5 @@ import os
 import benchmark.benchmarks as benchmarks
 
 if __name__ == '__main__':
-    benchmarks.run_benchmark_simulations(study="SP1", configuration="spotcheck", learner="baseline")
+    benchmarks.run_benchmark_simulations(study="MS2", configuration="mastery", learner="baseline")
     # os.system("shutdown /s /t 1")
