@@ -1,4 +1,4 @@
-# Snapshots 1 Study
+# Spotchecks 1 Study
 
 Spotchecking is the attempt to find useful modelling pipelines.
 
@@ -10,12 +10,28 @@ Also we will move settings into the new hiearcharcial settings model and refine 
 
 ## Preparation
 
-## SN1-Move study to SN1
+## SP1-Move study to SP1
 
 Action-Move study to SN1 **done**
 
-## SN1-Introduce Simulation Settings
+## SP1-Introduce Simulation Settings
 
 Simulation settings things like max_reincarnations, max_time, max_population etc. that generally control the sim.
 
 Its are core concern so leave it in the root.
+
+## SP1-Introduce Spotcheck workflow
+
+The spotcheck workflow uses just the spotchecking tuners to
+quickly find which decisions are effective.
+
+Also decision scores should match the scores.
+
+## SP1 - Complete move to settings
+
+Move settings to new hierachical system
+
+## SP1-Seperate learner from configuration in benchmarks
+
+Have learner config seperate
+

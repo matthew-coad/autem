@@ -30,8 +30,9 @@ class BenchmarkScorer(Evaluater):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
+        settings = SimulationSettings(member)
         evaluation = member.evaluation
-        random_state = member.get_random_state()
+        random_state = settings.get_random_state()
 
         did = 470
         dataset = openml.datasets.get_dataset(did)

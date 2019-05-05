@@ -458,8 +458,7 @@ renderPlot({
     group_by(member_id, league) %>%
     filter(step == min(step)) %>%
     mutate(
-      predicted_score = choice_score,
-      predicted_score_std = choice_score_std
+      predicted_score = choice_score
     ) %>%
     ungroup()
   simulation_summary_df <- simulation_summary_rdf() %>% filtered_data(input$experiment)

@@ -9,13 +9,14 @@ class CrossoverTuner(MemberManager):
 
     def configure_member(self, member):
 
+        settings = SimulationSettings(member)
         specie = member.get_specie()
         members = specie.list_members(alive = True)
         candidates = [ m for m in members if MemberLeagueState.get(m).is_pro() ]
         if len(candidates) < 2:
             return (None, None)
 
-        parent_indexes = member.get_random_state().choice(len(candidates), 2, replace = False)
+        parent_indexes = settings.get_random_state().choice(len(candidates), 2, replace = False)
         parent1 = candidates[parent_indexes[0]]
         parent2 = candidates[parent_indexes[1]]
         for component in specie.list_hyper_parameters():

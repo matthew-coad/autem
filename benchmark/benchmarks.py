@@ -21,7 +21,7 @@ import datetime
 from pathlib import Path
 
 def get_study():
-    return "SN1"
+    return "SP1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -32,39 +32,76 @@ def get_version():
 def get_n_jobs():
     return 4
 
+# Learners
+
+learner_builders = {
+    'baseline': hyper_learners.ClassificationBaseline,
+    'linear': hyper_learners.ClassificationLinear,
+    'trees': hyper_learners.ClassificationTrees,
+    'svm': hyper_learners.ClassificationLinear,
+}
+
 # Baseline configurations
 
-def make_snapshot_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_spotcheck_simulation(name, identity, data_id, learner, path):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Snapshot(max_time=max_time),
+            workflows.SpotcheckWorkflow(),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationBaseline(),
+            learner_builders[learner](),
             reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+        ])
     return simulation
 
-def make_hammer_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+
+def make_snapshot_simulation(name, identity, data_id, learner, path):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(max_time=max_time, max_species=3),
+            workflows.SnapshotWorkflow(),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationBaseline(),
+            learner_builders[learner](),
             reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+        ])
     return simulation
 
-def make_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
+def make_hammer_simulation(name, identity, data_id, learner, path):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(),
+            validators.Holdout(0.2),
+            baselines.BaselineStats(identity['dataset']),
+            learner_builders[learner](),
+            reporters.Csv(path),
+        ])
+    settings = autem.SimulationSettings(simulation)
+    settings.set_max_species(3)
+    return simulation
+
+def make_short_simulation(name, identity, data_id, learner, path):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.Standard(),
+            baselines.BaselineStats(identity['dataset']),
+            learner_builders[learner](),
+            reporters.Csv(path),
+        ])
+    return simulation
+
+def make_mastery_simulation(name, identity, data_id, learner, path):
     simulation = autem.Simulation(
         name,
         [
@@ -73,215 +110,20 @@ def make_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, pat
             workflows.Mastery([ "Learner" ]),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationBaseline(),
+            learner_builders[learner](),
             reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-# Linear configurations
-
-def make_linear_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Snapshot(max_time=max_time),
-            validators.Holdout(0.2),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationLinear(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_linear_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Standard(max_time=max_time),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationLinear(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_linear_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Mastery([ "Learner" ]),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationLinear(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-
-# Trees configurations
-
-def make_trees_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Snapshot(max_time=max_time),
-            validators.Holdout(0.2),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationTrees(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_trees_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Standard(max_time=max_time),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationTrees(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-
-def make_trees_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Mastery([ "Learner" ]),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationTrees(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-# SVM configurations    
-
-def make_svm_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Snapshot(max_time=max_time),
-            validators.Holdout(0.2),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationSVM(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_svm_short_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Standard(max_time=max_time),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationSVM(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_svm_mastery_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Mastery([ "Learner" ]),
-            baselines.BaselineStats(identity['dataset']),
-            hyper_learners.ClassificationSVM(),
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
-    return simulation
-
-def make_xgb_simulation(name, identity, data_id, max_time, n_jobs, seed, path, memory):
-    simulation = autem.Simulation(
-        name,
-        [
-            loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
-            workflows.Snapshot(max_time=max_time),
-            baselines.BaselineStats(identity['dataset']),
-
-            # Scalers
-            autem.Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.RobustScaler(),
-                preprocessors.StandardScaler(),
-                preprocessors.BoxCoxTransform(),
-                preprocessors.YeoJohnsonTransform(),
-            ]),
-
-            # Feature Selectors
-            autem.Choice("Selector", [
-                preprocessors.NoSelector(),
-            ]),
-
-            # Feature Reducers
-            autem.Choice("Reducer", [
-                preprocessors.NoReducer(),
-                preprocessors.FastICA(),
-                preprocessors.PCA(),
-            ]),
-
-            # Approximators
-            autem.Choice("Approximator", [
-                preprocessors.NoApproximator(),
-            ]),
-
-            autem.Choice("Learner", [
-                learners.XGBClassifier(),
-            ]),
-
-            reporters.Csv(path),
-        ], 
-        seed = seed, n_jobs=n_jobs, identity=identity, memory=memory)
+        ])
     return simulation
 
 simulation_builders = {
+    'spotcheck': make_spotcheck_simulation,
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
+    'short': make_short_simulation,
     'mastery': make_mastery_simulation,
-
-    'linear': make_linear_simulation,
-    'linear_short': make_linear_short_simulation,
-    'linear_mastery': make_linear_mastery_simulation,
-
-    'trees': make_trees_simulation,
-    'trees_short': make_trees_short_simulation,
-    'trees_mastery': make_trees_mastery_simulation,
-
-    'svm': make_svm_simulation,
-    'svm_short': make_svm_short_simulation,
-    'svm_mastery': make_svm_mastery_simulation,
-
-    'xgb': make_xgb_simulation,
-
 }
 
-def run_benchmark_simulation(study, baseline_name):
+def run_benchmark_simulation(study, baseline_name, configuration = None, learner = None):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
@@ -289,7 +131,8 @@ def run_benchmark_simulation(study, baseline_name):
     data_id = task.dataset_id
     version = get_version()
 
-    configuration = baseline_configuration["Configuration"]
+    configuration = baseline_configuration["Configuration"] if configuration is None else configuration
+    learner = baseline_configuration["Learner"] if learner is None else learner
     configuration_valid = configuration in simulation_builders
     if not configuration_valid:
         print("Baseline %s configuration %s does not exist" % (baseline_name, configuration))
@@ -312,12 +155,18 @@ def run_benchmark_simulation(study, baseline_name):
 
     utility.prepare_OpenML()
     simulation_builder = simulation_builders[configuration]
-    simulation = simulation_builder(name, identity, data_id, max_time, n_jobs, seed, path, memory)
+    simulation = simulation_builder(name, identity, data_id, learner, path)
+    settings = autem.SimulationSettings(simulation)
+    settings.set_identity(identity)
+    settings.set_n_jobs(4)
+    settings.set_seed(seed)
+    settings.set_memory(memory)
+    settings.set_max_time(max_time)
+
     simulation.run()
 
-def run_benchmark_simulations(study = None):
+def run_benchmark_simulations(study = None, configuration = None, learner = None):
     study = study if study else get_study()
     baseline_names = baselines.get_baseline_names(study)
     for baseline_name in baseline_names:
-        run_benchmark_simulation(study, baseline_name)
-
+        run_benchmark_simulation(study, baseline_name, configuration, learner)

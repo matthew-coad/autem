@@ -115,7 +115,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         """
         # Invoke managers in random order till one configures the member
         managers = self.list_member_managers()
-        manager_indexes = self.get_random_state().choice(len(managers), size = len(managers), replace=False)
+        manager_indexes = SimulationSettings(self).get_random_state().choice(len(managers), size = len(managers), replace=False)
         configured, reason = (False, None)
         for index in manager_indexes:
             manager = managers[index]
@@ -169,7 +169,7 @@ class Member(Container, MemberManagerContainer, HyperParameterContainer, Compone
         Mutate the member, making a single random change to its configuration
         """
         prior_repr = repr(self.configuration)
-        random_state = self.get_random_state()
+        random_state = SimulationSettings(self).get_random_state()
         components = self.list_hyper_parameters()
         n_components = len(components)
 

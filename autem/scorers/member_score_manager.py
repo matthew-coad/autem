@@ -28,7 +28,7 @@ class MemberScoreManager(MemberManager, SpecieManager, Reporter):
         Evaluate folds for the specie
         """
         max_league = SimulationSettings(specie).get_max_league()
-        random_state = specie.get_random_state()
+        random_state = SimulationSettings(specie).get_random_state()
 
         data = specie.get_simulation().get_training_data()
         features = data.features

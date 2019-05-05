@@ -3,6 +3,7 @@ from .reporters import DataType, Role
 from .hyper_parameter import HyperParameter
 from .member_manager import MemberManager
 from .reporters import Reporter
+from .simulation_settings import SimulationSettings
 
 class Choice(HyperParameter, MemberManager, Reporter):
 
@@ -93,7 +94,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         To start a member set a component as active and start it
         """
         component_names = self.get_active_component_names(member)
-        random_state = member.get_random_state()
+        random_state = SimulationSettings(member).get_random_state()
         component_name = component_names[random_state.randint(0, len(component_names))]
         component = self.get_component(component_name)
         self.set_active_component_name(member, component_name)
@@ -130,7 +131,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Perform a major change to the member
         """
-        random_state = member.get_random_state()
+        random_state = SimulationSettings(member).get_random_state()
         current_active_component_name = self.get_active_component_name(member)
         component_names = self.get_active_component_names()
         if len(component_names) < 2:
@@ -159,7 +160,7 @@ class Choice(HyperParameter, MemberManager, Reporter):
         """
         Cross over members 
         """
-        random_state = member.get_random_state()
+        random_state = SimulationSettings(member).get_random_state()
 
         # If we are in group mode and this is the first group
         # pick one of the parents to base my group on

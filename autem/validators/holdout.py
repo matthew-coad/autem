@@ -1,5 +1,7 @@
 from ..simulation_manager import SimulationManager
+from ..reporters import Reporter
 from ..loaders import Dataset
+from ..simulation_settings import SimulationSettings
 
 import numpy as np
 from scipy import stats
@@ -23,7 +25,7 @@ def get_validation_state(member):
     state = member.get_state("validation", lambda: ValidationState())
     return state
 
-class Holdout(SimulationManager):
+class Holdout(SimulationManager, Reporter):
     """
     Validate a model using a heldout dataset
     """
@@ -36,7 +38,8 @@ class Holdout(SimulationManager):
 
     def prepare_simulation(self, simulation):
 
-        random_state = simulation.get_random_state()
+        settings = SimulationSettings(simulation)
+        random_state = settings.get_random_state()
         validation_ratio = self.get_validation_ratio()
         data = simulation.get_full_data()
 

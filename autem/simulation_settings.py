@@ -24,6 +24,18 @@ class SimulationSettings:
     def set_memory(self, memory):
         return SettingState.get(self.get_container()).set_value("memory", memory)
 
+    def get_seed(self):
+        return SettingState.get(self.get_container()).get_value("seed", lambda: 1234)
+
+    def set_seed(self, seed):
+        return SettingState.get(self.get_container()).set_value("seed", seed)
+
+    def get_random_state(self):
+        return SettingState.get(self.get_container()).get_value("random_state", lambda: np.random.RandomState(self.get_seed()))
+
+    def set_seed(self, seed):
+        return SettingState.get(self.get_container()).set_value("seed", seed)
+
     def get_identity(self):
         return SettingState.get(self.get_container()).get_value("identity", lambda: {})
 

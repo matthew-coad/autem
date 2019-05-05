@@ -12,17 +12,21 @@ from .score_rater import ScoreRater
 from .tune_maker import TuneMaker
 from .tune_state import TuneState
 
+from .mastery_state import MasteryState
+
+from ..choice import Choice
+
 import time
 
-class Standard(SimulationManager, SpecieManager, EpochManager):
+class MasteryWorkflow(SimulationManager, SpecieManager, EpochManager):
     """
-    The standard workflow spotchecks until there is no more improvement, then tunes until their is no more improvement.
+    The mastery process analyses each pipeline choice and selects the best before moving onto the next choice.
     """
 
-    def __init__(self, max_time = None, max_epochs = None, max_species = None) :
+    def __init__(self, mastery_choices, max_time = None, max_epochs = None) :
+        self._mastery_choices = mastery_choices
         self._max_time = max_time
         self._max_epochs = max_epochs
-        self._max_species = max_species
 
     def get_max_time(self):
         return self._max_time
@@ -42,8 +46,8 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
     def get_max_epochs(self):
         return self._max_epochs
 
-    def get_max_species(self):
-        return self._max_species
+    def get_mastery_choices(self):
+        return self._mastery_choices
 
     # Simulations
 
@@ -76,25 +80,86 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
 
     def is_simulation_finished(self, simulation):
         """
-        Finish the simulation once we have completed one species
+        Simulation is finished if all mastery choices are complete
         """
-        n_species = len(simulation.list_species())
-        max_species = self.get_max_species() if not self.get_max_species() is None else 1
-        if n_species >= max_species:
-            return (True, "Reached max species")
+        duration = time.time() - simulation.get_start_time()
+        choice_name, component_name = self.get_next_specie_configuration(simulation)
+
+        if choice_name is None:
+            return (True, "All choices processed")
+
+        max_time = self.get_max_time()
+        if max_time is not None and duration >= max_time:
+            return (True, "Reached max time")
+        
         return (False, None)
 
     # Species
 
+    def get_next_specie_configuration(self, simulation):
+        mastery_choices = self.get_mastery_choices()
+        mastery_state = MasteryState.get(simulation)
+
+        mastery_choice = mastery_choices[0]
+
+        choices = [ c for c in simulation.list_components() if isinstance(c, Choice) ]
+        choice_names = [ c.get_name() for c in choices ]
+        choice_index = choice_names.index(mastery_choice)
+        choice = choices[choice_index]
+        choice_name = choice.get_name()
+
+        component_names = choice.get_component_names()
+        current_component_name = mastery_state.get_current_component_name()
+        if current_component_name is None:
+            component_name = component_names[0]
+        else:
+            current_index = component_names.index(current_component_name)
+            component_index = current_index + 1
+            if component_index >= len(component_names):
+                choice_name = None
+                component_name = None
+            else:
+                component_name = component_names[component_index]
+
+        return (choice_name, component_name)
+
     def configure_specie(self, specie):
+        simulation = specie.get_simulation()
+        mastery_state = MasteryState.get(simulation)
+
         specie.set_max_league(self.get_max_league())
         specie.set_max_reincarnations(self.get_max_reincarnations())
         specie.set_max_population(self.get_max_population())
 
+        choice_name, component_name = self.get_next_specie_configuration(specie.get_simulation())
+        specie.get_component_override().set_component_choices(choice_name, [ component_name ])
+        mastery_state.set_current(choice_name, component_name)
+        specie_name = "%s=%s" % (choice_name, component_name)
+        specie.set_name(specie_name)
+
+    def is_choice_finished(self, specie):
+        """
+        Is the current mastery choice finished?
+        """
+        mastery_state = MasteryState.get(simulation)
+
+        current_choice_name = mastery_state.get_current_choice_name()
+        choices = [ c for c in simulation.list_components() if isinstance(c, Choice) ]
+        choice_names = [ c.get_name() for c in choices ]
+        choice_index = choice_names.index(current_choice_name)
+        choice = choices[choice_index]
+
+        component_names = choice.get_component_names()
+        current_component_name = mastery_state.get_current_component_name()
+        current_index = component_names.index(current_component_name)
+        return current_index == len(component_names)-1
+
     def is_specie_finished(self, specie):
         """
-        Is the specie finished.
-        Value is the first component that returns a Non-Null value
+        Species are finished if:
+        + we have exceeded max epochs
+        + exceeded max duration
+        + Or the specie is no longer progressing
         """
         epoch = specie.get_current_epoch()
         is_tuning = TuneState.get(epoch).get_tuning()
@@ -112,8 +177,10 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
         progressed, reason = self.has_epoch_progressed(epoch)
         if progressed == False and is_tuning:
             return (True, reason)
-        
+
         return (False, None)
+
+    # Epoch
 
     def has_epoch_progressed(self, epoch):
 
@@ -150,6 +217,3 @@ class Standard(SimulationManager, SpecieManager, EpochManager):
 
     def is_epoch_finished(self, epoch):
         return (False, None)
-
-
-

@@ -81,15 +81,57 @@ def run_balance_scale_baseline(seed):
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.SnapshotWorkflow(),
+            workflows.SpotcheckWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationBaseline(),
             reporters.Csv(path),
         ])
+
     settings = autem.SimulationSettings(simulation)
     settings.set_identity(identity)
     settings.set_n_jobs(4)
+    settings.set_seed(seed)
+    simulation.run()
+
+def run_balance_scale_spotcheck(seed):
+    baseline_name = "balance-scale"
+    experiment = "spotcheck_%s_s%d" % (baseline_name, seed)
+    study = "DEV"
+    version = benchmark.get_version()
+    simulation_name = "%s_%s_v%d" % (study, experiment, version)
+
+    configuration = baselines.get_baseline_configuration(baseline_name)
+    path = benchmark.get_simulations_path().joinpath(study).joinpath(experiment)
+
+    utility.prepare_OpenML()
+    task_id = configuration["task_id"]
+    task = openml.tasks.get_task(task_id)
+    data_id = task.dataset_id
+    dataset = openml.datasets.get_dataset(data_id)
+    dataset_name = dataset.name
+
+    identity = {
+        'study': study,
+        'experiment': experiment,
+        'dataset': dataset_name,
+        'version': version
+    }    
+    
+    simulation = autem.Simulation(simulation_name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.SpotcheckWorkflow(),
+            baselines.BaselineStats(baseline_name),
+            hyper_learners.ClassificationBaseline(),
+            reporters.Csv(path),
+        ])
+        
+    settings = autem.SimulationSettings(simulation)
+    settings.set_identity(identity)
+    settings.set_n_jobs(4)
+    settings.set_seed(seed)
     simulation.run()
 
 if __name__ == '__main__':
-    run_balance_scale_baseline(1)
+    run_balance_scale_spotcheck(1)

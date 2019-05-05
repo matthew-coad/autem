@@ -14,13 +14,15 @@ from ..simulation_settings import SimulationSettings
 
 import time
 
-class SnapshotWorkflow(SimulationManager, SpecieManager, EpochManager):
+class SpotcheckWorkflow(SimulationManager, SpecieManager, EpochManager):
     """
-    The snapshow workflow produces a very quick snapshot simulation that runs one specie with no tuning
+    The spotcheck workflow produces evaluated decisions without attempting to tune them
     """
 
-    def __init__(self, max_epochs = 2, max_time = None) :
-        self._max_time = max_time
+    def __init__(self, max_epochs = 3) :
+        SimulationManager.__init__(self)
+        SpecieManager.__init__(self)
+        EpochManager.__init__(self)
         self._max_epochs = max_epochs
 
     # Simulations
@@ -33,7 +35,6 @@ class SnapshotWorkflow(SimulationManager, SpecieManager, EpochManager):
             tuners.GPDecisionModel(),
             tuners.PrioritySpotcheck(),
             tuners.CrossoverSpotcheck(),
-            tuners.CrossoverTuner(),
 
             DurationEvaluator(),
             DiverseContest(1.0),
@@ -53,7 +54,6 @@ class SnapshotWorkflow(SimulationManager, SpecieManager, EpochManager):
         simulation.set_components(components)
 
         settings = SimulationSettings(simulation)
-        settings.set_max_time(self._max_time)
         settings.set_max_epochs(self._max_epochs)
 
     def is_simulation_finished(self, simulation):
@@ -81,6 +81,7 @@ class SnapshotWorkflow(SimulationManager, SpecieManager, EpochManager):
         n_epochs = len(specie.list_epochs())
 
         settings = SimulationSettings(specie)
+
         max_epochs = settings.get_max_epochs()
         max_time = settings.get_max_time()
 

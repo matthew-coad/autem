@@ -17,7 +17,7 @@ from types import SimpleNamespace
 class Simulation(Container, SimulationManagerContainer, ComponentOverrideContainer, ReporterContainer) :
 
     """Simulation state"""
-    def __init__(self, name, seed, components):
+    def __init__(self, name, components):
 
         Container.__init__(self)
         SimulationManagerContainer.__init__(self)
@@ -26,8 +26,6 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
 
         self._name = name
         self._components = components
-        self._seed = seed
-        self._random_state = numpy.random.RandomState(seed)
 
         self._next_id = 1
 
@@ -56,12 +54,6 @@ class Simulation(Container, SimulationManagerContainer, ComponentOverrideContain
 
     def get_parent(self):
         return None
-
-    def get_random_state(self):
-        return self._random_state
-
-    def get_seed(self):
-        return self._seed
 
     def get_start_time(self):
         return self._start_time

@@ -137,4 +137,4 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         super().record_member(member, record)
 
         member_decision = MemberDecisionState.get(member)
-        record.DM_score = member_decision.get_decision_score()
+        record.CE_score = member_decision.get_decision_score()

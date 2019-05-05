@@ -31,12 +31,6 @@ class Container:
     def list_components(self):
         return self.get_simulation().list_components()
 
-    def get_random_state(self):
-        """
-        Get shared random state object
-        """
-        return self.get_simulation().get_random_state()
-
     def generate_id(self):
         """
         Generate an ID unique to simulation
