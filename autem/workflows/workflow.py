@@ -3,7 +3,7 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 from ..simulation_settings import SimulationSettings
 
-from ..scorers import MemberScoreState
+from ..scorers import MemberScoreState, MemberScoreManager
 
 import time
 
@@ -14,7 +14,7 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
     Contains shared services and standard implementations for workflows.
     """
 
-    def __init__(self, max_epochs = 3) :
+    def __init__(self) :
         SimulationManager.__init__(self)
         SpecieManager.__init__(self)
         EpochManager.__init__(self)
@@ -25,20 +25,7 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         """
         Required override that lists the workflows extensions
         """
-        extensions = [
-            scorers.MemberScoreManager(),
-
-            tuners.DecisionGridManager(),
-            tuners.GPDecisionModel(),
-            tuners.PrioritySpotcheck(),
-            tuners.CrossoverSpotcheck(),
-
-            DurationEvaluator(),
-            DiverseContest(1.0),
-            ContestJudge(),
-            ScoreRater(),
-        ]
-        return extensions
+        raise NotImplementedError()
 
     def configure_extensions(self, simulation):
         """

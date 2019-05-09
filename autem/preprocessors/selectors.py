@@ -73,3 +73,40 @@ class VarianceThreshold(Selector):
 
     def make_preprocessor(self, member):
         return sklearn.feature_selection.VarianceThreshold()
+
+class SelectFwe(Selector):
+
+    config = {
+        'numeric' : {
+            'alpha': np.arange(0, 0.05, 0.001),
+        }
+    }
+
+    def __init__(self):
+        Selector.__init__(self, "SFE", "Select Fwe", make_choice_list(self.config))
+
+    def make_preprocessor(self, member):
+        return sklearn.feature_selection.SelectFwe(score_func=sklearn.feature_selection.f_classif)
+
+""" class RFE(Selector):
+
+    config = {
+        'numeric' : {
+            'step': np.arange(0.05, 1.01, 0.05),
+        }
+    }
+
+    def __init__(self):
+        Selector.__init__(self, "RFE", "Reverse Feature Selection", make_choice_list(self.config))
+
+    def make_preprocessor(self, member):
+        #'estimator': {
+        #    'sklearn.ensemble.ExtraTreesClassifier': {
+        #        'n_estimators': [100],
+        #        'criterion': ['gini', 'entropy'],
+        #        'max_features': np.arange(0.05, 1.01, 0.05)
+        #    }
+        #}
+
+        return sklearn.feature_selection.RFE((score_func=sklearn.feature_selection.f_classif)
+ """

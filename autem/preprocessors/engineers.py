@@ -18,25 +18,31 @@ import numpy as np
 
 class Engineer(Preprocesssor):
 
-    def __init__(self, name, label, config):
-        Preprocesssor.__init__(self, name, label, _convert_config(config))
+    def __init__(self, name, label, parameters):
+        Preprocesssor.__init__(self, name, label, parameters)
 
 class NoEngineering(Engineer):
 
     def __init__(self):
-        Engineer.__init__(self, "ENO", "No Engineering", {})
+        Engineer.__init__(self, "ENO", "No Engineering", [])
 
     def make_preprocessor(self, member):
         return None
 
 class PolynomialFeatures(Engineer):
 
-    config = {}
+    config = {
+        'nominal': {
+            'degree': [2, 3],
+            'include_bias': [True, False],
+            'interaction_only': [True, False]
+        }
+    }
 
     def __init__(self):
-        Engineer.__init__(self, "PLY", "Polynomial Features", self.config)
+        Engineer.__init__(self, "PLY", "Polynomial Features", make_choice_list(self.config))
 
     def make_preprocessor(self, member):
-        return sklearn.preprocessing.PolynomialFeatures(degree=2, include_bias = False, interaction_only = False)
+        return sklearn.preprocessing.PolynomialFeatures()
 
     

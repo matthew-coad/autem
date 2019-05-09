@@ -22,7 +22,7 @@ import multiprocessing
 from pathlib import Path
 
 def get_study():
-    return "MA2"
+    return "PP3"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -39,7 +39,8 @@ learner_builders = {
     'baseline': hyper_learners.ClassificationBaseline,
     'linear': hyper_learners.ClassificationLinear,
     'trees': hyper_learners.ClassificationTrees,
-    'svm': hyper_learners.ClassificationLinear,
+    'svm': hyper_learners.ClassificationSVM,
+    'bayes': hyper_learners.ClassificationBayes,
 }
 
 # Baseline configurations
@@ -66,21 +67,19 @@ def make_snapshot_simulation(name, identity, data_id, learner, path):
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
             workflows.SnapshotWorkflow(),
-            validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
             reporters.Csv(path),
         ])
     return simulation
 
-def make_hammer_simulation(name, identity, data_id, learner, path):
+def make_standard_simulation(name, identity, data_id, learner, path):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(),
-            validators.Holdout(0.2),
+            workflows.StandardWorkflow(),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
             reporters.Csv(path),
@@ -89,17 +88,19 @@ def make_hammer_simulation(name, identity, data_id, learner, path):
     settings.set_max_species(3)
     return simulation
 
-def make_short_simulation(name, identity, data_id, learner, path):
+def make_hammer_simulation(name, identity, data_id, learner, path):
     simulation = autem.Simulation(
         name,
         [
             loaders.OpenMLLoader(data_id),
             scorers.Accuracy(),
-            workflows.Standard(),
+            workflows.StandardWorkflow(max_species = 3),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
             reporters.Csv(path),
         ])
+    settings = autem.SimulationSettings(simulation)
+    settings.set_max_species(3)
     return simulation
 
 def make_mastery_simulation(name, identity, data_id, learner, path):
@@ -116,12 +117,27 @@ def make_mastery_simulation(name, identity, data_id, learner, path):
         ])
     return simulation
 
+def make_short_mastery_simulation(name, identity, data_id, learner, path):
+    simulation = autem.Simulation(
+        name,
+        [
+            loaders.OpenMLLoader(data_id),
+            scorers.Accuracy(),
+            workflows.MasteryWorkflow(),
+            baselines.BaselineStats(identity['dataset']),
+            learner_builders[learner](),
+            reporters.Csv(path),
+        ])
+    return simulation
+
+
 simulation_builders = {
     'spotcheck': make_spotcheck_simulation,
     'snapshot': make_snapshot_simulation,
     'hammer': make_hammer_simulation,
-    'short': make_short_simulation,
+    'standard': make_standard_simulation,
     'mastery': make_mastery_simulation,
+    'short_mastery': make_short_mastery_simulation,
 }
 
 def run_benchmark_simulation(study, baseline_name, configuration, learner):
@@ -174,4 +190,11 @@ def run_benchmark_simulations(study = None, configuration = None, learner = None
         benchmark_process = multiprocessing.Process(target=run_benchmark_simulation, args=args)
         benchmark_process.start()
         benchmark_process.join()
+
+def run_debug_benchmark_simulations(study = None, configuration = None, learner = None):
+    study = study if study else get_study()
+    baseline_names = baselines.get_baseline_names(study)
+    for baseline_name in baseline_names:
+        run_benchmark_simulation(study, baseline_name, configuration, learner)
+
 

@@ -45,13 +45,6 @@ class MasteryWorkflow(Workflow):
     # Species
 
     def is_specie_finished(self, specie):
-        """
-        Species are finished if:
-        + we have exceeded max epochs
-        + exceeded max duration
-        + Or the specie is no longer progressing
-        """
-
         epoch = specie.get_current_epoch()
         tuning = TuneSettings(epoch).get_tuning()
 
@@ -69,4 +62,6 @@ class MasteryWorkflow(Workflow):
         epoch_n = epoch.get_epoch_n() 
         spotcheck_epochs = self._spotcheck_epochs
         tuning = epoch_n > spotcheck_epochs
-        TuneSettings(epoch).set_tuning(tuning)
+        tune_settings = TuneSettings(epoch)
+        tune_settings.set_tuning(tuning)
+        tune_settings.set_spotchecking(not tuning)

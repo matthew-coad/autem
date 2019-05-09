@@ -4,10 +4,10 @@ from .preprocessor import Preprocesssor, PreprocessorContainer
 from .engineers import NoEngineering, PolynomialFeatures
 
 # Scalers
-from .scalers import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, Binarizer, BoxCoxTransform, YeoJohnsonTransform
+from .scalers import NoScaling, MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, Binarizer, BoxCoxTransform, YeoJohnsonTransform
 
 # Feature Selectors
-from .selectors import NoSelector, SelectPercentile, VarianceThreshold
+from .selectors import NoSelector, SelectPercentile, VarianceThreshold, SelectFwe
 
 # Feature Reducers
 from .reducers import NoReducer, FastICA, FeatureAgglomeration, PCA

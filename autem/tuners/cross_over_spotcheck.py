@@ -13,8 +13,8 @@ class CrossoverSpotcheck(MemberManager):
 
     def configure_member(self, member):
 
-        tuning = TuneSettings(member).get_tuning()
-        if tuning is not None and tuning:
+        spotchecking = TuneSettings(member).get_spotchecking()
+        if spotchecking is not None and not spotchecking:
             return (None, None)
 
         settings = SimulationSettings(member)

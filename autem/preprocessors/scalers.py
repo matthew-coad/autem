@@ -87,6 +87,14 @@ class Scaler(Preprocesssor):
 
 # Scalers
 
+class NoScaling(Scaler):
+
+    def __init__(self):
+        Scaler.__init__(self, "SNO", "No Scaler", [])
+
+    def make_preprocessor(self, member):
+        return None
+
 class MaxAbsScaler(Scaler):
 
     def __init__(self):

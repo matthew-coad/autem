@@ -11,8 +11,12 @@ class ClassificationSVM(Hyperlearner):
             
             # Scalers
             Choice("Scaler", [
+                preprocessors.MaxAbsScaler(),
+                preprocessors.MinMaxScaler(),
+                preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
+                preprocessors.Binarizer(),
                 preprocessors.BoxCoxTransform(),
                 preprocessors.YeoJohnsonTransform()
             ]),

@@ -20,3 +20,7 @@ Reintroduce mastery settings, upgrading to the latest design
 
 Run each dataset in its own process to manage the thread leaking issue,
 manage memory etc.
+
+# MS2 - Run mastery benchmark
+
+Run mastery benchmark on the baseline learner to compare with spotchecks.

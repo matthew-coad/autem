@@ -4,27 +4,21 @@ from ..choice import Choice
 from .. import preprocessors
 from ..learners import classification as learners
 
-class ClassificationLinear(Hyperlearner):
+class ClassificationBayes(Hyperlearner):
 
     def list_components(self):
         components = [
             # Scalers
             Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.MinMaxScaler(),
-                preprocessors.Normalizer(),
-                preprocessors.RobustScaler(),
-                preprocessors.StandardScaler(),
-                preprocessors.Binarizer(),
-                preprocessors.BoxCoxTransform(),
-                preprocessors.YeoJohnsonTransform()
+                preprocessors.NoScaling(),
             ]),
 
             # Feature Selectors
             Choice("Selector", [
                 preprocessors.NoSelector(),
                 preprocessors.SelectPercentile(),
-                preprocessors.VarianceThreshold()
+                preprocessors.VarianceThreshold(),
+                preprocessors.SelectFwe(),
             ]),
 
             Choice("Engineer", [
@@ -34,8 +28,6 @@ class ClassificationLinear(Hyperlearner):
             # Feature Reducers
             Choice("Reducer", [
                 preprocessors.NoReducer(),
-                preprocessors.FastICA(),
-                preprocessors.PCA(),
             ]),
 
             # Approximators
@@ -44,8 +36,9 @@ class ClassificationLinear(Hyperlearner):
             ]),
 
             Choice("Learner", [
-                learners.LogisticRegression(),
-                learners.LinearDiscriminantAnalysis(),
+                learners.BernoulliNB(),
+                learners.GaussianNB(),
+                learners.MultinomialNB(),
             ])
         ]
         return components
