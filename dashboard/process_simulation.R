@@ -209,7 +209,7 @@ build_step_detail <- function(battle_df) {
         round = NA,
         duration = DE_duration,
         relative_duration = DE_standard_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   }
   
@@ -229,7 +229,7 @@ build_step_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   }
 
@@ -249,7 +249,7 @@ build_step_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   }
 
@@ -268,7 +268,7 @@ build_step_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   }
   
@@ -355,7 +355,7 @@ build_ranking_detail <- function(battle_df) {
         choice_score = choice_predicted_score,
         duration = DE_duration,
         relative_duration = DE_standard_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   } else {
     step_df12 <- NULL
@@ -376,7 +376,7 @@ build_ranking_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   } else {
     step_df13 <- NULL
@@ -395,7 +395,7 @@ build_ranking_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   } else {
     step_df14 <- NULL
@@ -414,7 +414,7 @@ build_ranking_detail <- function(battle_df) {
         score_std = SE_score_std,
         duration = DE_duration,
         relative_duration = DE_relative_duration,
-        validation_score = VE_score
+        validation_score = { if("VE_score" %in% names(.)) VE_score else NA}
       )
   } else {
     step_df15 <- NULL

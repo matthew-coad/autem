@@ -1,9 +1,8 @@
 source("process_simulation.R")
 
 simulation_paths = c(
-  "D:\\Documents\\autem\\benchmark\\simulations\\PP3",
-  "D:\\Documents\\autem\\benchmark\\simulations\\PP3LIN",
   "D:\\Documents\\autem\\benchmark\\simulations\\PP3BAY",
+  "D:\\Documents\\autem\\benchmark\\simulations\\PP3LIN",
   "D:\\Documents\\autem\\benchmark\\simulations\\PP3SVM",
   "D:\\Documents\\autem\\benchmark\\simulations\\PP3TRE"
 )

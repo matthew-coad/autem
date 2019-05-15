@@ -726,15 +726,12 @@ renderPlot({
     step_detail_df %>% 
     mutate(
       component1 = !! sym(.choice1),
-      component2 = !! sym(.choice2),
-      predicted_score = choice_score,
-      predicted_score_std = choice_score_std
+      component2 = !! sym(.choice2)
     ) %>%
-    select(study, experiment, component1, component2, score, score_std, predicted_score, predicted_score_std)
+    select(study, experiment, component1, component2, score, score_std)
 
   choice2_detail_df %>%
     ggplot() +
-    geom_point(aes(x = component2, y = predicted_score), size = 3, shape=1, color = "Grey", na.rm = TRUE) +
     geom_point(aes(x = component2, y = score), size = 1, na.rm = TRUE) +
     facet_wrap(component1 ~ study) +
     coord_flip()

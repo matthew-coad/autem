@@ -22,7 +22,7 @@ import multiprocessing
 from pathlib import Path
 
 def get_study():
-    return "PP3"
+    return "WD1"
 
 def get_simulations_path():
     return Path("benchmark/simulations")
@@ -41,6 +41,7 @@ learner_builders = {
     'trees': hyper_learners.ClassificationTrees,
     'svm': hyper_learners.ClassificationSVM,
     'bayes': hyper_learners.ClassificationBayes,
+    'wide': hyper_learners.ClassificationWide,
 }
 
 # Baseline configurations
