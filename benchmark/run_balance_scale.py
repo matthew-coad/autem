@@ -44,7 +44,7 @@ def run_balance_scale(seed):
         simulation_name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.Snapshot(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationSVM(),
@@ -120,7 +120,7 @@ def run_balance_scale_mastery(seed):
     simulation = autem.Simulation(simulation_name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.MasteryWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationSVM(),
