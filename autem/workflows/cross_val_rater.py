@@ -1,4 +1,5 @@
 from .evaluator import Evaluater
+from ..scorers import ScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -24,7 +25,7 @@ class CrossValidationRater(Evaluater):
         """
         raise NotImplementedError()
 
-        scorer = member.get_simulation().get_scorer()
+        scorer = ScoreQuery(member).get_metric()
 
         data = member.get_simulation().get_training_data()
         x = data.x

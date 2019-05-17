@@ -1,5 +1,6 @@
 from ..member_manager import MemberManager
 from ..scorers import MemberScoreState
+from ..scorers import ScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -24,7 +25,7 @@ class DiverseContest(MemberManager):
 
     def contest_members(self, contestant1, contestant2):
 
-        scorer = contestant1.get_simulation().get_scorer()
+        scorer = ScoreQuery(contestant1.get_simulation()).get_metric()
 
         max_league = max(contestant1.league, contestant2.league)
         if max_league == 0:
@@ -37,7 +38,7 @@ class DiverseContest(MemberManager):
 
         contestant1_predictions = contestant1_score_state.league_predictions[max_league]
         contestant2_predictions = contestant2_score_state.league_predictions[max_league]
-        inter_score = scorer.score(contestant1_predictions, contestant2_predictions)
+        inter_score = scorer(contestant1_predictions, contestant2_predictions)
         if inter_score < self.max_score:
             return None
 

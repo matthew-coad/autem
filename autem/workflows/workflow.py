@@ -3,7 +3,7 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 from ..simulation_settings import SimulationSettings
 
-from ..scorers import MemberScoreState, MemberScoreManager
+from ..scorers import MemberScoreState
 
 import time
 

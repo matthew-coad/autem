@@ -36,8 +36,6 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
         self._outline = None
 
-        self._scorer = None
-
         self._full_data = None
         self._training_data = None
         self._validation_data = None
@@ -75,14 +73,6 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
     def set_components(self, components):
         self._components = components
-
-    ## Scorers
-
-    def get_scorer(self):
-        return self._scorer
-
-    def set_scorer(self, scorer):
-        self._scorer = scorer
 
     ## Data
 

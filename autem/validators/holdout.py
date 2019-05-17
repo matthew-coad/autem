@@ -2,6 +2,7 @@ from ..simulation_manager import SimulationManager
 from ..reporters import Reporter
 from ..loaders import Dataset
 from ..simulation_settings import SimulationSettings
+from ..scorers import ScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -58,7 +59,7 @@ class Holdout(SimulationManager, Reporter):
             return None
 
         simulation = member.get_simulation()
-        scorer = simulation.get_scorer()
+        scorer = ScoreQuery(member).get_metric()
 
         training_data = simulation.get_training_data()
         validation_data = simulation.get_validation_data()

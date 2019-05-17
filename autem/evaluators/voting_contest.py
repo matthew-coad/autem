@@ -1,4 +1,5 @@
 from .evaluator import Evaluater
+from ..scorers import ScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -47,7 +48,7 @@ class VotingContest(Evaluater):
         """
         Calculate the boost that a member gives to the hard voting prediction of a set of stacked members
         """
-        scorer = member.get_simulation().get_scorer()
+        scorer = ScoreQuery(member).get_metric()
 
         data = member.get_simulation().get_training_data()
         features = data.features

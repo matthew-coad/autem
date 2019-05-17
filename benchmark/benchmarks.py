@@ -51,7 +51,7 @@ def make_spotcheck_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.SpotcheckWorkflow(),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
@@ -66,7 +66,7 @@ def make_snapshot_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.SnapshotWorkflow(),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
@@ -79,7 +79,7 @@ def make_standard_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.StandardWorkflow(),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
@@ -94,7 +94,7 @@ def make_hammer_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.StandardWorkflow(max_species = 3),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),
@@ -109,7 +109,7 @@ def make_mastery_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score),
             workflows.MasteryWorkflow(),
             validators.Holdout(0.2),
             baselines.BaselineStats(identity['dataset']),
@@ -123,7 +123,7 @@ def make_short_mastery_simulation(name, identity, data_id, learner, path):
         name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.Accuracy(),
+            scorers.LeagueScorer(scorers.accuracy_score, n_splits=10),
             workflows.MasteryWorkflow(),
             baselines.BaselineStats(identity['dataset']),
             learner_builders[learner](),

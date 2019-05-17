@@ -2,14 +2,16 @@ from ..member import Member
 from .member_score_state import MemberScoreState
 from .member_league_state import MemberLeagueState
 from ..simulation_settings import SimulationSettings
+from .score_query import ScoreQuery
 
-class MemberScoreQuery:
+class MemberScoreQuery(ScoreQuery):
 
     def __init__(self, member):
-        self._member = member
+        assert isinstance(member, Member)
+        ScoreQuery.__init__(self, member)
 
     def get_score_state(self):
-        return MemberScoreState.get(self._member)
+        return MemberScoreState.get(self.get_container())
 
     def get_score(self):
         """

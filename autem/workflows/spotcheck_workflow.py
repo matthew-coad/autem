@@ -25,8 +25,6 @@ class SpotcheckWorkflow(Workflow):
 
     def list_extensions(self):
         extensions = [
-            scorers.MemberScoreManager(),
-
             tuners.DecisionGridManager(),
             tuners.GPDecisionModel(),
             tuners.PrioritySpotcheck(),

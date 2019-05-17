@@ -1,4 +1,5 @@
 from .evaluator import Evaluater
+from ..scorers import ScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -18,7 +19,7 @@ class DummyClassifierAccuracy(Evaluater):
         """
 
         random_state = member.get_random_State()
-        scorer = member.get_simulation().get_scorer()
+        scorer = ScoreQuery(member).get_metric()
 
         data = member.get_simulation().get_training_data()
         features = data.features
