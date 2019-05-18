@@ -2,9 +2,11 @@ if __name__ == '__main__':
     import context
 
 import autem
+import autem.preprocessors as preprocessors
 import autem.scorers as scorers
 import autem.workflows as workflows
 import autem.validators as validators
+import autem.learners.classification as learners
 import autem.hyper_learners as hyper_learners
 import autem.loaders as loaders
 import autem.reporters as reporters
@@ -19,7 +21,7 @@ import openml
 def run_test(seed):
     study = "DEV"
     baseline_name = "analcatdata_dmft"
-    experiment = "%s_s%d" % (baseline_name, seed)
+    experiment = baseline_name
     version = benchmark.get_version()
     simulation_name = "%s_%s_v%d" % (study, experiment, version)
 
@@ -45,9 +47,10 @@ def run_test(seed):
         [
             loaders.OpenMLLoader(data_id),
             scorers.LeagueScorer(scorers.accuracy_score, 10),
-            workflows.MasteryWorkflow(),
+            workflows.StandardWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationSVM(),
+
             reporters.Csv(path),
         ])
 
