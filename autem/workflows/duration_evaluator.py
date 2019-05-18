@@ -1,5 +1,5 @@
 from ..member_manager import MemberManager
-from ..scorers import MemberScoreState
+from ..scorers import MemberScoreQuery
 from ..reporters import Reporter
 
 import numpy as np
@@ -31,8 +31,8 @@ class DurationEvaluator(MemberManager, Reporter):
 
         specie = member.get_specie()
 
-        score_state = MemberScoreState.get(member)
-        if not score_state.score_duration:
+        score_query = MemberScoreQuery(member)
+        if not score_query.get_duration():
             return None
 
         candidates = [ m for m in specie.list_members() if m.id != member.id and m.league >= 1]
@@ -41,11 +41,11 @@ class DurationEvaluator(MemberManager, Reporter):
 
         base_durations = []
         for candidate in candidates:
-            base_durations.append(MemberScoreState.get(candidate).score_duration)
+            base_durations.append(MemberScoreQuery(candidate).get_duration())
 
         duration_state = get_duration_state(member)
-        duration_state.duration = score_state.score_duration
-        duration_state.duration_std = score_state.score_duration_std
+        duration_state.duration = score_query.get_duration()
+        duration_state.duration_std = score_query.get_duration_std()
         duration_state.base_duration = np.mean(base_durations)
         duration_state.base_duration_std = np.std(base_durations)
         duration_state.relative_duration = duration_state.duration / duration_state.base_duration

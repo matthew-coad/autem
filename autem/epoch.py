@@ -3,8 +3,8 @@ from .epoch_manager import EpochManagerContainer
 from .hyper_parameter import HyperParameterContainer
 from .ranking import Ranking
 
-from .scorers import MemberLeagueState
 from .simulation_settings import SimulationSettings
+from .scorers import MemberScoreQuery
 
 import time
 
@@ -230,7 +230,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         """
         Rank all members
         """
-        inductees = [ m for m in self.list_members(alive = True) if MemberLeagueState.get(m).is_veteran() ]
+        inductees = [ m for m in self.list_members(alive = True) if MemberScoreQuery(m).is_veteran() ]
         n_inductees = len(inductees)
         specie = self.get_specie()
         progress_prefix = "Rating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())

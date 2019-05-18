@@ -2,8 +2,7 @@ from ..epoch_manager import EpochManager
 from ..member_manager import MemberManager
 from ..reporters import Reporter
 
-from ..scorers import MemberLeagueState
-from ..scorers import MemberScoreState
+from ..scorers import MemberScoreQuery
 from ..component_state import ComponentState
 from .decision_model_state import DecisionModelState
 from .member_decision_state import MemberDecisionState
@@ -30,7 +29,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         """
         List members who are considered an "authority" on decision models
         """
-        members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) if MemberScoreState.get(m).get_score() ]
+        members = [ m for s in simulation.list_species() for m in s.list_members(buried = True) if MemberScoreQuery(m).get_score() ]
         return members
 
     def build_member_decision_df(self, specie, members):
@@ -68,7 +67,7 @@ class DecisionModelManager(EpochManager, MemberManager, Reporter):
         decision_df = self.build_member_decision_df(specie, members)
 
         # Build a frame containing fit score for each member
-        scores = [(m.id, MemberScoreState.get(m).get_score()) for m in members ]
+        scores = [(m.id, MemberScoreQuery(m).get_score()) for m in members ]
         score_df = pd.DataFrame(scores, columns=['member_id', 'score'])
 
         # Join the frames together

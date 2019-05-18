@@ -1,6 +1,6 @@
 from ..member_manager import MemberManager
 from ..choice import Choice
-from ..scorers import MemberLeagueState
+from ..scorers import MemberScoreQuery
 from .decision_grid_state import DecisionGridState
 from ..simulation_settings import SimulationSettings
 
@@ -20,7 +20,7 @@ class CrossoverSpotcheck(MemberManager):
         settings = SimulationSettings(member)
         specie = member.get_specie()
         members = specie.list_members(alive = True)
-        candidates = [ m for m in members if MemberLeagueState.get(m).is_pro() ]
+        candidates = [ m for m in members if MemberScoreQuery(m).is_pro() ]
         if len(candidates) < 2:
             return (None, None)
         parent_indexes = settings.get_random_state().choice(len(candidates), 2, replace = False)

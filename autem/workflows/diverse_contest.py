@@ -1,5 +1,5 @@
 from ..member_manager import MemberManager
-from ..scorers import MemberScoreState
+from ..scorers import MemberScoreQuery
 from ..scorers import ScoreQuery
 
 import numpy as np
@@ -25,19 +25,19 @@ class DiverseContest(MemberManager):
 
     def contest_members(self, contestant1, contestant2):
 
-        scorer = ScoreQuery(contestant1.get_simulation()).get_metric()
+        contestant1_scores = MemberScoreQuery(contestant1)
+        contestant2_scores = MemberScoreQuery(contestant2)
+        scorer = contestant1_scores.get_metric()
 
-        max_league = max(contestant1.league, contestant2.league)
+        max_league = max(contestant1_scores.get_league(), contestant2_scores.get_league())
         if max_league == 0:
             return None
 
-        contestant1_score_state = MemberScoreState.get(contestant1)
-        contestant2_score_state = MemberScoreState.get(contestant2)
-        if not max_league in contestant1_score_state.league_predictions or not max_league in contestant2_score_state.league_predictions:
+        if not contestant1_scores.has_league_predictions(max_league) or not contestant2_scores.has_league_predictions(max_league):
             return None
 
-        contestant1_predictions = contestant1_score_state.league_predictions[max_league]
-        contestant2_predictions = contestant2_score_state.league_predictions[max_league]
+        contestant1_predictions = contestant1_scores.get_league_predictions(max_league)
+        contestant2_predictions = contestant1_scores.get_league_predictions(max_league)
         inter_score = scorer(contestant1_predictions, contestant2_predictions)
         if inter_score < self.max_score:
             return None

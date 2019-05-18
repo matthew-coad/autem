@@ -3,7 +3,7 @@ from ..specie_manager import SpecieManager
 from ..epoch_manager import EpochManager
 from ..simulation_settings import SimulationSettings
 
-from ..scorers import MemberScoreState
+from ..scorers import MemberScoreQuery
 
 import time
 
@@ -79,10 +79,10 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         if not top_member:
             return (None, "No top member")
 
-        prior_top_score_evaluation = MemberScoreState.get(prior_top_member)
-        top_score_evaluation = MemberScoreState.get(top_member)
+        prior_top_score_evaluation = MemberScoreQuery(prior_top_member)
+        top_score_evaluation = MemberScoreQuery(top_member)
 
-        score_progressed = top_score_evaluation.score > prior_top_score_evaluation.score
+        score_progressed = top_score_evaluation.get_score() > prior_top_score_evaluation.get_score()
         if score_progressed:
             return (True, "Score improved")
 

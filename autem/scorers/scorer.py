@@ -3,11 +3,14 @@ from ..member_manager import MemberManager
 from ..specie_manager import SpecieManager
 from ..reporters import Reporter
 
-from .member_score_state import MemberScoreState
-from .member_league_state import MemberLeagueState
 from ..simulation_settings import SimulationSettings
 from .score_settings import ScoreSettings
+
+from .member_score_state import MemberScoreState
+from .specie_score_state import SpecieScoreState
+
 from .score_query import ScoreQuery
+from .member_score_query import MemberScoreQuery
 
 import numpy as np
 
@@ -43,7 +46,7 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         Prepare folds
         """
         folds = self.build_folds(specie)
-        ScoreSettings(specie).set_folds(folds)
+        SpecieScoreState.get(specie).set_folds(folds)
 
     def build_folds(self, specie):
         """
@@ -85,7 +88,7 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
     def get_folds(self, specie, repeat, start, stop):
         start_index = self.n_splits * repeat + start
         end_index = self.n_splits * repeat + start + stop
-        folds = ScoreSettings(specie).get_folds()[start_index:end_index]
+        folds = SpecieScoreState.get(specie).get_folds()[start_index:end_index]
         return folds
 
     def build_scores(self, member, folds):
@@ -207,8 +210,8 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         Evaluate a contest between two veterans
         """
 
-        contestant1_scores = MemberScoreState.get(contestant1)
-        contestant2_scores = MemberScoreState.get(contestant2)
+        contestant1_scores = MemberScoreQuery(contestant1)
+        contestant2_scores = MemberScoreQuery(contestant2)
 
         # If scores are equal there is no outcome
         if contestant1_scores.get_score() == contestant2_scores.get_score():
@@ -223,14 +226,14 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         Evaluate a contest between peers, IE are at the same league but not veterans or rookies
         """
 
-        contestant1_scores = MemberScoreState.get(contestant1)
-        contestant2_scores = MemberScoreState.get(contestant2)
+        contestant1_scores = MemberScoreQuery(contestant1)
+        contestant2_scores = MemberScoreQuery(contestant2)
 
         # If scores are equal there is no outcome
         if contestant1_scores.get_score() == contestant2_scores.get_score():
             return
 
-        pros = MemberLeagueState.get(contestant1).is_pro()
+        pros = contestant1_scores.is_pro()
         # If the score of one contestant is inside the 60% confidence interval of the other then their is no outcome
         if pros and contestant1_scores.get_low_score() <= contestant2_scores.get_score() <= contestant1_scores.get_high_score():
             return
@@ -250,17 +253,17 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         Evaluate a mismatch, where the contestants are at different league levels
         """
 
-        contestant1_leagues = MemberLeagueState.get(contestant1)
-        contestant2_leagues = MemberLeagueState.get(contestant2)
+        contestant1_leagues = MemberScoreQuery(contestant1)
+        contestant2_leagues = MemberScoreQuery(contestant2)
 
         # Determine who is the senior and who is the junior
         senior = contestant1 if contestant1_leagues.get_league() > contestant2_leagues.get_league() else contestant2
         junior = contestant1 if contestant1_leagues.get_league() < contestant2_leagues.get_league() else contestant2
-        pros = MemberLeagueState.get(junior).is_pro()
+        pros = MemberScoreQuery(junior).is_pro()
 
         # If scores are equal there is no outcome
-        senior_scores = MemberScoreState.get(senior)
-        junior_scores = MemberScoreState.get(junior)
+        senior_scores = MemberScoreQuery(senior)
+        junior_scores = MemberScoreQuery(junior)
 
         # If they are pros and the score of the junior is inside the 60% confidence interval of the senior then their is no outcome
         if pros and senior_scores.get_low_score() <= junior_scores.get_score() <= senior_scores.get_high_score():
@@ -280,8 +283,8 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
 
         specie = contestant1.get_specie()
 
-        contestant1_leagues = MemberLeagueState.get(contestant1)
-        contestant2_leagues = MemberLeagueState.get(contestant2)
+        contestant1_leagues = MemberScoreQuery(contestant1)
+        contestant2_leagues = MemberScoreQuery(contestant2)
 
         # If both members are rookies then the scores are too inaccurate to make a judgement
         if contestant1_leagues.is_rookie() and contestant2_leagues.is_rookie():
@@ -303,6 +306,6 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
     def record_member(self, member, record):
         super().record_member(member, record)
 
-        score_state = MemberScoreState.get(member)
-        record.SE_score = score_state.score
-        record.SE_score_std = score_state.score_std
+        score_state = MemberScoreQuery(member)
+        record.SE_score = score_state.get_score()
+        record.SE_score_std = score_state.get_score_std()

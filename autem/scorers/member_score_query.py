@@ -1,6 +1,5 @@
 from ..member import Member
 from .member_score_state import MemberScoreState
-from .member_league_state import MemberLeagueState
 from ..simulation_settings import SimulationSettings
 from .score_query import ScoreQuery
 
@@ -10,20 +9,38 @@ class MemberScoreQuery(ScoreQuery):
         assert isinstance(member, Member)
         ScoreQuery.__init__(self, member)
 
-    def get_score_state(self):
+    def _get_score_state(self):
         return MemberScoreState.get(self.get_container())
 
     def get_score(self):
         """
         Get the best available score for the member
         """
-        return self.get_score_state().score
+        return self._get_score_state().score
 
     def get_score_std(self):
         """
         Get the best available score std for the member
         """
-        return self.get_score_state().score_std
+        return self._get_score_state().score_std
+
+    def get_duration(self):
+        """
+        Get how it long it took to evaluate each fit
+        """
+        return self._get_score_state().score_duration
+
+    def get_duration_std(self):
+        """
+        Get the standard deviation of how long it took to evaluate each fit
+        """
+        return self._get_score_state().score_duration_std        
+
+    def get_score_std(self):
+        """
+        Get the best available score std for the member
+        """
+        return self._get_score_state().score_std
 
     def get_high_score(self):
         """
@@ -65,13 +82,13 @@ class MemberScoreQuery(ScoreQuery):
         """
         Get the members league level
         """
-        return self._member.league
+        return self.get_container().league
 
     def get_max_league(self):
         """
         Get the maximum permitted league level
         """
-        return SimulationSettings(self._member).get_max_league()
+        return SimulationSettings(self.get_container()).get_max_league()
 
     def is_rookie(self):
         """
@@ -99,3 +116,10 @@ class MemberScoreQuery(ScoreQuery):
         """
         return self.get_league() >= 2
 
+    # League level queries
+
+    def has_league_predictions(self, league):
+        return league in self._get_score_state().league_predictions
+
+    def get_league_predictions(self, league):
+        return self._get_score_state().league_predictions[league]
