@@ -33,7 +33,7 @@ class DiverseContest(MemberManager):
         if max_league == 0:
             return None
 
-        if not contestant1_scores.has_league_predictions(max_league) or not contestant2_scores.has_league_predictions(max_league):
+        if not contestant1_scores.has_league_scores(max_league) or not contestant2_scores.has_league_scores(max_league):
             return None
 
         contestant1_predictions = contestant1_scores.get_league_predictions(max_league)

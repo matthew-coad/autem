@@ -118,8 +118,21 @@ class MemberScoreQuery(ScoreQuery):
 
     # League level queries
 
-    def has_league_predictions(self, league):
-        return league in self._get_score_state().league_predictions
+    def has_league_scores(self, league):
+        """
+        Do we have scores a given league level?
+        """
+        score_state = self._get_score_state()
+        return league in score_state.leagues
+
+    def get_league_score(self, league):
+        score_state = self._get_score_state()
+        return score_state.leagues[league].score
+
+    def get_league_duration(self, league):
+        score_state = self._get_score_state()
+        return score_state.leagues[league].duration
 
     def get_league_predictions(self, league):
-        return self._get_score_state().league_predictions[league]
+        score_state = self._get_score_state()
+        return score_state.leagues[league].predictions

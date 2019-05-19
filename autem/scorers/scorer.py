@@ -8,6 +8,8 @@ from .score_settings import ScoreSettings
 
 from .member_score_state import MemberScoreState
 from .specie_score_state import SpecieScoreState
+from .member_league_state import MemberLeagueState
+from .fit_state import FitState
 
 from .score_query import ScoreQuery
 from .member_score_query import MemberScoreQuery
@@ -68,35 +70,37 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
 
     def evaluate_member(self, member):
 
-        score_state = MemberScoreState.get(member)
-        if member.league == 0 and score_state.quick_score is None:
+        score_query = MemberScoreQuery(member)
+        if member.league == 0 and not score_query.has_league_scores(0):
             self.evaluate_quick_score(member)
             return None
 
         # At league level 1 add on the complete scores
         evaluated = False
-        if member.league == 1 and not 1 in score_state.league_scores:
+        if member.league == 1 and not score_query.has_league_scores(1):
             evaluated = self.evaluate_league_1(member)
 
         # High league levels
-        if member.league > 1 and not member.league in score_state.league_scores:
+        if member.league > 1 and not score_query.has_league_scores(member.league):
             evaluated = self.evaluate_league_scores(member, member.league)
 
         if evaluated:
             self.evaluate_scores(member)
 
-    def get_folds(self, specie, repeat, start, stop):
+    def get_fold_indexes(self, specie, repeat, start, stop):
         start_index = self.n_splits * repeat + start
         end_index = self.n_splits * repeat + start + stop
-        folds = SpecieScoreState.get(specie).get_folds()[start_index:end_index]
-        return folds
+        fold_indexes = range(start_index, end_index)
+        return fold_indexes
 
-    def build_scores(self, member, folds):
+    def build_scores(self, member, fold_indexes):
         """
         Build scores for the given member for the given folds
         """
 
-        metric = ScoreQuery(member).get_metric()
+        score_query = ScoreQuery(member)
+        metric = score_query.get_metric()
+        folds = score_query.get_folds()
         pipeline = member.get_pipeline()
 
         data = member.get_simulation().get_training_data()
@@ -104,11 +108,14 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         x = data.x
         y = data.y
 
-        scores = []
-        durations = []
-        predictions = np.empty(len(y))
-        predictions[:] = np.nan
-        for fold in folds:
+        fits = []
+        for fold_index in fold_indexes:
+
+            fit = FitState()
+            fits.append(fit)
+            fit.fold_index = fold_index
+
+            fold = folds[fold_index]
             i_train = fold[0]
             i_test = fold[1]
             x_train = x[i_train]
@@ -123,82 +130,114 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
                     pipeline.fit(x_train, y_train)
                     y_pred = pipeline.predict(x_test)
                 except Exception as ex:
+                    fit.fault = ex
                     member.fail(ex, "score_evaluator", "ScoreEvaluator")
-                    return (None, None, None)
+                    return None
             end_time = time.time()
             duration = end_time - start_time
             score = metric(y_test, y_pred)
-            scores.append(score)
-            durations.append(duration)
-            predictions[i_test] = y_pred
-        return (scores, durations, predictions)
+
+            fit.score = score
+            fit.predictions = y_pred
+            fit.duration = duration
+        return fits
 
     def evaluate_quick_score(self, member):
         """
         Evaluate a quick score based on a single fit using the first entry in quick_fold
         """
-        folds = self.get_folds(member.get_specie(), 0, 0, 1)
-        scores, durations, predictions = self.build_scores(member, folds)
-        if scores is None:
+        folds_index = self.get_fold_indexes(member.get_specie(), 0, 0, 1)
+        fits = self.build_scores(member, folds_index)
+        if fits is None:
             return False
 
-        quick_score = scores[0]
-        quick_duration = durations[0]
+        quick_score = fits[0].score
+        quick_duration = fits[0].duration
+
+        league_state = MemberLeagueState(0)
+        league_state.fits = fits
+        league_state.score = quick_score
+        league_state.score_std = None
+        league_state.duration = quick_duration
+        league_state.duration_std = None
+        league_state.predictions = None
 
         score_state = MemberScoreState.get(member)
-
-        score_state.quick_score = quick_score
-        score_state.quick_duration = quick_duration
-        score_state.quick_predictions = predictions
+        score_state.leagues[league_state.league] = league_state
 
         score_state.scores = [ quick_score ]
         score_state.score = quick_score
         score_state.score_std = None
 
-        score_state.score_durations =  [ quick_duration ]
+        score_state.score_durations = [ quick_duration ]
         score_state.score_duration = quick_duration
         score_state.score_duration_std = None
 
         return True
 
+    def complete_league_state(self, member, league, fits):
+        score_query = ScoreQuery(member)
+        folds = score_query.get_folds()
+
+        league_state = MemberLeagueState(league)
+        league_state.fits = fits
+
+        scores = [ f.score for f in fits ]
+        league_state.score = np.mean(scores)
+        league_state.score_std = np.std(scores)
+
+        durations = [ f.duration for f in fits ]
+        league_state.duration = np.mean(durations)
+        league_state.duration_std = np.std(durations)
+
+        data = member.get_simulation().get_training_data()
+        y = data.y
+
+        predictions = np.empty(len(y))
+        predictions[:] = np.nan
+        for fit in fits:
+            i_test = folds[fit.fold_index][1]
+            predictions[i_test] = fit.predictions
+        league_state.predictions = predictions
+
+        score_state = MemberScoreState.get(member)
+        score_state.leagues[league_state.league] = league_state
+
     def evaluate_league_1(self, member):
         """
         Evaluate league 1 score by finishing of the quick score
         """
-        folds = self.get_folds(member.get_specie(), 0, 1, self.n_splits)
-        scores, durations, predictions = self.build_scores(member, folds)
-        if scores is None:
+        folds_index = self.get_fold_indexes(member.get_specie(), 0, 1, self.n_splits)
+        fits = self.build_scores(member, folds_index)
+        if fits is None:
             return False
 
         score_state = MemberScoreState.get(member)
-        score_state.league_scores[1] = [ score_state.quick_score ] + scores
-        score_state.league_durations[1] = [ score_state.quick_duration ] + durations
-        quick_predictions = score_state.quick_predictions
-        league_predictions = np.where(np.isnan(predictions), quick_predictions, predictions)
-        score_state.league_predictions[1] = league_predictions
+
+        league0_state = score_state.leagues[0]
+        fits = league0_state.fits + fits
+        self.complete_league_state(member, 1, fits)
+
         return True
 
     def evaluate_league_scores(self, member, league):
-        folds = self.get_folds(member.get_specie(), 0, 0, self.n_splits)
-        scores, durations, predictions = self.build_scores(member, folds)
-        if scores is None:
+        folds_index = self.get_fold_indexes(member.get_specie(), 0, 0, self.n_splits)
+        fits = self.build_scores(member, folds_index)
+        if fits is None:
             return False
 
-        score_state = MemberScoreState.get(member)
-        score_state.league_scores[league] = scores
-        score_state.league_durations[league] = durations
-        score_state.league_predictions[league] = predictions
+        self.complete_league_state(member, league, fits)            
         return True
 
     def evaluate_scores(self, member):
         score_state = MemberScoreState.get(member)
-        scores = np.concatenate([ score_state.league_scores[l] for l in score_state.league_scores ])
-        score_state.scores = scores.tolist()
+        scores = [ f.score for l in score_state.leagues.values() for f in l.fits ]
+        score_state.scores = scores
         score_state.score = np.mean(scores)
         score_state.score_std = np.std(scores)
 
-        durations = np.concatenate([ score_state.league_durations[l] for l in score_state.league_durations ])
-        score_state.score_durations = durations.tolist()
+        durations = [ f.duration for l in score_state.leagues.values() for f in l.fits ]
+        score_state.score_durations = durations
         score_state.score_duration = np.mean(durations)
         score_state.score_duration_std = np.std(durations)
 

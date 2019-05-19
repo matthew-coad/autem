@@ -39,10 +39,7 @@ class DurationEvaluator(MemberManager, Reporter):
         if len(candidates) < 5:
             return None
 
-        base_durations = []
-        for candidate in candidates:
-            base_durations.append(MemberScoreQuery(candidate).get_duration())
-
+        base_durations = [ MemberScoreQuery(c).get_duration() for c in candidates ]
         duration_state = get_duration_state(member)
         duration_state.duration = score_query.get_duration()
         duration_state.duration_std = score_query.get_duration_std()
