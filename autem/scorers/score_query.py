@@ -1,4 +1,3 @@
-from .score_settings import ScoreSettings
 from .specie_score_state import SpecieScoreState
 
 class ScoreQuery:
@@ -13,7 +12,8 @@ class ScoreQuery:
         return self._container
 
     def get_metric(self):
-        return ScoreSettings(self.get_container()).get_metric()
+        specie = self.get_container().get_specie()
+        return SpecieScoreState.get(specie).get_metric()
 
     def get_folds(self):
         specie = self.get_container().get_specie()

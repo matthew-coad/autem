@@ -17,8 +17,8 @@ Convert predictions, score and duration into an autem standard model.
 
 Action - Introduce Fit State that contains information for a fit. **done**
 Action - Introduce Member League State that contains fit/state information for a given league for a given member. **done**
-Action - Convert state management to new model. **in progress**
-Action - Drop ScoreSettings. Has no responsibility. Move to state/query
+Action - Convert state management to new model. **done**
+Action - Drop ScoreSettings. Has no responsibility. Move to state/query **done**
 
 Introduce a state object that stores the result of each fit operation.
 Currently it will contain the score, duration and predictions. It will be stored in the member score state.

@@ -4,7 +4,6 @@ from ..specie_manager import SpecieManager
 from ..reporters import Reporter
 
 from ..simulation_settings import SimulationSettings
-from .score_settings import ScoreSettings
 
 from .member_score_state import MemberScoreState
 from .specie_score_state import SpecieScoreState
@@ -25,21 +24,15 @@ import time
 
 class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
 
-    def __init__(self, metric, n_splits):
+    def __init__(self, metric, splits):
         SimulationManager.__init__(self)
         MemberManager.__init__(self)
         SpecieManager.__init__(self)
         Reporter.__init__(self)
         self.metric = metric
-        self.n_splits = n_splits
+        self.splits = splits
 
     # Simulation
-
-    def prepare_simulation(self, simulation):
-        """
-        Make the score metric accessible across the application
-        """
-        ScoreSettings(simulation).set_metric(self.metric)
 
     # Specie
 
@@ -48,7 +41,9 @@ class Scorer(SimulationManager, MemberManager, SpecieManager, Reporter):
         Prepare folds
         """
         folds = self.build_folds(specie)
-        SpecieScoreState.get(specie).set_folds(folds)
+        specie_score_state = SpecieScoreState.get(specie)
+        specie_score_state.set_folds(folds)
+        specie_score_state.set_metric(self.metric)
 
     def build_folds(self, specie):
         """
