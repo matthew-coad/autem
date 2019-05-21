@@ -36,14 +36,6 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         components[workflow_index+1:workflow_index+1] = self.list_extensions()
         simulation.set_components(components)
 
-    ## Runtime
-
-    def is_runtime_exceeded(self, container):
-        duration = time.time() - container.get_simulation().get_start_time()
-        max_time = SimulationSettings(container).get_max_time()
-        runtime_exceeded = max_time is not None and duration >= max_time
-        return runtime_exceeded
-
     def is_max_specie_reached(self, simulation):
         max_species = SimulationSettings(simulation).get_max_species()
         n_species = len(simulation.list_species())
@@ -100,9 +92,6 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         """
         Simulation finished if max time exceeded
         """
-        if self.is_runtime_exceeded(simulation):
-            return (True, "Max time")
-
         if self.is_max_specie_reached(simulation):
             return (True, "Max specie")
 
@@ -115,9 +104,6 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         """
         Specie finished
         """
-        if self.is_runtime_exceeded(specie):
-            return (True, "Max time")
-
         if self.is_max_epochs_reached(specie):
             return (True, "Max epochs")
 
@@ -130,10 +116,6 @@ class Workflow(SimulationManager, SpecieManager, EpochManager):
         """
         Epoch finished
         """
-
-        if self.is_runtime_exceeded(epoch):
-            return (True, "Max time")
-
         if self.is_max_rounds_reached(epoch):
             return (True, "Max rounds")
         

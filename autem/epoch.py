@@ -11,7 +11,7 @@ import time
 from types import SimpleNamespace
 import numpy as np
 
-from .feedback import printProgressBar
+from .runners import RunQuery
 
 class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
     """
@@ -179,8 +179,9 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
 
         self._round += 1
 
+        feedback = RunQuery(self).get_feedback()
         specie = self.get_specie()
-        operation_name = "Evaluating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())
+        operation_name = "specie %s epoch %s:" % (specie.get_name(), self.get_name())
         current_round = self.get_round()
         settings = SimulationSettings(self)
         max_rounds = settings.get_max_rounds()
@@ -206,7 +207,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         # Ensure all members evaluated
         for member_index in range(len(members)):
             members[member_index].evaluate()
-            printProgressBar(member_index + (current_round - 1) * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
+            feedback.progress(member_index + (current_round - 1) * max_population, max_rounds * max_population, prefix = operation_name)
 
         # Have all evaluation survivors contest each other
         members = self.list_members(alive = True)
@@ -218,7 +219,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         for member in self.list_members():
             member.judge()
 
-        printProgressBar(current_round * max_population, max_rounds * max_population, prefix = operation_name, length = 50)
+        feedback.progress(current_round * max_population, max_rounds * max_population, prefix = operation_name)
 
     # Members
 
@@ -229,16 +230,16 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         """
         Rank all members
         """
+        feedback = RunQuery(self).get_feedback()
         inductees = [ m for m in self.list_members(alive = True) if MemberScoreQuery(m).is_veteran() ]
         n_inductees = len(inductees)
         specie = self.get_specie()
-        progress_prefix = "Rating %s specie %s epoch %s:" % (self.get_simulation().get_name(), specie.get_name(), self.get_name())
-        print("")
+        progress_prefix = "Rating specie %s epoch %s:" % (specie.get_name(), self.get_name())
         if n_inductees > 0:
             for index in range(n_inductees):
-                printProgressBar(index, n_inductees, prefix = progress_prefix, length = 50)
+                feedback.progress(index, n_inductees, prefix = progress_prefix)
                 inductees[index].rate()
-            printProgressBar(n_inductees, n_inductees, prefix = progress_prefix, length = 50)
+            feedback.progress(n_inductees, n_inductees, prefix = progress_prefix)
 
         candidates = [m for m in inductees if not m.rating is None]
         ranked_candidates = list(reversed(sorted(candidates, key=lambda member: member.rating)))

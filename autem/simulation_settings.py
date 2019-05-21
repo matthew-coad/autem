@@ -42,12 +42,6 @@ class SimulationSettings(Settings):
     def set_identity(self, identity):
         return self.set_value("identity", identity)
 
-    def get_max_time(self):
-        return self.get_value("max_time", lambda: None)
-
-    def set_max_time(self, max_time):
-        return self.set_value("max_time", max_time)
-
     def get_max_rounds(self):
         return self.get_value("max_rounds", lambda: 20)
 

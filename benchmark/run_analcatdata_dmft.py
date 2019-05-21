@@ -2,6 +2,7 @@ if __name__ == '__main__':
     import context
 
 import autem
+import autem.runners as runners
 import autem.preprocessors as preprocessors
 import autem.scorers as scorers
 import autem.workflows as workflows
@@ -47,7 +48,7 @@ def run_test(seed):
         [
             loaders.OpenMLLoader(data_id),
             scorers.LeagueScorer(scorers.accuracy_score, [ [ 1, 4, 5 ] ]),
-            workflows.StandardWorkflow(),
+            workflows.SnapshotWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationSVM(),
 
@@ -59,7 +60,6 @@ def run_test(seed):
     settings.set_n_jobs(4)
     settings.set_seed(seed)
     simulation.run()
-
 
 if __name__ == '__main__':
     run_test(1)

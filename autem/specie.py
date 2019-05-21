@@ -9,6 +9,8 @@ from .form import Form
 from .ranking import Ranking
 from .choice import Choice
 
+from .runners import RunQuery
+
 import numpy as np
 import time
 import datetime
@@ -147,7 +149,7 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
         self._end_time = time.time()
         self._alive = False
         duration = self.get_end_time() - self.get_start_time()
-        print("Specie %s - %s - Duration %s" % (self.id, finish_reason, duration))
+        RunQuery(self).get_feedback().report("Specie %s - %s - Duration %s" % (self.id, finish_reason, duration))
 
     ## Epochs
 

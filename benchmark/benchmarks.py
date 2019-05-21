@@ -1,6 +1,8 @@
-# Must import Autem before *anything* except context to set up the warning interceptors
+if __name__ == '__main__':
+    import context
 
 import autem
+import autem.runners as runners
 import autem.scorers as scorers
 import autem.workflows as workflows
 import autem.learners.classification as learners
@@ -156,7 +158,7 @@ simulation_builders = {
     'short_mastery': make_short_mastery_simulation,
 }
 
-def run_benchmark_simulation(study, baseline_name, configuration, learner):
+def make_benchmark_simulation(study, baseline_name, configuration, learner):
     experiment = baseline_name
     baseline_configuration = baselines.get_baseline_configuration(baseline_name)
     task_id = baseline_configuration["task_id"]
@@ -180,7 +182,6 @@ def run_benchmark_simulation(study, baseline_name, configuration, learner):
         'configuration': configuration,
     }    
 
-    max_time = 2 * 60 * 60
     n_jobs = get_n_jobs()
     seed = 1
     path = get_simulations_path().joinpath(study).joinpath(experiment)
@@ -194,23 +195,26 @@ def run_benchmark_simulation(study, baseline_name, configuration, learner):
     settings.set_n_jobs(4)
     settings.set_seed(seed)
     settings.set_memory(memory)
-    settings.set_max_time(max_time)
-
-    simulation.run()
+    return simulation
 
 def run_benchmark_simulations(study = None, configuration = None, learner = None):
     study = study if study else get_study()
     baseline_names = baselines.get_baseline_names(study)
+    max_time = 2 * 60 * 60
     for baseline_name in baseline_names:
-        args = (study, baseline_name, configuration, learner)
-        benchmark_process = multiprocessing.Process(target=run_benchmark_simulation, args=args)
-        benchmark_process.start()
-        benchmark_process.join()
+        simulation = make_benchmark_simulation(study, baseline_name, configuration, learner)
+        runner = runners.LocalRunner(simulation, max_time)
+        runner.run()
+        if runners.RunQuery(simulation).was_escaped():
+            break
 
 def run_debug_benchmark_simulations(study = None, configuration = None, learner = None):
     study = study if study else get_study()
     baseline_names = baselines.get_baseline_names(study)
     for baseline_name in baseline_names:
-        run_benchmark_simulation(study, baseline_name, configuration, learner)
+        simulation = make_benchmark_simulation(study, baseline_name, configuration, learner)
+        runner = runners.DebugRunner(simulation)
+        runner.run()
 
-
+if __name__ == '__main__':
+    run_benchmark_simulations()

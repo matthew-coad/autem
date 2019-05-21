@@ -31,3 +31,34 @@ Action - Permit specification of the league splits.
 Justification - This will allow us to dial up accuracy vs. speed. Ensure we are replicating
 baseline configurations etc.
 **done**
+
+
+## Enforce Time Limits
+
+1) Ensure that simulation time limits are enforced by forcefully terminating the process.
+
+2) Produce a record of the outcome.
+
+### Introduce runners.
+
+Runners are responsible for running a simulation. They may have options to abort running etc.
+
+Action - Add debug runner.
+Justification - Needed when debugging/runner not specified.
+**done**
+
+Action - Add local runner. Runs locally but in a seperate process. Supports escaping. Timeout
+Justification - Needed to clean up leaked resources as part of simulation series.
+**done**
+
+Action - Introduce feedback 
+Justification - Allow runners to redirect console messages to themselves, cross networks etc.
+**done**
+
+Action - Remove existing timeouts.
+Justification - Consistent implementation. Implementation not spread out.
+**done**
+
+Action - Add simulation escaped query.
+Justification - Determine if simulations queues should be escaped.
+**done**

@@ -5,7 +5,7 @@ from .simulation_settings import SimulationSettings
 from .specie import Specie
 from .form import Form
 from .ranking import Ranking
-from .feedback import printProgressBar
+from .runners import RunQuery, DebugRunner
 
 import numpy
 import time
@@ -199,28 +199,29 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
         for component in components:
             component.bury_simulation(self)
 
-    def run(self):
+    def _run_internal(self):
 
-        print("-----------------------------------------------------")
+        feedback = RunQuery(self).get_feedback()
+        feedback.section(self.get_name())
         today = datetime.datetime.now()
-        print("Running %s - Started %s" % (self.get_name(), today.strftime("%x %X")))
+        feedback.report("Started %s" % today.strftime("%x %X"))
 
         self._start_time = time.time()
         self._current_specie_id = 0
 
         configured, reason = self._configure()
         if not configured:
-            print("%s - configuration failed - %s" % (self.get_name(), reason))
+            feedback.report("Configuration failed - %s" % reason)
             return None
 
         outlined, reason = self._build_outline()
         if not outlined:
-            print("%s - outline failed - %s" % (self.get_name(), reason))
+            feedback.report("Outline failed - %s" % reason)
             return None
 
         prepared, reason = self._prepare()
         if not prepared:
-            print("%s - prepare failed - %s" % (self.get_name(), reason))
+            feedback.report("Prepare failed - %s" % reason)
             return None
 
         should_finish, finish_reason = self._should_finish()
@@ -241,7 +242,14 @@ class Simulation(Container, SimulationManagerContainer, ReporterContainer) :
 
         self._end_time = time.time()
         duration = self.get_end_time() - self.get_start_time()
-        print("%s - %s - Duration %s" % (self.get_name(), finish_reason, duration))
+        feedback.report("%s - Duration %s" % (finish_reason, duration))
+
+    def run(self):
+        """
+        Run the simulation.
+        """
+        runner = DebugRunner(self)
+        runner.run()
 
     ## Reporting
 
