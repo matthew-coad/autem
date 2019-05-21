@@ -51,6 +51,9 @@ class Specie(Container, SpecieManagerContainer, HyperParameterContainer):
     def get_simulation(self):
         return self._simulation
 
+    def get_specie(self):
+        return self
+
     def get_parent(self):
         return self.get_simulation()
 

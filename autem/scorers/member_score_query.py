@@ -12,35 +12,46 @@ class MemberScoreQuery(ScoreQuery):
     def _get_score_state(self):
         return MemberScoreState.get(self.get_container())
 
+    def _get_league_score_state(self):
+        """
+        Get the current league score state
+        """
+        score_state = self._get_score_state()
+        if score_state.current_league is None:
+            return None
+        return score_state.leagues[score_state.current_league]
+
     def get_score(self):
         """
         Get the best available score for the member
         """
-        return self._get_score_state().score
+        if self.get_current_league() is None:
+            return None
+        return self._get_league_score_state().score
 
     def get_score_std(self):
         """
         Get the best available score std for the member
         """
-        return self._get_score_state().score_std
+        if self.get_current_league() is None:
+            return None
+        return self._get_league_score_state().score_std
 
     def get_duration(self):
         """
         Get how it long it took to evaluate each fit
         """
-        return self._get_score_state().score_duration
+        if self.get_current_league() is None:
+            return None
+        return self._get_league_score_state().duration
 
     def get_duration_std(self):
         """
         Get the standard deviation of how long it took to evaluate each fit
         """
-        return self._get_score_state().score_duration_std        
-
-    def get_score_std(self):
-        """
-        Get the best available score std for the member
-        """
-        return self._get_score_state().score_std
+        if self.get_current_league() is None:
+            return None
+        return self._get_league_score_state().duration_std
 
     def get_high_score(self):
         """
@@ -78,17 +89,12 @@ class MemberScoreQuery(ScoreQuery):
             return None
         return self.get_score() - 2 * score_std
 
-    def get_league(self):
+    def get_current_league(self):
         """
-        Get the members league level
+        Get the currently active, evaluated league level
         """
-        return self.get_container().league
-
-    def get_max_league(self):
-        """
-        Get the maximum permitted league level
-        """
-        return SimulationSettings(self.get_container()).get_max_league()
+        score_state = self._get_score_state()
+        return score_state.current_league
 
     def is_rookie(self):
         """
@@ -97,7 +103,8 @@ class MemberScoreQuery(ScoreQuery):
         Rookies have a league level of 0. Rookies have inaccurate scores and are unlikely
         to be a contender
         """
-        return self.get_league() == 0
+        current_league = self.get_current_league()
+        return current_league is None or current_league == 0
 
     def is_veteran(self):
         """
@@ -106,15 +113,18 @@ class MemberScoreQuery(ScoreQuery):
         Veterans have the maximum league level. Have the most accurates scores and
         are likely to be a possible solution
         """
-        return self.get_league() == self.get_max_league()
+        if self.get_current_league() is None:
+            return False
+        return self.get_current_league() == self.get_n_leagues() - 1
 
     def is_pro(self):
         """
-        Is the member a pro?
-
-        Pros are in the upper levels. Have reasonably accurate scores.
+        Does this league have
         """
-        return self.get_league() >= 2
+        # Its a pro if the number of scores 
+        if self.get_current_league() is None:
+            return False
+        return len(self._get_league_score_state().scores) >= self.get_n_folds()
 
     # League level queries
 
@@ -122,17 +132,14 @@ class MemberScoreQuery(ScoreQuery):
         """
         Do we have scores a given league level?
         """
-        score_state = self._get_score_state()
-        return league in score_state.leagues
+        return league in self._get_score_state().leagues
 
     def get_league_score(self, league):
-        score_state = self._get_score_state()
-        return score_state.leagues[league].score
+        return self._get_score_state().leagues[league].score
 
     def get_league_duration(self, league):
-        score_state = self._get_score_state()
-        return score_state.leagues[league].duration
+        return self._get_score_state().leagues[league].duration
 
     def get_league_predictions(self, league):
-        score_state = self._get_score_state()
-        return score_state.leagues[league].predictions
+        return self._get_score_state().leagues[league].predictions
+

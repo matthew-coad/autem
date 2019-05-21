@@ -78,7 +78,3 @@ class SimulationSettings(Settings):
     def set_max_species(self, max_species):
         return self.set_value("max_species", max_species)
 
-    def get_max_league(self):
-        # Not really changeable anymore, so read-only
-        return self.get_value("max_league", lambda: 4) 
-

@@ -3,3 +3,4 @@ from .scorer import Scorer
 from .league_scorer import LeagueScorer
 from .score_query import ScoreQuery
 from .member_score_query import MemberScoreQuery
+from .score_contest import ScoreContest

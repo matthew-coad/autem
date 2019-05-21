@@ -3,6 +3,7 @@ from ..reporters import Reporter
 from ..loaders import Dataset
 from ..simulation_settings import SimulationSettings
 from ..scorers import ScoreQuery
+from ..scorers import MemberScoreQuery
 
 import numpy as np
 from scipy import stats
@@ -49,17 +50,19 @@ class Holdout(SimulationManager, Reporter):
         validation_data = Dataset(x_validation, y_validation, data.features)
         simulation.set_split_data(train_data, validation_data)
 
-    def validate_member(self, member, required_league):
+    def validate_member(self, member):
 
         validation_state = get_validation_state(member)
         if validation_state.evaluated:
             return None
 
-        if member.league < required_league:
+        score_query = MemberScoreQuery(member)
+
+        if not score_query.is_veteran():
             return None
 
         simulation = member.get_simulation()
-        scorer = ScoreQuery(member).get_metric()
+        scorer = score_query.get_metric()
 
         training_data = simulation.get_training_data()
         validation_data = simulation.get_validation_data()
@@ -86,7 +89,7 @@ class Holdout(SimulationManager, Reporter):
     def evaluate_member(self, member):
         super().evaluate_member(member)
 
-        self.validate_member(member, member.get_specie().get_max_league())
+        self.validate_member(member)
 
     def rate_member(self, member):
         super().rate_member(member)

@@ -46,7 +46,7 @@ def run_test(seed):
         simulation_name,
         [
             loaders.OpenMLLoader(data_id),
-            scorers.LeagueScorer(scorers.accuracy_score, 10),
+            scorers.LeagueScorer(scorers.accuracy_score, [ [ 1, 4, 5 ] ]),
             workflows.StandardWorkflow(),
             baselines.BaselineStats(baseline_name),
             hyper_learners.ClassificationSVM(),

@@ -7,8 +7,9 @@ class MemberLeagueState:
         self.league = league
         self.fits = []
         self.score = None
+        self.scores = None
         self.score_std = None
         self.duration = None
+        self.durations = None
         self.duration_std = None
         self.predictions = None
-

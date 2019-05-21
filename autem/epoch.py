@@ -185,7 +185,6 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
         settings = SimulationSettings(self)
         max_rounds = settings.get_max_rounds()
         max_population = settings.get_max_population()
-        max_league = settings.get_max_league()
 
         # Prepare for the next round
         members = self.list_members(alive = True)
@@ -194,7 +193,7 @@ class Epoch(Container, EpochManagerContainer, HyperParameterContainer):
 
         # Promote all living members
         for member in members:
-            if member.league < max_league:
+            if not MemberScoreQuery(member).is_veteran():
                 member.promote("Survived")
 
         # Repopulate

@@ -4,7 +4,6 @@ from .. import scorers
 from .. import tuners
 
 from .duration_evaluator import DurationEvaluator
-from .diverse_contest import DiverseContest
 from .contest_judge import ContestJudge
 from .score_rater import ScoreRater
 
@@ -33,8 +32,9 @@ class MasteryWorkflow(Workflow):
             tuners.CrossoverSpotcheck(),
             tuners.CrossoverTuner(),
 
+            scorers.ScoreContest(),
+
             DurationEvaluator(),
-            DiverseContest(1.0),
             ContestJudge(),
             ScoreRater(),
         ]

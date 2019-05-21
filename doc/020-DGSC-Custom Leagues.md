@@ -1,4 +1,6 @@
-# DGSC Study - Autem Dog Food - Custom Leagues
+# DGSC Study - Autem Dog Food
+
+## Custom Leagues
 
 Allow custom league configurations.
 
@@ -7,11 +9,11 @@ allow us to tune the performance, have different configurations for different da
 
 Part of the Autem Dog fooding effort where we use Autem to improve its performance.
 
-## DGSC-Convert Scorer to Standard Model
+### DGSC-Convert Scorer to Standard Model
 
 Convert the scorer model into the Autem Standard Model
 
-## DGSC-Convert Predictions to standard model
+### DGSC-Convert Predictions to standard model
 
 Convert predictions, score and duration into an autem standard model.
 
@@ -22,3 +24,10 @@ Action - Drop ScoreSettings. Has no responsibility. Move to state/query **done**
 
 Introduce a state object that stores the result of each fit operation.
 Currently it will contain the score, duration and predictions. It will be stored in the member score state.
+
+### DGSC-Allow custom leagues
+
+Action - Permit specification of the league splits. 
+Justification - This will allow us to dial up accuracy vs. speed. Ensure we are replicating
+baseline configurations etc.
+**done**
