@@ -6,6 +6,7 @@ benchmark/simulations
 benchmark/simulations_*/**
 benchmark/data
 experiments/**/simulations
+hyper/simulations
 
 xx/xx_tests/simulations
 .Rproj.user

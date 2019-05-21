@@ -62,3 +62,25 @@ Justification - Consistent implementation. Implementation not spread out.
 Action - Add simulation escaped query.
 Justification - Determine if simulations queues should be escaped.
 **done**
+
+## Hyper Analysis
+
+### Introduce Hyper Analysis
+
+Hyper analysis is a autem project that we use to analysis various performance of Autem itself.
+Its a core analysis because we use the results to improve the operation of Autem.
+The data for the core analysis is borrowed from the benchmark. By running the hyper analysis
+we can collect data to better improve analysis of the benchmark by testing which components work and
+using information collected from Autem to predict which configurations to use.
+
+The hyper analysis is contained in the "hyper" folder.
+
+**done**
+
+### Run snapshot analysis
+
+Run the hyper analysis for snapshots.
+
+**done**
+
+

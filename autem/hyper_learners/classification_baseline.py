@@ -10,9 +10,6 @@ class ClassificationBaseline(Hyperlearner):
         components = [
             # Scalers
             Choice("Scaler", [
-                preprocessors.MaxAbsScaler(),
-                preprocessors.MinMaxScaler(),
-                preprocessors.Normalizer(),
                 preprocessors.RobustScaler(),
                 preprocessors.StandardScaler(),
                 preprocessors.Binarizer(),
@@ -39,14 +36,11 @@ class ClassificationBaseline(Hyperlearner):
             # Approximators
             Choice("Approximator", [
                 preprocessors.NoApproximator(),
-                preprocessors.RBFSampler(),
-                preprocessors.Nystroem(),
             ]),
 
             Choice("Learner", [
                 learners.GaussianNB(),
                 learners.BernoulliNB(),
-                learners.MultinomialNB(),
                 learners.DecisionTreeClassifier(),
                 learners.KNeighborsClassifier(),
                 learners.LinearSVC(),
