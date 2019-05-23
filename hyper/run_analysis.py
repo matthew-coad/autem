@@ -13,6 +13,7 @@ import autem.reporters as reporters
 import autem.validators as validators
 
 import hyper.configuration as configuration
+from hyper import HyperAnalysis, Study
 import config
 import openml
 import os
@@ -107,29 +108,47 @@ def make_standard_simulation(study, baseline_name, hyperlearner):
 
     return simulation
 
+def make_hyper_analysis():
+    hyper_analysis = HyperAnalysis(studies = [
+        Study("snapshot"),
+        Study('linear'),
+        Study('trees'),
+        Study('svm'),
+        Study('bayes'),
+    ])
+    return hyper_analysis
+
+def get_outstanding_datasets(study):
+    hyper_analysis = make_hyper_analysis()
+    df = hyper_analysis.get_study(study).get_datasets_status() 
+    dataset_names = df[df.active & ~df.results].name.tolist()
+    return dataset_names
+
 def run_snapshot_analysis(debug):
-    baseline_names = configuration.get_hyper_names()
-    max_time = 1 * 60 * 60
-    for baseline_name in baseline_names:
+    dataset_names = get_outstanding_datasets("snapshot")
+    max_time = 4 * 60 * 60
+    for baseline_name in dataset_names:
         simulation = make_snapshot_simulation(baseline_name)
         runner = runners.LocalRunner(simulation, max_time) if not debug else runners.DebugRunner(simulation)
         runner.run()
         if runners.RunQuery(simulation).was_escaped():
-            break
+            return False
+    return True
 
 def run_standard_analysis(study, hyperlearner, debug):
-    hyper_analysis = 
-    baseline_names = configuration.get_hyper_names()
-    max_time = 2 * 60 * 60
-    for baseline_name in baseline_names:
+    dataset_names = get_outstanding_datasets(study)
+    max_time = 4 * 60 * 60
+    for baseline_name in dataset_names:
         simulation = make_standard_simulation(study, baseline_name, hyperlearner)
         runner = runners.LocalRunner(simulation, max_time) if not debug else runners.DebugRunner(simulation)
         runner.run()
         if runners.RunQuery(simulation).was_escaped():
-            break
+            return False
+    return True
 
 if __name__ == '__main__':
-    run_standard_analysis("linear", "linear", False)
-    run_standard_analysis("bayes", "bayes", False)
-
-
+    progress = run_snapshot_analysis(False)
+    if progress:
+        progress = run_standard_analysis("bayes", "bayes", False)
+    if progress:        
+        progress = run_standard_analysis("linear", "linear", False)

@@ -7,14 +7,21 @@ class Container:
 
     def __init__(self):
         self._states = {}
+        self._parent = None
 
     # Context
 
     def get_parent(self):
         """
-        Required override that fetches the parent container
+        Get the containers parent
         """
-        raise NotImplementedError()
+        return self._parent
+
+    def set_parent(self, parent):
+        """
+        Set the containers parent
+        """
+        self._parent = parent
 
     # States
 

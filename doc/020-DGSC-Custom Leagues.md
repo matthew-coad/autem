@@ -93,8 +93,11 @@ Outcome - Partially complete. PC shutdown for unknown reason.
 Action - Introduce Hyper analysis Model
 Outcome - **done**
 
-Action - 
+Action - Introduce Study model
+Outcome - **done**
 
+Action - Run outstanding hyper analysis
+Outcome - **done**
 
 
 

@@ -1,9 +1,10 @@
 {
     "python.linting.pylintEnabled": false,
     "python.pythonPath": "D:\\Apps\\Anaconda\\python.exe",
-    "python.testing.unittestEnabled": true,
+    "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pyTestEnabled": false,
     "explorer.autoReveal": false,
-    "problems.autoReveal": false
+    "problems.autoReveal": false,
+    "python.testing.promptToConfigure": false
 }

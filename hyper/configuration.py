@@ -18,7 +18,7 @@ def get_hyper_configuration_filename():
     return get_hyper_directory().joinpath("Configuration.xlsx")
 
 def get_hyper_simulations_path():
-    return get_hyper_directory().joinpath("Simulations")
+    return get_hyper_directory().joinpath("simulations")
 
 def load_hyper_configuration_data():
     filename = get_hyper_configuration_filename()

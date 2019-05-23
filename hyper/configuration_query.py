@@ -1,4 +1,3 @@
-from .hyper_analysis import HyperAnalysis
 import benchmark.baselines
 
 from pathlib import Path
