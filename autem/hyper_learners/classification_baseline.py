@@ -29,7 +29,6 @@ class ClassificationBaseline(Hyperlearner):
             Choice("Reducer", [
                 preprocessors.NoReducer(),
                 preprocessors.FastICA(),
-                preprocessors.FeatureAgglomeration(),
                 preprocessors.PCA(),
             ]),
 
