@@ -11,6 +11,4 @@ if __name__ == '__main__':
         Study("snapshot"),
         Study("linear"),
     ])
-    study = hyper_analysis.get_study("linear")
-    dataset = study.get_dataset("ada_agnostic")
-    print(study.get_datasets_status())
+    print(hyper_analysis.get_study("snapshot").get_datasets_status())

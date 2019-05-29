@@ -22,10 +22,17 @@ def prepare_OpenML():
     openml.config.apikey = config.OPENML_APIKEY
     openml.config.cache_directory = os.path.expanduser('~/.openml/cache')
 
-def make_snapshot_simulation(baseline_name):
+learner_builders = {
+    'baseline': hyper_learners.ClassificationBaseline,
+    'linear': hyper_learners.ClassificationLinear,
+    'trees': hyper_learners.ClassificationTrees,
+    'svm': hyper_learners.ClassificationSVM,
+    'bayes': hyper_learners.ClassificationBayes,
+}
+
+def make_snapshot_simulation(study, baseline_name, hyperlearner):
     prepare_OpenML()
 
-    study = "snapshot"
     hyper_configuration = configuration.get_hyper_configuration(baseline_name)
     task_id = hyper_configuration["task_id"]
     task = openml.tasks.get_task(task_id)
@@ -41,7 +48,7 @@ def make_snapshot_simulation(baseline_name):
         'dataset': baseline_name,
         'scorer': 'League1x10',
         'workflow': 'snapshot',
-        'learner': 'baseline',
+        'learner': hyperlearner,
     }    
 
     simulation = autem.Simulation(
@@ -50,7 +57,7 @@ def make_snapshot_simulation(baseline_name):
             loaders.OpenMLLoader(data_id),
             scorers.LeagueScorer(scorers.accuracy_score, [ [ 1, 4, 5 ] ]),
             workflows.SnapshotWorkflow(),
-            hyper_learners.ClassificationBaseline(),
+            learner_builders[hyperlearner](),
             reporters.Csv(path),
         ])
 
@@ -62,12 +69,6 @@ def make_snapshot_simulation(baseline_name):
 
     return simulation
 
-learner_builders = {
-    'linear': hyper_learners.ClassificationLinear,
-    'trees': hyper_learners.ClassificationTrees,
-    'svm': hyper_learners.ClassificationSVM,
-    'bayes': hyper_learners.ClassificationBayes,
-}
 
 def make_standard_simulation(study, baseline_name, hyperlearner):
     prepare_OpenML()
@@ -121,18 +122,19 @@ def make_hyper_analysis():
 def get_outstanding_datasets(study):
     hyper_analysis = make_hyper_analysis()
     df = hyper_analysis.get_study(study).get_datasets_status() 
-    dataset_names = df[df.active & ~df.results].name.tolist()
+    dataset_names = df[df.active & ~df.attempted].name.tolist()
     return dataset_names
 
-def run_snapshot_analysis(debug):
-    dataset_names = get_outstanding_datasets("snapshot")
+def run_snapshot_analysis(hyperlearners, debug):
+    dataset_names = get_outstanding_datasets(hyperlearners[-1])
     max_time = 4 * 60 * 60
     for baseline_name in dataset_names:
-        simulation = make_snapshot_simulation(baseline_name)
-        runner = runners.LocalRunner(simulation, max_time) if not debug else runners.DebugRunner(simulation)
-        runner.run()
-        if runners.RunQuery(simulation).was_escaped():
-            return False
+        for hyperlearner in hyperlearners:
+            simulation = make_snapshot_simulation(hyperlearner, baseline_name, hyperlearner)
+            runner = runners.LocalRunner(simulation, max_time) if not debug else runners.DebugRunner(simulation)
+            runner.run()
+            if runners.RunQuery(simulation).was_escaped():
+                return False
     return True
 
 def run_standard_analysis(study, hyperlearner, debug):
@@ -147,8 +149,4 @@ def run_standard_analysis(study, hyperlearner, debug):
     return True
 
 if __name__ == '__main__':
-    progress = run_snapshot_analysis(False)
-    if progress:
-        progress = run_standard_analysis("bayes", "bayes", False)
-    if progress:        
-        progress = run_standard_analysis("linear", "linear", False)
+    run_snapshot_analysis(["linear", "svm", "trees"], False)
